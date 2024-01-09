@@ -1,4 +1,4 @@
-import {Pong} from './Pong.js'
+import {Pong} from 'Pong.js'
 import {new_connection} from './new_connection.js'
 
 export class Lobby
