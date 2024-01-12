@@ -28,6 +28,7 @@ urlpatterns = [
     path('lobby/', views.lobby, name='lobby'),
     path('signup/', views.signup, name='signup'),
     path('login/', views.login, name='login'),
+    path('new_player/', views.new_player, name='new_player'),
     path('rooms/', RoomsConsumer.as_asgi()),
     path('pong/', include("pong.urls", namespace='pong')),
 ]

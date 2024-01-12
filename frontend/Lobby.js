@@ -1,4 +1,4 @@
-import {Pong} from 'Pong.js'
+import {Pong} from './Pong.js'
 import {new_connection} from './new_connection.js'
 
 export class Lobby
@@ -16,7 +16,7 @@ export class Lobby
         this.dom_rooms = document.getElementById("rooms");
         this.dom_pong.addEventListener("click", () => this.new_pong("pong"));
         this.dom_join.addEventListener("click", () => this.join());
-        this.rooms_update();
+        //this.rooms_update();
     }
 
     join() {

@@ -17,27 +17,11 @@ export class Main
         this.dom_status = document.getElementById("status");
         this.dom_user_name = document.getElementById("user_name");
         this.dom_container = document.getElementById("container");
-        this.dom_signup.addEventListener("click", () => this.signup());
+        this.dom_signup.addEventListener("click", () => this.signup_click());
+        this.dom_login.addEventListener("click", () => this.login_click());
     }
 
-    new_player() {
-        $.ajax({
-            url: '/new_player',
-            method: 'GET',
-            //headers: {'X-CSRFToken': csrftoken},
-            success: (response) => {
-                this.user = response;
-                console.log("new player :", this.user);
-                this.dom_user_name.innerHTML = this.user;
-            },
-            error: function(error) {
-                console.error('Error: sending new player demand', error.message);
-            }
-        });
-    }
-
-
-   load(page, callback) {
+    load(page, callback) {
         $.ajax({
             url: page + '/',
             method: 'GET',
@@ -54,8 +38,8 @@ export class Main
         });
     }
 
-    signup() {
+    signup_click() {
         this.load('/signup', () => this.signup.events());
     }
-    set_status(s) { dom.textContent = s; }
+    set_status(s) { this.dom_status.textContent = s; }
 }

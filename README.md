@@ -430,6 +430,49 @@ Using SessionMiddleware is more secure and efficient than sending session data d
 In summary, while sending session data directly in POST requests may seem simpler, using SessionMiddleware offers a more secure, efficient, and portable solution for managing user sessions in Django applications. It abstracts away the complexities of session management, reduces the risk of security vulnerabilities, and improves the overall performance of your application.
 
 
+#### Django load javascript
+To ensure that Django serves the JavaScript file with the correct content type when using the `<script>` tag in your template, you can use the `HttpResponse` class and set the `Content-Type` header accordingly.
+
+Here's an example of how you can do this in a Django view:
+
+```python
+from django.http import HttpResponse
+
+def your_view(request):
+    # Your view logic here
+
+    # Assuming 'main.js' is in the 'static' directory
+    js_file_path = 'static/main.js'
+
+    with open(js_file_path, 'r') as file:
+        js_content = file.read()
+
+    response = HttpResponse(js_content, content_type='application/javascript')
+    return response
+```
+
+In this example, we use the `HttpResponse` class and set the `content_type` parameter to 'application/javascript'. This ensures that the response is interpreted as JavaScript by the browser.
+
+However, a more Django-like way to achieve this is to use the `render` shortcut along with a template. Create a template file (e.g., `main.js`) that contains your JavaScript code:
+
+```javascript
+// main.js
+console.log('Hello from main.js');
+// Your JavaScript code goes here
+```
+
+Then, in your view, use the `render` shortcut:
+
+```python
+from django.shortcuts import render
+
+def your_view(request):
+    # Your view logic here
+
+    return render(request, 'main.js', content_type='application/javascript')
+```
+
+This way, you separate your JavaScript code into a template file, and Django will take care of setting the correct content type for you. Make sure to adjust the paths and names according to your project structure.
 
 ### Other stuffs
 
