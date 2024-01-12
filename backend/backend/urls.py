@@ -17,10 +17,17 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from . import views
+from pong.urls import urlpatterns
+from django.urls import include, path
+
+from .consumers import RoomsConsumer
 
 urlpatterns = [
+    path('', views.index, name='index'),
     path('admin/', admin.site.urls),
     path('lobby/', views.lobby, name='lobby'),
-    path('new_player/', views.new_player, name='new_player'),
-    path('pong/', include("pong.urls")),
+    path('signup/', views.signup, name='signup'),
+    path('login/', views.login, name='login'),
+    path('rooms/', RoomsConsumer.as_asgi()),
+    path('pong/', include("pong.urls", namespace='pong')),
 ]

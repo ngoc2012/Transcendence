@@ -38,8 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'game',
     'channels',
+    'game',
     'pong',
 ]
 
@@ -120,8 +120,12 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
-STATIC_URL = 'static/'
-STATICFILES_DIRS = [os.path.join(PROJECT_DIR, 'frontend')]
+#STATIC_URL = 'static/'
+#STATICFILES_DIRS = [os.path.join(PROJECT_DIR, 'frontend')]
+
+STATIC_URL = '/static/'
+#STATIC_ROOT = BASE_DIR / 'frontend'
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'frontend')]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field

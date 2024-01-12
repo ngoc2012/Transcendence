@@ -1,18 +1,23 @@
 import {Lobby} from './Lobby.js'
+import {Signup} from './Signup.js'
 
 export class Main
 {
-    user = "";
+    login = "";
+    name = "";
     id = -1;
     status = "";
 
     constructor()
     {
         this.lobby = new Lobby(this);
+        this.signup = new Signup(this);
         this.dom_login = document.getElementById("login");
+        this.dom_signup = document.getElementById("signup");
         this.dom_status = document.getElementById("status");
         this.dom_user_name = document.getElementById("user_name");
         this.dom_container = document.getElementById("container");
+        this.dom_signup.addEventListener("click", () => this.signup());
     }
 
     new_player() {
@@ -49,5 +54,8 @@ export class Main
         });
     }
 
+    signup() {
+        this.load('/signup', () => this.signup.events());
+    }
     set_status(s) { dom.textContent = s; }
 }

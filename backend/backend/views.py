@@ -1,28 +1,42 @@
 from django.shortcuts import render
 from django.http import HttpResponse
+from django.views.decorators.csrf import csrf_exempt
+from game.models import PlayersModel
 
-rooms = {}
-online_players = {}
+def index(request):
+	return (render(request, 'index.html'))
 
 def lobby(request):
 	return (render(request, 'lobby.html'))
 
+def signup(request):
+	return (render(request, 'signup.html'))
+
+@csrf_exempt
 def new_player(request):
-    i = 0
-    user_name = "user" + str(i)
-    while (user_name in online_players.keys()):
-        i += 1
-        user_name = "user" + str(i)
-    return (HttpResponse(user_name))
+    if PlayersModel.objects.filter(login=request.POST['login']).exists():
+        return (HttpResponse({"error": "Login '" + request.POST['login'] + "' exist. Please login!"}))
+    new_player = PlayersModel(
+            login=request.POST['login'],
+            password=request.POST['password'],
+            name=request.POST['name'],
+            x=0,
+            y=0
+            )
+    new_player.save()
+    return (HttpResponse({
+        'login': new_player.login,
+        'name': new_player.name
+        }))
 
-def new_room(request):
-    global rooms
-
-    # Get the channel layer
-    channel_layer = get_channel_layer()
-
-    i = 0
-    while (i in rooms):
-        i += 1
-    return (HttpResponse(str(i)))
-
+@csrf_exempt
+def login(request):
+    if PlayersModel.objects.filter(login=request.POST['login']).exists():
+        return (HttpResponse({"error": "Login '" + request.POST['login'] + "' exist. Please login!"}))
+    new_user = PlayersModel(
+            login=request.POST['login'],
+            password=request.POST['password'],
+            name=request.POST['name'],
+            x=0,
+            y=0
+            )
