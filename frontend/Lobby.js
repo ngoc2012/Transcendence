@@ -16,7 +16,7 @@ export class Lobby
         this.dom_rooms = document.getElementById("rooms");
         this.dom_pong.addEventListener("click", () => this.new_pong("pong"));
         this.dom_join.addEventListener("click", () => this.join());
-        //this.rooms_update();
+        this.rooms_update();
     }
 
     join() {
@@ -59,10 +59,28 @@ export class Lobby
     }
 
     rooms_update() {
+        const chatSocket = new WebSocket(
+            'ws://'
+            + window.location.host
+            + '/ws/game/rooms/'
+        );
+
+        chatSocket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+            //document.querySelector('#chat-log').value += (data.message + '\n');
+        };
+
+        chatSocket.onclose = function(e) {
+            console.error('Chat socket closed unexpectedly');
+        };
+        /*
         new_connection({
+            main: this.main,
             name: "rooms update",
             socket: this.socket,
-            link: 'ws://127.0.0.1:8000/rooms',
+            link: 'ws://'
+                + window.location.host
+                + '/ws/game/rooms/',
             callback: {
                 message: (data) => {
                     var options_rooms = this.dom_rooms && this.dom_rooms.options;
@@ -79,8 +97,9 @@ export class Lobby
                         });
                     }
                 },
-                error: this.rooms_update
+                error: this.rooms_update()
             }
         });
+        */
     }
 }

@@ -20,15 +20,14 @@ from . import views
 from pong.urls import urlpatterns
 from django.urls import include, path
 
-from .consumers import RoomsConsumer
-
 urlpatterns = [
     path('', views.index, name='index'),
+    path("chat/", include("chat.urls")),
     path('admin/', admin.site.urls),
     path('lobby/', views.lobby, name='lobby'),
     path('signup/', views.signup, name='signup'),
     path('login/', views.login, name='login'),
+    path('log_in/', views.log_in, name='log_in'),
     path('new_player/', views.new_player, name='new_player'),
-    path('rooms/', RoomsConsumer.as_asgi()),
     path('pong/', include("pong.urls", namespace='pong')),
 ]

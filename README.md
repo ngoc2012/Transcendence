@@ -181,6 +181,9 @@ ASGI stands for Asynchronous Server Gateway Interface. It's a specification for 
 #### Install `channels`
 
 python3 -m pip install Django channels
+
+pip install channels daphne
+
 [Channels](https://channels.readthedocs.io/en/latest/index.html)
 
 
@@ -473,6 +476,83 @@ def your_view(request):
 ```
 
 This way, you separate your JavaScript code into a template file, and Django will take care of setting the correct content type for you. Make sure to adjust the paths and names according to your project structure.
+
+
+
+### Django admin
+
+Django provides a built-in administrative interface called the Django Admin, which allows you to visualize and manage your models easily. To use the Django Admin, you need to follow these steps:
+
+1. **Create a superuser:**
+   - Run the following command to create a superuser account. This account will have administrative privileges to access the Django Admin interface.
+   
+     ```bash
+     python manage.py createsuperuser
+     ```
+
+   - Follow the prompts to enter a username, email address, and password.
+
+2. **Register your models in the admin.py file:**
+   - In your Django app, locate or create the `admin.py` file.
+   - Register your models in the `admin.py` file using the `admin.site.register()` function.
+
+     ```python
+     # Example admin.py file
+     from django.contrib import admin
+     from .models import YourModel1, YourModel2
+
+     admin.site.register(YourModel1)
+     admin.site.register(YourModel2)
+     ```
+
+3. **Run the development server:**
+   - Start your Django development server by running:
+
+     ```bash
+     python manage.py runserver
+     ```
+
+4. **Access the Django Admin interface:**
+   - Open your web browser and go to `http://127.0.0.1:8000/admin/` (replace `8000` with your actual development server port).
+   - Log in with the superuser credentials you created earlier.
+
+5. **Explore and manage your models:**
+   - Once logged in, you'll see a list of registered models. Click on a model to see a list of instances and details.
+   - You can perform various actions like adding, editing, and deleting model instances through the Django Admin interface.
+
+By default, the Django Admin provides a basic and functional interface for managing your models. If you need more customization or want to build a custom frontend, you might consider using third-party packages like `django-admin-interface`, `django-jet`, or building your own views using Django views and templates.
+
+Remember to secure your Django Admin by configuring the `ADMIN` settings in your project's `settings.py` file, restricting access only to authorized users.
+
+
+#### Django admin not work
+
+1. **Ensure `django.contrib.admin` is in `INSTALLED_APPS`:**
+   In your `settings.py` file, make sure that `'django.contrib.admin'` is included in the `INSTALLED_APPS` list:
+
+    ```python
+    INSTALLED_APPS = [
+        # ...
+        'django.contrib.admin',
+        # ...
+    ]
+    ```
+
+2. **Check Template Loaders:**
+   Ensure that your `TEMPLATES` setting in `settings.py` includes `'django.contrib.admin'` in the `'APP_DIRS'` option. The default Django project template usually includes this, but it's worth checking:
+
+    ```python
+    TEMPLATES = [
+        {
+            'BACKEND': 'django.template.backends.django.DjangoTemplates',
+            'DIRS': [],
+            'APP_DIRS': True,
+            # ...
+        },
+    ]
+    ```
+
+
 
 ### Other stuffs
 
