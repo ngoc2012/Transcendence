@@ -19,7 +19,8 @@ def new_game(request):
         name=request.POST['name'],
         nplayers=1,
         owner=owner
-    ).save()
+    )
+    new_game.save()
     return (JsonResponse({
         'id': new_game.id,
         'name': new_game.name
@@ -37,6 +38,7 @@ def delete(request):
     if not RoomsModel.objects.filter(id=request.POST['game_id']).exists():
         return (HttpResponse("Error: Room with id '" + request.POST['game_id'] + "' does not exist!"))
     room = RoomsModel.objects.get(id=request.POST['game_id'])
+    room.delete()
     if room.owner == owner:
-        return (HttpResponse("Room " + room.id + " deleted"))
+        return (HttpResponse("Room " + room.name + ' - ' + str(room) + " deleted"))
     return (HttpResponse("Error: Login '" + request.POST['login'] + "' is not the owner of '" + request.POST['game_id'] + "'!"))

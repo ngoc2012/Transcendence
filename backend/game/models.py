@@ -25,7 +25,7 @@ class RoomsModel(models.Model):
     x = models.IntegerField(blank=True, null=True)
     y = models.IntegerField(blank=True, null=True)
     def __str__(self):
-        return self.id
+        return str(self.id)
     def check_expired(self):
         if self.expires and self.expires < timezone.now():
             self.delete()

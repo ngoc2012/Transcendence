@@ -26,7 +26,7 @@ export class Lobby
         if (this.dom_rooms.selectedIndex === -1)
             return;
         $.ajax({
-            url: '/join',
+            url: '/game/join',
             method: 'POST',
             data: {
                 "user": this.main.user,
@@ -44,7 +44,6 @@ export class Lobby
     }
 
     new_game(game) {
-        console.log("new_game");
         this.main.set_status('');
         if (this.main.login === '')
         {
@@ -52,28 +51,38 @@ export class Lobby
             return;
         }
         $.ajax({
-            url: '/new',
+            url: '/game/new',
             method: 'POST',
             data: {
-                'name': 'Game name here',
+                'name': 'Stars war',
                 'game': game,
                 'login': this.main.login
             },
             success: (info) => {
-                /*
-                switch (info.game) {
-                    case 'pong':
-                        this.pong_game(info);
-                        break;
+                if (typeof info === 'string')
+                {
+                    this.main.set_status(info);
                 }
-                */
+                else
+                {
+                    this.main.set_status('Game ' + info.name + ' created.');
+                    if (this.socket !== -1)
+                        this.socket.send('update');
+                    /*
+                    switch (info.game) {
+                        case 'pong':
+                            this.pong_game(info);
+                            break;
+                    }
+                    */
+                }
+                
             },
             error: (error) => this.main.set_status('Error: Can not join game')
         });
     }
 
     delete_game() {
-        console.log("delete_game");
         this.main.set_status('');
         if (this.main.login === '')
         {
@@ -85,14 +94,16 @@ export class Lobby
             return;
         }
         $.ajax({
-            url: '/delete',
+            url: '/game/delete',
             method: 'POST',
             data: {
                 'game_id': this.dom_rooms.options[this.dom_rooms.selectedIndex].value,
                 'login': this.main.login
             },
             success: (info) => {
-                this.main.set_status(info)
+                this.main.set_status(info);
+                if (this.socket !== -1)
+                    this.socket.send('update');
             },
             error: (error) => this.main.set_status('Error: Can not join game')
         });
@@ -142,7 +153,7 @@ export class Lobby
         };
 
         this.socket.onclose = (e) => {
-            console.error('Chat socket closed unexpectedly');
+            //console.error('Chat socket closed unexpectedly');
         };
         /*
         new_connection({
