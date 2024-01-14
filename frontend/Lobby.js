@@ -60,11 +60,13 @@ export class Lobby
                 'login': this.main.login
             },
             success: (info) => {
+                /*
                 switch (info.game) {
                     case 'pong':
                         this.pong_game(info);
                         break;
                 }
+                */
             },
             error: (error) => this.main.set_status('Error: Can not join game')
         });

@@ -4,7 +4,7 @@ from django.views.decorators.csrf import csrf_exempt
 from .models import RoomsModel, PlayersModel
 
 @csrf_exempt
-def new_player(request):
+def new_game(request):
     if 'game' not in request.POST:
         return (HttpResponse("Error: No game!"))
     if 'login' not in request.POST:
