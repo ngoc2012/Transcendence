@@ -478,6 +478,84 @@ def your_view(request):
 This way, you separate your JavaScript code into a template file, and Django will take care of setting the correct content type for you. Make sure to adjust the paths and names according to your project structure.
 
 
+### Django models
+
+```bash
+python3 manage.py makemigrations
+python3 manage.py migrate
+```
+
+In Django models, the primary key is often represented by an integer field called `id`. By default, Django assigns an auto-incrementing integer to the `id` field, making it a numeric primary key. However, you can customize the primary key field or use other fields like `CharField` or `UUIDField` to have primary keys as strings.
+
+Here are a few examples:
+
+### Using a CharField for String Primary Key:
+
+```python
+from django.db import models
+
+class MyModel(models.Model):
+    custom_id = models.CharField(primary_key=True, max_length=50)
+    # other fields...
+```
+
+With this setup, the `custom_id` field will be the primary key, and it will be a string.
+
+### Using UUIDField for UUID Primary Key:
+
+```python
+import uuid
+from django.db import models
+
+class MyModel(models.Model):
+    uuid_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    # other fields...
+```
+
+This example uses `UUIDField` for the primary key, resulting in a UUID (Universally Unique Identifier) as the primary key.
+
+### Convert Numeric Primary Key to String Representation:
+
+If you want to convert an existing numeric primary key to a string representation, you can override the `__str__` method in your model:
+
+```python
+from django.db import models
+
+class MyModel(models.Model):
+    # fields...
+
+    def __str__(self):
+        return str(self.id)
+```
+
+In this example, the `__str__` method converts the numeric primary key (`id`) to its string representation when the model instance is converted to a string.
+
+Choose the approach that best fits your application's requirements and the nature of your primary keys. Keep in mind that changing the primary key type after data has been added to the database can be complex, and it's recommended to plan such changes carefully, especially in production environments.
+
+### str()
+
+When you call `str()` on a Django model instance, the `__str__` method is automatically invoked, and it returns the string representation of the model. This is useful, for example, when you want to display a model instance in a template or print it in the console.
+
+Here's an example using the `MyModel` with a custom `__str__` method:
+
+```python
+from django.db import models
+
+class MyModel(models.Model):
+    name = models.CharField(max_length=255)
+
+    def __str__(self):
+        return str(self.id)  # Convert the numeric primary key to its string representation
+
+# Example usage:
+my_instance = MyModel.objects.get(id=1)
+print(str(my_instance))  # This will call the __str__ method and print the string representation
+```
+
+In this example, when you print or convert `my_instance` to a string, it will call the `__str__` method, and the result will be the string representation of the model. In this case, the numeric primary key (`id`) is converted to its string representation.
+
+Keep in mind that the `__str__` method is used for human-readable representations, and it's often handy when you need to display model instances in templates or logs. If you're working with JSON serialization or similar scenarios, you might want to consider using the `__repr__` method instead.
+
 
 ### Django admin
 

@@ -10,11 +10,14 @@ export class Lobby
     
     events() {
         this.game = null;
+        this.dom_rooms = document.getElementById("rooms");
+        this.dom_join = document.querySelector("#join");
         this.dom_pong = document.querySelector("#pong");
         this.dom_pew = document.querySelector("#pew");
-        this.dom_join = document.querySelector("#join");
-        this.dom_rooms = document.getElementById("rooms");
-        this.dom_pong.addEventListener("click", () => this.new_pong("pong"));
+        this.dom_delete = document.querySelector("#delete");
+        this.dom_pong.addEventListener("click", () => this.new_game("pong"));
+        this.dom_pew.addEventListener("click", () => this.new_game("pew"));
+        this.dom_delete.addEventListener("click", () => this.delete_game());
         this.dom_join.addEventListener("click", () => this.join());
         this.rooms_update();
     }
@@ -23,11 +26,11 @@ export class Lobby
         if (this.dom_rooms.selectedIndex === -1)
             return;
         $.ajax({
-            url: '/join_game',
+            url: '/join',
             method: 'POST',
             data: {
                 "user": this.main.user,
-                "id": this.dom_rooms.options[this.dom_rooms.selectedIndex].value
+                "game_id": this.dom_rooms.options[this.dom_rooms.selectedIndex].value
             },
             success: (info) => {
                 switch (info.game) {
@@ -41,16 +44,70 @@ export class Lobby
     }
 
     new_game(game) {
+        console.log("new_game");
+        this.main.set_status('');
+        if (this.main.login === '')
+        {
+            this.main.set_status('Please login or sign up');
+            return;
+        }
         $.ajax({
-            url: '/new_game',
+            url: '/new',
             method: 'POST',
             data: {
-                "user": this.main.user,
-                "game": game
+                'name': 'Game name here',
+                'game': game,
+                'login': this.main.login
             },
-            success: (info) => this.pong_game(info),
-            error: (error) => this.main.set_status('Error: Can not create game')
+            success: (info) => {
+                switch (info.game) {
+                    case 'pong':
+                        this.pong_game(info);
+                        break;
+                }
+            },
+            error: (error) => this.main.set_status('Error: Can not join game')
         });
+    }
+
+    delete_game() {
+        console.log("delete_game");
+        this.main.set_status('');
+        if (this.main.login === '')
+        {
+            this.main.set_status('Please login or sign up');
+            return;
+        }
+        if (this.dom_rooms.selectedIndex === -1) {
+            this.main.set_status('Select a game');
+            return;
+        }
+        $.ajax({
+            url: '/delete',
+            method: 'POST',
+            data: {
+                'game_id': this.dom_rooms.options[this.dom_rooms.selectedIndex].value,
+                'login': this.main.login
+            },
+            success: (info) => {
+                this.main.set_status(info)
+            },
+            error: (error) => this.main.set_status('Error: Can not join game')
+        });
+        /*
+        if (this.socket === -1)
+        {
+            this.main.set_status('No connection');
+            return;
+        }
+        console.log("send new_game");
+        this.socket.send(JSON.stringify({
+            'action': 'new',
+            'name': 'Game name here',
+            'game': game,
+            'login': this.main.login
+        }));
+        */
     }
 
     pong_game(info) {
@@ -59,18 +116,30 @@ export class Lobby
     }
 
     rooms_update() {
-        const chatSocket = new WebSocket(
+        this.main.set_status('');
+        this.socket = new WebSocket(
             'ws://'
             + window.location.host
             + '/ws/game/rooms/'
         );
 
-        chatSocket.onmessage = function(e) {
-            const data = JSON.parse(e.data);
-            //document.querySelector('#chat-log').value += (data.message + '\n');
+        this.socket.onmessage = (e) => {
+            if (!('data' in e))
+                return;
+            const rooms = JSON.parse(e.data);
+            var options_rooms = this.dom_rooms && this.dom_rooms.options;
+            this.dom_rooms.innerHTML = "";
+            if (options_rooms && rooms && rooms.length > 0) {
+                rooms.forEach((room) => {
+                    var option = document.createElement("option");
+                    option.value = room.id;
+                    option.text = room.name + " - " + room.id;
+                    this.dom_rooms.add(option);
+                });
+            }
         };
 
-        chatSocket.onclose = function(e) {
+        this.socket.onclose = (e) => {
             console.error('Chat socket closed unexpectedly');
         };
         /*

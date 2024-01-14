@@ -4,10 +4,10 @@ import {Login} from './Login.js'
 
 export class Main
 {
-    login = "";
-    name = "";
+    login = '';
+    name = '';
     id = -1;
-    status = "";
+    status = '';
 
     constructor()
     {
