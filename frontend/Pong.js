@@ -1,11 +1,9 @@
-import {new_connection} from './new_connection.js'
-
 export class Pong
 {
-	constructor(m, g, i) {
+	constructor(m, l, r) {
         this.main = m;
-        this.lobby = g;
-        this.info = i;
+        this.lobby = l;
+        this.room = r;
         this.connected = false;
         this.socket = -1;
     }
@@ -13,8 +11,8 @@ export class Pong
 	init() {
 		this.canvas = document.getElementById('pongCanvas');
 		this.ctx = this.canvas.getContext('2d');
-        this.ctx.canvas.width  = this.info.width;
-        this.ctx.canvas.height = this.info.height;
+        this.ctx.canvas.width  = this.room.data.width;
+        this.ctx.canvas.height = this.room.data.height;
         let dom_start = document.getElementById("start");
         let dom_quit = document.getElementById("quit");
         dom_start.addEventListener("click", () => this.set_state("start"));
@@ -39,32 +37,41 @@ export class Pong
     }
 
     connect() {
-        this.main.set_status("Connecting to server...");
-        new_connection({
-            main: this.main,
-            name: "Connect to pong server",
-            link: 'ws://'
-                + window.location.host
-                + '/ws/pong/'
-                + this.info.room
-                + '?user=' + this.main.id,
-            callback: {
-                open: () => {
-                    this.connected = true;
-                    if (this.lobby.socket.readyState === WebSocket.OPEN)
-                        this.lobby.socket.send(this.info);
-                    else
-                        this.main.set_status('Error: WebSocket lobby not open.')
-                },
-                message: this.update_state,
-                close: this.quit
+        this.socket = new WebSocket(
+            'ws://'
+            + window.location.host
+            + '/ws/pong/'
+            + this.room.data.room
+            + '/'
+        );
+
+        this.socket.onmessage = (e) => {
+            if (!('data' in e))
+                return;
+            const rooms = JSON.parse(e.data);
+            var options_rooms = this.dom_rooms && this.dom_rooms.options;
+            this.dom_rooms.innerHTML = "";
+            if (options_rooms && rooms && rooms.length > 0) {
+                rooms.forEach((room) => {
+                    var option = document.createElement("option");
+                    option.value = room.id;
+                    option.text = room.name + " - " + room.id;
+                    this.dom_rooms.add(option);
+                });
             }
-        });
+        };
+
+        this.socket.onclose = (e) => {
+            //console.error('Chat socket closed unexpectedly');
+        };
     }
 
     set_state(e) {
         if (this.connected && this.socket !== -1)
-            this.socket.send(JSON.stringify({ 'do': e }));
+            this.socket.send(JSON.stringify({ 
+                'login': this.main.login,
+                'action': e
+        }));
     }
 
     update_state(data) {
@@ -78,7 +85,7 @@ export class Pong
 
 	draw() {
 		// Clear the canvas
-		this.ctx.clearRect(0, 0, this.info.width, this.info.height);
+		this.ctx.clearRect(0, 0, this.room.data.width, this.room.data.height);
 
 		// Draw paddles
 		this.ctx.fillStyle = '#8b3a62';
@@ -87,13 +94,13 @@ export class Pong
 		    this.ctx.fillRect(
                 p.x,
                 p.y,
-                this.info.paddle_width,
-                this.info.paddle_height);
+                this.room.data.paddle_width,
+                this.room.data.paddle_height);
         });
 
 		// Draw this.ball
 		this.ctx.beginPath();
-		this.ctx.arc(this.data.ball.x, this.data.ball.y, this.info.ball_r, 0, Math.PI * 2);
+		this.ctx.arc(this.data.ball.x, this.data.ball.y, this.room.data.ball_r, 0, Math.PI * 2);
 		this.ctx.fillStyle = '#00ffcc';
 		this.ctx.fill();
 		this.ctx.closePath();

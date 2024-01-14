@@ -17,23 +17,7 @@ from channels.security.websocket import AllowedHostsOriginValidator
 from django.urls import path, re_path
 from game.consumers import RoomsConsumer
 from chat.consumers import ChatConsumer
-
-#os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'backend.settings')
-#
-#application = ProtocolTypeRouter({
-#    # Django's ASGI application to handle traditional HTTP requests
-#    "http": get_asgi_application(),
-#
-#    # WebSocket handler
-#    "websocket": AllowedHostsOriginValidator(
-#        AuthMiddlewareStack(
-#            URLRouter([
-#                path("ws/rooms/", RoomsConsumer.as_asgi()),
-#            ])
-#        )
-#    ),
-#})
-
+from pong.consumers import PongConsumer
 
 #from chat.routing import websocket_urlpatterns
 
@@ -50,17 +34,9 @@ application = ProtocolTypeRouter(
         "websocket": AllowedHostsOriginValidator(
             AuthMiddlewareStack(URLRouter([
                 re_path(r"ws/chat/(?P<room_name>\w+)/$", ChatConsumer.as_asgi()),
+                re_path(r"ws/pong/(?P<room_id>\w+)/$", PongConsumer.as_asgi()),
                 path("ws/game/rooms/", RoomsConsumer.as_asgi()),
             ]))
         ),
     }
 )
-
-#application = ProtocolTypeRouter(
-#    {
-#        "http": django_asgi_app,
-#        "websocket": AllowedHostsOriginValidator(
-#            AuthMiddlewareStack(URLRouter(websocket_urlpatterns))
-#        ),
-#    }
-#)

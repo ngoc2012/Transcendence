@@ -1,15 +1,14 @@
 import {Pong} from './Pong.js'
-import {new_connection} from './new_connection.js'
 
 export class Lobby
 {
     constructor(m) {
         this.main = m;
         this.socket = -1;
+        this.game = null;
     }
     
     events() {
-        this.game = null;
         this.dom_rooms = document.getElementById("rooms");
         this.dom_join = document.querySelector("#join");
         this.dom_pong = document.querySelector("#pong");
@@ -29,17 +28,29 @@ export class Lobby
             url: '/game/join',
             method: 'POST',
             data: {
-                "user": this.main.user,
+                'login': this.main.login,
                 "game_id": this.dom_rooms.options[this.dom_rooms.selectedIndex].value
             },
             success: (info) => {
-                switch (info.game) {
-                    case 'pong':
-                        this.pong_game(info);
-                        break;
+                if (typeof info === 'string')
+                {
+                    this.main.set_status(info);
+                }
+                else
+                {
+                    //this.main.set_status('Game ' + info.name + ' created.');
+                    if (this.socket !== -1)
+                        this.socket.send('update');
+                    /*
+                    switch (info.game) {
+                        case 'pong':
+                            this.pong_game(info);
+                            break;
+                    }
+                    */
                 }
             },
-            error: (error) => this.main.set_status('Error: Can not join game')
+            error: () => this.main.set_status('Error: Can not join game')
         });
     }
 
@@ -65,7 +76,7 @@ export class Lobby
                 }
                 else
                 {
-                    this.main.set_status('Game ' + info.name + ' created.');
+                    //this.main.set_status('Game ' + info.name + ' created.');
                     if (this.socket !== -1)
                         this.socket.send('update');
                     /*
@@ -76,9 +87,8 @@ export class Lobby
                     }
                     */
                 }
-                
             },
-            error: (error) => this.main.set_status('Error: Can not join game')
+            error: () => this.main.set_status('Error: Can not create game')
         });
     }
 
@@ -107,20 +117,6 @@ export class Lobby
             },
             error: (error) => this.main.set_status('Error: Can not join game')
         });
-        /*
-        if (this.socket === -1)
-        {
-            this.main.set_status('No connection');
-            return;
-        }
-        console.log("send new_game");
-        this.socket.send(JSON.stringify({
-            'action': 'new',
-            'name': 'Game name here',
-            'game': game,
-            'login': this.main.login
-        }));
-        */
     }
 
     pong_game(info) {
@@ -155,33 +151,5 @@ export class Lobby
         this.socket.onclose = (e) => {
             //console.error('Chat socket closed unexpectedly');
         };
-        /*
-        new_connection({
-            main: this.main,
-            name: "rooms update",
-            socket: this.socket,
-            link: 'ws://'
-                + window.location.host
-                + '/ws/game/rooms/',
-            callback: {
-                message: (data) => {
-                    var options_rooms = this.dom_rooms && this.dom_rooms.options;
-                    this.dom_rooms.innerHTML = "";
-                    if (options_rooms && data.rooms && data.rooms.length > 0) {
-                        data.rooms.forEach((room) => {
-                            var option = document.createElement("option");
-                            option.value = room.id;
-                            option.text = "" + room.id;
-                            room.players.forEach((p) => {
-                                option.text += " - " + p;
-                            });
-                            this.dom_rooms.add(option);
-                        });
-                    }
-                },
-                error: this.rooms_update()
-            }
-        });
-        */
     }
 }
