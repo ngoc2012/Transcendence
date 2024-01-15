@@ -26,12 +26,10 @@ def new_player(request):
     if PlayersModel.objects.filter(login=request.POST['login']).exists():
         return (HttpResponse("Error: Login '" + request.POST['login'] + "' exist."))
     new_player = PlayersModel(
-            login=request.POST['login'],
-            password=request.POST['password'],
-            name=request.POST['name'],
-            x=0,
-            y=0
-            )
+        login=request.POST['login'],
+        password=request.POST['password'],
+        name=request.POST['name']
+    )
     new_player.save()
     return (JsonResponse({
         'login': new_player.login,
@@ -46,10 +44,10 @@ def log_in(request):
         return (HttpResponse("Error: No password!"))
     if not PlayersModel.objects.filter(login=request.POST['login']).exists():
         return (HttpResponse("Error: Login '" + request.POST['login'] + "' does not exist!"))
-    user = PlayersModel.objects.get(login=request.POST['login'])
-    if user.password == request.POST['password']:
+    player = PlayersModel.objects.get(login=request.POST['login'])
+    if player.password == request.POST['password']:
         return (JsonResponse({
-            'login': user.login,
-            'name': user.name
+            'login': player.login,
+            'name': player.name
         }))
     return (HttpResponse('Error: Password not correct!'))

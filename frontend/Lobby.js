@@ -38,16 +38,11 @@ export class Lobby
                 }
                 else
                 {
-                    //this.main.set_status('Game ' + info.name + ' created.');
-                    if (this.socket !== -1)
-                        this.socket.send('update');
-                    /*
                     switch (info.game) {
                         case 'pong':
                             this.pong_game(info);
                             break;
                     }
-                    */
                 }
             },
             error: () => this.main.set_status('Error: Can not join game')
@@ -77,15 +72,11 @@ export class Lobby
                 else
                 {
                     //this.main.set_status('Game ' + info.name + ' created.');
-                    if (this.socket !== -1)
-                        this.socket.send('update');
-                    /*
                     switch (info.game) {
                         case 'pong':
                             this.pong_game(info);
                             break;
                     }
-                    */
                 }
             },
             error: () => this.main.set_status('Error: Can not create game')
@@ -120,6 +111,7 @@ export class Lobby
     }
 
     pong_game(info) {
+        this.quit();
         this.game = new Pong(this.main, this, info);
         this.main.load('/pong', () => this.game.init());
     }
@@ -151,5 +143,13 @@ export class Lobby
         this.socket.onclose = (e) => {
             //console.error('Chat socket closed unexpectedly');
         };
+    }
+
+    quit() {
+        if (this.socket !== -1)
+        {
+            this.socket.close();
+            this.socket = -1;
+        }
     }
 }

@@ -4,7 +4,8 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 from game.models import RoomsModel, PlayersModel, PlayerRoomModel
 
 @sync_to_async
-def get_room_data(players, room):
+def get_room_data(players, room_id):
+    room = RoomsModel.objects.get(id=room_id)
     return json.dumps({
         'ball': {'x': room.x, 'y':room.y},
         'players': [{'x': i.x, 'y': i.y} for i in players]
@@ -13,7 +14,6 @@ def get_room_data(players, room):
 class PongConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.room_id = self.scope['url_route']['kwargs']['room_id']
-        self.room = RoomsModel.objects.get(id=self.room_id)
         # Join room group
         await self.channel_layer.group_add(
             self.room_id,
@@ -45,7 +45,7 @@ class PongConsumer(AsyncWebsocketConsumer):
     
     async def group_data(self, event):
         players = PlayerRoomModel.objects.filter(room=self.room_id)
-        room_data = await get_room_data(players, self.room)
+        room_data = await get_room_data(players, self.room_id)
         await self.send(text_data=room_data)
     
     #async def game_loop(self):

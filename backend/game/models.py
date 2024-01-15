@@ -7,8 +7,8 @@ class PlayersModel(models.Model):
     login = models.CharField(max_length=255)
     password = models.CharField(max_length=255)
     name = models.CharField(max_length=255)
-    #session_id = models.CharField(max_length=40)
-    #expires = models.DateTimeField()
+    session_id = models.CharField(max_length=40, null=True)
+    expires = models.DateTimeField(null=True)
     
     def __str__(self):
         return self.name
@@ -17,7 +17,6 @@ class RoomsModel(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=255)
     game = models.CharField(max_length=20)
-    nplayers = models.IntegerField(blank=True, null=True)
     owner = models.ForeignKey(PlayersModel, on_delete=models.CASCADE, related_name='own')
     server = models.ForeignKey(PlayersModel, on_delete=models.CASCADE, related_name='serve', null=True)
     expires = models.DateTimeField(default=timezone.now() + timezone.timedelta(minutes=15))
