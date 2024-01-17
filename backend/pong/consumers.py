@@ -14,12 +14,12 @@ def get_info(consumer):
     consumer.room = RoomsModel.objects.get(id=consumer.room_id)
     consumer.player = PlayerRoomModel.objects.get(id=consumer.player_id)
     consumer.server = PlayerRoomModel.objects.get(player=consumer.room.server)
-    
 
 @sync_to_async
 def get_room_data(players, room_id):
     room = RoomsModel.objects.get(id=room_id)
     return json.dumps({
+        'score': [room.score0, room.score1],
         'ball': {'x': room.x, 'y':room.y},
         'players': [{'x': i.x, 'y': i.y} for i in players]
     })
@@ -34,6 +34,10 @@ def start_game(consumer):
 @sync_to_async
 def end_game(consumer):
     consumer.server = PlayerRoomModel.objects.get(player=consumer.room.server)
+    if consumer.room.x <= 0:
+        consumer.room.score1 += 1
+    else:
+        consumer.room.score0 += 1
     consumer.room.x = consumer.server.x + pong_data['PADDLE_WIDTH'] + pong_data['RADIUS']
     consumer.room.y = consumer.server.y + pong_data['PADDLE_HEIGHT'] / 2
     consumer.room.started = False
@@ -69,12 +73,7 @@ class PongConsumer(AsyncWebsocketConsumer):
             self.channel_name
         )
         await self.accept()
-        await self.channel_layer.group_send(
-            self.room_id,
-            {
-                'type': 'group_data'
-            }
-        )
+        await self.channel_layer.group_send(self.room_id, {'type': 'group_data'})
 
     async def disconnect(self, close_code):
         await self.channel_layer.group_discard(

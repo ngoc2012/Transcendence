@@ -11,6 +11,8 @@ export class Pong
 	init() {
         this.dom_game_name = document.getElementById("game_name");
         this.dom_game_name.innerHTML = this.room.name;
+        this.dom_score0 = document.getElementById("score0");
+        this.dom_score1 = document.getElementById("score1");
 		this.canvas = document.getElementById('pongCanvas');
 		this.ctx = this.canvas.getContext('2d');
         this.ctx.canvas.width  = this.room.data.WIDTH;
@@ -73,7 +75,11 @@ export class Pong
         this.socket.onmessage = (e) => {
             if (!('data' in e))
                 return;
-            this.draw(JSON.parse(e.data));
+            let data = JSON.parse(e.data);
+            //console.log(data.score);
+            this.dom_score0.innerHTML = data.score[0];
+            this.dom_score1.innerHTML = data.score[1];
+            this.draw(data);
         };
 
         this.socket.onclose = (e) => {

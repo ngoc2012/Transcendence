@@ -22,6 +22,8 @@ class RoomsModel(models.Model):
     started = models.BooleanField(default=False)
     x = models.IntegerField(blank=True, null=True)
     y = models.IntegerField(blank=True, null=True)
+    score0 = models.IntegerField(default=0)
+    score1 = models.IntegerField(default=0)
     def __str__(self):
         return str(self.id)
     def check_expired(self):
