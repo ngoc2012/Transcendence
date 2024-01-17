@@ -1,4 +1,4 @@
-# chat/urls.py
+# game/urls.py
 from django.urls import path
 
 from . import views

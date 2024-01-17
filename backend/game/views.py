@@ -1,3 +1,5 @@
+import requests  # Add this line
+
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -109,3 +111,4 @@ def delete(request):
     if room.owner == owner:
         return (HttpResponse(s))
     return (HttpResponse("Error: Login '" + request.POST['login'] + "' is not the owner of '" + request.POST['game_id'] + "'!"))
+

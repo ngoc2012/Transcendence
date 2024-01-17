@@ -1,0 +1,26 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>42 OAuth Example</title>
+</head>
+<body>
+
+    <button id="loginBtn">Login with 42</button>
+
+    <script>
+        console.log('Script started');
+        document.getElementById('loginBtn').addEventListener('click', function() {
+            // Redirect to the 42 OAuth authorization URL
+            window.location.href = 'https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-bda043967d92d434d1d6c24cf1d236ce0c6cc9c718a9198973efd9c5236038ed&redirect_uri=http%3A%2F%2Flocalhost%3A8000%2Fcallback&response_type=code';
+        });
+    </script>
+
+</body>
+</html>
+
+
+
+<!-- python manage.py runserver to connect-->

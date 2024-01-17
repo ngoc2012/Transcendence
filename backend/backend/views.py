@@ -1,3 +1,4 @@
+import requests
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -51,3 +52,42 @@ def log_in(request):
             'name': player.name
         }))
     return (HttpResponse('Error: Password not correct!'))
+
+def callback(request):
+    code = request.GET.get('code')
+
+    try:
+        token_response = requests.post('https://api.intra.42.fr/oauth/token', data={
+            'grant_type': 'authorization_code',
+            'client_id': '',
+            'client_secret': '',
+            'code': code,
+            'redirect_uri': 'http://0.0.0.0:8000',
+        })
+
+        token_data = token_response.json()
+        access_token = token_data['access_token']
+        
+        user_response = requests.get('https://api.intra.42.fr/v2/me', headers={
+            'Authorization': f'Bearer {access_token}',
+        })
+
+
+        user_data = user_response.json()
+        print('User Information:', user_data['login'])
+        print('User Information:', user_data['usual_full_name'])
+
+        new_player = PlayersModel(
+            login=user_data['login'],
+            password='password',
+            name=user_data['usual_full_name']
+        )
+        new_player.save()
+
+        return JsonResponse({
+            'login': user_data['login'],
+            'name': user_data['usual_full_name'],
+        })
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return HttpResponse("An error occurred.")
