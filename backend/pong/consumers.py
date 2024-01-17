@@ -85,7 +85,8 @@ def down(consumer):
 
 @sync_to_async
 def left(consumer):
-    if consumer.player.x > 0:
+    if  (consumer.player.side == 0 and consumer.player.x > 0) \
+        or (consumer.player.side == 1 and consumer.player.x > 3 * pong_data['WIDTH'] / 4):
         consumer.player.x -= pong_data['STEP_X']
         consumer.player.save()
         if not consumer.room.started and consumer.server == consumer.player:
@@ -95,7 +96,8 @@ def left(consumer):
 
 @sync_to_async
 def right(consumer):
-    if consumer.player.x < pong_data['WIDTH']:
+    if (consumer.player.side == 0 and consumer.player.x < pong_data['WIDTH'] / 4 - pong_data['PADDLE_WIDTH']) \
+        or (consumer.player.side == 1 and consumer.player.x < pong_data['WIDTH'] - pong_data['PADDLE_WIDTH']):
         consumer.player.x += pong_data['STEP_X']
         consumer.player.save()
         if not consumer.room.started and consumer.server == consumer.player:
@@ -157,7 +159,7 @@ class PongConsumer(AsyncWebsocketConsumer):
         dx = 1
         dy = 1
         while True:
-            #await asyncio.sleep(0.01)
+            await asyncio.sleep(0.02)
             dy = await update_ball(self, dx, dy)
             dx = await check_collision(self, dx)
             if self.room.x <= 0 or self.room.x >= pong_data['WIDTH']:
