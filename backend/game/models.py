@@ -9,9 +9,8 @@ class PlayersModel(models.Model):
     name = models.CharField(max_length=255)
     session_id = models.CharField(max_length=40, null=True)
     expires = models.DateTimeField(null=True)
-    
     def __str__(self):
-        return self.name
+        return str(self.id)
 
 class RoomsModel(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -20,6 +19,7 @@ class RoomsModel(models.Model):
     owner = models.ForeignKey(PlayersModel, on_delete=models.CASCADE, related_name='own')
     server = models.ForeignKey(PlayersModel, on_delete=models.CASCADE, related_name='serve', null=True)
     expires = models.DateTimeField(default=timezone.now() + timezone.timedelta(minutes=15))
+    started = models.BooleanField(default=False)
     x = models.IntegerField(blank=True, null=True)
     y = models.IntegerField(blank=True, null=True)
     def __str__(self):
@@ -29,10 +29,12 @@ class RoomsModel(models.Model):
             self.delete()
 
 class PlayerRoomModel(models.Model):
-    id = models.AutoField(primary_key=True)
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     player = models.ForeignKey(PlayersModel, on_delete=models.CASCADE)
     room = models.ForeignKey(RoomsModel, on_delete=models.CASCADE)
     side = models.IntegerField(blank=True, null=True)
     position = models.IntegerField(blank=True, null=True)
     x = models.IntegerField(blank=True, null=True)
     y = models.IntegerField(blank=True, null=True)
+    def __str__(self):
+        return str(self.id)

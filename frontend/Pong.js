@@ -17,7 +17,7 @@ export class Pong
         this.ctx.canvas.height = this.room.data.HEIGHT;
         this.dom_start = document.getElementById("start");
         this.dom_quit = document.getElementById("quit");
-        this.dom_start.addEventListener("click", () => this.set_state("start"));
+        this.dom_start.addEventListener("click", () => this.start());
         this.dom_quit.addEventListener("click", () => this.quit());
         document.addEventListener('keydown', (event) => {
             switch (event.key) {
@@ -27,10 +27,18 @@ export class Pong
                 case 'ArrowDown':
                     this.set_state("down");
                     break;
+                case ' ':
+                    this.start();
+                    break;
             }
         });
         this.connect();
 	}
+
+    start() {
+        if (this.socket !== -1)
+            this.socket.send('start');
+    }
 
     quit() {
         if (this.socket !== -1)
@@ -48,6 +56,8 @@ export class Pong
             + '/ws/pong/'
             + this.room.id
             + '/'
+            + this.room.player_id
+            + '/'
         );
 
         this.socket.onmessage = (e) => {
@@ -62,6 +72,9 @@ export class Pong
     }
 
     set_state(e) {
+        if (this.socket !== -1)
+            this.socket.send(e);
+        /*
         $.ajax({
             url: '/pong/state',
             method: 'POST',
@@ -80,6 +93,7 @@ export class Pong
             },
             error: () => this.main.set_status('Error: Can not set state')
         });
+        */
     }
 
 	draw(data) {

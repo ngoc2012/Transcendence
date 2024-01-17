@@ -65,6 +65,8 @@ export class Lobby
                 'login': this.main.login
             },
             success: (info) => {
+                if (this.socket !== -1)
+                    this.socket.send('update');
                 if (typeof info === 'string')
                 {
                     this.main.set_status(info);

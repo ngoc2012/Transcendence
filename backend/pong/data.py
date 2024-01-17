@@ -3,6 +3,8 @@ pong_data = {
     'WIDTH': 800,
     'RADIUS': 10,
     'STEP': 20,
+    'DX': 5,
+    'DY': 5,
     'PADDLE_WIDTH': 10,
     'PADDLE_HEIGHT': 60,
     'PADDLE_STEP': 5,
