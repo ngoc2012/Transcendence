@@ -10,6 +10,10 @@
 python3 manage.py runserver 0.0.0.0:8000
 ```
 
+## github workflow
+
+[GitHub flow](https://docs.github.com/en/get-started/quickstart/github-flow)
+
 ## Bootstrap toolkit
 
 [Introduction](https://getbootstrap.com/docs/4.6/getting-started/introduction/)
