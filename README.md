@@ -13,6 +13,12 @@ python3 manage.py runserver 0.0.0.0:8000
 ## github workflow
 
 [GitHub flow](https://docs.github.com/en/get-started/quickstart/github-flow)
+[Basic Branching and Merging](https://git-scm.com/book/en/v2/Git-Branching-Basic-Branching-and-Merging)
+
+```console
+git checkout -b branch_name
+git push --set-upstream origin branch_name
+```
 
 ## Bootstrap toolkit
 
