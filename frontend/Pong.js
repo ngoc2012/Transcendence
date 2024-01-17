@@ -77,9 +77,13 @@ export class Pong
                 return;
             let data = JSON.parse(e.data);
             //console.log(data.score);
-            this.dom_score0.innerHTML = data.score[0];
-            this.dom_score1.innerHTML = data.score[1];
-            this.draw(data);
+            if ('score' in data)
+            {
+                this.dom_score0.innerHTML = data.score[0];
+                this.dom_score1.innerHTML = data.score[1];
+            }
+            else
+                this.draw(data);
         };
 
         this.socket.onclose = (e) => {

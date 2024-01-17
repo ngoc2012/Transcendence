@@ -19,10 +19,14 @@ def get_info(consumer):
 def get_room_data(players, room_id):
     room = RoomsModel.objects.get(id=room_id)
     return json.dumps({
-        'score': [room.score0, room.score1],
         'ball': {'x': room.x, 'y':room.y},
         'players': [{'x': i.x, 'y': i.y} for i in players]
     })
+
+@sync_to_async
+def get_score_data(room_id):
+    room = RoomsModel.objects.get(id=room_id)
+    return json.dumps({ 'score': [room.score0, room.score1] })
 
 @sync_to_async
 def start_game(consumer):
@@ -73,6 +77,7 @@ class PongConsumer(AsyncWebsocketConsumer):
             self.channel_name
         )
         await self.accept()
+        await self.channel_layer.group_send(self.room_id, {'type': 'score_data'})
         await self.channel_layer.group_send(self.room_id, {'type': 'group_data'})
 
     async def disconnect(self, close_code):
@@ -102,6 +107,10 @@ class PongConsumer(AsyncWebsocketConsumer):
         room_data = await get_room_data(players, self.room_id)
         await self.send(text_data=room_data)
     
+    async def score_data(self, event):
+        score = await get_score_data(self.room_id)
+        await self.send(text_data=score)
+
     async def game_loop(self):
         await start_game(self)
         dx = 1
@@ -112,6 +121,7 @@ class PongConsumer(AsyncWebsocketConsumer):
             dx = await check_collision(self, dx)
             if self.room.x <= 0 or self.room.x >= pong_data['WIDTH']:
                 await end_game(self)
+                await self.channel_layer.group_send(self.room_id, {'type': 'score_data'})
                 await self.channel_layer.group_send(self.room_id, {'type': 'group_data'})
                 return            
             await self.channel_layer.group_send(self.room_id, {'type': 'group_data'})
