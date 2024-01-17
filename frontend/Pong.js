@@ -50,12 +50,12 @@ export class Pong
     }
 
     quit() {
+        this.set_state('quit');
         if (this.socket !== -1)
         {
             this.socket.close();
             this.socket = -1;
         }
-        this.set_state('quit');
         this.main.load('/lobby', () => this.lobby.events());
     }
 
@@ -84,31 +84,9 @@ export class Pong
     set_state(e) {
         if (this.socket !== -1)
             this.socket.send(e);
-        /*
-        $.ajax({
-            url: '/pong/state',
-            method: 'POST',
-            data: {
-                'login': this.main.login,
-                "game_id": this.room.id,
-                'action': e
-            },
-            success: (info) => {
-                if (!info.includes('Done'))
-                {
-                    this.main.set_status(info);
-                }
-                if (this.socket !== -1)
-                    this.socket.send('update');
-            },
-            error: () => this.main.set_status('Error: Can not set state')
-        });
-        */
     }
 
 	draw(data) {
-        //console.log(this.room);
-        //console.log(data);
 		// Clear the canvas
 		this.ctx.clearRect(0, 0, this.room.data.WIDTH, this.room.data.HEIGHT);
 

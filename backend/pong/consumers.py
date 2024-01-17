@@ -105,6 +105,18 @@ def right(consumer):
             consumer.room.x += pong_data['STEP']
             consumer.room.save()
 
+@sync_to_async
+def quit(consumer):
+    if PlayerRoomModel.objects.filter(room=consumer.room_id).count() == 1:
+        consumer.room.delete()
+    if consumer.server == consumer.player:
+        consumer.player.delete()
+        consumer.server = PlayerRoomModel.objects.filter(room=consumer.room_id).first()
+        #consumer.room.server = PlayersModel.objects.get(player=consumer.room.server)
+        #consumer.room.save()
+    else:
+        consumer.player.delete()
+
 class PongConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.room_id = self.scope['url_route']['kwargs']['room_id']
@@ -147,6 +159,8 @@ class PongConsumer(AsyncWebsocketConsumer):
             await up(self)
         elif text_data == 'down':
             await down(self)
+        elif text_data == 'quit':
+            await quit(self)
         await self.channel_layer.group_send(self.room_id, {'type': 'group_data'})
     
     async def group_data(self, event):
