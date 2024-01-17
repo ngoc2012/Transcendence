@@ -55,6 +55,7 @@ export class Pong
             this.socket.close();
             this.socket = -1;
         }
+        set_state('quit');
         this.main.load('/lobby', () => this.lobby.events());
     }
 
