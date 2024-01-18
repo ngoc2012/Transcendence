@@ -11,6 +11,7 @@
 ```console
 pip install Django
 pip install channels daphne
+```
 
 [Channels](https://channels.readthedocs.io/en/latest/index.html)
 
