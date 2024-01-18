@@ -7,7 +7,7 @@ import asyncio
 
 from .data import pong_data
 from .move import check_collision, update_ball, up, down, left, right
-from .game import get_info, get_room_data, get_teams_data, get_score_data, start_game, end_game, quit, change_side
+from .game import get_info, get_room_data, get_teams_data, get_score_data, start_game, end_game, quit, change_side, change_server_direction
 import random
 
 class PongConsumer(AsyncWebsocketConsumer):
@@ -15,6 +15,8 @@ class PongConsumer(AsyncWebsocketConsumer):
         self.room_id = self.scope['url_route']['kwargs']['room_id']
         self.player_id = self.scope['url_route']['kwargs']['player_id']
         self.choices = [5, 10]
+        self.dx = 1
+        self.dy = 1
         self.ddy = random.choice(self.choices)
         self.room = None
         self.player = None
@@ -38,7 +40,9 @@ class PongConsumer(AsyncWebsocketConsumer):
         )
 
     async def receive(self, text_data):
-        if text_data == 'start' and not self.room.started:
+        if text_data == 'start':
+            await get_info(self)
+            if not self.room.started:
                 asyncio.create_task(self.game_loop())
         elif text_data == 'left':
             await left(self)
@@ -54,6 +58,8 @@ class PongConsumer(AsyncWebsocketConsumer):
         elif text_data == 'side':
             await change_side(self)
             await self.channel_layer.group_send(self.room_id, {'type': 'teams_data'})
+        elif text_data == 'server':
+            await change_server_direction(self)
         await self.channel_layer.group_send(self.room_id, {'type': 'group_data'})
     
     async def group_data(self, event):
@@ -62,7 +68,7 @@ class PongConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=room_data)
     
     async def teams_data(self, event):
-        teams = await get_teams_data(self.room_id)
+        teams = await get_teams_data(self, self.room_id)
         await self.send(text_data=teams)
 
     async def score_data(self, event):
@@ -71,8 +77,8 @@ class PongConsumer(AsyncWebsocketConsumer):
 
     async def game_loop(self):
         await start_game(self)
-        dx = 1
-        dy = 1
+        dx = self.dx
+        dy = self.dy
         while True:
             await asyncio.sleep(0.02)
             dy = await update_ball(self, dx, dy)

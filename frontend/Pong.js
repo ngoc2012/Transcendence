@@ -44,6 +44,9 @@ export class Pong
                 case 's':
                     this.set_state("side");
                     break;
+                case 'c':
+                    this.set_state("server");
+                    break;
                 case ' ':
                     this.start();
                     break;
@@ -119,28 +122,4 @@ export class Pong
         if (this.socket !== -1)
             this.socket.send(e);
     }
-
-    /*
-	draw(data) {
-		// Clear the canvas
-		this.ctx.clearRect(0, 0, this.room.data.WIDTH, this.room.data.HEIGHT);
-
-		// Draw paddles
-		this.ctx.fillStyle = '#8b3a62';
-        data.players.forEach((p) => {
-		    this.ctx.fillRect(
-                p.x,
-                p.y,
-                this.room.data.PADDLE_WIDTH,
-                this.room.data.PADDLE_HEIGHT);
-        });
-
-		// Draw this.ball
-		this.ctx.beginPath();
-		this.ctx.arc(data.ball.x, data.ball.y, this.room.data.RADIUS, 0, Math.PI * 2);
-		this.ctx.fillStyle = '#00ffcc';
-		this.ctx.fill();
-		this.ctx.closePath();
-	}
-    */
 }
