@@ -1,3 +1,4 @@
+from django.core.exceptions import ObjectDoesNotExist
 import json
 from asgiref.sync import sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
@@ -16,11 +17,14 @@ def get_info(consumer):
 
 @sync_to_async
 def get_room_data(players, room_id):
-    room = RoomsModel.objects.get(id=room_id)
-    return json.dumps({
-        'ball': {'x': room.x, 'y':room.y},
-        'players': [{'x': i.x, 'y': i.y} for i in players]
-    })
+    try:
+        room = RoomsModel.objects.get(id=room_id)
+        return json.dumps({
+            'ball': {'x': room.x, 'y':room.y},
+            'players': [{'x': i.x, 'y': i.y} for i in players]
+        })
+    except ObjectDoesNotExist:
+        return "Error: Rooms not found"
 
 @sync_to_async
 def get_teams_data(room_id):

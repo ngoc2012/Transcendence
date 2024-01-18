@@ -1,3 +1,5 @@
+import {Draw} from './Draw.js'
+
 export class Pong
 {
 	constructor(m, l, r) {
@@ -6,6 +8,7 @@ export class Pong
         this.room = r;
         this.connected = false;
         this.socket = -1;
+        this.draw = new Draw(this);
     }
 
 	init() {
@@ -104,7 +107,7 @@ export class Pong
                 });
             }
             else
-                this.draw(data);
+                this.draw.execute(data);
         };
 
         this.socket.onclose = (e) => {
@@ -117,6 +120,7 @@ export class Pong
             this.socket.send(e);
     }
 
+    /*
 	draw(data) {
 		// Clear the canvas
 		this.ctx.clearRect(0, 0, this.room.data.WIDTH, this.room.data.HEIGHT);
@@ -138,4 +142,5 @@ export class Pong
 		this.ctx.fill();
 		this.ctx.closePath();
 	}
+    */
 }
