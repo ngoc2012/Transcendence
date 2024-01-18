@@ -4,6 +4,16 @@
 
 [The Mechanics of Pong](https://dooglz.github.io/set09121/pong2)
 
+## Prerequisites
+
+### Install `Django` `channels`
+
+```console
+pip install Django
+pip install channels daphne
+
+[Channels](https://channels.readthedocs.io/en/latest/index.html)
+
 ## Start game
 
 ```console
@@ -187,14 +197,6 @@ $.ajax({
 ### ASGI
 
 ASGI stands for Asynchronous Server Gateway Interface. It's a specification for asynchronous web servers and frameworks in Python. ASGI enables handling multiple connections asynchronously, making it suitable for applications that require real-time features, such as chat applications, live notifications, or multiplayer games.
-
-#### Install `channels`
-
-python3 -m pip install Django channels
-
-pip install channels daphne
-
-[Channels](https://channels.readthedocs.io/en/latest/index.html)
 
 
 #### Configuration

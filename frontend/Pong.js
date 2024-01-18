@@ -11,6 +11,8 @@ export class Pong
 	init() {
         this.dom_game_name = document.getElementById("game_name");
         this.dom_game_name.innerHTML = this.room.name;
+        this.dom_team0 = document.getElementById("team0");
+        this.dom_team1 = document.getElementById("team1");
         this.dom_score0 = document.getElementById("score0");
         this.dom_score1 = document.getElementById("score1");
 		this.canvas = document.getElementById('pongCanvas');
@@ -34,6 +36,10 @@ export class Pong
                     break;
                 case 'ArrowRight':
                     this.set_state("right");
+                    break;
+                // change side
+                case 's':
+                    this.set_state("side");
                     break;
                 case ' ':
                     this.start();
@@ -81,6 +87,21 @@ export class Pong
             {
                 this.dom_score0.innerHTML = data.score[0];
                 this.dom_score1.innerHTML = data.score[1];
+            }
+            else if ('team0' in data)
+            {
+                this.dom_team0.innerHTML = "";
+                data.team0.forEach((p) => {
+                    let new_p = document.createElement("li");
+                    new_p.textContent = p;
+                    this.dom_team0.appendChild(new_p);
+                });
+                this.dom_team1.innerHTML = "";
+                data.team1.forEach((p) => {
+                    let new_p = document.createElement("li");
+                    new_p.textContent = p;
+                    this.dom_team0.appendChild(new_p);
+                });
             }
             else
                 this.draw(data);

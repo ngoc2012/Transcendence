@@ -1,64 +1,14 @@
 import json
 from asgiref.sync import sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
-from game.models import RoomsModel, PlayerRoomModel
+from game.models import RoomsModel, PlayerRoomModel, PlayersModel
 
 import asyncio
 
 from .data import pong_data
 from .move import check_collision, update_ball, up, down, left, right
+from .game import get_info, get_room_data, get_teams_data, get_score_data, start_game, end_game, quit, change_side
 import random
-
-@sync_to_async
-def get_info(consumer):
-    consumer.room = RoomsModel.objects.get(id=consumer.room_id)
-    consumer.player = PlayerRoomModel.objects.get(id=consumer.player_id)
-    consumer.server = PlayerRoomModel.objects.get(player=consumer.room.server)
-
-@sync_to_async
-def get_room_data(players, room_id):
-    room = RoomsModel.objects.get(id=room_id)
-    return json.dumps({
-        'ball': {'x': room.x, 'y':room.y},
-        'players': [{'x': i.x, 'y': i.y} for i in players]
-    })
-
-@sync_to_async
-def get_score_data(room_id):
-    room = RoomsModel.objects.get(id=room_id)
-    return json.dumps({ 'score': [room.score0, room.score1] })
-
-@sync_to_async
-def start_game(consumer):
-    consumer.room = RoomsModel.objects.get(id=consumer.room_id)
-    consumer.server = PlayerRoomModel.objects.get(player=consumer.room.server)
-    consumer.room.started = True
-    consumer.room.save()
-
-@sync_to_async
-def end_game(consumer):
-    consumer.server = PlayerRoomModel.objects.get(player=consumer.room.server)
-    if consumer.room.x <= 0:
-        consumer.room.score1 += 1
-    else:
-        consumer.room.score0 += 1
-    consumer.room.x = consumer.server.x + pong_data['PADDLE_WIDTH'] + pong_data['RADIUS']
-    consumer.room.y = consumer.server.y + pong_data['PADDLE_HEIGHT'] / 2
-    consumer.room.started = False
-    consumer.room.save()
-
-@sync_to_async
-def quit(consumer):
-    if PlayerRoomModel.objects.filter(room=consumer.room_id).count() == 1:
-        consumer.room.delete()
-    if consumer.server == consumer.player:
-        consumer.player.delete()
-        consumer.server = PlayerRoomModel.objects.filter(room=consumer.room_id).first()
-        #consumer.room.server = PlayersModel.objects.get(player=consumer.room.server)
-        #consumer.room.save()
-    else:
-        print("Player deleted")
-        consumer.player.delete()
 
 class PongConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -77,6 +27,7 @@ class PongConsumer(AsyncWebsocketConsumer):
             self.channel_name
         )
         await self.accept()
+        await self.channel_layer.group_send(self.room_id, {'type': 'teams_data'})
         await self.channel_layer.group_send(self.room_id, {'type': 'score_data'})
         await self.channel_layer.group_send(self.room_id, {'type': 'group_data'})
 
@@ -87,7 +38,6 @@ class PongConsumer(AsyncWebsocketConsumer):
         )
 
     async def receive(self, text_data):
-        #print(text_data)
         if text_data == 'start' and not self.room.started:
             asyncio.create_task(self.game_loop())
         elif text_data == 'left':
@@ -100,6 +50,10 @@ class PongConsumer(AsyncWebsocketConsumer):
             await down(self)
         elif text_data == 'quit':
             await quit(self)
+            await self.channel_layer.group_send(self.room_id, {'type': 'teams_data'})
+        elif text_data == 'side':
+            await change_side(self)
+            await self.channel_layer.group_send(self.room_id, {'type': 'teams_data'})
         await self.channel_layer.group_send(self.room_id, {'type': 'group_data'})
     
     async def group_data(self, event):
@@ -107,6 +61,10 @@ class PongConsumer(AsyncWebsocketConsumer):
         room_data = await get_room_data(players, self.room_id)
         await self.send(text_data=room_data)
     
+    async def teams_data(self, event):
+        teams = await get_teams_data(self.room_id)
+        await self.send(text_data=teams)
+
     async def score_data(self, event):
         score = await get_score_data(self.room_id)
         await self.send(text_data=score)
