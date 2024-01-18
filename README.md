@@ -4,6 +4,16 @@
 
 [The Mechanics of Pong](https://dooglz.github.io/set09121/pong2)
 
+## Prerequisites
+
+### Install `Django` `channels`
+
+```console
+pip install Django
+pip install channels daphne
+
+[Channels](https://channels.readthedocs.io/en/latest/index.html)
+
 ## Start game
 
 ```console
@@ -13,6 +23,12 @@ python3 manage.py runserver 0.0.0.0:8000
 ## github workflow
 
 [GitHub flow](https://docs.github.com/en/get-started/quickstart/github-flow)
+[Basic Branching and Merging](https://git-scm.com/book/en/v2/Git-Branching-Basic-Branching-and-Merging)
+
+```console
+git checkout -b branch_name
+git push --set-upstream origin branch_name
+```
 
 ## Bootstrap toolkit
 
@@ -181,14 +197,6 @@ $.ajax({
 ### ASGI
 
 ASGI stands for Asynchronous Server Gateway Interface. It's a specification for asynchronous web servers and frameworks in Python. ASGI enables handling multiple connections asynchronously, making it suitable for applications that require real-time features, such as chat applications, live notifications, or multiplayer games.
-
-#### Install `channels`
-
-python3 -m pip install Django channels
-
-pip install channels daphne
-
-[Channels](https://channels.readthedocs.io/en/latest/index.html)
 
 
 #### Configuration

@@ -11,6 +11,10 @@ export class Pong
 	init() {
         this.dom_game_name = document.getElementById("game_name");
         this.dom_game_name.innerHTML = this.room.name;
+        this.dom_team0 = document.getElementById("team0");
+        this.dom_team1 = document.getElementById("team1");
+        this.dom_score0 = document.getElementById("score0");
+        this.dom_score1 = document.getElementById("score1");
 		this.canvas = document.getElementById('pongCanvas');
 		this.ctx = this.canvas.getContext('2d');
         this.ctx.canvas.width  = this.room.data.WIDTH;
@@ -33,6 +37,10 @@ export class Pong
                 case 'ArrowRight':
                     this.set_state("right");
                     break;
+                // change side
+                case 's':
+                    this.set_state("side");
+                    break;
                 case ' ':
                     this.start();
                     break;
@@ -50,12 +58,12 @@ export class Pong
     }
 
     quit() {
+        this.set_state('quit');
         if (this.socket !== -1)
         {
             this.socket.close();
             this.socket = -1;
         }
-        set_state('quit');
         this.main.load('/lobby', () => this.lobby.events());
     }
 
@@ -73,7 +81,30 @@ export class Pong
         this.socket.onmessage = (e) => {
             if (!('data' in e))
                 return;
-            this.draw(JSON.parse(e.data));
+            let data = JSON.parse(e.data);
+            //console.log(data.score);
+            if ('score' in data)
+            {
+                this.dom_score0.innerHTML = data.score[0];
+                this.dom_score1.innerHTML = data.score[1];
+            }
+            else if ('team0' in data)
+            {
+                this.dom_team0.innerHTML = "";
+                data.team0.forEach((p) => {
+                    let new_p = document.createElement("li");
+                    new_p.textContent = p;
+                    this.dom_team0.appendChild(new_p);
+                });
+                this.dom_team1.innerHTML = "";
+                data.team1.forEach((p) => {
+                    let new_p = document.createElement("li");
+                    new_p.textContent = p;
+                    this.dom_team0.appendChild(new_p);
+                });
+            }
+            else
+                this.draw(data);
         };
 
         this.socket.onclose = (e) => {
@@ -84,31 +115,9 @@ export class Pong
     set_state(e) {
         if (this.socket !== -1)
             this.socket.send(e);
-        /*
-        $.ajax({
-            url: '/pong/state',
-            method: 'POST',
-            data: {
-                'login': this.main.login,
-                "game_id": this.room.id,
-                'action': e
-            },
-            success: (info) => {
-                if (!info.includes('Done'))
-                {
-                    this.main.set_status(info);
-                }
-                if (this.socket !== -1)
-                    this.socket.send('update');
-            },
-            error: () => this.main.set_status('Error: Can not set state')
-        });
-        */
     }
 
 	draw(data) {
-        //console.log(this.room);
-        //console.log(data);
 		// Clear the canvas
 		this.ctx.clearRect(0, 0, this.room.data.WIDTH, this.room.data.HEIGHT);
 
