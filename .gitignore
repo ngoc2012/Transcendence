@@ -1,4 +1,4 @@
 *.swp
 .vscode
-__pycache__/
+__pycache__
 package-lock.json
