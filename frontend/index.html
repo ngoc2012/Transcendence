@@ -23,12 +23,11 @@
     <a id="home">Home</a>
     <div style="display: inline">Hello <div id="name"></div></div>
     <button id="login" type="button">Login</button>
-
     <button id="login42">Login with 42</button>
 
     <script>
       document.getElementById('login42').addEventListener('click', function() {
-          window.location.href = 'https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-bda043967d92d434d1d6c24cf1d236ce0c6cc9c718a9198973efd9c5236038ed&redirect_uri=http%3A%2F%2F0.0.0.0%3A8000&response_type=code';
+          window.location.href = 'https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-bda043967d92d434d1d6c24cf1d236ce0c6cc9c718a9198973efd9c5236038ed&redirect_uri=http%3A%2F%2F0.0.0.0%3A8000%2Fcallback%2F&response_type=code';
       });
     </script>
 

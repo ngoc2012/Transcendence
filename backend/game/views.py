@@ -1,5 +1,3 @@
-import requests  # Add this line
-
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -102,13 +100,11 @@ def delete(request):
     if not PlayersModel.objects.filter(login=request.POST['login']).exists():
         return (HttpResponse("Error: Login '" + request.POST['login'] + "' does not exist!"))
     owner = PlayersModel.objects.get(login=request.POST['login'])
-    #uuid_obj = UUID(uuid_str)
     if not RoomsModel.objects.filter(id=request.POST['game_id']).exists():
         return (HttpResponse("Error: Room with id '" + request.POST['game_id'] + "' does not exist!"))
     room = RoomsModel.objects.get(id=request.POST['game_id'])
     s = "Room " + room.name + ' - ' + str(room) + " deleted"
-    room.delete()
     if room.owner == owner:
+        room.delete()
         return (HttpResponse(s))
     return (HttpResponse("Error: Login '" + request.POST['login'] + "' is not the owner of '" + request.POST['game_id'] + "'!"))
-

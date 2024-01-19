@@ -53,6 +53,7 @@ def log_in(request):
         }))
     return (HttpResponse('Error: Password not correct!'))
 
+@csrf_exempt
 def callback(request):
     code = request.GET.get('code')
 
@@ -62,7 +63,7 @@ def callback(request):
             'client_id': '',
             'client_secret': '',
             'code': code,
-            'redirect_uri': 'http://0.0.0.0:8000',
+            'redirect_uri': 'http://0.0.0.0:8000/callback/',
         })
 
         token_data = token_response.json()
