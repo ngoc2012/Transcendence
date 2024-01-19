@@ -6,7 +6,7 @@
 #    By: minh-ngu <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/09/28 10:56:09 by minh-ngu          #+#    #+#              #
-#    Updated: 2024/01/19 06:52:08 by ngoc             ###   ########.fr        #
+#    Updated: 2024/01/19 07:05:15 by ngoc             ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -35,5 +35,7 @@ clean:
 	#$(shell cd backend && python3 manage.py migrate)
 	#$(shell cd backend && python3 manage.py makemigrations)
 	#$(shell cd backend && python3 manage.py migrate)
+	# Clean __pycache__
+	find . -type d -name "__pycache__" -exec gio trash -f {} +
 
 .PHONY: all clean fclean re test
