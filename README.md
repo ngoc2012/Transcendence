@@ -27,9 +27,76 @@ python3 manage.py runserver 0.0.0.0:8000
 [Basic Branching and Merging](https://git-scm.com/book/en/v2/Git-Branching-Basic-Branching-and-Merging)
 
 ```console
+make gits M="your message"
+```
+
+### New branch
+
+```console
 git checkout -b branch_name
 git push --set-upstream origin branch_name
 ```
+
+### Check a branch
+
+```console
+git checkout -b branch_name
+git pull
+```
+... checking process ...
+
+```console
+git reset --hard
+```
+
+### Merge a branch
+
+Merging a branch in GitHub involves combining changes from one branch into another, typically merging a feature branch into the main branch (such as `master` or `main`). Here are the general steps to merge a branch using GitHub:
+
+1. **Ensure your local branch is up-to-date:**
+   Before merging, make sure your local branch is up-to-date with the latest changes from the target branch (usually `main` or `master`).
+
+   ```bash
+   git checkout main
+   git pull origin main
+   git checkout your-feature-branch
+   git merge main
+   ```
+
+2. **Resolve any conflicts (if necessary):**
+   If there are conflicting changes between your feature branch and the target branch, you'll need to resolve them. Git will mark the conflicting files, and you need to manually resolve the conflicts.
+
+   ```bash
+   # After resolving conflicts
+   git add <conflicted-file1> <conflicted-file2> ...
+   git merge --continue
+   ```
+
+3. **Push the changes to your remote repository:**
+   Once the local merge is complete, push the changes to your remote repository on GitHub.
+
+   ```bash
+   git push origin your-feature-branch
+   ```
+
+4. **Create a pull request (PR) on GitHub:**
+   If you are merging into the main branch, you typically create a pull request. On GitHub, navigate to your repository, switch to your feature branch, and click on the "New pull request" button. Select the base branch (the branch you want to merge into, e.g., `main`) and compare branch (your feature branch). Provide a title and description for the pull request.
+
+5. **Review and merge the pull request:**
+   After creating the pull request, it goes through a review process. Once the changes are approved, you can merge the pull request. GitHub provides a "Merge pull request" button.
+
+6. **Delete the feature branch (optional):**
+   After merging, you may choose to delete the feature branch, especially if it was created for a specific task or feature.
+
+   ```bash
+   # Locally delete the branch
+   git branch -d your-feature-branch
+
+   # Remotely delete the branch
+   git push origin --delete your-feature-branch
+   ```
+
+That's it! Your branch is merged, and changes are reflected in the target branch. Keep in mind that these are general steps, and the exact process may vary based on your specific repository and branching strategy.
 
 ## Bootstrap toolkit
 
