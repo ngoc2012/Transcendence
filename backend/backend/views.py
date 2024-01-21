@@ -78,17 +78,21 @@ def callback(request):
         print('User Information:', user_data['login'])
         print('User Information:', user_data['usual_full_name'])
 
-        new_player = PlayersModel(
-            login=user_data['login'],
-            password='password',
-            name=user_data['usual_full_name']
-        )
-        new_player.save()
+        if not PlayersModel.objects.filter(login=user_data['login']).exists():
+            new_player = PlayersModel(
+                login=user_data['login'],
+                password='password',
+                name=user_data['login']
+            )
+            new_player.save()
 
-        return JsonResponse({
-            'login': user_data['login'],
-            'name': user_data['usual_full_name'],
-        })
+
+        my42login = user_data['login']
+        print('User Login in view:', my42login)
+        return render(request, 'index.html', {'my42login': my42login})
+ 
     except Exception as e:
         print(f"An error occurred: {e}")
         return HttpResponse("An error occurred.")
+
+

@@ -9,9 +9,12 @@ export class Login
         this.dom_login = document.querySelector("#login0");
         this.dom_password = document.querySelector("#password0");
         this.dom_log_in = document.querySelector("#log_in");
+        this.dom_log_in42 = document.querySelector("#log_in42");
         this.dom_cancel = document.querySelector("#cancel0");
+
         this.dom_log_in.addEventListener("click", () => this.login());
         this.dom_cancel.addEventListener("click", () => this.cancel());
+        this.dom_log_in42.addEventListener("click", () => this.loginWith42());
     }
 
     login() {
@@ -47,5 +50,23 @@ export class Login
     cancel() {
         this.main.set_status('');
         this.main.load('/lobby', () => this.main.lobby.events());
+    }
+
+    loginWith42() {
+        console.log("coucou1");
+        window.location.href = 'https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-bda043967d92d434d1d6c24cf1d236ce0c6cc9c718a9198973efd9c5236038ed&redirect_uri=http%3A%2F%2F0.0.0.0%3A8000%2Fcallback%2F&response_type=code';
+        console.log("coucou2");
+
+        if (my42login)
+        {
+            console.log(my42login);
+ 
+            this.main.login = my42login;
+            this.main.name = my42login;
+            this.main.dom_name.innerHTML = my42login;
+            this.main.dom_login = document.getElementById("login0"); //a verifier
+            this.main.dom_login.value = my42login;
+            this.main.load('/lobby', () => this.main.lobby.events());
+        }
     }
 }

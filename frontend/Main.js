@@ -20,6 +20,7 @@ export class Main
         this.dom_name = document.getElementById("name");
         this.dom_name.innerHTML = "Anonyme";
         this.dom_container = document.getElementById("container");
+        this.dom_login42 = document.getElementById("login42");
         this.dom_signup.addEventListener("click", () => this.signup_click());
         this.dom_login.addEventListener("click", () => this.login_click());
     }
@@ -32,6 +33,7 @@ export class Main
                 //window.history.pushState({
                 //    "user": this.user
                 //}, page, page);
+                console.log('Page loaded successfully');
                 this.dom_container.innerHTML = html;
                 callback();
             },
@@ -48,5 +50,7 @@ export class Main
     login_click() {
         this.load('/login', () => this.log_in.events());
     }
+    
+
     set_status(s) {this.dom_status.innerHTML = s;}
 }
