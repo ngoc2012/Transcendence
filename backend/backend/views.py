@@ -3,6 +3,10 @@ from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from game.models import PlayersModel
 import requests
+import os
+
+API_PUBLIC = os.environ.get('API_PUBLIC')
+API_SECRET = os.environ.get('API_SECRET')
 
 def index(request):
 	return (render(request, 'index.html'))
@@ -57,11 +61,13 @@ def log_in(request):
 def callback(request):
     code = request.GET.get('code')
 
+    print('DATA:', API_PUBLIC)
+
     try:
         token_response = requests.post('https://api.intra.42.fr/oauth/token', data={
             'grant_type': 'authorization_code',
-            'client_id': '',
-            'client_secret': '',
+            'client_id': API_PUBLIC,
+            'client_secret': API_SECRET,
             'code': code,
             'redirect_uri': 'http://0.0.0.0:8000/callback/',
         })

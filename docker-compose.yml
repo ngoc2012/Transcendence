@@ -8,8 +8,8 @@ services:
       dockerfile: Dockerfile
       no_cache: false
     restart: always
-    #env_file:
-    #  - .env
+    env_file:
+     - .env
     ports:
       - 8000:8000
     volumes:
