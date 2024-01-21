@@ -60,8 +60,8 @@ def callback(request):
     try:
         token_response = requests.post('https://api.intra.42.fr/oauth/token', data={
             'grant_type': 'authorization_code',
-            'client_id': 'u-s4t2ud-bda043967d92d434d1d6c24cf1d236ce0c6cc9c718a9198973efd9c5236038ed',
-            'client_secret': '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',
+            'client_id': '',
+            'client_secret': '',
             'code': code,
             'redirect_uri': 'http://0.0.0.0:8000/callback/',
         })
