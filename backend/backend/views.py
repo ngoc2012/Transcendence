@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from game.models import PlayersModel
+import requests
 
 def index(request):
 	return (render(request, 'index.html'))
@@ -51,3 +52,45 @@ def log_in(request):
             'name': player.name
         }))
     return (HttpResponse('Error: Password not correct!'))
+
+@csrf_exempt
+def callback(request):
+    code = request.GET.get('code')
+
+    try:
+        token_response = requests.post('https://api.intra.42.fr/oauth/token', data={
+            'grant_type': 'authorization_code',
+            'client_id': '',
+            'client_secret': '',
+            'code': code,
+            'redirect_uri': 'http://0.0.0.0:8000/callback/',
+        })
+
+        token_data = token_response.json()
+        access_token = token_data['access_token']
+        
+        user_response = requests.get('https://api.intra.42.fr/v2/me', headers={
+            'Authorization': f'Bearer {access_token}',
+        })
+
+
+        user_data = user_response.json()
+        print('User Information:', user_data['login'])
+        print('User Information:', user_data['usual_full_name'])
+
+        if not PlayersModel.objects.filter(login=user_data['login']).exists():
+            new_player = PlayersModel(
+                login=user_data['login'],
+                password='password',
+                name=user_data['login']
+            )
+            new_player.save()
+
+        return render(request, 'index.html', {
+            'my42login': user_data['login'],
+            'my42name': user_data['usual_full_name']
+            })
+ 
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return HttpResponse("An error occurred.")

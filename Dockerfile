@@ -20,8 +20,8 @@ RUN apt-get update \
 # Install Python dependencies
 RUN pip3 install --upgrade pip \
     && pip3 install Django && \
-    pip3 install channels daphne
-
+    pip3 install channels daphne \
+    && pip3 install requests
 # Set the working directory
 WORKDIR /app/backend
 

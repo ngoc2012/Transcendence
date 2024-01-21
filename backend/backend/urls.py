@@ -18,6 +18,7 @@ from django.contrib import admin
 from django.urls import path
 from . import views
 from django.urls import include, path
+from .views import callback
 
 urlpatterns = [
     path('', views.index, name='index'),
@@ -30,4 +31,5 @@ urlpatterns = [
     path('log_in/', views.log_in, name='log_in'),
     path('new_player/', views.new_player, name='new_player'),
     path('pong/', include("pong.urls", namespace='pong')),
+    path('callback/', callback, name='callback')
 ]

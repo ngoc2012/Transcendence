@@ -69,3 +69,34 @@ migrate:
 	$(shell cd backend && python3 manage.py migrate)
 	
 .PHONY: all clean fclean re test
+
+
+
+# *********** OLD MAKEFILE WITHOUT DOCKER TO EXECUTE LOCALLY *******************
+
+
+# M:=
+# test:
+# 	cd backend && python3 manage.py runserver 0.0.0.0:8000	
+# gitf:
+# 	make clean
+# 	git add Makefile
+# 	git add backend/*
+# 	git add frontend/*
+# 	git commit -m "all"
+# 	git push
+# gitd:
+# 	make clean
+# 	git add -A -- :!*.o :!*.swp
+# 	git commit -m "$(M)"
+# 	git push
+# clean:
+# 	# Clean migration folder
+# 	gio trash -f backend/game/migrations/[!__init__.py]*
+# 	#$(shell cd backend && python3 manage.py migrate)
+# 	#$(shell cd backend && python3 manage.py makemigrations)
+# 	#$(shell cd backend && python3 manage.py migrate)
+# 	# Clean __pycache__
+# 	find . -type d -name "__pycache__" -exec gio trash -f {} +
+
+# .PHONY: all clean fclean re test
