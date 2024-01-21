@@ -10,6 +10,35 @@
 #                                                                              #
 # **************************************************************************** #
 
+all:
+	@sudo docker compose -f ./docker-compose.yml up -d --build
+
+down:
+	@sudo docker compose -f ./docker-compose.yml down
+
+up:
+	@sudo docker compose -f ./docker-compose.yml up -d --build
+
+stop:
+	@sudo docker stop $$(sudo docker ps)
+
+remove_con:
+	@sudo docker rm -f $$(sudo docker ps -a -q)
+
+remove_images:
+	@sudo docker image prune --all --force
+
+re:
+	@make down
+	@make up
+
+clean:
+	@sudo docker stop $$(docker ps -qa);\
+	sudo docker rm $$(docker ps -qa);\
+	sudo docker rmi -f $$(docker images -qa);\
+	sudo docker volume rm $$(docker volume ls -q);\
+	sudo docker network rm $$(docker network ls -q);\
+	
 # gitf: git in final
 # gitd: git in developpement
 # Ex: make gitd M="your message"
@@ -25,17 +54,18 @@ gitf:
 	git commit -m "all"
 	git push
 gitd:
-	make clean
+	make gitclean
 	git add -A -- :!*.o :!*.swp
 	git commit -m "$(M)"
 	git push
-clean:
+gitclean:
 	# Clean migration folder
 	gio trash -f backend/game/migrations/[!__init__.py]*
-	#$(shell cd backend && python3 manage.py migrate)
-	#$(shell cd backend && python3 manage.py makemigrations)
-	#$(shell cd backend && python3 manage.py migrate)
 	# Clean __pycache__
 	find . -type d -name "__pycache__" -exec gio trash -f {} +
 
+migrate:
+	$(shell cd backend && python3 manage.py makemigrations)
+	$(shell cd backend && python3 manage.py migrate)
+	
 .PHONY: all clean fclean re test

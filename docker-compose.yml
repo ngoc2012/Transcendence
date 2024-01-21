@@ -1,0 +1,30 @@
+version: '3'
+
+services:
+  pong:
+    container_name: pong
+    build:
+      context: ./
+      dockerfile: Dockerfile
+      no_cache: false
+    restart: always
+    #env_file:
+    #  - .env
+    ports:
+      - 8000:8000
+    volumes:
+      - pong_data:/app
+    networks:
+      - network
+
+volumes:
+  pong_data:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./
+      o: bind
+
+networks:
+  network:
+    driver: bridge
