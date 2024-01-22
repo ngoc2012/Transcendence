@@ -1,16 +1,12 @@
 #!/bin/bash
 
 cd /app/backend/.
-# python3 manage.py migrate
 python3 manage.py makemigrations
 python3 manage.py migrate
-# solution 1 : 
-# python3 manage.py createsuperuser --noinput --username "admin" --email "admin@gmail.com"
-# python3 changesuperuserpw.py -n "admin" -p "admin"
 
-#solution 2 : 
-# echo "from django.contrib.auth.models import User; User.objects.create_superuser('admin', 'admin@gmail.com', 'admin')" | python3 manage.py shell
+python3 manage.py createsuperuser --noinput --username "$DJANGO_SUPERUSER_USERNAME" --email "$DJANGO_SUPERUSER_EMAIL"
+python3 changesuperuserpw.py -n "$DJANGO_SUPERUSER_USERNAME" -p "$DJANGO_SUPERUSER_PASSWORD"
 
+echo "Superuser created successfully."
 
-python3 manage.py runserver 0.0.0.0:8000
-
+exec "$@"
