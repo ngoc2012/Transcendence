@@ -6,13 +6,13 @@
 #    By: minh-ngu <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/09/28 10:56:09 by minh-ngu          #+#    #+#              #
-#    Updated: 2024/01/22 06:30:57 by ngoc             ###   ########.fr        #
+#    Updated: 2024/01/22 06:43:15 by ngoc             ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 all:
 	@sudo docker compose -f ./docker-compose.yml up -d --build
-	@sudo docker compose -f ./docker-compose.yml logs -f pong
+	@sudo docker compose -f ./docker-compose.yml logs -f
 
 down:
 	@sudo docker compose -f ./docker-compose.yml down
