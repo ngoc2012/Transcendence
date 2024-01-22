@@ -6,12 +6,13 @@
 #    By: minh-ngu <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/09/28 10:56:09 by minh-ngu          #+#    #+#              #
-#    Updated: 2024/01/19 07:05:15 by ngoc             ###   ########.fr        #
+#    Updated: 2024/01/22 06:30:57 by ngoc             ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 all:
 	@sudo docker compose -f ./docker-compose.yml up -d --build
+	@sudo docker compose -f ./docker-compose.yml logs -f pong
 
 down:
 	@sudo docker compose -f ./docker-compose.yml down
@@ -55,7 +56,7 @@ gitf:
 	git push
 gitd:
 	make gitclean
-	git add -A -- :!*.o :!*.swp
+	git add -A -- :!*.o :!*.swp :!*.env
 	git commit -m "$(M)"
 	git push
 gitclean:
