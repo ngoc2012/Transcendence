@@ -69,7 +69,7 @@ def callback(request):
             'client_id': API_PUBLIC,
             'client_secret': API_SECRET,
             'code': code,
-            'redirect_uri': 'http://0.0.0.0:8000/callback/',
+            'redirect_uri': 'https://127.0.0.1/callback/',
         })
 
         token_data = token_response.json()
