@@ -121,7 +121,7 @@ export class Lobby
     rooms_update() {
         this.main.set_status('');
         this.socket = new WebSocket(
-            'ws://'
+            'wss://'
             + window.location.host
             + '/ws/game/rooms/'
         );
