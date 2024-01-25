@@ -50,7 +50,7 @@ export class Main
                 //window.history.pushState({
                 //    "user": this.user
                 //}, page, page);
-                console.log('Page loaded successfully');
+                //console.log('Page loaded successfully');
                 this.dom_container.innerHTML = html;
                 callback();
             },

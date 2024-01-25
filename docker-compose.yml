@@ -1,10 +1,25 @@
 version: '3'
 
 services:
-  pong:
-    container_name: pong
+  nginx:
+    container_name: nginx
     build:
-      context: ./
+      context: ./nginx
+      dockerfile: Dockerfile
+      no_cache: false
+    ports:
+      - 80:80
+      - 443:443
+    restart: always
+    env_file:
+     - .env
+    networks:
+      - network
+
+  django:
+    container_name: django
+    build:
+      context: ./django
       dockerfile: Dockerfile
       no_cache: false
     restart: always
@@ -13,12 +28,12 @@ services:
     ports:
       - 8000:8000
     volumes:
-      - pong_data:/app
+      - django_data:/app
     networks:
       - network
 
 volumes:
-  pong_data:
+  django_data:
     driver: local
     driver_opts:
       type: none
