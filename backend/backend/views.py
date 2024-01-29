@@ -2,11 +2,15 @@ from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from game.models import PlayersModel
+from django.shortcuts import redirect
+from django.conf import settings
 import requests
+import secrets
 import os
 
 API_PUBLIC = os.environ.get('API_PUBLIC')
 API_SECRET = os.environ.get('API_SECRET')
+
 
 GOOGLE_OAUTH2_CLIENT_ID = os.environ.get('GOOGLE_OAUTH2_CLIENT_ID')
 GOOGLE_OAUTH2_CLIENT_SECRET = os.environ.get('GOOGLE_OAUTH2_CLIENT_SECRET')
@@ -114,13 +118,32 @@ def twofa(request):
 
 #voir avec les sessions
 
+from django.http import JsonResponse
+
 @csrf_exempt
-def googleauth(request):
+def google_auth(request):
+    settings.GOOGLELOG = request.GET.get('login')
+    settings.GOOGLENAME = request.GET.get('name')
+
+    # Configuration parameters for Google OAuth2 authentication
+    client_id = GOOGLE_OAUTH2_CLIENT_ID
+    redirect_uri = 'https://127.0.0.1/google/callback'
+    scopes = 'openid email profile'  # Scopes required for your application
+    state = secrets.token_urlsafe(16)
+
+    # Generate the OAuth2 authorization URL
+    authorization_url = f'https://accounts.google.com/o/oauth2/auth?response_type=code&client_id={client_id}&redirect_uri={redirect_uri}&scope={scopes}&state={state}'
+
+    # Return the authorization URL as a JSON response
+    return JsonResponse({"authorization_url": authorization_url})
+
+@csrf_exempt
+def google_callback(request):
+    # Récupérer le code d'autorisation de la requête GET
     code = request.GET.get('code')
-    # my42login = request.GET.get('my42login', '')
-    # my42name = request.GET.get('my42name', '') 
 
     try:
+        # Échanger le code d'autorisation contre un jeton d'accès
         token_response = requests.post('https://oauth2.googleapis.com/token', data={
             'code': code,
             'client_id': GOOGLE_OAUTH2_CLIENT_ID,
@@ -132,16 +155,20 @@ def googleauth(request):
         token_data = token_response.json()
         access_token = token_data['access_token']
 
+        # Utiliser le jeton d'accès pour accéder aux informations de l'utilisateur (facultatif)
         user_response = requests.get('https://www.googleapis.com/oauth2/v3/userinfo', headers={
             'Authorization': f'Bearer {access_token}',
         })
 
+        # Traiter les données de l'utilisateur ici (ex: enregistrement en base de données)
+        print(settings.GOOGLELOG)
+        print(settings.GOOGLENAME)
+        # Rediriger l'utilisateur vers une page de succès ou autre
         return render(request, 'index.html', {
-            'my42login': 'tt',
-            'my42name': 'tt'
+            'my42login': settings.GOOGLELOG,
+            'my42name': settings.GOOGLENAME
             })
 
-
     except Exception as e:
-        print(f"An error occurred: {e}")
-        return HttpResponse("An error occurred.")
+        # Gérer les erreurs d'authentification
+        return HttpResponse("Une erreur s'est produite lors de l'authentification.")

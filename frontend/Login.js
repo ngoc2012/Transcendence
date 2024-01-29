@@ -38,8 +38,8 @@ export class Login
                 }
                 else
                 {
-                    my42login = info.login;
-                    my42name = info.name;
+                    // my42login = info.login;
+                    // my42name = info.name;
                     this.main.login = info.login;
                     this.main.name = info.name;
                     this.main.dom_name.innerHTML = info.name;

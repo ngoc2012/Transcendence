@@ -33,6 +33,7 @@ urlpatterns = [
     path('pong/', include("pong.urls", namespace='pong')),
     path('callback/', callback, name='callback'),
     path('twofa/', views.twofa, name='twofa'),
-    path('google/callback/', views.googleauth, name='googleauth')
+    path('google/callback/', views.google_callback, name='google_callback'),
+    path('google_auth/', views.google_auth, name='google_auth')
 
 ]

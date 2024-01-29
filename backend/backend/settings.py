@@ -139,3 +139,9 @@ STATICFILES_DIRS = [os.path.join(PROJECT_DIR, 'frontend')]
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+
+#global variables
+GOOGLELOG = 'templog'
+GOOGLENAME = 'tempname'
