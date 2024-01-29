@@ -1,10 +1,12 @@
 import {Lobby} from './Lobby.js'
 import {Signup} from './Signup.js'
 import {Login} from './Login.js'
+import {twofa} from './twofa.js'
 
 export class Main
 {
     login = '';
+    twofa = '';
     name = '';
     id = -1;
     status = '';
@@ -12,6 +14,7 @@ export class Main
     constructor()
     {
         this.lobby = new Lobby(this);
+        this.twofa = new twofa(this);
         this.signup = new Signup(this);
         this.log_in = new Login(this);
         this.dom_login = document.getElementById("login");
