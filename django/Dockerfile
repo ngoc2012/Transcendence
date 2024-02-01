@@ -23,6 +23,9 @@ RUN pip3 install --upgrade pip \
     pip3 install channels daphne \
     && pip3 install requests
 
+RUN     pip3 install google-auth google-auth-oauthlib google-auth-httplib2
+RUN     pip3 install pyotp
+
 COPY entrypoint.sh .
 RUN chmod +x entrypoint.sh
 ENTRYPOINT [ "./entrypoint.sh" ]

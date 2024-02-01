@@ -34,6 +34,7 @@ urlpatterns = [
     path('callback/', callback, name='callback'),
     path('twofa/', views.twofa, name='twofa'),
     path('google/callback/', views.google_callback, name='google_callback'),
-    path('google_auth/', views.google_auth, name='google_auth')
+    path('google_auth/', views.google_auth, name='google_auth'),
+    path('enable_2fa/', views.enable_2fa, name='enable_2fa')
 
 ]

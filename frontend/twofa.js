@@ -17,37 +17,65 @@ export class twofa
 
     }
 
-    loginwithsms() {
-        console.log('salut')
-        this.main.load('/lobby', () => this.main.lobby.events());
+    // Fonction pour générer et afficher le QR code
+    // le faire s'integrer a l'html
+    // import QRCode from 'qrcode-generator';
+
+    generateQRCode(otpauthUrl) {
+
+        var qrCodeContainer = document.createElement('div');
+        qrCodeContainer.id = 'qr-code-container';
+    
+        document.body.appendChild(qrCodeContainer);
+    
+        var qrCode = QRCode(0, 'M');
+        qrCode.addData(otpauthUrl);
+        qrCode.make();
+    
+        var img = qrCode.createImgTag(5);
+    
+        qrCodeContainer.innerHTML = img;
     }
 
-    // generateState() {
-    //     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    //     let state = '';
-    //     for (let i = 0; i < 32; i++) {
-    //         state += chars.charAt(Math.floor(Math.random() * chars.length));
-    //     }
-    //     return state;
-    // }
-    
-    loginWithgoogle() {
-        console.log('PASSE ICI')
+    loginwithsms() {
+        console.log(this.main.login);
+        console.log(this.main.name);
         $.ajax({
-            url: '/google_auth/',  // URL de votre vue Django
-            method: 'GET',  // Méthode HTTP utilisée (GET dans ce cas)
+            url: '/enable_2fa/',
+            method: 'GET',
             data: {
                 "login": this.main.login,
                 "name": this.main.name,
             },
             success: function(response) {
-                // Réponse réussie de la vue Django
                 console.log('Success:', response);
-                // Redirection de l'utilisateur vers l'URL d'autorisation OAuth2
+    
+                // Générer et afficher le QR code
+                // this.generateQRCode(response.otpauth_url);
+                
+                // Rediriger vers enable_2fa.html avec otpauth_url comme paramètre
+                // window.location.href = 'enable_2fa.html?otpauth_url=' + response.otpauth_url;
+    
+            }.bind(this),
+            error: function(xhr, status, error) {
+                console.error('Error:', error);
+            }
+        });
+    }
+
+    loginWithgoogle() {
+        console.log('PASSE ICI')
+        $.ajax({
+            url: '/google_auth/',
+            method: 'GET',
+            data: {
+                "login": this.main.login,
+                "name": this.main.name,
+            },
+            success: function(response) {
                 window.location.href = response.authorization_url;
             },
             error: function(xhr, status, error) {
-                // En cas d'erreur lors de la requête AJAX
                 console.error('Error:', error);
             }
         });
