@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from game.models import PlayersModel
+from transchat.models import Room
 import requests
 import os
 
@@ -19,6 +20,12 @@ def signup(request):
 
 def login(request):
 	return (render(request, 'login.html'))
+
+@csrf_exempt
+def chatroom(request, room_name, username):
+	print(room_name)
+	print(username)
+	return render(request, 'message.html')
 
 @csrf_exempt
 def new_player(request):

@@ -16,7 +16,7 @@ from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.security.websocket import AllowedHostsOriginValidator
 from django.urls import path, re_path
 from game.consumers import RoomsConsumer
-from chat.consumers import ChatConsumer
+from transchat.consumers import ChatConsumer
 from pong.consumers import PongConsumer
 
 #from chat.routing import websocket_urlpatterns
