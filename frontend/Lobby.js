@@ -1,4 +1,5 @@
 import {Pong} from './Pong.js'
+import {Chat} from './Chat.js'
 
 export class Lobby
 {
@@ -13,14 +14,35 @@ export class Lobby
         this.dom_join = document.querySelector("#join");
         this.dom_pong = document.querySelector("#pong");
         this.dom_pew = document.querySelector("#pew");
+        this.dom_chat = document.querySelector("#chat");
         this.dom_delete = document.querySelector("#delete");
         this.dom_pong.addEventListener("click", () => this.new_game("pong"));
         this.dom_pew.addEventListener("click", () => this.new_game("pew"));
         this.dom_delete.addEventListener("click", () => this.delete_game());
         this.dom_join.addEventListener("click", () => this.join());
+		this.dom_chat.addEventListener("click", () => this.chat());
         this.rooms_update();
     }
 
+	chat() {
+		$.ajax({
+			url: '/transchat/room/',
+			method: 'GET',
+			success: (info) => {
+				this.quit();
+				let chat = new Chat(this.main, "test")
+				this.socket = new WebSocket(
+					'wss://'
+					+ window.location.host
+					+ '/ws/'
+					+ 'test'
+					+ '/'
+				);
+				this.main.load("/transchat/room", () => this.chat.events())
+			}
+		})
+	}
+	
     join() {
         if (this.dom_rooms.selectedIndex === -1)
             return;

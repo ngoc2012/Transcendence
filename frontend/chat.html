@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Enter Room</title>
+</head>
+<body>
+    <div class="parent">
+        <div class="child">
+            <h1>Enter Room</h1>
+            <form action="/transchat/room/" method="POST">
+                {% csrf_token %}
+                <label for="">Username</label><br>
+                <input type="text" placeholder="Username" name="username" required><br>
+                <label for="">Room name</label><br>
+                <input type="text" placeholder="room name" name="room" required><br>
+                <center><button type="submit">Submit</button></center><br>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
