@@ -8,14 +8,19 @@ import requests
 import secrets
 import os
 import pyotp
+import random
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
 
 API_PUBLIC = os.environ.get('API_PUBLIC')
 API_SECRET = os.environ.get('API_SECRET')
 
-
 GOOGLE_OAUTH2_CLIENT_ID = os.environ.get('GOOGLE_OAUTH2_CLIENT_ID')
 GOOGLE_OAUTH2_CLIENT_SECRET = os.environ.get('GOOGLE_OAUTH2_CLIENT_SECRET')
 GOOGLE_OAUTH2_PROJECT_ID = os.environ.get('GOOGLE_OAUTH2_PROJECT_ID')
+
+SENDGRID_API_KEY = os.environ.get('SENDGRID_API_KEY')
+
 
 def index(request):
 	return (render(request, 'index.html'))
@@ -24,31 +29,70 @@ def lobby(request):
 	return (render(request, 'lobby.html'))
 
 def signup(request):
-	return (render(request, 'signup.html'))
+    return render(request, 'signup.html')
+
 
 def login(request):
 	return (render(request, 'login.html'))
 
+
+@csrf_exempt
+def mail_2fa(request):
+    # name = request.GET.get('name')
+    # login = request.GET.get('login')
+    sender_email = 'blobilboquet@gmail.com' #changer + tard
+    recipient_email = request.GET.get('email') 
+    print(recipient_email)
+    code = ""
+    for _ in range(6):
+        digit = random.randint(0, 9)
+        code += str(digit)
+
+    message = Mail(
+        from_email=sender_email,
+        to_emails=recipient_email,
+        subject='2FA CODE TRANSCENDENCE',
+        html_content=code)
+    try:
+        sg = SendGridAPIClient(SENDGRID_API_KEY)
+        response = sg.send(message)
+        print('Email sent successfully')
+        print(response.status_code)
+        print(response.body)
+        print(response.headers)
+    except Exception as e:
+        print('Error sending email:', str(e))
+    return JsonResponse({'code': code})
+
+
 @csrf_exempt
 def new_player(request):
+    print('Received request data:', request.POST)  # ce print ne se fais pas 
     if 'login' not in request.POST or request.POST['login'] == "":
-        return (HttpResponse("Error: No login!"))
+        return HttpResponse("Error: No login!")
+    if 'email' not in request.POST or request.POST['email'] == "":
+        return HttpResponse("Error: No email!")
     if 'password' not in request.POST or request.POST['password'] == "":
-        return (HttpResponse("Error: No password!"))
+        return HttpResponse("Error: No password!")
     if 'name' not in request.POST or request.POST['name'] == "":
-        return (HttpResponse("Error: No name!"))
+        return HttpResponse("Error: No name!")
     if PlayersModel.objects.filter(login=request.POST['login']).exists():
-        return (HttpResponse("Error: Login '" + request.POST['login'] + "' exist."))
+        return HttpResponse("Error: Login '" + request.POST['login'] + "' exist.")
+
     new_player = PlayersModel(
         login=request.POST['login'],
         password=request.POST['password'],
-        name=request.POST['name']
+        name=request.POST['name'],
+        email=request.POST['email']
     )
     new_player.save()
-    return (JsonResponse({
+    return JsonResponse({
         'login': new_player.login,
-        'name': new_player.name
-        }))
+        'name': new_player.name,
+        'email': new_player.email
+    })
+
+
 
 @csrf_exempt
 def log_in(request):
@@ -151,9 +195,9 @@ def google_callback(request):
         token_data = token_response.json()
         access_token = token_data['access_token']
 
-        user_response = requests.get('https://www.googleapis.com/oauth2/v3/userinfo', headers={
-            'Authorization': f'Bearer {access_token}',
-        })
+        # user_response = requests.get('https://www.googleapis.com/oauth2/v3/userinfo', headers={
+        #     'Authorization': f'Bearer {access_token}',
+        # })
 
         # print(settings.GOOGLELOG)
         # print(settings.GOOGLENAME)
@@ -180,10 +224,26 @@ def enable_2fa(request):
     return JsonResponse({'otpauth_url': otpauth_url})
 
 
+def qrcode_2fa(request):
+	return (render(request, 'qrcode_2fa.html'))
 
-
-
-
-
-
-
+@csrf_exempt
+def new_player(request):
+    if 'login' not in request.POST or request.POST['login'] == "":
+        return (HttpResponse("Error: No login!"))
+    if 'password' not in request.POST or request.POST['password'] == "":
+        return (HttpResponse("Error: No password!"))
+    if 'name' not in request.POST or request.POST['name'] == "":
+        return (HttpResponse("Error: No name!"))
+    if PlayersModel.objects.filter(login=request.POST['login']).exists():
+        return (HttpResponse("Error: Login '" + request.POST['login'] + "' exist."))
+    new_player = PlayersModel(
+        login=request.POST['login'],
+        password=request.POST['password'],
+        name=request.POST['name']
+    )
+    new_player.save()
+    return (JsonResponse({
+        'login': new_player.login,
+        'name': new_player.name
+        }))

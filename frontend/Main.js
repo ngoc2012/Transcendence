@@ -8,6 +8,7 @@ export class Main
     login = '';
     twofa = '';
     name = '';
+    email = '';
     id = -1;
     status = '';
 
@@ -22,6 +23,7 @@ export class Main
         this.dom_status = document.getElementById("status");
         this.dom_name = document.getElementById("name");
         this.dom_name.innerHTML = "Anonyme";
+        this.dom_email = document.getElementById("email");
         this.dom_container = document.getElementById("container");
         this.dom_login42 = document.getElementById("login42");
         this.dom_signup.addEventListener("click", () => this.signup_click());
@@ -55,7 +57,11 @@ export class Main
                 //}, page, page);
                 //console.log('Page loaded successfully');
                 this.dom_container.innerHTML = html;
-                callback();
+                //pas oublier de changer ca
+                if (callback && typeof callback === 'function') {
+                    callback();
+                }
+                // callback();  // fait erreur "callback is not a function"
             },
             error: function(error) {
                 console.error('Error: pong GET fail', error.message);

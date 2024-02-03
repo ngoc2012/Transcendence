@@ -35,6 +35,11 @@ urlpatterns = [
     path('twofa/', views.twofa, name='twofa'),
     path('google/callback/', views.google_callback, name='google_callback'),
     path('google_auth/', views.google_auth, name='google_auth'),
-    path('enable_2fa/', views.enable_2fa, name='enable_2fa')
+    path('enable_2fa/', views.enable_2fa, name='enable_2fa'),
+    path('qrcode_2fa/', views.qrcode_2fa, name='qrcode_2fa'),
+    path('mail_2fa/', views.mail_2fa, name='mail_2fa')
 
-]
+]   
+
+
+

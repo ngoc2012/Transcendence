@@ -25,6 +25,7 @@ RUN pip3 install --upgrade pip \
 
 RUN     pip3 install google-auth google-auth-oauthlib google-auth-httplib2
 RUN     pip3 install pyotp
+RUN     pip3 install sendgrid
 
 COPY entrypoint.sh .
 RUN chmod +x entrypoint.sh

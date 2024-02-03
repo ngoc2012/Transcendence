@@ -40,7 +40,12 @@ clean:
 	sudo docker rmi -f $$(docker images -qa);\
 	sudo docker volume rm $$(docker volume ls -q);\
 	sudo docker network rm $$(docker network ls -q);\
-	
+
+flush_db:
+	@sudo docker exec -it django python3 /app/backend/manage.py flush
+
+#docker exec -it django python3 /app/backend/manage.py flush
+
 # gitf: git in final
 # gitd: git in developpement
 # Ex: make gitd M="your message"
