@@ -2,6 +2,7 @@ import {Lobby} from './Lobby.js'
 import {Signup} from './Signup.js'
 import {Login} from './Login.js'
 import {twofa} from './twofa.js'
+import {code_2fa} from './code_2fa.js'
 
 export class Main
 {
@@ -18,6 +19,8 @@ export class Main
         this.twofa = new twofa(this);
         this.signup = new Signup(this);
         this.log_in = new Login(this);
+        this.code_2fa = new code_2fa(this);
+
         this.dom_login = document.getElementById("login");
         this.dom_signup = document.getElementById("signup");
         this.dom_status = document.getElementById("status");
@@ -26,6 +29,7 @@ export class Main
         this.dom_email = document.getElementById("email");
         this.dom_container = document.getElementById("container");
         this.dom_login42 = document.getElementById("login42");
+
         this.dom_signup.addEventListener("click", () => this.signup_click());
         this.dom_login.addEventListener("click", () => this.login_click());
     }

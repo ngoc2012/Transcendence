@@ -38,14 +38,11 @@ export class Login
                 }
                 else
                 {
-                    // my42login = info.login;
-                    // my42name = info.name;
+                    this.main.email = info.email;
                     this.main.login = info.login;
                     this.main.name = info.name;
                     this.main.dom_name.innerHTML = info.name;
                     this.main.load('/twofa', () => this.main.twofa.events());
-
-                    // this.main.load('/lobby', () => this.main.lobby.events());
                 }
             },
             error: (data) => this.main.set_status(data.error)

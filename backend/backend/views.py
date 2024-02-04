@@ -36,18 +36,24 @@ def login(request):
 	return (render(request, 'login.html'))
 
 
+def twofa(request):
+    return (render(request, 'twofa.html'))
+
+# le mettre en retour de mail_2fa
+def code_2fa(request):
+    return (render(request, 'code_2fa.html'))
+
+
 @csrf_exempt
 def mail_2fa(request):
-    # name = request.GET.get('name')
-    # login = request.GET.get('login')
-    sender_email = 'blobilboquet@gmail.com' #changer + tard
+    sender_email = 'tlebouvi@student.42.fr' #changer + tard?
     recipient_email = request.GET.get('email') 
     print(recipient_email)
     code = ""
     for _ in range(6):
         digit = random.randint(0, 9)
         code += str(digit)
-
+    settings.CODE = code
     message = Mail(
         from_email=sender_email,
         to_emails=recipient_email,
@@ -64,10 +70,17 @@ def mail_2fa(request):
         print('Error sending email:', str(e))
     return JsonResponse({'code': code})
 
+@csrf_exempt
+def verify(request):
+    input_code = request.POST.get('input_code') 
+    if(input_code == settings.CODE):
+        return JsonResponse({'result': '1'})
+    return JsonResponse({'result': '0'})
+
 
 @csrf_exempt
 def new_player(request):
-    print('Received request data:', request.POST)  # ce print ne se fais pas 
+
     if 'login' not in request.POST or request.POST['login'] == "":
         return HttpResponse("Error: No login!")
     if 'email' not in request.POST or request.POST['email'] == "":
@@ -106,7 +119,8 @@ def log_in(request):
     if player.password == request.POST['password']:
         return (JsonResponse({
             'login': player.login,
-            'name': player.name
+            'name': player.name,
+            'email': player.email
         }))
     return (HttpResponse('Error: Password not correct!'))
 
@@ -141,13 +155,15 @@ def callback(request):
             new_player = PlayersModel(
                 login=user_data['login'],
                 password='password',
-                name=user_data['login']
+                name=user_data['login'],
+                email=user_data['email']
             )
             new_player.save()
 
         return render(request, 'index.html', {
             'my42login': user_data['login'],
-            'my42name': user_data['usual_full_name']
+            'my42name': user_data['usual_full_name'],
+            'my42email': user_data['email']
             })
  
     except Exception as e:
@@ -155,8 +171,6 @@ def callback(request):
         return HttpResponse("An error occurred.")
     
 
-def twofa(request):
-    	return (render(request, 'twofa.html'))
 
 # demander l'email a la connection -> lié l'email au pseudo
 # recup l'email dans la db et le pseudo associé
@@ -205,6 +219,7 @@ def google_callback(request):
         return render(request, 'index.html', {
             'my42login': settings.GOOGLELOG,
             'my42name': settings.GOOGLENAME
+            #ajouter le mail ici
             })
 
     except Exception as e:
@@ -226,24 +241,3 @@ def enable_2fa(request):
 
 def qrcode_2fa(request):
 	return (render(request, 'qrcode_2fa.html'))
-
-@csrf_exempt
-def new_player(request):
-    if 'login' not in request.POST or request.POST['login'] == "":
-        return (HttpResponse("Error: No login!"))
-    if 'password' not in request.POST or request.POST['password'] == "":
-        return (HttpResponse("Error: No password!"))
-    if 'name' not in request.POST or request.POST['name'] == "":
-        return (HttpResponse("Error: No name!"))
-    if PlayersModel.objects.filter(login=request.POST['login']).exists():
-        return (HttpResponse("Error: Login '" + request.POST['login'] + "' exist."))
-    new_player = PlayersModel(
-        login=request.POST['login'],
-        password=request.POST['password'],
-        name=request.POST['name']
-    )
-    new_player.save()
-    return (JsonResponse({
-        'login': new_player.login,
-        'name': new_player.name
-        }))

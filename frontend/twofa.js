@@ -21,7 +21,9 @@ export class twofa
     }
 
     loginWithemail() {
-        console.log('email from js before avax : ', this.main.email)
+        console.log('email from js before avax : ', this.main.email);
+        console.log('login from js before avax : ', this.main.login);
+
         $.ajax({
             url: '/mail_2fa/',
             method: 'GET',
@@ -30,10 +32,12 @@ export class twofa
                 "name": this.main.name,
                 "email": this.main.email
             },
-            success: function(response) {
-                console.log('MON CODE :',response.code)
+            success: (response) => {
+                console.log('MON CODE :',response.code); //enelever ce retour
+                console.log('LOGIN : ', this.main.login);
+                this.main.load('/code_2fa', () => this.main.code_2fa.events());
             },
-            error: function(xhr, status, error) {
+            error: (xhr, status, error) => {
                 console.error('Error:', error);
             }
         });
@@ -68,7 +72,6 @@ export class twofa
     }
 
     loginWithgoogle() {
-        // console.log('PASSE ICI')
         $.ajax({
             url: '/google_auth/',
             method: 'GET',

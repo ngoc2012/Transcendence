@@ -145,3 +145,4 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 #global variables
 GOOGLELOG = 'templog'
 GOOGLENAME = 'tempname'
+CODE = ''
