@@ -45,13 +45,25 @@ export class Signup
                 }
                 else
                 {
-                    console.log('email from js at signup : ', info.email)
-
                     this.main.email = info.email;
                     this.main.login = info.login;
                     this.main.name = info.name;
                     this.main.dom_name.innerHTML = info.name;
-                    this.main.load('/lobby', () => this.main.lobby.events());
+                    $.ajax({
+                        url: '/display_2fa/',
+                        method: 'POST',
+                        data: {
+                            "email": this.main.email,
+                            "secret": info.secret
+                        },
+                        success: (html) => {
+                                this.main.dom_container.innerHTML = html;
+                                this.main.display_2fa.events();
+                        },
+                        error: function(error) {
+                            console.error('Error: pong POST fail', error.message);
+                        }
+                    });
                 }
             },
             error: (data) => this.main.set_status(data.error)

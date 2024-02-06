@@ -43,6 +43,15 @@ def twofa(request):
 def code_2fa(request):
     return (render(request, 'code_2fa.html'))
 
+@csrf_exempt
+def display_2fa(request):
+    email = request.POST['email']
+    secret = request.POST['secret']
+    return render(request, 'display_2fa.html', {'email': email, 'secret_key': secret})
+
+
+def qrcode_2fa(request):
+	return (render(request, 'qrcode_2fa.html'))
 
 @csrf_exempt
 def mail_2fa(request):
@@ -91,18 +100,21 @@ def new_player(request):
         return HttpResponse("Error: No name!")
     if PlayersModel.objects.filter(login=request.POST['login']).exists():
         return HttpResponse("Error: Login '" + request.POST['login'] + "' exist.")
-
+    mysecret = pyotp.random_base32()
+    print('mysecret = ', mysecret)
     new_player = PlayersModel(
         login=request.POST['login'],
         password=request.POST['password'],
         name=request.POST['name'],
-        email=request.POST['email']
+        email=request.POST['email'],
+        secret_2fa = mysecret
     )
     new_player.save()
     return JsonResponse({
         'login': new_player.login,
         'name': new_player.name,
-        'email': new_player.email
+        'email': new_player.email,
+        'secret': new_player.secret_2fa
     })
 
 
@@ -148,15 +160,14 @@ def callback(request):
 
 
         user_data = user_response.json()
-        # print('User Information:', user_data['login'])
-        # print('User Information:', user_data['usual_full_name'])
 
         if not PlayersModel.objects.filter(login=user_data['login']).exists():
             new_player = PlayersModel(
                 login=user_data['login'],
                 password='password',
                 name=user_data['login'],
-                email=user_data['email']
+                email=user_data['email'],
+                secret_2fa = pyotp.random_base32()
             )
             new_player.save()
 
@@ -170,14 +181,6 @@ def callback(request):
         print(f"An error occurred: {e}")
         return HttpResponse("An error occurred.")
     
-
-
-# demander l'email a la connection -> lié l'email au pseudo
-# recup l'email dans la db et le pseudo associé
-
-#voir avec les sessions
-
-from django.http import JsonResponse
 
 @csrf_exempt
 def google_auth(request):
@@ -209,13 +212,6 @@ def google_callback(request):
         token_data = token_response.json()
         access_token = token_data['access_token']
 
-        # user_response = requests.get('https://www.googleapis.com/oauth2/v3/userinfo', headers={
-        #     'Authorization': f'Bearer {access_token}',
-        # })
-
-        # print(settings.GOOGLELOG)
-        # print(settings.GOOGLENAME)
-
         return render(request, 'index.html', {
             'my42login': settings.GOOGLELOG,
             'my42name': settings.GOOGLENAME
@@ -226,18 +222,15 @@ def google_callback(request):
         return HttpResponse("Une erreur s'est produite lors de l'authentification.")
 
 
-
 @csrf_exempt
-def enable_2fa(request):
-    name = request.GET.get('name')
-    login = request.GET.get('login')
+def verify_qrcode(request):
+    input_code = request.POST.get('input_code')
 
-    # Générer le secret 2FA et l'URL du QR code
-    secret = pyotp.random_base32()
-    otpauth_url = pyotp.totp.TOTP(secret).provisioning_uri(login, issuer_name="Transcendence")
-    print(otpauth_url)
-    return JsonResponse({'otpauth_url': otpauth_url})
+    if not PlayersModel.objects.filter(login=request.POST['login']).exists():
+        return (HttpResponse("Error: Login '" + request.POST['login'] + "' does not exist!"))
+    player = PlayersModel.objects.get(login=request.POST['login'])
 
-
-def qrcode_2fa(request):
-	return (render(request, 'qrcode_2fa.html'))
+    totp = pyotp.TOTP(player.secret_2fa)
+    if totp.verify(input_code):
+        return JsonResponse({'result': '1'})
+    return JsonResponse({'result': '0'})

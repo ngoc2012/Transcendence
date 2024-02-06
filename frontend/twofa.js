@@ -21,8 +21,8 @@ export class twofa
     }
 
     loginWithemail() {
-        console.log('email from js before avax : ', this.main.email);
-        console.log('login from js before avax : ', this.main.login);
+        // console.log('email from js before avax : ', this.main.email);
+        // console.log('login from js before avax : ', this.main.login);
 
         $.ajax({
             url: '/mail_2fa/',
@@ -33,7 +33,7 @@ export class twofa
                 "email": this.main.email
             },
             success: (response) => {
-                console.log('MON CODE :',response.code); //enelever ce retour
+                console.log('MON CODE :',response.code); //enlever ce retour
                 console.log('LOGIN : ', this.main.login);
                 this.main.load('/code_2fa', () => this.main.code_2fa.events());
             },
@@ -43,33 +43,11 @@ export class twofa
         });
     }
 
-    
+
     loginwithsms() {
-        console.log(this.main.login);
-        console.log(this.main.name);
-        $.ajax({
-            url: '/enable_2fa/',
-            method: 'GET',
-            data: {
-                "login": this.main.login,
-                "name": this.main.name,
-            },
-            success: function(response) {
-                console.log('Success:', response);
-    
-                // Générer et afficher le QR code
-                this.main.load('/qrcode_2fa');
-                // this.generateQRCode(response.otpauth_url);                
-                // Rediriger vers enable_2fa.html avec otpauth_url comme paramètre
-                
-                //window.location.href = 'https://qrcode_2fa';
-    
-            }.bind(this),
-            error: function(xhr, status, error) {
-                console.error('Error:', error);
-            }
-        });
+        this.main.load('/qrcode_2fa', () => this.main.qrcode_2fa.events());
     }
+
 
     loginWithgoogle() {
         $.ajax({

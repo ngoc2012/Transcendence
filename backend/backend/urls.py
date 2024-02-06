@@ -35,11 +35,13 @@ urlpatterns = [
     path('twofa/', views.twofa, name='twofa'),
     path('google/callback/', views.google_callback, name='google_callback'),
     path('google_auth/', views.google_auth, name='google_auth'),
-    path('enable_2fa/', views.enable_2fa, name='enable_2fa'),
+    path('display_2fa/', views.display_2fa, name='display_2fa'),
     path('qrcode_2fa/', views.qrcode_2fa, name='qrcode_2fa'),
     path('mail_2fa/', views.mail_2fa, name='mail_2fa'),
     path('code_2fa/', views.code_2fa, name='code_2fa'),
-    path('verify/', views.verify, name='verify')
+    path('verify/', views.verify, name='verify'),
+    path('verify_qrcode/', views.verify_qrcode, name='verify_qrcode'),
+    
 
 
 ]   
