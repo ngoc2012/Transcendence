@@ -1,7 +1,42 @@
 import {Main} from './Main.js'
 
 var main = new Main();
+//<script src="//cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
 
+var qrcode = new QRCode("test", {
+    text: "http://jindo.dev.naver.com/collie",
+    width: 128,
+    height: 128,
+    colorDark : "#000000",
+    colorLight : "#ffffff",
+    correctLevel : QRCode.CorrectLevel.H
+});
+/*
+function makeCode() {
+  var elText = document.getElementById("text");
+
+  if (!elText.value) {
+    alert("Input a text");
+    elText.focus();
+    return;
+  }
+
+  qrcode.makeCode(elText.value);
+}
+
+makeCode();
+
+$("#text").
+on("blur", function () {
+  makeCode();
+}).
+on("keydown", function (e) {
+  if (e.keyCode == 13) {
+    makeCode();
+  }
+});
+//# sourceURL=pen.js
+*/
 if (my42login !== null && my42login !== "" && my42email !== "")
 {
     main.login = my42login;
