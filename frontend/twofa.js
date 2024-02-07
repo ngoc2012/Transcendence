@@ -21,9 +21,6 @@ export class twofa
     }
 
     loginWithemail() {
-        // console.log('email from js before avax : ', this.main.email);
-        // console.log('login from js before avax : ', this.main.login);
-
         $.ajax({
             url: '/mail_2fa/',
             method: 'GET',
@@ -33,8 +30,8 @@ export class twofa
                 "email": this.main.email
             },
             success: (response) => {
-                console.log('MON CODE :',response.code); //enlever ce retour
-                console.log('LOGIN : ', this.main.login);
+                // console.log('MON CODE :',response.code);
+                // console.log('LOGIN : ', this.main.login);
                 this.main.load('/code_2fa', () => this.main.code_2fa.events());
             },
             error: (xhr, status, error) => {
@@ -65,7 +62,6 @@ export class twofa
             }
         });
     }
-
 
     cancel() {
         this.main.set_status('');

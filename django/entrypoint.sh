@@ -1,23 +1,9 @@
 #!/bin/bash
 
-cd /app/frontend/.
-
-# Téléchargez qrcode.min.js depuis le CDN
-wget -O qrcode.min.js https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js
-
-# Assurez-vous que le dossier pour les fichiers JavaScript existe
-
-# Incluez-le dans votre fichier HTML : Ajoutez une balise de script dans votre fichier HTML pour charger qrcode.min.js
-# Ouvrez votre fichier HTML dans un éditeur et ajoutez la balise script, ou utilisez une commande sed pour le faire automatiquement
-echo '<script src="qrcode.min.js"></script>' >> /app/frontend/display_2fa.html
-
-chmod 755 /app/frontend/display_2fa.html
-
 
 cd /app/backend/.
 python3 manage.py makemigrations
 python3 manage.py migrate
-
 
 # Attempt to create a superuser
 if python3 manage.py createsuperuser --noinput --username "$DJANGO_SUPERUSER_USERNAME" --email "$DJANGO_SUPERUSER_EMAIL" 2>/dev/null; then

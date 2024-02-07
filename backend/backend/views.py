@@ -215,7 +215,6 @@ def google_callback(request):
         return render(request, 'index.html', {
             'my42login': settings.GOOGLELOG,
             'my42name': settings.GOOGLENAME
-            #ajouter le mail ici
             })
 
     except Exception as e:

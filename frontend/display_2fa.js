@@ -1,4 +1,3 @@
-// import QRCode from '/app/frontend/qrcode.min.js';
 
 export class display_2fa {
     constructor(m) {
@@ -9,7 +8,6 @@ export class display_2fa {
         this.main.set_status('');
         this.dom_proceed = document.querySelector("#proceed");
         this.dom_proceed.addEventListener("click", () => this.proceed());
-
         this.generateQRCode();
     }
 
@@ -18,7 +16,11 @@ export class display_2fa {
     }
 
     generateQRCode() {
-        const secret = "https://www.google.com/"; // À remplacer ensuite par le code du 2FA
+
+        const secretKeyElement = document.getElementById("secretKey");
+        const secretKey = secretKeyElement.dataset.secret;
+        const login = this.main.login;
+        const secret = `otpauth://totp/${login}?secret=${secretKey}&issuer=Transcendence`;
         const qrCodeElement = document.querySelector("#qrcode");
         new QRCode(qrCodeElement, secret);
     }
