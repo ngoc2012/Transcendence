@@ -1,5 +1,4 @@
 import {Pong} from './Pong.js'
-import {Chat} from './Chat.js'
 
 export class Lobby
 {
@@ -30,15 +29,7 @@ export class Lobby
 			method: 'GET',
 			success: (info) => {
 				this.quit();
-				let chat = new Chat(this.main, "test")
-				this.socket = new WebSocket(
-					'wss://'
-					+ window.location.host
-					+ '/ws/'
-					+ 'test'
-					+ '/'
-				);
-				this.main.load("/transchat/room", () => this.chat.events())
+				this.main.load("/transchat/room", () => this.chat.events());
 			}
 		})
 	}

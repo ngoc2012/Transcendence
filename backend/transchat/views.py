@@ -1,11 +1,10 @@
 from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
-from .models import Room
+from .models import Room, Message
 
 @csrf_exempt
 def chat_index(request):
 	if request.method == 'POST':
-		print("on entre")
 		if 'username' in request.POST:
 			username = request.POST['username']
 		else:
@@ -32,7 +31,17 @@ def chat_index(request):
 
 @csrf_exempt
 def room(request, room_name, username):
-	print("on est dans room")
-	print(room_name)
-	print(username)
-	return render(request, 'message.html')
+	get_room = Room.objects.get(room_name=room_name)
+
+	if request.method == 'POST':
+		message =request.POST['message']
+		print(message)
+		new_message = Message(room=get_room, sender=username, message=message)
+		new_message.save()
+
+	get_messages = Message.objects.filter(room=get_room)
+	context={
+		"messages": get_messages,
+		"user": username
+	}
+	return render(request, 'message.html', context)
