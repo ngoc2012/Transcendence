@@ -6,40 +6,40 @@
 #    By: minh-ngu <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/09/28 10:56:09 by minh-ngu          #+#    #+#              #
-#    Updated: 2024/01/22 06:43:15 by ngoc             ###   ########.fr        #
+#    Updated: 2024/02/08 12:10:30 by minh-ngu         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 all:
-	@sudo docker compose -f ./docker-compose.yml up -d --build
-	@sudo docker compose -f ./docker-compose.yml logs -f
+	@docker compose -f ./docker-compose.yml up -d --build
+	@docker compose -f ./docker-compose.yml logs -f
 
 down:
-	@sudo docker compose -f ./docker-compose.yml down
+	@docker compose -f ./docker-compose.yml down
 
 up:
-	@sudo docker compose -f ./docker-compose.yml up -d --build
-	@sudo docker compose -f ./docker-compose.yml logs -f
+	@docker compose -f ./docker-compose.yml up -d --build
+	@docker compose -f ./docker-compose.yml logs -f
 
 stop:
-	@sudo docker stop $$(sudo docker ps)
+	@docker stop $$(docker ps)
 
 remove_con:
-	@sudo docker rm -f $$(sudo docker ps -a -q)
+	@docker rm -f $$(docker ps -a -q)
 
 remove_images:
-	@sudo docker image prune --all --force
+	@docker image prune --all --force
 
 re:
 	@make down
 	@make up
 
 clean:
-	@sudo docker stop $$(docker ps -qa);\
-	sudo docker rm $$(docker ps -qa);\
-	sudo docker rmi -f $$(docker images -qa);\
-	sudo docker volume rm $$(docker volume ls -q);\
-	sudo docker network rm $$(docker network ls -q);\
+	@docker stop $$(docker ps -qa);\
+	docker rm $$(docker ps -qa);\
+	docker rmi -f $$(docker images -qa);\
+	docker volume rm $$(docker volume ls -q);\
+	docker network rm $$(docker network ls -q);\
 	
 # gitf: git in final
 # gitd: git in developpement
