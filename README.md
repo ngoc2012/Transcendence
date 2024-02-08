@@ -4,6 +4,24 @@
 
 [The Mechanics of Pong](https://dooglz.github.io/set09121/pong2)
 
+## Docker rootless (machine 42)
+
+```console
+systemctl --user start docker
+systemctl --user status docker
+export PATH=/home/$USER/bin:$PATH
+export DOCKER_HOST=unix:///run/user/$id/docker.sock
+```
+With $id is the uid get by command `id`
+
+For next reboot, put the 2 export commands in '.zshrc'
+
+The game is now on port 8080:
+
+```console
+https://127.0.0.1:8080
+```
+
 ## Prerequisites
 
 ### Install `Django` `channels`
