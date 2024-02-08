@@ -20,6 +20,7 @@ GOOGLE_OAUTH2_CLIENT_SECRET = os.environ.get('GOOGLE_OAUTH2_CLIENT_SECRET')
 GOOGLE_OAUTH2_PROJECT_ID = os.environ.get('GOOGLE_OAUTH2_PROJECT_ID')
 
 SENDGRID_API_KEY = os.environ.get('SENDGRID_API_KEY')
+EMAIL_SENDER = os.environ.get('EMAIL_SENDER')
 
 
 def index(request):
@@ -39,7 +40,7 @@ def login(request):
 def twofa(request):
     return (render(request, 'twofa.html'))
 
-# le mettre en retour de mail_2fa
+# le mettre en retour de mail_2fa?
 def code_2fa(request):
     return (render(request, 'code_2fa.html'))
 
@@ -53,9 +54,11 @@ def display_2fa(request):
 def qrcode_2fa(request):
 	return (render(request, 'qrcode_2fa.html'))
 
+
+# use sendgrid API to send an email to the user containing the code used for the 2fa
 @csrf_exempt
 def mail_2fa(request):
-    sender_email = 'tlebouvi@student.42.fr' #changer + tard?
+    sender_email = EMAIL_SENDER
     recipient_email = request.GET.get('email') 
     print(recipient_email)
     code = ""
@@ -79,6 +82,7 @@ def mail_2fa(request):
         print('Error sending email:', str(e))
     return JsonResponse({'code': code})
 
+# verify the email code
 @csrf_exempt
 def verify(request):
     input_code = request.POST.get('input_code') 
@@ -86,7 +90,7 @@ def verify(request):
         return JsonResponse({'result': '1'})
     return JsonResponse({'result': '0'})
 
-
+# create a new player in the database and his 2fa key used for authenticator
 @csrf_exempt
 def new_player(request):
 
@@ -118,7 +122,7 @@ def new_player(request):
     })
 
 
-
+# login an user
 @csrf_exempt
 def log_in(request):
     if 'login' not in request.POST:
@@ -136,12 +140,11 @@ def log_in(request):
         }))
     return (HttpResponse('Error: Password not correct!'))
 
+
+# callback function used to get the info from the 42 API, if the user never conected before he is added to the database as a new user.
 @csrf_exempt
 def callback(request):
     code = request.GET.get('code')
-
-    print('DATA:', API_PUBLIC)
-
     try:
         token_response = requests.post('https://api.intra.42.fr/oauth/token', data={
             'grant_type': 'authorization_code',
@@ -165,7 +168,7 @@ def callback(request):
             new_player = PlayersModel(
                 login=user_data['login'],
                 password='password',
-                name=user_data['login'],
+                name=user_data['usual_full_name'],
                 email=user_data['email'],
                 secret_2fa = pyotp.random_base32()
             )
@@ -181,7 +184,7 @@ def callback(request):
         print(f"An error occurred: {e}")
         return HttpResponse("An error occurred.")
     
-
+# used to connect with google but not very useful since i need to add manualy the mail that this code accept beforehand (but  it work)
 @csrf_exempt
 def google_auth(request):
     settings.GOOGLELOG = request.GET.get('login')
@@ -196,6 +199,7 @@ def google_auth(request):
 
     return JsonResponse({"authorization_url": authorization_url})
 
+# callback handling from google API
 @csrf_exempt
 def google_callback(request):
     code = request.GET.get('code')
@@ -220,7 +224,7 @@ def google_callback(request):
     except Exception as e:
         return HttpResponse("Une erreur s'est produite lors de l'authentification.")
 
-
+# verify the authenticator TOTP code
 @csrf_exempt
 def verify_qrcode(request):
     input_code = request.POST.get('input_code')

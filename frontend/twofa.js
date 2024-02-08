@@ -1,4 +1,7 @@
 
+
+// Start the differents 2fa processes for login
+
 export class twofa
 {
     constructor(m) {
@@ -8,12 +11,12 @@ export class twofa
     events() {
         this.main.set_status('');
 
-        this.dom_log_in_sms = document.querySelector("#log_in_with_sms");
+        this.dom_log_in_qrcode = document.querySelector("#log_in_with_qrcode");
         this.dom_cancel = document.querySelector("#cancel0");
         this.dom_log_in_google = document.querySelector("#log_in_with_google");
         this.dom_log_in_email = document.querySelector("#log_in_with_email");
 
-        this.dom_log_in_sms.addEventListener("click", () => this.loginwithsms());
+        this.dom_log_in_qrcode.addEventListener("click", () => this.loginwithqrcode());
         this.dom_cancel.addEventListener("click", () => this.cancel());
         this.dom_log_in_google.addEventListener("click", () => this.loginWithgoogle());
         this.dom_log_in_email.addEventListener("click", () => this.loginWithemail());
@@ -30,8 +33,6 @@ export class twofa
                 "email": this.main.email
             },
             success: (response) => {
-                // console.log('MON CODE :',response.code);
-                // console.log('LOGIN : ', this.main.login);
                 this.main.load('/code_2fa', () => this.main.code_2fa.events());
             },
             error: (xhr, status, error) => {
@@ -41,7 +42,7 @@ export class twofa
     }
 
 
-    loginwithsms() {
+    loginwithqrcode() {
         this.main.load('/qrcode_2fa', () => this.main.qrcode_2fa.events());
     }
 

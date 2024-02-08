@@ -1,3 +1,9 @@
+
+
+// Give the user the different way of login in our app (normal or through 42), 
+// then in case of a normal connection start the 2fa verification process
+
+
 export class Login
 {
     constructor(m) {

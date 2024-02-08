@@ -1,4 +1,7 @@
 
+
+// After signup of a new user, this js and the linked html display what's needed the future login to go through the 2fa
+
 export class display_2fa {
     constructor(m) {
         this.main = m;

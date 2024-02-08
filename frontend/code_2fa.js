@@ -1,4 +1,8 @@
 
+
+// Take and verify the 2fa code from email then conect the user if the code is right
+
+
 export class code_2fa
 {
     constructor(m) {
@@ -14,13 +18,10 @@ export class code_2fa
         document.getElementById("email_address").innerText = this.main.email;
         this.dom_confirm.addEventListener("click", () => this.confirm());
         this.dom_cancel.addEventListener("click", () => this.cancel());
-
-
     }
 
 
     confirm() {
-        console.log('CONFIRM ACCESSED input code = ', this.dom_code.value);
         if (this.dom_code.value === '')
         {
             this.main.set_status('Field must not be empty');

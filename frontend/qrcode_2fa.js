@@ -1,4 +1,7 @@
 
+
+// Take and verify the 2fa code from authenticator then conect the user if the code is right
+
 export class qrcode_2fa
 {
     constructor(m) {
@@ -19,7 +22,6 @@ export class qrcode_2fa
     }
 
     confirm() {
-        // console.log('CONFIRM ACCESSED input code = ', this.dom_code.value);
         if (this.dom_code.value === '')
         {
             this.main.set_status('Field must not be empty');
