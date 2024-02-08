@@ -6,6 +6,31 @@
 
 ## Docker rootless (machine 42)
 
+### Install (installed in machine 42)
+
+[Install](https://docs.docker.com/engine/security/rootless/)
+
+You must install newuidmap and newgidmap on the host. These commands are provided by the uidmap package on most distros.
+
+/etc/subuid and /etc/subgid should contain at least 65,536 subordinate UIDs/GIDs for the user. In the following example, the user testuser has 65,536 subordinate UIDs/GIDs (231072-296607).
+
+```console
+id -u
+1001
+whoami
+testuser
+grep ^$(whoami): /etc/subuid
+testuser:231072:65536
+grep ^$(whoami): /etc/subgid
+testuser:231072:65536
+```
+
+```console
+bash /usr/bin/dockerd-rootless-setuptool.sh install
+```
+
+### Execute
+
 ```console
 systemctl --user start docker
 systemctl --user status docker
