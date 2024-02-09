@@ -1,3 +1,9 @@
+
+
+// Give the user the different way of login in our app (normal or through 42), 
+// then in case of a normal connection start the 2fa verification process
+
+
 export class Login
 {
     constructor(m) {
@@ -38,10 +44,11 @@ export class Login
                 }
                 else
                 {
+                    this.main.email = info.email;
                     this.main.login = info.login;
                     this.main.name = info.name;
                     this.main.dom_name.innerHTML = info.name;
-                    this.main.load('/lobby', () => this.main.lobby.events());
+                    this.main.load('/twofa', () => this.main.twofa.events());
                 }
             },
             error: (data) => this.main.set_status(data.error)

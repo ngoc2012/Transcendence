@@ -44,6 +44,7 @@ clean:
 # gitf: git in final
 # gitd: git in developpement
 # Ex: make gitd M="your message"
+#docker exec -it django python3 /app/backend/manage.py flush
 
 M:=
 test:
