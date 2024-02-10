@@ -24,11 +24,17 @@ export class Lobby
     }
 
 	chat() {
+		if (this.main.login === ''){
+			this.main.set_status('You need to be logged-in to use the chat');
+			return;
+		}
 		$.ajax({
 			url: '/transchat/room/',
 			method: 'GET',
+			data: {
+				'username': this.main.login
+			},
 			success: (info) => {
-				this.quit();
 				this.main.load("/transchat/room", () => this.chat.events());
 			}
 		})

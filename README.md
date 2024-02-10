@@ -4,6 +4,49 @@
 
 [The Mechanics of Pong](https://dooglz.github.io/set09121/pong2)
 
+## Docker rootless (machine 42)
+
+### Install (installed in machine 42)
+
+[Install](https://docs.docker.com/engine/security/rootless/)
+
+You must install newuidmap and newgidmap on the host. These commands are provided by the uidmap package on most distros.
+
+/etc/subuid and /etc/subgid should contain at least 65,536 subordinate UIDs/GIDs for the user. In the following example, the user testuser has 65,536 subordinate UIDs/GIDs (231072-296607).
+
+```console
+id -u
+1001
+whoami
+testuser
+grep ^$(whoami): /etc/subuid
+testuser:231072:65536
+grep ^$(whoami): /etc/subgid
+testuser:231072:65536
+```
+
+```console
+bash /usr/bin/dockerd-rootless-setuptool.sh install
+```
+
+### Execute
+
+```console
+systemctl --user start docker
+systemctl --user status docker
+export PATH=/home/$USER/bin:$PATH
+export DOCKER_HOST=unix:///run/user/$id/docker.sock
+```
+With $id is the uid get by command `id`
+
+For next reboot, put the 2 export commands in '.zshrc'
+
+The game is now on port 8080:
+
+```console
+https://127.0.0.1:8080
+```
+
 ## Prerequisites
 
 ### Install `Django` `channels`
@@ -766,3 +809,79 @@ window.onload = function() {
     }
 };
 ```
+
+
+## Drawing in terminal
+
+### Drawing and update
+
+Drawing in a terminal using C or C++ involves using terminal escape sequences to control cursor movement and text formatting. The specific escape sequences may vary slightly depending on the terminal emulator you're using, as different terminals may interpret them differently.
+
+Here's a simple example in C that draws a basic shape (a rectangle) and updates it:
+
+```c
+#include <stdio.h>
+#include <unistd.h>
+
+void clearScreen() {
+    printf("\033[2J");  // ANSI escape code to clear the screen
+    printf("\033[H");   // Move the cursor to the top-left corner
+    fflush(stdout);
+}
+
+void drawRectangle(int width, int height) {
+    for (int i = 0; i < height; ++i) {
+        for (int j = 0; j < width; ++j) {
+            printf("* ");
+        }
+        printf("\n");
+    }
+    fflush(stdout);
+}
+
+int main() {
+    int width = 10;
+    int height = 5;
+
+    while (1) {
+        clearScreen();
+        drawRectangle(width, height);
+        usleep(500000);  // Sleep for 0.5 seconds (500,000 microseconds)
+        // You can use nanosleep or sleep for longer intervals depending on your needs
+    }
+
+    return 0;
+}
+```
+
+In this example:
+- The `clearScreen` function uses ANSI escape codes (`\033[2J` and `\033[H`) to clear the screen and move the cursor to the top-left corner.
+- The `drawRectangle` function prints a rectangle made of asterisks.
+- The `main` function enters an infinite loop to continuously update the screen with the drawn rectangle.
+
+You can modify the `width` and `height` variables, as well as the drawing logic in the `drawRectangle` function to customize the appearance of your drawing.
+
+Compile the program using a C compiler (e.g., `gcc`) and run it in a terminal. Keep in mind that not all terminals fully support ANSI escape codes, so the result may vary depending on the terminal emulator you are using.
+
+### Print unicode characters
+
+[List of Unicode characters](https://en.wikipedia.org/wiki/List_of_Unicode_characters)
+
+[Blocks Elements](https://en.wikipedia.org/wiki/Block_Elements)
+
+```c
+#include <wchar.h>
+
+int main() {
+    wprintf(L"Hello, this is a Unicode character: %lc\n", L'\u2603'); // Snowman character
+    return 0;
+}
+```
+
+In this example:
+- The `wprintf` function is used instead of `printf`.
+- The `%lc` format specifier is used for printing a wide character.
+
+Make sure to use the `L` prefix before the string and character literals to denote wide strings and characters.
+
+Note that the actual support for Unicode characters depends on the terminal emulator and the font being used. Some terminals and fonts may not display all Unicode characters correctly, so you might need to configure your terminal settings accordingly. Additionally, your source code file should be saved in a Unicode-compatible encoding (such as UTF-8) to handle Unicode literals properly.
