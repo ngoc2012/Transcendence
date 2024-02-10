@@ -20,6 +20,9 @@ def signup(request):
 def login(request):
 	return (render(request, 'login.html'))
 
+def new_tournament(request):
+     return (render(request, 'tournament.html'))
+
 @csrf_exempt
 def new_player(request):
     if 'login' not in request.POST or request.POST['login'] == "":

@@ -1,7 +1,8 @@
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from .models import RoomsModel, PlayersModel, PlayerRoomModel
+from .models import RoomsModel, PlayersModel, PlayerRoomModel, TournamentModel
+from django.utils import timezone
 
 from pong.data import pong_data
 
@@ -108,3 +109,31 @@ def delete(request):
         room.delete()
         return (HttpResponse(s))
     return (HttpResponse("Error: Login '" + request.POST['login'] + "' is not the owner of '" + request.POST['game_id'] + "'!"))
+
+# @csrf_exempt
+# def new_tournament(request):
+#     if request.method != "POST":
+#         return HttpResponse("Error: This endpoint expects a POST request.", status=405)
+#     if 'name' not in request.POST:
+#         return HttpResponse("Error: No name provided");
+#     if 'game_type' not in request.POST:
+#         return HttpResponse("Error: No game type provided")
+#     if 'login' not in request.POST:
+#         return HttpResponse("Error: No login provided")
+#     if not PlayersModel.objects.filter(login=request.POST['login']).exists():
+#         return HttpResponse(f"Error: Login '{request.POST['login']}' does not exist!")
+    
+#     start_date = request.POST.get('start_date', timezone.now())
+#     tournament = TournamentModel(
+#         name=request.POST['name'],
+#         game_type=request.POST['game_type'],
+#         start_date=start_date
+#     )
+#     tournament.save()
+#     return JsonResponse({
+#         'message': 'Tournament created successfully',
+#         'id': str(tournament.id),
+#         'name': tournament.name,
+#         'game_type': tournament.game_type,
+#         'start_date': tournament.start_date
+#     })
