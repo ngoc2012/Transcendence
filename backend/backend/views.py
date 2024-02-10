@@ -20,7 +20,7 @@ def signup(request):
 def login(request):
 	return (render(request, 'login.html'))
 
-def new_tournament(request):
+def tournament(request):
      return (render(request, 'tournament.html'))
 
 @csrf_exempt

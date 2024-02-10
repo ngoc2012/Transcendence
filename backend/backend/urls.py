@@ -32,5 +32,5 @@ urlpatterns = [
     path('new_player/', views.new_player, name='new_player'),
     path('pong/', include("pong.urls", namespace='pong')),
     path('callback/', callback, name='callback'),
-    path('tournament/new/', views.new_tournament, name='new_tournament')
+    path('tournament/', views.tournament, name='tournament')
 ]

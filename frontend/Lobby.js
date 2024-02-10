@@ -10,6 +10,7 @@ export class Lobby
     
     events() {
         this.dom_rooms = document.getElementById("rooms");
+        this.dom_tournament = document.getElementById("tournament");
         this.dom_join = document.querySelector("#join");
         this.dom_pong = document.querySelector("#pong");
         this.dom_pew = document.querySelector("#pew");
@@ -18,6 +19,7 @@ export class Lobby
         this.dom_pew.addEventListener("click", () => this.new_game("pew"));
         this.dom_delete.addEventListener("click", () => this.delete_game());
         this.dom_join.addEventListener("click", () => this.join());
+        this.dom_tournament.addEventListener("click", () => this.tournament_click());
         this.rooms_update();
     }
 
@@ -145,6 +147,10 @@ export class Lobby
         this.socket.onclose = (e) => {
             //console.error('Chat socket closed unexpectedly');
         };
+    }
+
+    tournament_click() {
+        this.main.load('/tournament', () => this.tournament.events());
     }
 
     quit() {
