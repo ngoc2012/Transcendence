@@ -8,8 +8,7 @@ services:
       dockerfile: Dockerfile
       no_cache: false
     ports:
-      - 80:80
-      - 443:443
+      - 8080:443
     restart: always
     env_file:
      - .env
