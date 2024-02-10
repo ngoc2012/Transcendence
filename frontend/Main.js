@@ -38,6 +38,7 @@ export class Main
         this.dom_proceed = document.getElementById("proceed");
         this.dom_signup = document.getElementById("signup");
         this.dom_status = document.getElementById("status");
+        this.dom_tournament = document.getElementById("tournament");
         this.dom_name = document.getElementById("name");
         this.dom_name.innerHTML = "Anonyme";
         this.dom_email = document.getElementById("email");
