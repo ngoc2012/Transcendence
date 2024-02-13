@@ -1,6 +1,7 @@
 import {Lobby} from './Lobby.js'
 import {Signup} from './Signup.js'
 import {Login} from './Login.js'
+import {Tournament} from './Tournament.js'
 
 export class Main
 {

@@ -1,4 +1,5 @@
 import {Pong} from './Pong.js'
+import { Tournament } from './Tournament.js';
 
 export class Lobby
 {
@@ -150,6 +151,12 @@ export class Lobby
     }
 
     tournament_click() {
+        if (this.main.login === '')
+        {
+            this.main.set_status('Please login or sign up');
+            return;
+        }
+        this.tournament = new Tournament(this.main);
         this.main.load('/tournament', () => this.tournament.events());
     }
 

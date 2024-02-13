@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from game.models import PlayersModel
+from game.models import PlayersModel, TournamentModel
 import requests
 import os
 
@@ -103,3 +103,22 @@ def callback(request):
     except Exception as e:
         print(f"An error occurred: {e}")
         return HttpResponse("An error occurred.")
+    
+@csrf_exempt
+def new_tournament(request):
+    if request.method == 'POST':
+        # print("ok")
+        name = request.POST.get('name')
+        game = request.POST.get('game')
+        owner = PlayersModel.objects.get(login=request.POST['login'])
+        try:
+            # print("ok")
+            tournament = TournamentModel(name=name, game=game, owner=owner)
+            return JsonResponse({'success': 'Tournament created successfully'}, status=200)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
+    else:
+         return JsonResponse({'error': 'Invalid request'}, status=405)
+
+    
+        

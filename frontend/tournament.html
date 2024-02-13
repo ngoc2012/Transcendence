@@ -7,7 +7,7 @@
 </head>
 <body>
     <h3>Create a New Tournament</h3>
-    <form method="post">
+    <form id="tournamentForm" method="post">
         {% csrf_token %}
         <label for="name">Tournament Name:</label>
         <input type="text" id="name" name="name" required><br><br>

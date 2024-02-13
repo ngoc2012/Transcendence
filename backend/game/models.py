@@ -41,29 +41,32 @@ class PlayerRoomModel(models.Model):
     def __str__(self):
         return str(self.id)
     
-# Tournament classes   
+# Tournament classes
 class TournamentModel(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=255)
-    game_type = models.CharField(max_length=20)
-    start_date = models.DateTimeField(default=timezone.now)
-    end_date = models.DateTimeField(null=True, blank=True)
+    game = models.CharField(max_length=20)
+    owner = models.ForeignKey(PlayersModel, on_delete=models.CASCADE)
+    expires = models.DateTimeField(default=timezone.now() + timezone.timedelta(minutes=60))
     def __str__(self):
         return self.name
+    def check_expired(self):
+        if self.expires and self.expires < timezone.now():
+            self.delete()
 
-class TournamentPlayerModel(models.Model):
-    tournament = models.ForeignKey(TournamentModel, on_delete=models.CASCADE)
-    player = models.ForeignKey(PlayersModel, on_delete=models.CASCADE)
-    is_active = models.BooleanField(default=True)
-    # allow only one tournament per player
-    class Meta:
-        unique_together = ('tournament', 'player')   
-    def __str__(self):
-        return f"{self.tournament.name} - {self.player.name}"
+# class TournamentPlayerModel(models.Model):
+#     tournament = models.ForeignKey(TournamentModel, on_delete=models.CASCADE)
+#     player = models.ForeignKey(PlayersModel, on_delete=models.CASCADE)
+#     is_active = models.BooleanField(default=True)
+#     # allow only one tournament per player
+#     class Meta:
+#         unique_together = ('tournament', 'player')   
+#     def __str__(self):
+#         return f"{self.tournament.name} - {self.player.name}"
 
-class TournamentRoomModel(models.Model):
-    room = models.OneToOneField(RoomsModel, on_delete=models.CASCADE)
-    tournament = models.ForeignKey(TournamentModel, on_delete=models.CASCADE)
-    round_number = models.IntegerField()
-    def __str__(self):
-        return f"{self.tournament.name} - Room {self.room.id}"
+# class TournamentRoomModel(models.Model):
+#     room = models.OneToOneField(RoomsModel, on_delete=models.CASCADE)
+#     tournament = models.ForeignKey(TournamentModel, on_delete=models.CASCADE)
+#     round_number = models.IntegerField()
+#     def __str__(self):
+#         return f"{self.tournament.name} - Room {self.room.id}"
