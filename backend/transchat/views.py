@@ -1,41 +1,53 @@
 from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
-from .models import Room, Message
+from .models import Room, Message, User
+
+
 
 @csrf_exempt
-def chat_index(request):
-	if request.method == 'POST':
-		if 'username' in request.POST:
-			username = request.POST['username']
-		else:
-			username = 'username'
+def chat_lobby(request):
+	if request.method == 'GET':
+		if 'username' in request.GET:
+			username = request.GET['username']
+			try:
+				get_user = User.objects.get(username=username)
+				return redirect('signup', username=username)
 
-		if 'room' in request.POST:
-			room = request.POST['room']
-		else:
-			room = 'default'
+			except User.DoesNotExist:
+				new_user = User(username=username)
+				new_user.save()
+			return redirect('signup', username=username)
+	return render(request, 'chat.html')
 
-		print(username)
-		print(room)
+
+
+def chat_signup(request, username):
+	if 'room' in request.POST:
+		room = request.POST['room']
 
 		try:
 			get_room = Room.objects.get(room_name=room)
-			return redirect('room', room_name=room, username=username)
+			get_user = User.objects.get(username=username)
+			get_user.rooms.add(get_room)
+			request.session['username'] = get_user.username
+			return redirect('room', room_name=room)
 		
 		except Room.DoesNotExist:
 			new_room = Room(room_name=room)
+			get_user = User.objects.get(username=username)
 			new_room.save()
-			return redirect('room', room_name=room, username=username)
-
-	return render(request, 'chat.html')
+			get_user.rooms.add(new_room)
+			request.session['username'] = get_user.username
+			return redirect('room', room_name=room)
+	return render(request, 'chat.html', {"username":username})
 
 @csrf_exempt
-def room(request, room_name, username):
+def room(request, room_name):
 	get_room = Room.objects.get(room_name=room_name)
+	username = request.session['username']
 
 	if request.method == 'POST':
 		message =request.POST['message']
-		print(message)
 		new_message = Message(room=get_room, sender=username, message=message)
 		new_message.save()
 

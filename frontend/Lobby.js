@@ -23,23 +23,24 @@ export class Lobby
         this.rooms_update();
     }
 
-	chat() {
+	chat(){
+		this.main.set_status('')
 		if (this.main.login === ''){
-			this.main.set_status('You need to be logged-in to use the chat');
+			this.main.set_status('You must be logged in to chat.');
 			return;
 		}
 		$.ajax({
-			url: '/transchat/room/',
-			method: 'GET',
-			data: {
-				'username': this.main.login
-			},
-			success: (info) => {
-				this.main.load("/transchat/room", () => this.chat.events());
+			url: '/transchat/chat_lobby/',
+			method: 'POST',
+			success: (html) => {
+				console.log(this.main.login);
+				this.main.load_with_data('transchat/chat_lobby', () => this.chat.events(), {
+					'username': this.main.login
+				});
 			}
-		})
+		})	
 	}
-	
+
     join() {
         if (this.dom_rooms.selectedIndex === -1)
             return;

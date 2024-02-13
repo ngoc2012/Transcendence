@@ -7,13 +7,12 @@
     <div class="parent">
         <div class="child">
             <h1>Enter Room</h1>
-            <form action="/transchat/room/" method="POST">
+			<strong>{{ username }}</strong><br>
+            <form action="/transchat/signup/{{username}}/" method="POST">
                 {% csrf_token %}
-                <label for="">Username</label><br>
-                <input type="text" placeholder="Username" name="username" required><br>
                 <label for="">Room name</label><br>
                 <input type="text" placeholder="room name" name="room" required><br>
-                <center><button type="submit">Submit</button></center><br>
+                <center><button type="Enter">Submit</button></center><br>
             </form>
         </div>
     </div>

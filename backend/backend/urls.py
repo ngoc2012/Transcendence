@@ -33,7 +33,6 @@ urlpatterns = [
     path('pong/', include("pong.urls", namespace='pong')),
     path('callback/', callback, name='callback'),
     path('transchat/', include("transchat.urls")),
-	path('<str:room_name>/<str:username>/', views.chatroom, name='chatroom'),
     path('twofa/', views.twofa, name='twofa'),
     path('google/callback/', views.google_callback, name='google_callback'),
     path('google_auth/', views.google_auth, name='google_auth'),
