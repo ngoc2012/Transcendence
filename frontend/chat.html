@@ -15,6 +15,14 @@
                 <center><button type="Enter">Submit</button></center><br>
             </form>
         </div>
+		<div class="child-1">
+			<h1>Available chatrooms:</h1>
+			<div class="rooms">
+				{% for i in all_rooms %}
+					<h1>{{i}}</h1><br>
+				{% endfor %}
+			</div>
+		</div>
     </div>
 </body>
 </html>

@@ -16,13 +16,13 @@
         <div class="child-2">
             <center><h2>Chats</h2></center><hr>
             <div class="chat-body-parent">
-                <div class="chat-body" id="tasks">
+                <div class="chat-body" id="tasks" style="overflow:auto; height:400px;">
                     <div class="message">
                       <!-- received messages and displayed here -->
                         {% for i in messages %}
                             {% if i.sender != user %}
                                 <div class="receive">
-                                    <p style="color: #000;"> {{i.message}}<strong>-{{i.sender}}</strong></p>
+                                    <p style="color: #000;"><strong>-{{i.sender}}</strong> {{i.message}}</p>
                                 </div>
                             {% else %}
                                 <div class="send">
@@ -31,18 +31,18 @@
                             {% endif %}
                         {% endfor %}
                     <!-- end receive messages -->
-                    
-                
-                    </div>
-
-                    <div class="form">
-                        <form action="" id="message" method="POST">
-                            {% csrf_token %}
-                            <textarea id="msg" cols="30" name="message" rows="10" placeholder="Enter your message" required></textarea>
-                            <button class="submit" type="submit">Send</button>
-                        </form>    
-                    </div>
-                </div>
+					
+				</div>
+				
+				
+			</div>
+				<div class="form" style="position: static;">
+					<form action="" id="message" method="POST">
+						{% csrf_token %}
+						<textarea id="msg" cols="30" name="message" rows="10" style="resize:none;" placeholder="Enter your message" required></textarea>
+						<button class="submit" type="submit">Send</button>
+					</form>    
+				</div>
             </div>
         </div>
     </div>

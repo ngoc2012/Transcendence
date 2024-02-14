@@ -22,6 +22,7 @@ def chat_lobby(request):
 
 
 def chat_signup(request, username):
+	all_rooms = Room.objects.all()
 	if 'room' in request.POST:
 		room = request.POST['room']
 
@@ -39,7 +40,7 @@ def chat_signup(request, username):
 			get_user.rooms.add(new_room)
 			request.session['username'] = get_user.username
 			return redirect('room', room_name=room)
-	return render(request, 'chat.html', {"username":username})
+	return render(request, 'chat.html', {"username":username, "all_rooms":all_rooms})
 
 @csrf_exempt
 def room(request, room_name):
