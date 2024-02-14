@@ -3,7 +3,7 @@
 import datetime
 from django.db import migrations, models
 import django.db.models.deletion
-from django.utils.timezone import utc
+# from django.utils.timezone
 import uuid
 
 
@@ -32,7 +32,7 @@ class Migration(migrations.Migration):
                 ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
                 ('name', models.CharField(max_length=255)),
                 ('game', models.CharField(max_length=20)),
-                ('expires', models.DateTimeField(default=datetime.datetime(2024, 2, 9, 12, 22, 0, 668505, tzinfo=utc))),
+                ('expires', models.DateTimeField(default=datetime.datetime(2024, 2, 9, 12, 22, 0, 668505))),
                 ('started', models.BooleanField(default=False)),
                 ('x', models.IntegerField(blank=True, null=True)),
                 ('y', models.IntegerField(blank=True, null=True)),

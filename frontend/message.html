@@ -18,31 +18,38 @@
             <div class="chat-body-parent">
                 <div class="chat-body" id="tasks" style="overflow:auto; height:400px;">
                     <div class="message">
-                      <!-- received messages and displayed here -->
+                        <!-- received messages and displayed here -->
                         {% for i in messages %}
-                            {% if i.sender != user %}
-                                <div class="receive">
-                                    <p style="color: #000;"><strong>-{{i.sender}}</strong> {{i.message}}</p>
-                                </div>
-                            {% else %}
-                                <div class="send">
-                                    <p style="color: #000;">{{i.message}}</p>
-                                </div>
-                            {% endif %}
+                        {% if i.sender != user %}
+                        <div class="receive">
+                          <p style="color: #000;"><strong>{{i.sender}}</strong> - {{i.message}}</p>
+                        </div>
+                        {% else %}
+                        <div class="send">
+                            <p style="color: #000;">{{i.message}}</p>
+                        </div>
+                        {% endif %}
                         {% endfor %}
-                    <!-- end receive messages -->
-					
-				</div>
-				
-				
-			</div>
-				<div class="form" style="position: static;">
-					<form action="" id="message" method="POST">
-						{% csrf_token %}
-						<textarea id="msg" cols="30" name="message" rows="10" style="resize:none;" placeholder="Enter your message" required></textarea>
-						<button class="submit" type="submit">Send</button>
-					</form>    
-				</div>
+                        <!-- end receive messages -->
+                    </div>
+                </div>
+            </div>
+            <div class="form">
+                <form action="" id="message" method="POST" >
+                    {% csrf_token %}
+                    <textarea id="msg" cols="30" name="message" rows="10" style="resize:none;" placeholder="Enter your message" required></textarea>
+                    <button class="submit" type="submit">Send</button>
+                </form>    
+            </div>
+        </div>
+        <div class="child-user">
+            <div>Users</div>
+            <div class="users">
+                {% for i in users %}
+                <div class="display_user">
+                    <span style="color:#000">{{i.username}}</span>
+                </div>
+                {% endfor%}
             </div>
         </div>
     </div>
