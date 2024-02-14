@@ -23,6 +23,9 @@ def login(request):
 def tournament(request):
      return (render(request, 'tournament.html'))
 
+def tournament_lobby(request):
+     return (render(request, 'tournament_lobby.html'))
+
 @csrf_exempt
 def new_player(request):
     if 'login' not in request.POST or request.POST['login'] == "":
@@ -107,18 +110,16 @@ def callback(request):
 @csrf_exempt
 def new_tournament(request):
     if request.method == 'POST':
-        # print("ok")
+        print('ok')
         name = request.POST.get('name')
         game = request.POST.get('game')
         owner = PlayersModel.objects.get(login=request.POST['login'])
         try:
-            # print("ok")
-            tournament = TournamentModel(name=name, game=game, owner=owner)
-            return JsonResponse({'success': 'Tournament created successfully'}, status=200)
+            # tournament = TournamentModel(name=name, game=game, owner=owner)
+            tournament = TournamentModel.objects.create(name=name, game=game, owner=owner)
+            tournament.save();
+            return JsonResponse({'message': 'Tournament created successfully'}, status=200)
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=400)
     else:
          return JsonResponse({'error': 'Invalid request'}, status=405)
-
-    
-        

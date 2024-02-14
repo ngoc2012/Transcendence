@@ -54,6 +54,13 @@ class TournamentModel(models.Model):
         if self.expires and self.expires < timezone.now():
             self.delete()
 
+# class TournamentInviteModel(models.Model):
+#     tournament = models.ForeignKey(TournamentModel, on_delete=models.CASCADE)
+#     invited = models.ForeignKey(PlayersModel, on_delete=models.CASCADE)
+#     token = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+#     status = models.CharField(max_length=10, choices=[('pending', 'Pending'), ('accepted', 'Accepted'), ('declined', 'Declined')], default='pending')
+
+
 # class TournamentPlayerModel(models.Model):
 #     tournament = models.ForeignKey(TournamentModel, on_delete=models.CASCADE)
 #     player = models.ForeignKey(PlayersModel, on_delete=models.CASCADE)
