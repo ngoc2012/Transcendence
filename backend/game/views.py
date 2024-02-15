@@ -109,9 +109,3 @@ def delete(request):
         room.delete()
         return (HttpResponse(s))
     return (HttpResponse("Error: Login '" + request.POST['login'] + "' is not the owner of '" + request.POST['game_id'] + "'!"))
-
-# @csrf_exempt
-# def list_users(request):
-#     players = PlayersModel.objects.all().values('id', 'login', 'name')
-#     players_list = list(players) #convert to list -> JSON serialize
-#     return JsonResponse(players_list, safe=False)

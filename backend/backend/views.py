@@ -110,16 +110,19 @@ def callback(request):
 @csrf_exempt
 def new_tournament(request):
     if request.method == 'POST':
-        print('ok')
         name = request.POST.get('name')
         game = request.POST.get('game')
         owner = PlayersModel.objects.get(login=request.POST['login'])
         try:
-            # tournament = TournamentModel(name=name, game=game, owner=owner)
             tournament = TournamentModel.objects.create(name=name, game=game, owner=owner)
-            tournament.save();
-            return JsonResponse({'message': 'Tournament created successfully'}, status=200)
+            return JsonResponse({'message': 'Tournament created successfully', 'id': str(tournament.id)}, status=200)
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=400)
     else:
          return JsonResponse({'error': 'Invalid request'}, status=405)
+    
+@csrf_exempt
+def list_users(request):
+    players = PlayersModel.objects.all().values('id', 'login', 'name')
+    players_list = list(players) #convert to list -> JSON serialize
+    return JsonResponse(players_list, safe=False)

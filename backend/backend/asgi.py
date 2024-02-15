@@ -18,6 +18,7 @@ from django.urls import path, re_path
 from game.consumers import RoomsConsumer
 from chat.consumers import ChatConsumer
 from pong.consumers import PongConsumer
+from . consumers import TournamentInviteConsumer
 
 #from chat.routing import websocket_urlpatterns
 
@@ -38,6 +39,7 @@ application = ProtocolTypeRouter(
                 #re_path(r'^ws/pong/(?P<room_id>[0-9a-f-]+)/$', PongConsumer.as_asgi()),
                 re_path(r'^ws/pong/(?P<room_id>[0-9a-f-]+)/(?P<player_id>[0-9a-f-]+)/$', PongConsumer.as_asgi()),
                 path("ws/game/rooms/", RoomsConsumer.as_asgi()),
+                path('ws/tournament/invite/<uuid:tournament_id>/', TournamentInviteConsumer.as_asgi()),
             ]))
         ),
     }

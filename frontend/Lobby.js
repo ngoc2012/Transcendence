@@ -1,5 +1,5 @@
 import {Pong} from './Pong.js'
-import { Tournament } from './Tournament.js';
+import {Tournament} from './Tournament.js';
 
 export class Lobby
 {
@@ -165,6 +165,8 @@ export class Lobby
         {
             this.socket.close();
             this.socket = -1;
+            this.inviteSocket.close();
+            this.inviteSocket = -1;
         }
     }
 }
