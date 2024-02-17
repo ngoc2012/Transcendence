@@ -48,15 +48,6 @@
         width: 100%;
     }
 
-    .child-1 {
-        /* height: 70vh; */
-        width: 30%;
-        margin: 10px;
-        border-radius: 10px;
-        
-        background-color: white;
-    }
-
     .chat-room {
         width: 100%;
         /* max-height: ; */
@@ -64,10 +55,38 @@
         display: flex;
         align-items: center;
         justify-content: space-around;
-        background-color: #fff;
-        border: 1px solid dodgerblue;
+        background-color: #eb0b0b;
+        border: 1px solid rgb(6, 8, 10);
     }
 
+    .child-user{
+        display: flex;
+        height: 400px;
+        width: 200px;
+        border-radius: 10px;
+        border: 2px solid #00000f;
+        justify-content:space-evenly;
+        background-color: #c51a1a;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .child-user .users{
+        display: flex;
+        overflow: auto;
+        height: 80%;
+        width: 70%;
+        align-self: flex-end;
+        flex-direction: column;
+        align-self: center;
+        background-color: #ffffff;
+        border-radius: 10px;
+    }
+
+    .child-user .users .display_user{
+        margin: 5px;
+        align-self: flex-start;
+    }
     .profile-pic {
         /* height: 80px; */
         width: 15%;
@@ -106,13 +125,13 @@
         margin: 10px;
         border-radius: 10px;
         padding: 10px;
-        background-color: #FBEEC1;
+        background-color: #ffc800;
     }
 
     .chat-body-parent {
         display: flex;
         justify-content: center;
-        align-items: center;
+        align-items: end;
 		overflow: auto;
         /* height: 60vh; */
     }
@@ -122,15 +141,17 @@
         width: 100%;
         background-color: #659DBD;
         border-radius: 10px;
-        display: flex;      
+        display: flex;
         padding: 10px;
+        align-self: flex-end;
         flex-direction: column;
     }
 
     .chat-body .message .receive, .send {
         background-color: #DAAD86;
         max-width: 400px;
-       
+        justify-content: space-between;
+        align-self: flex-end;
         border-radius: 10px;
         padding: 10px;
         margin-bottom: 10px;
@@ -147,17 +168,21 @@
     }
 
     .chat-body .message .send {
-        align-self: flex-end;
+        margin-top: auto;
     }
 
     .chat-body .message .receive {
-        align-self: flex-start;
+        align-self: flex-end;
+        margin-top: auto;
+        margin-bottom: 20px;
     }
 
     form {
         display: flex;
-        align-items: center;
-        justify-content: space-around;
+        align-items: end;
+        justify-content: space-between;
+        padding: 10px;
+        position: static;
     }
 
     form textarea {

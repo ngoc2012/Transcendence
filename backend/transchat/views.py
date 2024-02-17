@@ -29,7 +29,7 @@ def chat_signup(request, username):
 		try:
 			get_room = Room.objects.get(room_name=room)
 			get_user = User.objects.get(username=username)
-			get_user.rooms.add(get_room)
+			get_room.users.add(get_user)
 			request.session['username'] = get_user.username
 			print("redirect room exist")
 			return redirect('room', room_name=room)
@@ -37,8 +37,8 @@ def chat_signup(request, username):
 		except Room.DoesNotExist:
 			new_room = Room(room_name=room)
 			get_user = User.objects.get(username=username)
+			new_room.users.add(get_user)
 			new_room.save()
-			get_user.rooms.add(new_room)
 			request.session['username'] = get_user.username
 			print("redirect room does not exist")
 			return redirect('room', room_name=room)
@@ -48,6 +48,7 @@ def chat_signup(request, username):
 def room(request, room_name):
 	print("room name = " + room_name)
 	get_room = Room.objects.get(room_name=room_name)
+	users = get_room.users.all()
 	username = request.session['username']
 
 	if request.method == 'POST':
@@ -59,6 +60,7 @@ def room(request, room_name):
 	get_messages = Message.objects.filter(room=get_room)
 	context={
 		"messages": get_messages,
-		"user": username
+		"user": username,
+		"users": users
 	}
 	return render(request, 'message.html', context)
