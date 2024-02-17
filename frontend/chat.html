@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+	{% load static %}
     <title>Enter Room</title>
 </head>
 <body>
@@ -8,13 +9,10 @@
         <div class="child">
             <h1>Enter Room</h1>
 			<strong>{{ username }}</strong><br>
-            <form action="/transchat/signup/{{username}}/" method="POST">
-                {% csrf_token %}
-                <label for="">Room name</label><br>
-                <input type="text" placeholder="room name" name="room" required><br>
-                <center><button type="Enter">Submit</button></center><br>
-            </form>
-        </div>
+            {% csrf_token %}
+            <label for="">Room name</label><br>
+            <input type="text" id="room" placeholder="room name" name="room" required><br>
+            <center><button type="Enter" id="enter">Submit</button></center><br>        </div>
 		<div class="child-1">
 			<h1>Available chatrooms:</h1>
 			<div class="rooms">
@@ -25,4 +23,5 @@
 		</div>
     </div>
 </body>
+<script src="{% static 'Chat_signup.js' %}"></script>
 </html>

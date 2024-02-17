@@ -1,4 +1,5 @@
 import {Pong} from './Pong.js'
+import { Chat_signup } from './Chat_signup.js'
 
 export class Lobby
 {
@@ -29,12 +30,13 @@ export class Lobby
 			this.main.set_status('You must be logged in to chat.');
 			return;
 		}
+		this.chat_signup = new Chat_signup(this.main);
 		$.ajax({
 			url: '/transchat/chat_lobby/',
 			method: 'POST',
 			success: (html) => {
 				console.log(this.main.login);
-				this.main.load_with_data('transchat/chat_lobby', () => this.chat.events(), {
+				this.main.load_with_data('transchat/chat_lobby', () => this.chat_signup.events(), {
 					'username': this.main.login
 				});
 			}

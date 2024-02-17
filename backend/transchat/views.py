@@ -19,18 +19,19 @@ def chat_lobby(request):
 			return redirect('signup', username=username)
 	return render(request, 'chat.html')
 
-
-
+@csrf_exempt
 def chat_signup(request, username):
 	all_rooms = Room.objects.all()
 	if 'room' in request.POST:
 		room = request.POST['room']
+		print("room = " + request.POST['room'])
 
 		try:
 			get_room = Room.objects.get(room_name=room)
 			get_user = User.objects.get(username=username)
 			get_user.rooms.add(get_room)
 			request.session['username'] = get_user.username
+			print("redirect room exist")
 			return redirect('room', room_name=room)
 		
 		except Room.DoesNotExist:
@@ -39,18 +40,21 @@ def chat_signup(request, username):
 			new_room.save()
 			get_user.rooms.add(new_room)
 			request.session['username'] = get_user.username
+			print("redirect room does not exist")
 			return redirect('room', room_name=room)
 	return render(request, 'chat.html', {"username":username, "all_rooms":all_rooms})
 
 @csrf_exempt
 def room(request, room_name):
+	print("room name = " + room_name)
 	get_room = Room.objects.get(room_name=room_name)
 	username = request.session['username']
 
 	if request.method == 'POST':
-		message =request.POST['message']
-		new_message = Message(room=get_room, sender=username, message=message)
-		new_message.save()
+		if 'message' in request.POST:
+			message =request.POST['message']
+			new_message = Message(room=get_room, sender=username, message=message)
+			new_message.save()
 
 	get_messages = Message.objects.filter(room=get_room)
 	context={
