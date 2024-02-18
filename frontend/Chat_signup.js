@@ -1,4 +1,4 @@
-import {Chat} from './Chat.js'
+import { Chat } from './Chat.js'
 
 export class Chat_signup{
 	constructor(m){
@@ -6,32 +6,34 @@ export class Chat_signup{
 	}
 
 	events(){
-		this.main.set_status('');
-		this.main.dom_room = document.querySelector("#room");
-		this.main.dom_submit = document.querySelector("#enter");
-		this.main.dom_submit.addEventListener("click", () => this.enter());
-		console.log(this.main.dom_room);
-		console.log(this.main.dom_submit);
+		console.log("on entre dans evetns");
+		this.dom_roomname = document.querySelector("#room-name-input");
+		this.dom_submit = document.querySelector("#room-name-submit");
+		this.dom_submit.addEventListener("click", () => this.start_chat());
+		this.dom_roomname.focus();
+
+		this.dom_roomname.onkeyup = function(e) {
+            if (e.keyCode === 13) {
+                document.querySelector('#room-name-submit').click();
+            }
+        };
+
+		this.dom_submit.onclick = function(e, t) {
+			
+		};
 	}
 
-	enter(){
-		if (this.main.dom_room.value === ''){
-			this.main.set_status('Please enter a room name');
-			console.log("error room_name");
+	start_chat(){
+		this.roomname = this.dom_roomname.value;
+		if (this.roomname === ''){
 			return ;
 		}
-		this.chat = new Chat(this.main);
-		console.log("rom_dom value = " + this.main.dom_room.value);
+		this.main.chat = new Chat(this.main);
 		$.ajax({
-			url: '/transchat/signup/' + this.main.login + '/',
+			url: 'transchat/' + this.roomname +'/',
 			method: 'POST',
-			data: {
-				"room": this.main.dom_room.value,
-				"username": this.main.login,
-			},
 			success: (html) => {
-				console.log('we enter');
-				this.main.load('transchat/' + this.main.dom_room.value, () => this.chat.init());
+				this.main.load('transchat/' + this.roomname, () => this.main.chat.init());
 			}
 		})
 	}

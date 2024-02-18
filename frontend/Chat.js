@@ -1,51 +1,50 @@
-// $(document).on('submit', '#message', function(e){
-// 	console.log("on entre ou aps ?")
-// 	e.preventDefault();
-// 	$.ajax({
-// 		type: 'POST',
-// 		data: {
-// 			message: $('#msg').val(),
-// 			csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
-// 		},
-// 		success: (data) => {
-// 			$( ".message" ).load(window.location.href + " .message" );
-// 		}
-// 	});
-// 	$( ".parent" ).load(window.location.href + " .parent" );
-// })
-
-// $(document).ready(function(){
-// 	setInterval(function(){
-// 		$( ".message" ).load(window.location.href + " .message" );
-// 	}, 5000)
-// })
-
 export class Chat{
 	constructor(m){
 		this.main = m;
-		console.log("creating chat");
-	}
-
-	events(){
-
+		this.socket = -1;
 	}
 
 	init(){
-		console.log("entering chat");
-		console.log("url = " + 'wss://'
-		+ window.location.host
-		+ '/transchat/'
-		+ this.main.dom_room.value
-		+ '/');
-		this.socket = new WebSocket(
-			'wss://'
-			+ window.location.host
-			+ '/transchat/'
-			+ this.main.dom_room
-			+ '/'
-		);
-		if (this.socket != null){
-			console.log("websocket");
+		this.dom_input = document.querySelector('#chat-message-input');
+		this.dom_chatlog = document.querySelector('#chat-log');
+		this.dom_submit = document.querySelector('#chat-message-submit');
+		this.roomName = JSON.parse(document.getElementById('room-name').textContent);
+		this.dom_input.addEventListener('keydown', (event) => this.press_enter(event));
+		this.dom_submit.addEventListener("click", () => this.send_message())
+		this.dom_input.focus();
+
+        this.socket = new WebSocket(
+            'ws://'
+            + window.location.host
+            + '/ws/transchat/'
+            + this.roomName
+            + '/'
+			);
+			this.events(this.socket);
+		}
+
+	events(e){
+        this.socket.onmessage = function(e) {
+            var data = JSON.parse(e.data);
+			document.querySelector('#chat-log').value += (data.message + '\n');
+        };
+
+        this.socket.onclose = function(e) {
+            console.error('Chat socket closed unexpectedly');
+        };
+	}
+
+	send_message(){
+		var message = this.dom_input.value;
+		this.socket.send(JSON.stringify({
+			'message': message,
+			'user': this.main.login,
+		}));
+		this.dom_input.value = '';
+	}
+	press_enter(e){
+		if (e.keyCode === 13) {  // enter, return
+			this.dom_submit.click();
 		}
 	}
 }

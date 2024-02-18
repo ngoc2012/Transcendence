@@ -36,7 +36,7 @@ export class Lobby
 			method: 'POST',
 			success: (html) => {
 				console.log(this.main.login);
-				this.main.load_with_data('transchat/chat_lobby', () => this.chat_signup.events(), {
+				this.main.load_with_data('transchat/chat_lobby', () => this.chat_signup.events(this.main), {
 					'username': this.main.login
 				});
 			}
@@ -143,7 +143,7 @@ export class Lobby
     rooms_update() {
         this.main.set_status('');
         this.socket = new WebSocket(
-            'wss://'
+            'ws://'
             + window.location.host
             + '/ws/game/rooms/'
         );

@@ -18,7 +18,6 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-	path('chat_lobby/', views.chat_lobby, name="chat_lobby"),
-	path("signup/<str:username>/", views.chat_signup, name='signup'),
-	path('<str:room_name>/', views.room, name='room')
+	path('chat_lobby/', views.lobby, name='lobby'),
+	path('<str:room_name>/', views.chatroom, name='chatroom'),
 ]
