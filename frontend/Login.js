@@ -44,6 +44,8 @@ export class Login
                 }
                 else
                 {
+                    sessionStorage.setItem('JWTToken', info.access_token);
+                    document.cookie = `refresh_token=${info.refresh_token}; path=/; secure; HttpOnly`;
                     this.main.email = info.email;
                     this.main.login = info.login;
                     this.main.name = info.name;

@@ -31,11 +31,12 @@ on("keydown", function (e) {
 */
 
 //recupere la data obtenue du callback de l'auth 42 
-if (my42login !== null && my42login !== "" && my42email !== "")
+if (my42login !== null && my42login !== "" && my42email !== "" && my42JWT != "")
 {
     main.login = my42login;
     main.email = my42email;
-
+    sessionStorage.setItem('JWTToken', my42JWT);
+    my42JWT = ""
     main.name = my42name;
     main.dom_name.innerHTML = main.name;
 }
