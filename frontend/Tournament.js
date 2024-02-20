@@ -45,18 +45,32 @@ export class Tournament {
             }
         });
     }
+    
+    sendInvite(userId, tournamentId) {
+        const inviteData = {
+            type: 'send_invite',
+            inviteeId : userId,
+            tourId : tournamentId
+        };
+        this.main.lobby.socket.send(JSON.stringify(inviteData));
+        console.log(`Game invite sent to ${userId}`);
+    }
 
     userList(users) {
         const playersList = document.getElementById('players-list');
         playersList.innerHTML = ''; // Clear existing list items
         users.forEach((user) => {
+            if (user.login === this.main.login) {
+                return;
+            }
+    
             const li = document.createElement('li');
             li.textContent = `${user.login}`; // Display the user's login
             
             const inviteButton = document.createElement('button');
             inviteButton.textContent = 'Send Invite';
             inviteButton.onclick = function() {
-                // sendInvite(user.id, this.id);
+                sendInvite(user.id, this.id);
             };
             
             li.appendChild(inviteButton);
@@ -64,17 +78,4 @@ export class Tournament {
         });
     }
 
-    // sendInvite(userId, tournamentId) {
-    //     if (this.lobby.inviteSocket !== -1 && this.lobby.inviteSocket.readyState === WebSocket.OPEN) {
-    //         const inviteData = {
-    //             action: 'send_invite',
-    //             inviteeId : userId,
-    //             tourId : tournamentId
-    //         };
-    //         this.lobby.inviteSocket.send(JSON.stringify(inviteData));
-    //         console.log(`Game invite sent to ${userId}`);
-    //     } else {
-    //         console.log("Invite socket is not open. Cannot send invite.");
-    //     }
-    // }
 }

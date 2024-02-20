@@ -52,34 +52,35 @@ class RoomsConsumer(AsyncWebsocketConsumer):
             await self.broadcast_user_list()
 
     async def receive(self, text_data):
-        data = json.loads(text_data)
-        if data.get('type') == 'authenticate':
-            login = data.get('login')
-            player = await get_player_by_login(login)
-            if player:
-                self.user_id = player.id  # Store the authenticated user's database ID in the instance of the consumer class
-                RoomsConsumer.connected_users.add(self.user_id)
-                await self.broadcast_user_list()
-                await self.send(text_data=json.dumps({'message': 'Socket authentication successful'}))
-            else:
-                await self.send(text_data=json.dumps({'message': 'Socket authentication failed'}))
-                await self.close(code=1008)
-
-        if data.get('type') == 'request_users_list':
-            connected_user_ids = list(RoomsConsumer.connected_users)
-            players_list = await get_connected_players_async(connected_user_ids)
-            await self.send(text_data=json.dumps({
-                'type': 'users_list',
-                'users': players_list,
-            }))
-
-        else:
+        if not text_data:
             await self.channel_layer.group_send(
                 self.group_name,
                 {
                     'type': 'group_room_list'
                 }
             )
+        else:
+            data = json.loads(text_data)
+            if data.get('type') == 'update':
+                await self.channel_layer.group_send(
+                self.group_name,
+                {
+                    'type': 'group_room_list'
+                }
+            )
+            elif data.get('type') == 'authenticate':
+                login = data.get('login')
+                player = await get_player_by_login(login)
+                if player:
+                    self.user_id = player.id  # Store the authenticated user's database ID in the instance of the consumer class
+                    RoomsConsumer.connected_users.add(self.user_id)
+                    await self.broadcast_user_list()
+                    await self.send(text_data=json.dumps({'message': 'Socket authentication successful'}))
+                else:
+                    await self.send(text_data=json.dumps({'message': 'Socket authentication failed'}))
+                    await self.close(code=1008)
+            elif data.get('type') == 'request_users_list':
+                await self.broadcast_user_list()
 
     async def broadcast_user_list(self):
         connected_user_ids = list(RoomsConsumer.connected_users)
@@ -98,8 +99,6 @@ class RoomsConsumer(AsyncWebsocketConsumer):
             'users': event['users'],
         }))
 
-
-    
     async def group_room_list(self, event):
         rooms = RoomsModel.objects.all()
         rooms_data = await room_list(rooms)

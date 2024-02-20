@@ -70,7 +70,9 @@ export class Lobby
             },
             success: (info) => {
                 if (this.socket !== -1)
-                    this.socket.send('update');
+                    this.socket.send(JSON.stringify({
+                        type: 'update'
+                    }));
                 if (typeof info === 'string')
                 {
                     this.main.set_status(info);
@@ -110,7 +112,9 @@ export class Lobby
             success: (info) => {
                 this.main.set_status(info);
                 if (this.socket !== -1)
-                    this.socket.send('update');
+                    this.socket.send(JSON.stringify({
+                        type: 'update'
+                    }));
             },
             error: (error) => this.main.set_status('Error: Can not join game')
         });
@@ -131,6 +135,11 @@ export class Lobby
                 + '/ws/game/rooms/'
             );
         }
+        else {
+            this.socket.send(JSON.stringify({
+                type: 'update'
+            }));        
+        }
 
         this.socket.onmessage = (e) => {
             if (!('data' in e))
@@ -139,22 +148,25 @@ export class Lobby
             if (data.type === 'users_list' ) {
                 if (this.tournament)
                     this.tournament.userList(data.users);
-                };
-            const rooms = JSON.parse(e.data);
-            var options_rooms = this.dom_rooms && this.dom_rooms.options;
-            this.dom_rooms.innerHTML = "";
-            if (options_rooms && rooms && rooms.length > 0) {
-                rooms.forEach((room) => {
-                    var option = document.createElement("option");
-                    option.value = room.id;
-                    option.text = room.name + " - " + room.id;
-                    this.dom_rooms.add(option);
-                });
             }
-        };
+            else {
+                const rooms = JSON.parse(e.data);
+                var options_rooms = this.dom_rooms && this.dom_rooms.options;
+                this.dom_rooms.innerHTML = "";
+                if (options_rooms && rooms && rooms.length > 0) {
+                    rooms.forEach((room) => {
+                        var option = document.createElement("option");
+                        option.value = room.id;
+                        option.text = room.name + " - " + room.id;
+                        this.dom_rooms.add(option);
+                    });
+                }
+            
+            };
+        }
 
         this.socket.onclose = (e) => {
-            console.error('Error: Socket Closed');
+            // console.error('Error: Socket Closed');
         };
     }
 
