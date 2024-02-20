@@ -9,8 +9,11 @@ import secrets
 import os
 import pyotp
 import random
+import jwt
+from datetime import datetime, timedelta
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
+from django.contrib.auth.hashers import make_password, check_password
 
 API_PUBLIC = os.environ.get('API_PUBLIC')
 API_SECRET = os.environ.get('API_SECRET')
@@ -18,6 +21,9 @@ API_SECRET = os.environ.get('API_SECRET')
 GOOGLE_OAUTH2_CLIENT_ID = os.environ.get('GOOGLE_OAUTH2_CLIENT_ID')
 GOOGLE_OAUTH2_CLIENT_SECRET = os.environ.get('GOOGLE_OAUTH2_CLIENT_SECRET')
 GOOGLE_OAUTH2_PROJECT_ID = os.environ.get('GOOGLE_OAUTH2_PROJECT_ID')
+
+JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY')
+JWT_REFRESH_SECRET_KEY = os.environ.get('JWT_REFRESH_SECRET_KEY')
 
 SENDGRID_API_KEY = os.environ.get('SENDGRID_API_KEY')
 EMAIL_SENDER = os.environ.get('EMAIL_SENDER')
@@ -40,7 +46,6 @@ def login(request):
 def twofa(request):
     return (render(request, 'twofa.html'))
 
-# le mettre en retour de mail_2fa?
 def code_2fa(request):
     return (render(request, 'code_2fa.html'))
 
@@ -93,7 +98,6 @@ def verify(request):
 # create a new player in the database and his 2fa key used for authenticator
 @csrf_exempt
 def new_player(request):
-
     if 'login' not in request.POST or request.POST['login'] == "":
         return HttpResponse("Error: No login!")
     if 'email' not in request.POST or request.POST['email'] == "":
@@ -104,44 +108,89 @@ def new_player(request):
         return HttpResponse("Error: No name!")
     if PlayersModel.objects.filter(login=request.POST['login']).exists():
         return HttpResponse("Error: Login '" + request.POST['login'] + "' exist.")
-    mysecret = pyotp.random_base32()
-    print('mysecret = ', mysecret)
+    bool = request.POST['enable2fa']
+    if (bool == 'true'):
+        mysecret = pyotp.random_base32()
+    else:
+        mysecret = ''
+
+    hashed_password = make_password(request.POST['password'])
+    
     new_player = PlayersModel(
         login=request.POST['login'],
-        password=request.POST['password'],
+        password=hashed_password,
         name=request.POST['name'],
         email=request.POST['email'],
         secret_2fa = mysecret
     )
     new_player.save()
-    return JsonResponse({
+
+    #JWT handling
+    access_token = jwt.encode({
+        'user_id': new_player.id,
+        'exp': datetime.utcnow() + timedelta(hours=1)
+    }, JWT_SECRET_KEY, algorithm='HS256')
+
+    refresh_token = jwt.encode({
+        'user_id': new_player.id
+    }, JWT_REFRESH_SECRET_KEY, algorithm='HS256')
+    response = JsonResponse({
+        'access_token': access_token,
         'login': new_player.login,
         'name': new_player.name,
         'email': new_player.email,
         'secret': new_player.secret_2fa
     })
+    response.set_cookie('refresh_token', refresh_token, httponly=True)
+    return response
 
-
-# login an user
+# Login an user and set JWT token
 @csrf_exempt
 def log_in(request):
-    if 'login' not in request.POST:
-        return (HttpResponse("Error: No login!"))
-    if 'password' not in request.POST:
-        return (HttpResponse("Error: No password!"))
-    if not PlayersModel.objects.filter(login=request.POST['login']).exists():
-        return (HttpResponse("Error: Login '" + request.POST['login'] + "' does not exist!"))
-    player = PlayersModel.objects.get(login=request.POST['login'])
-    if player.password == request.POST['password']:
-        return (JsonResponse({
-            'login': player.login,
-            'name': player.name,
-            'email': player.email
-        }))
-    return (HttpResponse('Error: Password not correct!'))
+    if request.method == 'POST':
+        if 'login' not in request.POST:
+            return JsonResponse({'error': 'No login!'}, status=400)
+        if 'password' not in request.POST:
+            return JsonResponse({'error': 'No password!'}, status=400)
+
+        login = request.POST['login']
+        password = request.POST['password']
+
+        try:
+            player = PlayersModel.objects.get(login=login)
+            if (player.secret_2fa != ''):
+                enable2fa = 'true'
+            else:
+                enable2fa = 'false'
+                
+            # JWT handling
+            if check_password(password, player.password):
+                access_token = jwt.encode({
+                    'user_id': player.id,
+                    'exp': datetime.utcnow() + timedelta(hours=1)
+                }, JWT_SECRET_KEY, algorithm='HS256')
+                refresh_token = jwt.encode({
+                    'user_id': player.id
+                }, JWT_REFRESH_SECRET_KEY, algorithm='HS256')
+
+                response = JsonResponse({
+                    'access_token': access_token,
+                    'login': player.login,
+                    'name': player.name,
+                    'email': player.email,
+                    'enable2fa': enable2fa
+                })
+                response.set_cookie('refresh_token', refresh_token, httponly=True)
+                return response
+            else:
+                return JsonResponse({'error': 'Password not correct!'}, status=401)
+        except PlayersModel.DoesNotExist:
+            return JsonResponse({'error': 'Login does not exist!'}, status=404)
+    else:
+        return JsonResponse({'error': 'Only POST requests are allowed'}, status=405)
 
 
-# callback function used to get the info from the 42 API, if the user never conected before he is added to the database as a new user.
+# callback function used to get the info from the 42 API
 @csrf_exempt
 def callback(request):
     code = request.GET.get('code')
@@ -161,68 +210,43 @@ def callback(request):
             'Authorization': f'Bearer {access_token}',
         })
 
-
         user_data = user_response.json()
-
+        hashed_password = make_password('password')
         if not PlayersModel.objects.filter(login=user_data['login']).exists():
             new_player = PlayersModel(
                 login=user_data['login'],
-                password='password',
+                password=hashed_password,
                 name=user_data['usual_full_name'],
                 email=user_data['email'],
-                secret_2fa = pyotp.random_base32()
+                secret_2fa=''
             )
             new_player.save()
 
-        return render(request, 'index.html', {
+        player = PlayersModel.objects.get(login=user_data['login'])
+
+        # JWT handling
+        access_token_jwt = jwt.encode({
+            'user_id': player.id,
+            'exp': datetime.utcnow() + timedelta(hours=1)
+        }, JWT_SECRET_KEY, algorithm='HS256')
+
+        refresh_token_jwt = jwt.encode({
+            'user_id': player.id
+        }, JWT_REFRESH_SECRET_KEY, algorithm='HS256')
+
+        response = render(request, 'index.html', {
             'my42login': user_data['login'],
             'my42name': user_data['usual_full_name'],
-            'my42email': user_data['email']
-            })
+            'my42email': user_data['email'],
+            'my42JWT': access_token_jwt
+        })
+        response.set_cookie('refresh_token', refresh_token_jwt, httponly=True)
+        
+        return response
  
     except Exception as e:
         print(f"An error occurred: {e}")
         return HttpResponse("An error occurred.")
-    
-# used to connect with google but not very useful since i need to add manualy the mail that this code accept beforehand (but  it work)
-@csrf_exempt
-def google_auth(request):
-    settings.GOOGLELOG = request.GET.get('login')
-    settings.GOOGLENAME = request.GET.get('name')
-
-    client_id = GOOGLE_OAUTH2_CLIENT_ID
-    redirect_uri = 'https://127.0.0.1/google/callback'
-    scopes = 'openid email profile'
-    state = secrets.token_urlsafe(16)
-
-    authorization_url = f'https://accounts.google.com/o/oauth2/auth?response_type=code&client_id={client_id}&redirect_uri={redirect_uri}&scope={scopes}&state={state}'
-
-    return JsonResponse({"authorization_url": authorization_url})
-
-# callback handling from google API
-@csrf_exempt
-def google_callback(request):
-    code = request.GET.get('code')
-
-    try:
-        token_response = requests.post('https://oauth2.googleapis.com/token', data={
-            'code': code,
-            'client_id': GOOGLE_OAUTH2_CLIENT_ID,
-            'client_secret': GOOGLE_OAUTH2_CLIENT_SECRET,
-            'redirect_uri': 'https://127.0.0.1/google/callback',
-            'grant_type': 'authorization_code',
-        })
-
-        token_data = token_response.json()
-        access_token = token_data['access_token']
-
-        return render(request, 'index.html', {
-            'my42login': settings.GOOGLELOG,
-            'my42name': settings.GOOGLENAME
-            })
-
-    except Exception as e:
-        return HttpResponse("Une erreur s'est produite lors de l'authentification.")
 
 # verify the authenticator TOTP code
 @csrf_exempt
