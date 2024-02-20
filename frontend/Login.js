@@ -50,7 +50,10 @@ export class Login
                     this.main.login = info.login;
                     this.main.name = info.name;
                     this.main.dom_name.innerHTML = info.name;
-                    this.main.load('/twofa', () => this.main.twofa.events());
+                    if (info.enable2fa == 'true')
+                        this.main.load('/twofa', () => this.main.twofa.events());
+                    else
+                        this.main.load('/lobby', () => this.main.lobby.events());
                 }
             },
             error: (data) => this.main.set_status(data.error)

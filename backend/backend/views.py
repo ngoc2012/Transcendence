@@ -13,6 +13,7 @@ import jwt
 from datetime import datetime, timedelta
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
+from django.contrib.auth.hashers import make_password, check_password
 
 API_PUBLIC = os.environ.get('API_PUBLIC')
 API_SECRET = os.environ.get('API_SECRET')
@@ -107,10 +108,17 @@ def new_player(request):
         return HttpResponse("Error: No name!")
     if PlayersModel.objects.filter(login=request.POST['login']).exists():
         return HttpResponse("Error: Login '" + request.POST['login'] + "' exist.")
-    mysecret = pyotp.random_base32()
+    bool = request.POST['enable2fa']
+    if (bool == 'true'):
+        mysecret = pyotp.random_base32()
+    else:
+        mysecret = ''
+
+    hashed_password = make_password(request.POST['password'])
+    
     new_player = PlayersModel(
         login=request.POST['login'],
-        password=request.POST['password'],
+        password=hashed_password,
         name=request.POST['name'],
         email=request.POST['email'],
         secret_2fa = mysecret
@@ -150,9 +158,13 @@ def log_in(request):
 
         try:
             player = PlayersModel.objects.get(login=login)
-
+            if (player.secret_2fa != ''):
+                enable2fa = 'true'
+            else:
+                enable2fa = 'false'
+                
             # JWT handling
-            if player.password == password:
+            if check_password(password, player.password):
                 access_token = jwt.encode({
                     'user_id': player.id,
                     'exp': datetime.utcnow() + timedelta(hours=1)
@@ -165,7 +177,8 @@ def log_in(request):
                     'access_token': access_token,
                     'login': player.login,
                     'name': player.name,
-                    'email': player.email
+                    'email': player.email,
+                    'enable2fa': enable2fa
                 })
                 response.set_cookie('refresh_token', refresh_token, httponly=True)
                 return response
@@ -175,6 +188,7 @@ def log_in(request):
             return JsonResponse({'error': 'Login does not exist!'}, status=404)
     else:
         return JsonResponse({'error': 'Only POST requests are allowed'}, status=405)
+
 
 # callback function used to get the info from the 42 API
 @csrf_exempt
@@ -197,14 +211,14 @@ def callback(request):
         })
 
         user_data = user_response.json()
-
+        hashed_password = make_password('password')
         if not PlayersModel.objects.filter(login=user_data['login']).exists():
             new_player = PlayersModel(
                 login=user_data['login'],
-                password='password',
+                password=hashed_password,
                 name=user_data['usual_full_name'],
                 email=user_data['email'],
-                secret_2fa=pyotp.random_base32()
+                secret_2fa=''
             )
             new_player.save()
 
