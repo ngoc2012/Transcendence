@@ -6,21 +6,17 @@ export class Chat_signup{
 	}
 
 	events(){
-		console.log("on entre dans evetns");
 		this.dom_roomname = document.querySelector("#room-name-input");
 		this.dom_submit = document.querySelector("#room-name-submit");
 		this.dom_submit.addEventListener("click", () => this.start_chat());
+		this.dom_roomname.addEventListener("keydown", (event) => this.enter_chat(event));
 		this.dom_roomname.focus();
+	}
 
-		this.dom_roomname.onkeyup = function(e) {
-            if (e.keyCode === 13) {
-                document.querySelector('#room-name-submit').click();
-            }
-        };
-
-		this.dom_submit.onclick = function(e, t) {
-			
-		};
+	enter_chat(e){
+		if (e.keyCode === 13){
+			this.dom_submit.click();
+		}
 	}
 
 	start_chat(){
@@ -29,12 +25,6 @@ export class Chat_signup{
 			return ;
 		}
 		this.main.chat = new Chat(this.main);
-		$.ajax({
-			url: 'transchat/' + this.roomname +'/',
-			method: 'POST',
-			success: (html) => {
-				this.main.load('transchat/' + this.roomname, () => this.main.chat.init());
-			}
-		})
+		this.main.load('transchat/' + this.roomname, () => this.main.chat.init());
 	}
 }
