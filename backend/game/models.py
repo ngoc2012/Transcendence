@@ -44,7 +44,7 @@ class PlayerRoomModel(models.Model):
 # Tournament classes
 class TournamentModel(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, unique=True)
     game = models.CharField(max_length=20)
     owner = models.ForeignKey(PlayersModel, on_delete=models.CASCADE)
     expires = models.DateTimeField(default=timezone.now() + timezone.timedelta(minutes=60))

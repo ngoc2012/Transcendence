@@ -7,6 +7,7 @@ export class Lobby
         this.main = m;
         this.socket = -1;
         this.game = null;
+        this.tournament = null;
     }
     
     events() {
@@ -122,16 +123,23 @@ export class Lobby
     }
 
     rooms_update() {
-        this.main.set_status('');
-        this.socket = new WebSocket(
-            'wss://'
-            + window.location.host
-            + '/ws/game/rooms/'
-        );
+        if (this.socket === -1) {
+            this.main.set_status('');
+            this.socket = new WebSocket(
+                'wss://'
+                + window.location.host
+                + '/ws/game/rooms/'
+            );
+        }
 
         this.socket.onmessage = (e) => {
             if (!('data' in e))
                 return;
+            const data = JSON.parse(e.data);
+            if (data.type === 'users_list' ) {
+                if (this.tournament)
+                    this.tournament.userList(data.users);
+                };
             const rooms = JSON.parse(e.data);
             var options_rooms = this.dom_rooms && this.dom_rooms.options;
             this.dom_rooms.innerHTML = "";
@@ -146,7 +154,7 @@ export class Lobby
         };
 
         this.socket.onclose = (e) => {
-            //console.error('Chat socket closed unexpectedly');
+            console.error('Error: Socket Closed');
         };
     }
 
@@ -165,8 +173,6 @@ export class Lobby
         {
             this.socket.close();
             this.socket = -1;
-            this.inviteSocket.close();
-            this.inviteSocket = -1;
         }
     }
 }

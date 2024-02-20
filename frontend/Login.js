@@ -41,6 +41,7 @@ export class Login
                     this.main.login = info.login;
                     this.main.name = info.name;
                     this.main.dom_name.innerHTML = info.name;
+                    this.main.lobby.socket.send(JSON.stringify({ type: "authenticate", login: this.main.login }));
                     this.main.load('/lobby', () => this.main.lobby.events());
                 }
             },

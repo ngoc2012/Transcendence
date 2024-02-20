@@ -35,5 +35,5 @@ urlpatterns = [
     path('tournament/', views.tournament, name='tournament'),
     path('tournament/new/', views.new_tournament, name='new_tournament'),
     path('tournament/lobby/', views.tournament_lobby, name='tournament_lobby'),
-    path("tournament/list/users/", views.list_users, name="list_users")
+    # path("tournament/list/users/", views.list_users, name="list_users")
 ]
