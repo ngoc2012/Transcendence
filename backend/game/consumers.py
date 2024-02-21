@@ -46,6 +46,9 @@ class RoomsConsumer(AsyncWebsocketConsumer):
             self.group_name,
             self.channel_name
         )
+        if hasattr(self, 'user_id'):
+            unique_group_name = f"user_{self.user_id}"
+            await self.channel_layer.group_discard(unique_group_name, self.channel_name)
         user_id = getattr(self, 'user_id', None)
         if user_id in RoomsConsumer.connected_users:
             RoomsConsumer.connected_users.remove(user_id)
@@ -72,8 +75,10 @@ class RoomsConsumer(AsyncWebsocketConsumer):
                 login = data.get('login')
                 player = await get_player_by_login(login)
                 if player:
-                    self.user_id = player.id  # Store the authenticated user's database ID in the instance of the consumer class
-                    RoomsConsumer.connected_users.add(self.user_id)
+                    self.user_id = player.id  # store the authenticated user's database ID in the instance of the consumer class
+                    unique_group_name = f"user_{self.user_id}"
+                    await self.channel_layer.group_add(unique_group_name, self.channel_name)  # add user to unique group
+                    RoomsConsumer.connected_users.add(self.user_id) # class level
                     await self.broadcast_user_list()
                     await self.send(text_data=json.dumps({'message': 'Socket authentication successful'}))
                 else:
@@ -81,6 +86,35 @@ class RoomsConsumer(AsyncWebsocketConsumer):
                     await self.close(code=1008)
             elif data.get('type') == 'request_users_list':
                 await self.broadcast_user_list()
+            elif data.get('type') == 'tournament_invite':
+                invitee_login = data.get('inviteeId')
+                tour_id = data.get('tourId')
+                invitee = await get_player_by_login(invitee_login)
+                invitee_id = invitee.id
+                if invitee_id in RoomsConsumer.connected_users:
+                    print('invitee id found')
+                    await self.send_invite_to_user(invitee_id, tour_id)
+
+    async def send_invite_to_user(self, invitee_id, tour_id):
+        invite_message = {
+            'type': 'tournament_invite',
+            'message': f'You have been invited to join tournament {tour_id}',
+            'tour_id': tour_id,
+        }
+        # target the invitee socket 
+        unique_group_name = f"user_{invitee_id}"
+        await self.channel_layer.group_send(
+            unique_group_name,
+            {
+                'type': 'send_tournament_invite',
+                'text': json.dumps(invite_message),
+            }
+        )
+    
+    async def send_tournament_invite(self, event):
+        # forward the event's data directly to the client
+        await self.send(text_data=event["text"])
+
 
     async def broadcast_user_list(self):
         connected_user_ids = list(RoomsConsumer.connected_users)
@@ -88,7 +122,7 @@ class RoomsConsumer(AsyncWebsocketConsumer):
         await self.channel_layer.group_send(
             self.group_name,
             {
-                'type': 'broadcast_users',  # method
+                'type': 'broadcast_users',
                 'users': players_list,
             }
         )

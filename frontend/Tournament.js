@@ -45,16 +45,6 @@ export class Tournament {
             }
         });
     }
-    
-    sendInvite(userId, tournamentId) {
-        const inviteData = {
-            type: 'send_invite',
-            inviteeId : userId,
-            tourId : tournamentId
-        };
-        this.main.lobby.socket.send(JSON.stringify(inviteData));
-        console.log(`Game invite sent to ${userId}`);
-    }
 
     userList(users) {
         const playersList = document.getElementById('players-list');
@@ -69,8 +59,8 @@ export class Tournament {
             
             const inviteButton = document.createElement('button');
             inviteButton.textContent = 'Send Invite';
-            inviteButton.onclick = function() {
-                sendInvite(user.id, this.id);
+            inviteButton.onclick = () => {
+                this.sendInvite(user.login, this.id);
             };
             
             li.appendChild(inviteButton);
@@ -78,4 +68,13 @@ export class Tournament {
         });
     }
 
+    sendInvite(userId, tournamentId) {
+        const inviteData = {
+            type: 'tournament_invite',
+            inviteeId : userId,
+            tourId : tournamentId
+        };
+        this.main.lobby.socket.send(JSON.stringify(inviteData));
+        console.log(`Game invite sent to ${userId}`);
+    }
 }

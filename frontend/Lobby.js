@@ -149,6 +149,9 @@ export class Lobby
                 if (this.tournament)
                     this.tournament.userList(data.users);
             }
+            else if (data.type == 'tournament_invite') {
+                this.displayTournamentInvite(data.message, data.tour_id);
+            }
             else {
                 const rooms = JSON.parse(e.data);
                 var options_rooms = this.dom_rooms && this.dom_rooms.options;
@@ -178,6 +181,38 @@ export class Lobby
         }
         this.tournament = new Tournament(this.main);
         this.main.load('/tournament', () => this.tournament.events());
+    }
+
+    displayTournamentInvite(message, tourId) {
+        // Create a container for the invite notification if it doesn't exist
+        let inviteContainer = document.getElementById('inviteContainer');
+        if (!inviteContainer) {
+            inviteContainer = document.createElement('div');
+            inviteContainer.id = 'inviteContainer';
+            document.body.appendChild(inviteContainer);
+        }
+    
+        // Create the invite notification
+        const inviteNotification = document.createElement('div');
+        inviteNotification.classList.add('invite-notification'); // Add some CSS class for styling
+        inviteNotification.innerHTML = `
+            <p>${message}</p>
+            <button id="acceptInviteBtn">Accept</button>
+            <button id="declineInviteBtn">Decline</button>
+        `;
+    
+        // Append the invite notification to the container
+        inviteContainer.appendChild(inviteNotification);
+    
+        // Add event listeners for the accept and decline buttons
+        document.getElementById('acceptInviteBtn').addEventListener('click', function() {
+            acceptTournamentInvite(tourId);
+            inviteContainer.removeChild(inviteNotification); // Remove the invite notification
+        });
+        document.getElementById('declineInviteBtn').addEventListener('click', function() {
+            // Optionally do something on decline
+            inviteContainer.removeChild(inviteNotification); // Remove the invite notification
+        });
     }
 
     quit() {
