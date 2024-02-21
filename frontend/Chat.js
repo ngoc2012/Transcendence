@@ -42,6 +42,7 @@ export class Chat{
 		}));
 		this.dom_input.value = '';
 	}
+
 	press_enter(e){
 		if (e.keyCode === 13) {  // enter, return
 			this.dom_submit.click();
