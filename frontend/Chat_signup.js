@@ -6,7 +6,6 @@ export class Chat_signup{
 	}
 
 	events(){
-		console.log("on entre dans evetns");
 		this.dom_roomname = document.querySelector("#room-name-input");
 		this.dom_submit = document.querySelector("#room-name-submit");
 		this.dom_submit.addEventListener("click", () => this.start_chat());
@@ -17,10 +16,6 @@ export class Chat_signup{
                 document.querySelector('#room-name-submit').click();
             }
         };
-
-		this.dom_submit.onclick = function(e, t) {
-			
-		};
 	}
 
 	start_chat(){
