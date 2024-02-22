@@ -102,8 +102,7 @@ export class Lobby
 
     delete_game() {
         this.main.set_status('');
-        if (this.main.login === '')
-        {
+        if (this.main.login === '') {
             this.main.set_status('Please login or sign up');
             return;
         }
@@ -116,14 +115,33 @@ export class Lobby
             method: 'POST',
             data: {
                 'game_id': this.dom_rooms.options[this.dom_rooms.selectedIndex].value,
-                'login': this.main.login
+                'login': this.main.login,
             },
-            success: (info) => {
-                this.main.set_status(info);
-                if (this.socket !== -1)
-                    this.socket.send('update');
+            headers: {
+                'Authorization': `Bearer ${sessionStorage.JWTToken}`
             },
-            error: (error) => this.main.set_status('Error: Can not join game')
+            success: (response) => {
+                if (response.token) {
+                    sessionStorage.setItem('JWTToken', response.token);
+                }
+                if (response.error) {
+                    const message = response.message;
+                    this.main.set_status('Error: ' + message);
+                } else if (response.message) {
+                    const message = response.message;
+                    this.main.set_status(message);
+                    if (this.socket !== -1) {
+                        this.socket.send('update');
+                    }
+                }
+            },
+            error: (xhr, textStatus, errorThrown) => {
+            let errorMessage = "Error: Can not delete game";
+            if (xhr.responseJSON && xhr.responseJSON.error) {
+                errorMessage = xhr.responseJSON.error;
+            }
+            this.main.set_status(errorMessage);
+            }
         });
     }
 

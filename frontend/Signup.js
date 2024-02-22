@@ -12,6 +12,8 @@ export class Signup
         this.dom_name = document.querySelector("#name1");
         this.dom_signup = document.querySelector("#signup1");
         this.dom_cancel = document.querySelector("#cancel1");
+        this.dom_enable2fa = document.querySelector("#enable2fa");
+    
         this.dom_signup.addEventListener("click", () => this.signup());
         this.dom_cancel.addEventListener("click", () => this.cancel());
     }
@@ -22,11 +24,13 @@ export class Signup
             this.main.set_status('Field must not be empty');
             return;
         }
+        let checkbox = this.dom_enable2fa.checked;
         console.log("Sending AJAX request with data:", {
             "login": this.dom_login.value,
             "password": this.dom_password.value,
             "name": this.dom_name.value,
-            "email": this.dom_email.value
+            "email": this.dom_email.value,
+            "enable2fa": checkbox
         });
         
         $.ajax({
@@ -36,7 +40,8 @@ export class Signup
                 "login": this.dom_login.value,
                 "password": this.dom_password.value,
                 "name": this.dom_name.value,
-                "email": this.dom_email.value
+                "email": this.dom_email.value,
+                "enable2fa": checkbox
             },
             success: (info) => {
                 if (typeof info === 'string')
@@ -45,25 +50,33 @@ export class Signup
                 }
                 else
                 {
+                    sessionStorage.setItem('JWTToken', info.access_token);
+                    document.cookie = `refresh_token=${info.refresh_token}; path=/; secure; HttpOnly`;
                     this.main.email = info.email;
                     this.main.login = info.login;
                     this.main.name = info.name;
                     this.main.dom_name.innerHTML = info.name;
-                    $.ajax({
-                        url: '/display_2fa/',
-                        method: 'POST',
-                        data: {
-                            "email": this.main.email,
-                            "secret": info.secret
-                        },
-                        success: (html) => {
-                                this.main.dom_container.innerHTML = html;
-                                this.main.display_2fa.events();
-                        },
-                        error: function(error) {
-                            console.error('Error: pong POST fail', error.message);
-                        }
-                    });
+                    if (checkbox)
+                    {
+                        $.ajax({
+                            url: '/display_2fa/',
+                            method: 'POST',
+                            data: {
+                                "email": this.main.email,
+                                "secret": info.secret
+                            },
+                            success: (html) => {
+                                    this.main.dom_container.innerHTML = html;
+                                    this.main.display_2fa.events();
+                            },
+                            error: function(error) {
+                                console.error('Error: pong POST fail', error.message);
+                            }
+                        });
+                    }
+                    else {
+                        this.main.load('/lobby', () => this.main.lobby.events());
+                    }
                 }
             },
             error: (data) => this.main.set_status(data.error)

@@ -45,11 +45,16 @@ export class Login
                 }
                 else
                 {
+                    sessionStorage.setItem('JWTToken', info.access_token);
+                    document.cookie = `refresh_token=${info.refresh_token}; path=/; secure; HttpOnly`;
                     this.main.email = info.email;
                     this.main.login = info.login;
                     this.main.name = info.name;
                     this.main.dom_name.innerHTML = info.name;
-                    this.main.load('/twofa', () => this.main.twofa.events());
+                    if (info.enable2fa == 'true')
+                        this.main.load('/twofa', () => this.main.twofa.events());
+                    else
+                        this.main.load('/lobby', () => this.main.lobby.events());
                 }
             },
             error: (data) => this.main.set_status(data.error)
