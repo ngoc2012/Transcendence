@@ -34,9 +34,7 @@ class ChatConsumer(WebsocketConsumer):
         msg = str(message).split(" ")
         user = User.objects.get(username=username)
         if self.scope['state']['username'] == '':
-            print("premier if", end='\n')
             if text_data_json['type'] == 'connection':
-                print('deuxieme if', end='\n')
                 self.scope['state']['username'] = username
                 return
         for i in msg:

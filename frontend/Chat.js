@@ -14,7 +14,7 @@ export class Chat{
 		this.dom_input.focus();
 
         this.socket = new WebSocket(
-            'ws://'
+            'wss://'
             + window.location.host
             + '/ws/transchat/'
             + this.roomName
