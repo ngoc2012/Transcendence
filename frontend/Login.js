@@ -57,7 +57,13 @@ export class Login
                         this.main.load('/lobby', () => this.main.lobby.events());
                 }
             },
-            error: (data) => this.main.set_status(data.error)
+            error: (xhr, textStatus, errorThrown) => {
+                if (xhr.responseJSON && xhr.responseJSON.error) {
+                    this.main.set_status(xhr.responseJSON.error);
+                } else {
+                    this.main.set_status('An error occurred during the request.');
+                }
+            }
         });
     }
 
