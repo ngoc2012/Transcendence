@@ -34,13 +34,6 @@ export class Lobby
         this.main.load_with_data('transchat/chat_lobby', () => this.chat_signup.events(this.main), {
             'username': this.main.login
         });
-		// $.ajax({
-		// 	url: '/transchat/chat_lobby/',
-		// 	method: 'POST',
-		// 	success: (html) => {
-		// 		console.log(this.main.login);
-		// 	}
-		// })	
 	}
 
     join() {

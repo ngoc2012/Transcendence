@@ -24,6 +24,7 @@ export class Chat{
 		}
 
 	events(e){
+		var login = this.main.log_in;
         this.socket.onmessage = function(e) {
             var data = JSON.parse(e.data);
 			document.querySelector('#chat-log').value += (data.message + '\n');
