@@ -20,9 +20,9 @@ from . import views
 from django.urls import include, path
 from .views import callback
 
+
 urlpatterns = [
     path('', views.index, name='index'),
-    path("chat/", include("chat.urls")),
     path("game/", include("game.urls")),
     path('admin/', admin.site.urls),
     path('lobby/', views.lobby, name='lobby'),
@@ -32,6 +32,7 @@ urlpatterns = [
     path('new_player/', views.new_player, name='new_player'),
     path('pong/', include("pong.urls", namespace='pong')),
     path('callback/', callback, name='callback'),
+    path('transchat/', include("transchat.urls")),
     path('twofa/', views.twofa, name='twofa'),
     path('display_2fa/', views.display_2fa, name='display_2fa'),
     path('qrcode_2fa/', views.qrcode_2fa, name='qrcode_2fa'),

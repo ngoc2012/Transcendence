@@ -80,6 +80,29 @@ export class Main
         });
     }
 
+	load_with_data(page, callback, data) {
+        $.ajax({
+            url: page + '/',
+            method: 'GET',
+			data : data,
+            success: (html) => {
+                //window.history.pushState({
+                //    "user": this.user
+                //}, page, page);
+                //console.log('Page loaded successfully');
+                this.dom_container.innerHTML = html;
+                //pas oublier de changer ca
+                if (callback && typeof callback === 'function') {
+                    callback();
+                }
+                // callback();  // fait erreur "callback is not a function"
+            },
+            error: function(error) {
+                console.error('Error: pong GET fail', error.message);
+            }
+        });
+    }
+
     signup_click() {
         this.load('/signup', () => this.signup.events());
     }

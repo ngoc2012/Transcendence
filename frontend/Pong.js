@@ -75,7 +75,7 @@ export class Pong
 
     connect() {
         this.socket = new WebSocket(
-            'wss://'
+            'ws://'
             + window.location.host
             + '/ws/pong/'
             + this.room.id

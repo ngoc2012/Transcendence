@@ -1,4 +1,5 @@
 import {Pong} from './Pong.js'
+import { Chat_signup } from './Chat_signup.js'
 
 export class Lobby
 {
@@ -13,13 +14,27 @@ export class Lobby
         this.dom_join = document.querySelector("#join");
         this.dom_pong = document.querySelector("#pong");
         this.dom_pew = document.querySelector("#pew");
+        this.dom_chat = document.querySelector("#chat");
         this.dom_delete = document.querySelector("#delete");
         this.dom_pong.addEventListener("click", () => this.new_game("pong"));
         this.dom_pew.addEventListener("click", () => this.new_game("pew"));
         this.dom_delete.addEventListener("click", () => this.delete_game());
         this.dom_join.addEventListener("click", () => this.join());
+		this.dom_chat.addEventListener("click", () => this.chat());
         this.rooms_update();
     }
+
+	chat(){
+		this.main.set_status('')
+		if (this.main.login === ''){
+			this.main.set_status('You must be logged in to chat.');
+			return;
+		}
+		this.chat_signup = new Chat_signup(this.main);
+        this.main.load_with_data('transchat/chat_lobby', () => this.chat_signup.events(this.main), {
+            'username': this.main.login
+        });
+	}
 
     join() {
         if (this.dom_rooms.selectedIndex === -1)
@@ -139,7 +154,7 @@ export class Lobby
     rooms_update() {
         this.main.set_status('');
         this.socket = new WebSocket(
-            'wss://'
+            'ws://'
             + window.location.host
             + '/ws/game/rooms/'
         );

@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from game.models import PlayersModel
+from transchat.models import Room
 from django.shortcuts import redirect
 from django.conf import settings
 import requests
@@ -34,10 +35,8 @@ def lobby(request):
 def signup(request):
     return render(request, 'signup.html')
 
-
 def login(request):
 	return (render(request, 'login.html'))
-
 
 def twofa(request):
     return (render(request, 'twofa.html'))
@@ -60,7 +59,7 @@ def qrcode_2fa(request):
 @csrf_exempt
 def mail_2fa(request):
     sender_email = EMAIL_SENDER
-    recipient_email = request.GET.get('email') 
+    recipient_email = request.GET.get('email')
     print(recipient_email)
     code = ""
     for _ in range(6):
@@ -92,6 +91,8 @@ def verify(request):
     return JsonResponse({'result': '0'})
 
 # create a new player in the database and his 2fa key used for authenticator
+
+
 @csrf_exempt
 def new_player(request):
     if 'login' not in request.POST or request.POST['login'] == "":

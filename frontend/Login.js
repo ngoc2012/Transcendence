@@ -8,6 +8,7 @@ export class Login
 {
     constructor(m) {
         this.main = m;
+		this.blocked_users = [];
     }
     
     events() {
