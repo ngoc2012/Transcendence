@@ -30,7 +30,13 @@ export class Lobby
 			this.main.set_status('You must be logged in to chat.');
 			return;
 		}
-        $
+        $.ajax({
+			url: '/transchat/chat_lobby/',
+			method: 'POST',
+			data:{
+				'username': this.main.login
+			}
+		});
 		this.chat = new Chat(this.main);
         this.main.load('transchat/general_chat', () => this.chat.init());
 	}
