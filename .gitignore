@@ -3,9 +3,8 @@
 __pycache__
 package-lock.json
 .env
-backend/game/migrations
-backend/transchat/migrations
-backend/pong/migrations
+backend/db.sqlite3
+backend/game/migrations/*.py
 backend/venv
 backend/db.sqlite3
 to_do.txt
