@@ -31,6 +31,8 @@ remove_images:
 	@docker image prune --all --force
 
 re:
+	gio trash -f backend/game/migrations/[!__init__.py]*
+	gio trash -f backend/db.sqlite3
 	@make down
 	@make up
 
