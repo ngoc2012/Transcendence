@@ -8,6 +8,9 @@ class ChatConsumer(WebsocketConsumer):
     def connect(self):
         self.room_name = self.scope["url_route"]["kwargs"]["room_name"]
         self.room_group_name = "chat_%s" % self.room_name
+        self.scope['state'] ={
+            'username': ''
+		}
         # Join room group
         async_to_sync(self.channel_layer.group_add)(
             self.room_group_name, self.channel_name
@@ -30,9 +33,12 @@ class ChatConsumer(WebsocketConsumer):
         username = text_data_json['user']
         msg = str(message).split(" ")
         user = User.objects.get(username=username)
-        self.scope['state'] ={
-            "username": username
-		}
+        if self.scope['state']['username'] == '':
+            print("premier if", end='\n')
+            if text_data_json['type'] == 'connection':
+                print('deuxieme if', end='\n')
+                self.scope['state']['username'] = username
+                return
         for i in msg:
             if i and blockcmd == True:
                 if i == username:
@@ -73,6 +79,6 @@ class ChatConsumer(WebsocketConsumer):
         msg_user = event['user']
         user = User.objects.get(username=self.scope['state']['username'])
         try:
-            print("blockeduser = " + str(user.blocked_user.get(username=msg_user)))
+            user.blocked_user.get(username=msg_user)
         except User.DoesNotExist:
             self.send(text_data=json.dumps({"message": message, "user": msg_user}))

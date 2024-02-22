@@ -22,17 +22,28 @@ export class Chat{
 			);
 			this.events(this.socket);
 		}
-
+		
 	events(e){
-		var login = this.main.log_in;
-        this.socket.onmessage = function(e) {
-            var data = JSON.parse(e.data);
+		var socket = this.socket;
+		var login = this.main.login;
+		var room = this.roomName;
+
+		this.socket.onopen = function(e) {
+			socket.send(JSON.stringify({
+				'type': 'connection',
+				'message': room,
+				'user': login,
+			}));
+		};
+
+       	this.socket.onmessage = function(e) {
+       	    var data = JSON.parse(e.data);
 			document.querySelector('#chat-log').value += (data.message + '\n');
-        };
+       	};
 
         this.socket.onclose = function(e) {
             console.error('Chat socket closed unexpectedly');
-        };
+       	};
 	}
 
 	send_message(){
