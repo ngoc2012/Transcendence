@@ -19,5 +19,6 @@ from . import views
 
 urlpatterns = [
 	path('chat_lobby/', views.lobby, name='lobby'),
+	path('callback/transchat/chat_lobby/', views.lobby, name='lobby'),
 	path('<str:room_name>/', views.chatroom, name='chatroom'),
 ]
