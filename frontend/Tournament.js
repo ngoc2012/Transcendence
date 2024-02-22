@@ -19,6 +19,13 @@ export class Tournament {
         this.dom_player_list = document.getElementById('players-list');
         if (this.dom_player_list)
             this.main.lobby.socket.send(JSON.stringify({type: 'request_users_list'}));
+            const inviteButton = document.querySelector(`button[data-login='${login}']`);
+        this.dom_start_tournament = document.getElementById('start-tournament');
+        this.dom_start_tournament.disabled = true;
+    }
+
+    eventsStart() {
+
     }
     
     tournamentSubmit(event) {
@@ -58,6 +65,7 @@ export class Tournament {
             li.textContent = `${user.login}`; // Display the user's login
             
             const inviteButton = document.createElement('button');
+            inviteButton.setAttribute('data-login', user.login);
             inviteButton.textContent = 'Send Invite';
             inviteButton.onclick = () => {
                 this.sendInvite(user.login, this.id);
@@ -68,6 +76,15 @@ export class Tournament {
         });
     }
 
+    tournamentInviteAccepted(login) {
+        const inviteButton = document.querySelector(`button[data-login='${login}']`);
+        if (inviteButton) {
+            inviteButton.textContent = 'Accepted';
+            inviteButton.disabled = true;
+            this.player = this.player + 1;
+        }
+    }
+
     sendInvite(userId, tournamentId) {
         const inviteData = {
             type: 'tournament_invite',
@@ -76,5 +93,15 @@ export class Tournament {
         };
         this.main.lobby.socket.send(JSON.stringify(inviteData));
         console.log(`Game invite sent to ${userId}`);
+    }
+
+    tournamentReady() {
+        this.dom_start_tournament.addEventListener('click', (e) => this.startTournament(e));
+        this.dom_start_tournament.disabled = false;
+    }
+
+    startTournament() {
+        const tournamentUrl = `/tournament/${this.id}`;
+        this.main.load(tournamentUrl, () => this.eventsStart());
     }
 }

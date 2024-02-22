@@ -27,6 +27,9 @@ def tournament(request):
 def tournament_lobby(request):
      return (render(request, 'tournament_lobby.html'))
 
+def tournament_lobby(request):
+     return (render(request, 'tournament_ready.html'))
+
 @csrf_exempt
 def new_player(request):
     if 'login' not in request.POST or request.POST['login'] == "":
@@ -121,13 +124,7 @@ def new_tournament(request):
             return JsonResponse({'error': str(e)}, status=400)
     else:
          return JsonResponse({'error': 'Invalid request'}, status=405)
-    
-# @csrf_exempt
-# def list_users(request):
-#     # Fetch player details from the database for all connected users
-#     connected_players = PlayersModel.objects.filter(id__in=RoomsConsumer.connected_users).values('id', 'login', 'name')
-#     players_list = list(connected_players)
-#     return JsonResponse(players_list, safe=False)
-#     # players = PlayersModel.objects.all().values('id', 'login', 'name')
-#     # players_list = list(players) #convert to list -> JSON serialize
-#     # return JsonResponse(players_list, safe=False)
+
+@csrf_exempt
+def tournament_start(request):
+    None

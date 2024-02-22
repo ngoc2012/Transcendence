@@ -152,6 +152,12 @@ export class Lobby
             else if (data.type == 'tournament_invite') {
                 this.displayTournamentInvite(data.message, data.tour_id);
             }
+            else if (data.type === 'tournament_invite_accepted') {
+                this.tournament.tournamentInviteAccepted(data.message);
+            }
+            else if (data.type === 'tournament_ready') {
+                this.tournament.tournamentReady();
+            }
             else {
                 const rooms = JSON.parse(e.data);
                 var options_rooms = this.dom_rooms && this.dom_rooms.options;
@@ -184,7 +190,6 @@ export class Lobby
     }
 
     displayTournamentInvite(message, tourId) {
-        // Create a container for the invite notification if it doesn't exist
         let inviteContainer = document.getElementById('inviteContainer');
         if (!inviteContainer) {
             inviteContainer = document.createElement('div');
@@ -192,27 +197,44 @@ export class Lobby
             document.body.appendChild(inviteContainer);
         }
     
-        // Create the invite notification
         const inviteNotification = document.createElement('div');
-        inviteNotification.classList.add('invite-notification'); // Add some CSS class for styling
+        inviteNotification.classList.add('invite-notification');
         inviteNotification.innerHTML = `
             <p>${message}</p>
             <button id="acceptInviteBtn">Accept</button>
             <button id="declineInviteBtn">Decline</button>
         `;
     
-        // Append the invite notification to the container
+        // append the invite notification to the container
         inviteContainer.appendChild(inviteNotification);
     
-        // Add event listeners for the accept and decline buttons
-        document.getElementById('acceptInviteBtn').addEventListener('click', function() {
-            acceptTournamentInvite(tourId);
-            inviteContainer.removeChild(inviteNotification); // Remove the invite notification
+        // event listeners accept / decline buttons
+        document.getElementById('acceptInviteBtn').addEventListener('click', () => {
+            this.tournamentInviteResponse('accept', message);
+            inviteContainer.removeChild(inviteNotification);
         });
-        document.getElementById('declineInviteBtn').addEventListener('click', function() {
-            // Optionally do something on decline
-            inviteContainer.removeChild(inviteNotification); // Remove the invite notification
-        });
+        document.getElementById('declineInviteBtn').addEventListener('click', () => {
+            this.tournamentInviteResponse('decline', message);
+            inviteContainer.removeChild(inviteNotification);
+        });        
+    }
+
+    tournamentInviteResponse(response, tourId) {
+        if (response === 'accept') {
+            this.socket.send(JSON.stringify({
+                type: 'tournament_invite_resp',
+                response: 'accept',
+                id: tourId,
+                login: this.main.login
+            }));        
+        } else {
+            this.socket.send(JSON.stringify({
+                type: 'tournament_invite_resp',
+                response: 'decline',
+                id: tourId,
+                login: this.main.login
+            }));
+        }
     }
 
     quit() {
