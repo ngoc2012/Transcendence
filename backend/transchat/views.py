@@ -17,6 +17,10 @@ def lobby(request):
                 new_user.save()
                 request.session['user'] = username
                 return render(request, 'chat_signup.html', {"username": username})
+    if request.method == 'POST':
+        if 'username' in request.POST:
+            username = request.POST['username']
+    return render(request, 'chat_signup.html', {"username": username})
 
 @csrf_exempt
 def chatroom(request, room_name):
