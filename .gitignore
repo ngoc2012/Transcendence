@@ -5,6 +5,7 @@ package-lock.json
 .env
 backend/db.sqlite3
 backend/game/migrations/*.py
+backend/transchat/migrations/*.py
 backend/venv
 backend/db.sqlite3
 to_do.txt

@@ -24,15 +24,16 @@ export class Chat{
 		}
 		
 	events(e){
-		var socket = this.socket;
-		var login = this.main.login;
-		var room = this.roomName;
+		const socket = this.socket;
+		const login = this.main.login;
+		const room = this.roomName;
 
 		this.socket.onopen = function(e) {
 			socket.send(JSON.stringify({
 				'type': 'connection',
 				'message': room,
 				'user': login,
+                'room': room
 			}));
 		};
 
@@ -47,10 +48,13 @@ export class Chat{
 	}
 
 	send_message(){
-		var message = this.dom_input.value;
+		const room = this.roomName;
+		const message = this.dom_input.value;
 		this.socket.send(JSON.stringify({
 			'message': message,
 			'user': this.main.login,
+            'room' : room,
+            'type': 'chat_message'
 		}));
 		this.dom_input.value = '';
 	}
