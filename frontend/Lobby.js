@@ -31,13 +31,6 @@ export class Lobby
 			return;
 		}
 		this.chat_signup = new Chat_signup(this.main);
-		$.ajax({
-			url: '/transchat/chat_lobby/',
-			method: 'POST',
-			data:{
-				'username': this.main.login
-			}
-		});
         this.main.load_with_data('transchat/chat_lobby', () => this.chat_signup.events(this.main), {
             'username': this.main.login
         });

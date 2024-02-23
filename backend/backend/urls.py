@@ -32,7 +32,6 @@ urlpatterns = [
     path('new_player/', views.new_player, name='new_player'),
     path('pong/', include("pong.urls", namespace='pong')),
     path('callback/', callback, name='callback'),
-    path('callback/transchat/', include("transchat.urls")),
     path('transchat/', include("transchat.urls")),
     path('twofa/', views.twofa, name='twofa'),
     path('display_2fa/', views.display_2fa, name='display_2fa'),
