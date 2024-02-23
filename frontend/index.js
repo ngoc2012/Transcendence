@@ -39,6 +39,8 @@ if (my42login !== null && my42login !== "" && my42email !== "" && my42JWT != "")
     my42JWT = ""
     main.name = my42name;
     main.dom_name.innerHTML = main.name;
+    history.replaceState({}, '', 'https://127.0.0.1:8080');
+
 }
 
 document.addEventListener('DOMContentLoaded', () => {
