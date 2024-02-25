@@ -98,6 +98,13 @@ def get_tournament_owner(tour_id):
         return organizer_id
     return None
 
+@database_sync_to_async
+def get_matches_by_status(tournament_id, status):
+    return list(TournamentMatchModel.objects.filter(
+        tournament_id=tournament_id, 
+        status=status
+    ).select_related('room', 'player1', 'player2'))
+
 
 get_connected_players_async = database_sync_to_async(get_connected_players)
 
@@ -177,6 +184,8 @@ class RoomsConsumer(AsyncWebsocketConsumer):
                 await self.handle_tournament_join(data)
             elif data.get('type') == 'tournament_event_invite':
                 await self.handle_tourevent_invite(data)
+            elif data.get('type') == 'tournament_list':
+                await self.handle_tour_matches(data)
 
     async def handle_tourevent_invite(self, data):
         tour_id = data.get('tour_id')
@@ -218,8 +227,6 @@ class RoomsConsumer(AsyncWebsocketConsumer):
             return
         
         participant_ids = await sync_to_async(list)(tournament.participants.values_list('id', flat=True))
-        print(participant_ids)
-        print(self.user_id)
         if self.user_id in participant_ids:
             room_id = await self.get_user_match_room_id(id)
             if room_id:
@@ -233,7 +240,7 @@ class RoomsConsumer(AsyncWebsocketConsumer):
             return
 
         participants = await get_tournament_participants(tournament)
-        matches_data = []
+        # matches_data = []
 
         if len(participants) % 2 != 0:
             last_participant = participants[-1]
@@ -245,19 +252,35 @@ class RoomsConsumer(AsyncWebsocketConsumer):
             if player1 and player2:
                 room = await new_room(i // 2, tournament)
                 match = await create_tournament_match(tournament, room, player1, player2, tournament.round)
-                match_data = {
-                    'room_id': str(room.id),
-                    'player1_name': player1.name,
-                    'player2_name': player2.name,
-                    'status': match.status,
-                }
-                matches_data.append(match_data)
-
+                # match_data = {
+                #     'room_id': str(room.id),
+                #     'player1_name': player1.name,
+                #     'player2_name': player2.name,
+                #     'status': match.status,
+                # }
+                # matches_data.append(match_data)
+                
+    async def handle_tour_matches(self, data):
+        tour_id = data.get('id')
+        tournament = await get_tournament(tour_id)
+        if not tournament:
+            await self.send(text_data=json.dumps({'error': 'Tournament not found'}))
+            return
+        
         await self.send(text_data=json.dumps({
             'type': 'tournament_infos',
             'name': tournament.name,
             'round': tournament.round
         }))
+        
+        matches = await get_matches_by_status(tour_id, 'Waiting for players to join')
+        
+        matches_data = [{
+        'room_id': str(match.room.id),
+        'player1_name': match.player1.name,
+        'player2_name': match.player2.name if match.player2 else 'Awaiting player',
+        'status': match.status
+        } for match in matches]
 
         await self.send(text_data=json.dumps({
             'type': 'tournament_matches',
@@ -328,20 +351,20 @@ class RoomsConsumer(AsyncWebsocketConsumer):
         match = await database_sync_to_async(
             TournamentMatchModel.objects.filter(
                 tournament_id=tour_id, 
-                player1_id=self.user_id
+                player1__id=self.user_id  # player1__id: query foreign key relations
             ).first
         )()
-        
+
         if not match:
             match = await database_sync_to_async(
                 TournamentMatchModel.objects.filter(
                     tournament_id=tour_id, 
-                    player2_id=self.user_id
+                    player2__id=self.user_id
                 ).first
             )()
-        
+
         if match:
             room = await database_sync_to_async(lambda: match.room)()
             return room.id
-            
+
         return None

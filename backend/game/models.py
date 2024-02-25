@@ -62,10 +62,10 @@ class TournamentModel(models.Model):
 
 class TournamentMatchModel(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    tournament = models.ForeignKey(TournamentModel, on_delete=models.CASCADE, related_name='results')
-    room = models.OneToOneField(RoomsModel, on_delete=models.CASCADE, related_name='tournament_result')
-    player1 = models.ForeignKey(PlayersModel, on_delete=models.CASCADE, related_name='tournament_results_as_player1')
-    player2 = models.ForeignKey(PlayersModel, on_delete=models.CASCADE, related_name='tournament_results_as_player2')
+    tournament = models.ForeignKey(TournamentModel, on_delete=models.CASCADE, related_name='tournament')
+    room = models.OneToOneField(RoomsModel, on_delete=models.CASCADE, related_name='tournament_room')
+    player1 = models.ForeignKey(PlayersModel, on_delete=models.CASCADE, related_name='tournament_player1')
+    player2 = models.ForeignKey(PlayersModel, on_delete=models.CASCADE, related_name='tournament_player2')
     p1_score = models.IntegerField(default=0)
     p2_score = models.IntegerField(default=0)
     winner = models.ForeignKey(PlayersModel, on_delete=models.SET_NULL, null=True, blank=True, related_name='won_match_results')

@@ -27,7 +27,7 @@ export class Tournament {
         this.dom_matches = document.getElementById('tournament-matches');
         if (this.dom_matches) {
             const data = {
-            type: 'tournament_rounds',
+            type: 'tournament_list',
             id: this.id
             };
             this.main.lobby.socket.send(JSON.stringify(data));
@@ -108,6 +108,16 @@ export class Tournament {
     queryTournamentRound() {
         const tournamentUrl = `/tournament/${this.id}`;
         this.main.load(tournamentUrl, () => this.eventsStart());
+        const data = {
+        type: 'tournament_rounds',
+        id: this.id
+        };
+        this.main.lobby.socket.send(JSON.stringify(data));
+    }
+
+    queryRoundList() {
+        const tournamentUrl = `/tournament/${this.id}`;
+        this.main.load(tournamentUrl, () => this.eventsStart());
     }
 
     startEventInvite() {
@@ -121,7 +131,8 @@ export class Tournament {
 
     eventInvite(tourID) {
         this.id = tourID;
-        this.queryTournamentRound();
+        // this.queryTournamentRound();
+        this.queryRoundList();
     }
 
     tournamentInfos(name, round) {
