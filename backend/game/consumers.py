@@ -203,20 +203,20 @@ class RoomsConsumer(AsyncWebsocketConsumer):
         tour_id = data.get('tour_id')
         match_id = data.get('match_id')
         tournament = await get_tournament(tour_id)
-        if not tournament:
-            await self.send(text_data=json.dumps({'error': 'Tournament not found'}))
-            return
-        match = await database_sync_to_async(TournamentMatchModel.objects.select_related('tournament').get)(id=match_id)
-        if not match:
-            await self.send(text_data=json.dumps({'error': 'Match not found'}))
-            return
-        if match.tournament.id != tournament.id:
-            await self.send(text_data=json.dumps({'error': 'Match does not belong to tournament'}))
-            return
+        # if not tournament:
+        #     await self.send(text_data=json.dumps({'error': 'Tournament not found'}))
+        #     return
+        # match = await database_sync_to_async(TournamentMatchModel.objects.select_related('tournament').get)(id=match_id)
+        # if not match:
+        #     await self.send(text_data=json.dumps({'error': 'Match not found'}))
+        #     return
+        # if match.tournament.id != tournament.id:
+        #     await self.send(text_data=json.dumps({'error': 'Match does not belong to tournament'}))
+        #     return
         await self.send(text_data=json.dumps({
             'type': 'tournament_join_valid',
-            'tourId': tournament.id,
-            'matchId': data.match_id
+            'tourId': str(tournament.id),
+            'matchId': str(match_id)
         }))
 
     async def handle_tournament_player(self, data):
@@ -240,7 +240,6 @@ class RoomsConsumer(AsyncWebsocketConsumer):
             return
 
         participants = await get_tournament_participants(tournament)
-        # matches_data = []
 
         if len(participants) % 2 != 0:
             last_participant = participants[-1]
@@ -252,13 +251,6 @@ class RoomsConsumer(AsyncWebsocketConsumer):
             if player1 and player2:
                 room = await new_room(i // 2, tournament)
                 match = await create_tournament_match(tournament, room, player1, player2, tournament.round)
-                # match_data = {
-                #     'room_id': str(room.id),
-                #     'player1_name': player1.name,
-                #     'player2_name': player2.name,
-                #     'status': match.status,
-                # }
-                # matches_data.append(match_data)
                 
     async def handle_tour_matches(self, data):
         tour_id = data.get('id')

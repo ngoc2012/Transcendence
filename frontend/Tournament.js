@@ -1,4 +1,5 @@
 import {Lobby} from './Lobby.js'
+import {Pong} from './Pong.js';
 
 export class Tournament {
 
@@ -6,7 +7,7 @@ export class Tournament {
         this.main = m;
         this.lobby = m.lobby;
         this.id = -1;
-        this.match = null;
+        this.game = null;
     }
 
     events() {
@@ -188,7 +189,7 @@ export class Tournament {
             method: 'POST',
             data: {
                 'login': this.main.login,
-                "game_id": data.match_id
+                "game_id": data.matchId
             },
             success: (info) => {
                 if (typeof info === 'string')
@@ -197,7 +198,7 @@ export class Tournament {
                 {
                     switch (info.game) {
                         case 'pong':
-                            this.match = new Pong(this.main, this.main.lobby, info);
+                            this.game = new Pong(this.main, this.main.lobby, info);
                             this.main.load('/pong', () => this.game.init());
                             break;
                     }
