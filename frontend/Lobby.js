@@ -158,6 +158,21 @@ export class Lobby
             else if (data.type === 'tournament_ready') {
                 this.tournament.tournamentReady();
             }
+            else if (data.type === 'tournament_infos') {
+                this.tournament.tournamentInfos(data.name, data.round)
+            }
+            else if (data.type === 'tournament_matches') {
+                this.tournament.displayTournamentMatches(data.matches);
+            }
+            else if (data.type === 'tournament_join') {
+                this.tournament.displayPlayerAction(data.message);
+            }
+            else if (data.type === 'tournament_join_valid') {
+                this.tournament.joinMatch(data);
+            }
+            else if (data.type === 'tournament_event_invite') {
+                this.displayEventInvite(data.message);
+            }
             else {
                 const rooms = JSON.parse(e.data);
                 var options_rooms = this.dom_rooms && this.dom_rooms.options;
@@ -215,6 +230,36 @@ export class Lobby
         });
         document.getElementById('declineInviteBtn').addEventListener('click', () => {
             this.tournamentInviteResponse('decline', message);
+            inviteContainer.removeChild(inviteNotification);
+        });        
+    }
+
+    displayEventInvite(tourID) {
+        let inviteContainer = document.getElementById('inviteContainer');
+        if (!inviteContainer) {
+            inviteContainer = document.createElement('div');
+            inviteContainer.id = 'inviteContainer';
+            document.body.appendChild(inviteContainer);
+        }
+    
+        const inviteNotification = document.createElement('div');
+        inviteNotification.classList.add('event-invite-notification');
+        inviteNotification.innerHTML = `
+            <p>Tournament is ready! Join?</p>
+            <button id="acceptInviteBtn">Accept</button>
+            <button id="declineInviteBtn">Decline</button>
+        `;
+    
+        // append the invite notification to the container
+        inviteContainer.appendChild(inviteNotification);
+    
+        // event listeners accept / decline buttons
+        document.getElementById('acceptInviteBtn').addEventListener('click', () => {
+            inviteContainer.removeChild(inviteNotification);
+            this.tournament = new Tournament(this.main);
+            this.tournament.eventInvite(tourID);
+        });
+        document.getElementById('declineInviteBtn').addEventListener('click', () => {
             inviteContainer.removeChild(inviteNotification);
         });        
     }

@@ -1,7 +1,8 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from game.models import PlayersModel, TournamentModel
+from game.models import PlayersModel, TournamentModel, TournamentMatchModel, RoomsModel, PlayerRoomModel
+from django.utils import timezone
 import requests
 import os
 import random, string
@@ -27,8 +28,8 @@ def tournament(request):
 def tournament_lobby(request):
      return (render(request, 'tournament_lobby.html'))
 
-def tournament_lobby(request):
-     return (render(request, 'tournament_ready.html'))
+def tournament_start(request, tournament_id):
+     return (render(request, 'tournament_start.html'))
 
 @csrf_exempt
 def new_player(request):
@@ -125,6 +126,52 @@ def new_tournament(request):
     else:
          return JsonResponse({'error': 'Invalid request'}, status=405)
 
-@csrf_exempt
-def tournament_start(request):
-    None
+# @csrf_exempt
+# def tournament_round(request):
+#     tournament = get_object_or_404(TournamentModel, pk=tournament_id)
+#     participants = list(tournament.participants.all())
+
+#     if len(participants) % 2 != 0:
+#         last_participant = participants[-1]
+#         tournament.participants.remove(last_participant)
+#         tournament.waitlist.add(last_participant)
+
+#     def new_room(i, tournament):
+#         room = RoomsModel.objects.create(
+#             game=tournament.game,
+#             name=f"{tournament.name} - Match {i}",
+#             owner=tournament.owner,
+#             server=tournament.owner
+#         )
+#         if room.game == 'pong':
+#             room.x = pong_data['PADDLE_WIDTH'] + pong_data['RADIUS']
+#             room.y = pong_data['HEIGHT'] / 2
+#             room.save()
+#         player_room = PlayerRoomModel.objects.create(
+#             player=tournament.owner,
+#             room=room,
+#             side=0,
+#             position=0
+#         )
+#         if room.game == 'pong':
+#             player_room.x = 0
+#             player_room.y = pong_data['HEIGHT'] / 2 - pong_data['PADDLE_HEIGHT'] / 2
+#             player_room.save()
+        
+#         return room
+
+#     for i in range(0, len(participants), 2):
+#         player1 = participants[i]
+#         player2 = participants[i + 1]
+#         room = new_room(i, tournament)
+#         match = TournamentMatchModel.objects.create(
+#             tournament=tournament,
+#             room=room,
+#             player1=player1,
+#             player2=player2,
+#             round_number=tournament.round,
+#             start_time=timezone.now()
+#         )
+
+
+
