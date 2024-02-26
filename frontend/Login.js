@@ -77,4 +77,3 @@ export class Login
         this.main.load('/lobby', () => this.main.lobby.events());
     }
 }
-this.main.load('/lobby', () => this.main.lobby.events());
