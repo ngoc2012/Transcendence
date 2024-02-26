@@ -20,9 +20,9 @@ from . import views
 from django.urls import include, path
 from .views import callback
 
+
 urlpatterns = [
     path('', views.index, name='index'),
-    path("chat/", include("chat.urls")),
     path("game/", include("game.urls")),
     path('admin/', admin.site.urls),
     path('lobby/', views.lobby, name='lobby'),
@@ -32,9 +32,21 @@ urlpatterns = [
     path('new_player/', views.new_player, name='new_player'),
     path('pong/', include("pong.urls", namespace='pong')),
     path('callback/', callback, name='callback'),
+    path('transchat/', include("transchat.urls")),
+    path('twofa/', views.twofa, name='twofa'),
+    path('display_2fa/', views.display_2fa, name='display_2fa'),
+    path('qrcode_2fa/', views.qrcode_2fa, name='qrcode_2fa'),
+    path('mail_2fa/', views.mail_2fa, name='mail_2fa'),
+    path('code_2fa/', views.code_2fa, name='code_2fa'),
+    path('verify/', views.verify, name='verify'),
+    path('verify_qrcode/', views.verify_qrcode, name='verify_qrcode'),
     path('tournament/', views.tournament, name='tournament'),
     path('tournament/new/', views.new_tournament, name='new_tournament'),
     path('tournament/lobby/', views.tournament_lobby, name='tournament_lobby'),
     path('tournament/<uuid:tournament_id>/', views.tournament_start, name='tournament_start'),
     # path('tournament/<uuid:tournament_id>/', views.tournament_round, name="list_users")
+
 ]
+
+
+

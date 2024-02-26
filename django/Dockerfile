@@ -10,6 +10,7 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         build-essential \
         python3 \
+        wget \
         python3-pip \
         python3-dev \
         libffi-dev \
@@ -22,6 +23,12 @@ RUN pip3 install --upgrade pip \
     && pip3 install Django && \
     pip3 install channels daphne \
     && pip3 install requests
+    
+RUN     pip3 install pyjwt
+
+RUN     pip3 install google-auth google-auth-oauthlib google-auth-httplib2
+RUN     pip3 install pyotp
+RUN     pip3 install sendgrid
 
 COPY entrypoint.sh .
 RUN chmod +x entrypoint.sh

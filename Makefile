@@ -31,6 +31,8 @@ remove_images:
 	@docker image prune --all --force
 
 re:
+	gio trash -f backend/game/migrations/[!__init__.py]*
+	gio trash -f backend/db.sqlite3
 	@make down
 	@make up
 
@@ -44,6 +46,10 @@ clean:
 # gitf: git in final
 # gitd: git in developpement
 # Ex: make gitd M="your message"
+
+
+#flush database : 
+#docker exec -it django python3 /app/backend/manage.py flush
 
 M:=
 test:
@@ -63,6 +69,7 @@ gitd:
 gitclean:
 	# Clean migration folder
 	gio trash -f backend/game/migrations/[!__init__.py]*
+	gio trash -f backend/db.sqlite3
 	# Clean __pycache__
 	find . -type d -name "__pycache__" -exec gio trash -f {} +
 

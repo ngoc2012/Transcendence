@@ -3,8 +3,13 @@ from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from .models import RoomsModel, PlayersModel, PlayerRoomModel, TournamentModel, TournamentMatchModel
 from django.utils import timezone
-
+import jwt
 from pong.data import pong_data
+import os
+from datetime import datetime, timedelta
+
+JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY')
+JWT_REFRESH_SECRET_KEY = os.environ.get('JWT_REFRESH_SECRET_KEY')
 
 def get_data(game):
     if game == 'pong':
@@ -92,23 +97,79 @@ def join(request):
         'data': get_data(room.game)
         }))
 
+
+#delete a room with a JWT check
 @csrf_exempt
 def delete(request):
     if 'game_id' not in request.POST:
-        return (HttpResponse("Error: No game id!"))
+        return JsonResponse({'error': 'No game id!'}, status=400)
     if 'login' not in request.POST:
-        return (HttpResponse("Error: No login!"))
-    if not PlayersModel.objects.filter(login=request.POST['login']).exists():
-        return (HttpResponse("Error: Login '" + request.POST['login'] + "' does not exist!"))
-    owner = PlayersModel.objects.get(login=request.POST['login'])
-    if not RoomsModel.objects.filter(id=request.POST['game_id']).exists():
-        return (HttpResponse("Error: Room with id '" + request.POST['game_id'] + "' does not exist!"))
-    room = RoomsModel.objects.get(id=request.POST['game_id'])
-    s = "Room " + room.name + ' - ' + str(room) + " deleted"
-    if room.owner == owner:
+        return JsonResponse({'error': 'No login!'}, status=400)
+
+    try:
+        player = PlayersModel.objects.get(login=request.POST['login'])
+    except PlayersModel.DoesNotExist:
+        return JsonResponse({'error': "Login '{}' does not exist!".format(request.POST['login'])}, status=404)
+
+    try:
+        room = RoomsModel.objects.get(id=request.POST['game_id'])
+    except RoomsModel.DoesNotExist:
+        return JsonResponse({'error': "Room with id '{}' does not exist!".format(request.POST['game_id'])}, status=404)
+
+    s = "Room {} - {} deleted".format(room.name, room)
+
+    if room.owner != player:
+        return JsonResponse({'error': "Login '{}' is not the owner of '{}'!".format(request.POST['login'], request.POST['game_id'])}, status=401)
+
+    #JWT token check
+    if 'Authorization' not in request.headers:
+        return JsonResponse({'error': 'Authorization header missing'}, status=401)
+    auth_header = request.headers['Authorization']
+    try:
+        token_type, token = auth_header.split(' ')
+        if token_type != 'Bearer':
+            return JsonResponse({'error': 'Invalid token type'}, status=401)
+    except ValueError:
+        return JsonResponse({'error': 'Malformed Authorization header'}, status=401)
+
+    try:
+        payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=['HS256'])
+        player_id = payload['user_id']
+        if player_id != player.id:
+            return JsonResponse({'error': 'Invalid JWT token'}, status=401)
+
+        print("Valid JWT token used")
         room.delete()
-        return (HttpResponse(s))
-    return (HttpResponse("Error: Login '" + request.POST['login'] + "' is not the owner of '" + request.POST['game_id'] + "'!"))
+        return JsonResponse({'message': s})
+
+    #Token refresh handling
+    except jwt.ExpiredSignatureError:
+        if 'refresh_token' not in request.COOKIES:
+            return JsonResponse({'error': 'JWT token expired and Refresh token missing'}, status=401)
+        refresh_token = request.COOKIES.get('refresh_token')
+        try:
+
+            payload = jwt.decode(refresh_token, JWT_REFRESH_SECRET_KEY, algorithms=['HS256'])
+
+            new_token = jwt.encode({
+                'user_id': player.id,
+                'exp': datetime.utcnow() + timedelta(hours=1)  # Access token expiration time
+            }, JWT_SECRET_KEY, algorithm='HS256')
+            print("JWT token expired but a new one has been created using the Refresh token")
+            room.delete()
+            return JsonResponse({'message': s, 'token': new_token})
+
+        except jwt.ExpiredSignatureError:
+            return JsonResponse({'error': 'JWT token expired and Refresh token expired, log in again'}, status=401)
+        except jwt.InvalidTokenError:
+            return JsonResponse({'error': 'JWT token expired and Invalid refresh token, log in again'}, status=401)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
+
+    except jwt.InvalidTokenError:
+        return JsonResponse({'error': 'Invalid token'}, status=401)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)
 
 @csrf_exempt
 def tournament_join(request):

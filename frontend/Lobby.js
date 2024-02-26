@@ -1,4 +1,5 @@
 import {Pong} from './Pong.js'
+import { Chat_signup } from './Chat_signup.js'
 import {Tournament} from './Tournament.js';
 
 export class Lobby
@@ -9,21 +10,35 @@ export class Lobby
         this.game = null;
         this.tournament = null;
     }
-    
+
     events() {
         this.dom_rooms = document.getElementById("rooms");
         this.dom_tournament = document.getElementById("tournament");
         this.dom_join = document.querySelector("#join");
         this.dom_pong = document.querySelector("#pong");
         this.dom_pew = document.querySelector("#pew");
+        this.dom_chat = document.querySelector("#chat");
         this.dom_delete = document.querySelector("#delete");
         this.dom_pong.addEventListener("click", () => this.new_game("pong"));
         this.dom_pew.addEventListener("click", () => this.new_game("pew"));
         this.dom_delete.addEventListener("click", () => this.delete_game());
         this.dom_join.addEventListener("click", () => this.join());
+		this.dom_chat.addEventListener("click", () => this.chat());
         this.dom_tournament.addEventListener("click", () => this.tournament_click());
         this.rooms_update();
     }
+
+	chat(){
+		this.main.set_status('')
+		if (this.main.login === ''){
+			this.main.set_status('You must be logged in to chat.');
+			return;
+		}
+		this.chat_signup = new Chat_signup(this.main);
+        this.main.load_with_data('transchat/chat_lobby', () => this.chat_signup.events(this.main), {
+            'username': this.main.login
+        });
+	}
 
     join() {
         if (this.dom_rooms.selectedIndex === -1)
@@ -93,8 +108,7 @@ export class Lobby
 
     delete_game() {
         this.main.set_status('');
-        if (this.main.login === '')
-        {
+        if (this.main.login === '') {
             this.main.set_status('Please login or sign up');
             return;
         }
@@ -107,16 +121,35 @@ export class Lobby
             method: 'POST',
             data: {
                 'game_id': this.dom_rooms.options[this.dom_rooms.selectedIndex].value,
-                'login': this.main.login
+                'login': this.main.login,
             },
-            success: (info) => {
-                this.main.set_status(info);
-                if (this.socket !== -1)
-                    this.socket.send(JSON.stringify({
+            headers: {
+                'Authorization': `Bearer ${sessionStorage.JWTToken}`
+            },
+            success: (response) => {
+                if (response.token) {
+                    sessionStorage.setItem('JWTToken', response.token);
+                }
+                if (response.error) {
+                    const message = response.message;
+                    this.main.set_status('Error: ' + message);
+                } else if (response.message) {
+                    const message = response.message;
+                    this.main.set_status(message);
+                    if (this.socket !== -1) {
+                        this.socket.send(JSON.stringify({
                         type: 'update'
                     }));
+                    }
+                }
             },
-            error: (error) => this.main.set_status('Error: Can not join game')
+            error: (xhr, textStatus, errorThrown) => {
+            let errorMessage = "Error: Can not delete game";
+            if (xhr.responseJSON && xhr.responseJSON.error) {
+                errorMessage = xhr.responseJSON.error;
+            }
+            this.main.set_status(errorMessage);
+            }
         });
     }
 
@@ -138,7 +171,7 @@ export class Lobby
         else {
             this.socket.send(JSON.stringify({
                 type: 'update'
-            }));        
+            }));
         }
 
         this.socket.onmessage = (e) => {
@@ -185,7 +218,7 @@ export class Lobby
                         this.dom_rooms.add(option);
                     });
                 }
-            
+
             };
         }
 
@@ -211,7 +244,7 @@ export class Lobby
             inviteContainer.id = 'inviteContainer';
             document.body.appendChild(inviteContainer);
         }
-    
+
         const inviteNotification = document.createElement('div');
         inviteNotification.classList.add('invite-notification');
         inviteNotification.innerHTML = `
@@ -219,10 +252,10 @@ export class Lobby
             <button id="acceptInviteBtn">Accept</button>
             <button id="declineInviteBtn">Decline</button>
         `;
-    
+
         // append the invite notification to the container
         inviteContainer.appendChild(inviteNotification);
-    
+
         // event listeners accept / decline buttons
         document.getElementById('acceptInviteBtn').addEventListener('click', () => {
             this.tournamentInviteResponse('accept', message);
@@ -231,7 +264,7 @@ export class Lobby
         document.getElementById('declineInviteBtn').addEventListener('click', () => {
             this.tournamentInviteResponse('decline', message);
             inviteContainer.removeChild(inviteNotification);
-        });        
+        });
     }
 
     displayEventInvite(tourID) {
@@ -241,7 +274,7 @@ export class Lobby
             inviteContainer.id = 'inviteContainer';
             document.body.appendChild(inviteContainer);
         }
-    
+
         const inviteNotification = document.createElement('div');
         inviteNotification.classList.add('event-invite-notification');
         inviteNotification.innerHTML = `
@@ -249,10 +282,10 @@ export class Lobby
             <button id="acceptInviteBtn">Accept</button>
             <button id="declineInviteBtn">Decline</button>
         `;
-    
+
         // append the invite notification to the container
         inviteContainer.appendChild(inviteNotification);
-    
+
         // event listeners accept / decline buttons
         document.getElementById('acceptInviteBtn').addEventListener('click', () => {
             inviteContainer.removeChild(inviteNotification);
@@ -261,7 +294,7 @@ export class Lobby
         });
         document.getElementById('declineInviteBtn').addEventListener('click', () => {
             inviteContainer.removeChild(inviteNotification);
-        });        
+        });
     }
 
     tournamentInviteResponse(response, tourId) {
@@ -271,7 +304,7 @@ export class Lobby
                 response: 'accept',
                 id: tourId,
                 login: this.main.login
-            }));        
+            }));
         } else {
             this.socket.send(JSON.stringify({
                 type: 'tournament_invite_resp',
