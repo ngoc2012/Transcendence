@@ -10,10 +10,13 @@ import os
 import pyotp
 import random
 import jwt
+import json
 from datetime import datetime, timedelta
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 from django.contrib.auth.hashers import make_password, check_password
+
+from web3 import Web3
 
 API_PUBLIC = os.environ.get('API_PUBLIC')
 API_SECRET = os.environ.get('API_SECRET')
@@ -31,7 +34,48 @@ def index(request):
 def lobby(request):
 	return (render(request, 'lobby.html'))
 
+
+#https://www.polarsparc.com/xhtml/GanacheSolidityPython.html
+
 def signup(request):
+    print('TEST WEB3')
+    ganache_url = 'http://ganache:8545'
+    web3 = Web3(Web3.HTTPProvider(ganache_url))
+    block_number = web3.eth.block_number
+
+    print('BONJOUR VOICI LE NUM DE BLOCK: ', block_number)
+
+    if web3.is_connected():
+        print("Connection to Ganache successful!")
+    else:
+        print("Failed to connect to Ganache.")
+
+
+
+
+
+    with open('/app/blockchain_handling/build/contracts/SimpleContract.json') as f:
+        contract_data = json.load(f)
+        contract_abi = contract_data['abi']
+
+
+    contract_address = '0xD67F3179988E9A9Cd46d33cb068e7D9D9C4bE6cE'
+
+
+    simple_contract = web3.eth.contract(address=contract_address, abi=contract_abi)
+
+
+    result = simple_contract.functions.getValue().call()
+    print('Returned value:', result)
+
+
+
+
+
+
+
+
+
     return render(request, 'signup.html')
 
 

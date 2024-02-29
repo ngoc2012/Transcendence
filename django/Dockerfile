@@ -23,7 +23,10 @@ RUN pip3 install --upgrade pip \
     && pip3 install Django && \
     pip3 install channels daphne \
     && pip3 install requests
-    
+
+RUN     apt-get update
+RUN     apt-get install netcat -y
+RUN     pip3 install web3
 RUN     pip3 install pyjwt
 
 RUN     pip3 install google-auth google-auth-oauthlib google-auth-httplib2

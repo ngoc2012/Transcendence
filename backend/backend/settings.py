@@ -41,7 +41,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'game',
     'pong',
-    'chat'
+    'chat',
+    'web3'
 ]
 
 MIDDLEWARE = [

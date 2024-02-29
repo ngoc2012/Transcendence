@@ -6,7 +6,6 @@ services:
     build:
       context: ./nginx
       dockerfile: Dockerfile
-      no_cache: false
     ports:
       - 8080:443
     restart: always
@@ -20,7 +19,6 @@ services:
     build:
       context: ./django
       dockerfile: Dockerfile
-      no_cache: false
     restart: always
     env_file:
      - .env
@@ -28,6 +26,13 @@ services:
       - 8000:8000
     volumes:
       - django_data:/app
+    networks:
+      - network
+
+  ganache:
+    image: trufflesuite/ganache-cli:latest
+    ports:
+      - "8545:8545"  # Port RPC
     networks:
       - network
 
