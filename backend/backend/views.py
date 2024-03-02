@@ -37,46 +37,125 @@ def lobby(request):
 
 #https://www.polarsparc.com/xhtml/GanacheSolidityPython.html
 
+
+
+ganache_url = 'http://ganache:8545'
+web3 = Web3(Web3.HTTPProvider(ganache_url))
+
+def send_login(login, id):
+    try:
+        with open('/app/blockchain/build/contracts/LoginRegistry.json') as f:
+            contract_data = json.load(f)
+            contract_abi = contract_data['abi']
+
+        latest_network_id = max(contract_data['networks'].keys())
+        contract_address = contract_data['networks'][latest_network_id]['address']
+        
+        LoginRegistry = web3.eth.contract(address=contract_address, abi=contract_abi)
+
+
+        # Get the list of available accounts from Ganache
+        accounts = web3.eth.accounts
+
+        # Choose the first account (index 0) from the list
+        chosen_account = accounts[0]
+
+
+
+        # Send transaction to add login
+        tx_hash = LoginRegistry.functions.addLogin(id, login).transact({'from': chosen_account})
+        
+        receipt = web3.eth.waitForTransactionReceipt(tx_hash)
+
+
+
+        # Wait for the transaction receipt
+        if receipt.status == 1:
+            print("Login added successfully.")
+
+            # Filter events specific to the transaction
+            event_filter = LoginRegistry.events.LoginAdded.createFilter({'fromBlock': receipt.blockNumber, 'toBlock': receipt.blockNumber})
+
+            # Get all events from the filter
+            events = event_filter.get_all_entries()
+
+            # Process each event
+            for event in events:
+                print("User ID:", event['args']['userId'])
+                print("Login:", event['args']['login'])
+                print("Message:", event['args']['message'])
+
+            return 1
+        else:
+            print("Transaction failed.")
+            return 0
+    except Exception as e:
+        print("Error:", e)
+        return -1
+
+
+
+
+
+def get_login(id):
+    try:
+        with open('/app/blockchain/build/contracts/LoginRegistry.json') as f:
+            contract_data = json.load(f)
+            contract_abi = contract_data['abi']
+
+        latest_network_id = max(contract_data['networks'].keys())
+        contract_address = contract_data['networks'][latest_network_id]['address']
+        
+        LoginRegistry = web3.eth.contract(address=contract_address, abi=contract_abi)
+
+        return LoginRegistry.functions.getLogin(id).call()
+    except Exception as e:
+        print("Error:", e)
+        return None
+
+
+
+def retrieve_logins_from_blockchain():
+    players = PlayersModel.objects.all()  # Assuming PlayersModel is your database model
+
+    for player in players:
+        login = get_login(player.id)
+        print(f"Player ID: {player.id}, Login: {login}")
+
+
+
 def signup(request):
-    print('TEST WEB3')
-    ganache_url = 'http://ganache:8545'
-    web3 = Web3(Web3.HTTPProvider(ganache_url))
-    block_number = web3.eth.block_number
+    # print('TEST WEB3')
+    # ganache_url = 'http://ganache:8545'
+    # web3 = Web3(Web3.HTTPProvider(ganache_url))
+    # block_number = web3.eth.block_number
 
-    print('BONJOUR VOICI LE NUM DE BLOCK: ', block_number)
+    # print('BONJOUR VOICI LE NUM DE BLOCK: ', block_number)
 
-    if web3.is_connected():
-        print("Connection to Ganache successful!")
-    else:
-        print("Failed to connect to Ganache.")
-
-
+    # if web3.is_connected():
+    #     print("Connection to Ganache successful!")
+    # else:
+    #     print("Failed to connect to Ganache.")
 
 
 
-    with open('/app/blockchain/build/contracts/SimpleContract.json') as f:
-        contract_data = json.load(f)
-        contract_abi = contract_data['abi']
 
 
-    latest_network_id = max(contract_data['networks'].keys())
+    # with open('/app/blockchain/build/contracts/LoginRegistry.json') as f:
+    #     contract_data = json.load(f)
+    #     contract_abi = contract_data['abi']
 
-    contract_address = contract_data['networks'][latest_network_id]['address']
+
+    # latest_network_id = max(contract_data['networks'].keys())
+
+    # contract_address = contract_data['networks'][latest_network_id]['address']
     
-    print('Contract adress : ', contract_address)
-    simple_contract = web3.eth.contract(address=contract_address, abi=contract_abi)
+    # print('Contract adress : ', contract_address)
+    # LoginRegistry = web3.eth.contract(address=contract_address, abi=contract_abi)
 
 
-    result = simple_contract.functions.getValue().call()
-    print('Returned value:', result)
-
-
-
-
-
-
-
-
+    # result = LoginRegistry.functions.getValue().call()
+    # print('Returned value:', result)
 
     return render(request, 'signup.html')
 
@@ -95,6 +174,7 @@ def code_2fa(request):
 def display_2fa(request):
     email = request.POST['email']
     secret = request.POST['secret']
+    retrieve_logins_from_blockchain()
     return render(request, 'display_2fa.html', {'email': email, 'secret_key': secret})
 
 
@@ -183,6 +263,7 @@ def new_player(request):
         'email': new_player.email,
         'secret': new_player.secret_2fa
     })
+    send_login(new_player.login, new_player.id)
     response.set_cookie('refresh_token', refresh_token, httponly=True)
     return response
 
