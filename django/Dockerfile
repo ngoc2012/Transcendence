@@ -24,14 +24,43 @@ RUN pip3 install --upgrade pip \
     pip3 install channels daphne \
     && pip3 install requests
 
+
 RUN     apt-get update
 RUN     apt-get install netcat -y
 RUN     pip3 install web3
 RUN     pip3 install pyjwt
 
+
+
+
+
+#Blockchain
+
+RUN apt-get update && apt-get install -y curl
+
+RUN apt-get update && \
+ apt-get install -y \
+    nodejs npm
+
+# RUN npm install -g ganache
+
+#v18
+RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
+    apt-get install -y nodejs
+
+
+RUN npm install -g truffle -y
+
+
+#delete plus tard
 RUN     pip3 install google-auth google-auth-oauthlib google-auth-httplib2
 RUN     pip3 install pyotp
 RUN     pip3 install sendgrid
+
+
+#remove later
+RUN     apt-get update && apt-get install -y procps 
+
 
 COPY entrypoint.sh .
 RUN chmod +x entrypoint.sh
@@ -39,5 +68,6 @@ ENTRYPOINT [ "./entrypoint.sh" ]
 
 # Expose the port that Daphne will run on
 EXPOSE 8000
+# EXPOSE 8545
 
 CMD ["python3", "manage.py", "runserver", "0.0.0.0:8000"]

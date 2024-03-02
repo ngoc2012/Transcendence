@@ -21,4 +21,10 @@ else
     fi
 fi
 
+#deploy smart contracts
+cd /app/blockchain/.
+truffle deploy
+cd /app/backend/.
+
+
 exec "$@"

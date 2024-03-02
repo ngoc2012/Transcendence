@@ -54,14 +54,16 @@ def signup(request):
 
 
 
-    with open('/app/blockchain_handling/build/contracts/SimpleContract.json') as f:
+    with open('/app/blockchain/build/contracts/SimpleContract.json') as f:
         contract_data = json.load(f)
         contract_abi = contract_data['abi']
 
 
-    contract_address = '0xD67F3179988E9A9Cd46d33cb068e7D9D9C4bE6cE'
+    latest_network_id = max(contract_data['networks'].keys())
 
-
+    contract_address = contract_data['networks'][latest_network_id]['address']
+    
+    print('Contract adress : ', contract_address)
     simple_contract = web3.eth.contract(address=contract_address, abi=contract_abi)
 
 
