@@ -44,8 +44,6 @@ urlpatterns = [
     path('tournament/new/', views.new_tournament, name='new_tournament'),
     path('tournament/lobby/', views.tournament_lobby, name='tournament_lobby'),
     path('tournament/<uuid:tournament_id>/', views.tournament_start, name='tournament_start'),
-    # path('tournament/<uuid:tournament_id>/', views.tournament_round, name="list_users")
-
 ]
 
 

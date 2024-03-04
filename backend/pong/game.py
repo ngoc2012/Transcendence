@@ -44,6 +44,22 @@ def get_score_data(room_id):
     return json.dumps({ 'score': [room.score0, room.score1] })
 
 @sync_to_async
+def get_win_data(room_id):
+    room = RoomsModel.objects.get(id=room_id)
+    if room.score0 > room.score1:
+        winner = 'player0'
+        winning_score = room.score0
+    elif room.score1 > room.score0:
+        winner = 'player1'
+        winning_score = room.score1
+    return json.dumps({
+        'win': winner,
+        'score': [room.score0, room.score1],
+        'winning_score': winning_score,
+        'roomid': room_id
+    })
+
+@sync_to_async
 def start_game(consumer):
     consumer.room = RoomsModel.objects.get(id=consumer.room_id)
     consumer.server = PlayerRoomModel.objects.get(player=consumer.room.server)

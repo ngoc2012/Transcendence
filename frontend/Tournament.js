@@ -8,6 +8,8 @@ export class Tournament {
         this.lobby = m.lobby;
         this.id = -1;
         this.game = null;
+        this.ready = -1;
+        this.final = 0;
     }
 
     events() {
@@ -62,25 +64,27 @@ export class Tournament {
 
     userList(users) {
         const playersList = document.getElementById('players-list');
-        playersList.innerHTML = '';
-        users.forEach((user) => {
-            if (user.login === this.main.login) {
-                return;
-            }
-    
-            const li = document.createElement('li');
-            li.textContent = `${user.login}`; // Display the user's login
-            
-            const inviteButton = document.createElement('button');
-            inviteButton.setAttribute('data-login', user.login);
-            inviteButton.textContent = 'Send Invite';
-            inviteButton.onclick = () => {
-                this.sendInvite(user.login, this.id);
-            };
-            
-            li.appendChild(inviteButton);
-            playersList.appendChild(li);
-        });
+        if (playersList) {
+            playersList.innerHTML = '';
+            users.forEach((user) => {
+                if (user.login === this.main.login) {
+                    return;
+                }
+        
+                const li = document.createElement('li');
+                li.textContent = `${user.login}`;
+                
+                const inviteButton = document.createElement('button');
+                inviteButton.setAttribute('data-login', user.login);
+                inviteButton.textContent = 'Send Invite';
+                inviteButton.onclick = () => {
+                    this.sendInvite(user.login, this.id);
+                };
+                
+                li.appendChild(inviteButton);
+                playersList.appendChild(li);
+            });
+        }
     }
 
     tournamentInviteAccepted(login) {
@@ -102,16 +106,19 @@ export class Tournament {
     }
 
     tournamentReady() {
-        this.dom_start_tournament.addEventListener('click', (e) => {this.queryTournamentRound(e); this.startEventInvite();});
-        this.dom_start_tournament.disabled = false;
+        if (this.ready === -1) {
+            this.dom_start_tournament.addEventListener('click', (e) => {this.queryTournamentRound(e); this.startEventInvite();});
+            this.dom_start_tournament.disabled = false;
+            this.ready = 1;
+        }
     }
 
     queryTournamentRound() {
         const tournamentUrl = `/tournament/${this.id}`;
         this.main.load(tournamentUrl, () => this.eventsStart());
         const data = {
-        type: 'tournament_rounds',
-        id: this.id
+            type: 'tournament_rounds',
+            id: this.id
         };
         this.main.lobby.socket.send(JSON.stringify(data));
     }
@@ -119,6 +126,18 @@ export class Tournament {
     queryRoundList() {
         const tournamentUrl = `/tournament/${this.id}`;
         this.main.load(tournamentUrl, () => this.eventsStart());
+    }
+
+    endMatch(data) {
+        const resultData = {
+            type: 'match_result',
+            winner: data.win,
+            score: data.score,
+            winning_score: data.winning_score,
+            roomid: data.roomid
+        };
+        this.main.lobby.socket.send(JSON.stringify(resultData));
+        this.queryRoundList();
     }
 
     startEventInvite() {
@@ -132,39 +151,55 @@ export class Tournament {
 
     eventInvite(tourID) {
         this.id = tourID;
-        // this.queryTournamentRound();
         this.queryRoundList();
     }
 
     tournamentInfos(name, round) {
         const tournamentInfosContainer = document.getElementById('tournament-infos');
-        tournamentInfosContainer.innerHTML = '';
-    
-        tournamentInfosContainer.innerHTML = `
-            <h3>Tournament - ${name} - Round: ${round}</h3>
-        `;
+        if (tournamentInfosContainer) {
+            tournamentInfosContainer.innerHTML = '';
+            
+            if (round === -2) {
+                tournamentInfosContainer.innerHTML = `
+                    <h3>Tournament - ${name} - Results</h3>
+                `;
+            }
+            else if (round === -1) {
+                this.final = 1;
+                tournamentInfosContainer.innerHTML = `
+                    <h3>Tournament - ${name} - Round: Final</h3>
+                `;
+            }
+            else {
+                tournamentInfosContainer.innerHTML = `
+                    <h3>Tournament - ${name} - Round: ${round}</h3>
+                `;
+            }
+        }
     }
 
     displayTournamentMatches(matches) {
         const matchesContainer = document.getElementById('tournament-matches');
-        matchesContainer.innerHTML = '';
-        
-        matches.forEach(match => {
-            const matchElement = document.createElement('div');
-            matchElement.className = 'match';
+        if (matchesContainer) {
+            matchesContainer.innerHTML = '';
             
-            matchElement.innerHTML = `
-                <p>Room ID: ${match.room_id}</p>
-                <p>Player 1: ${match.player1_name} vs. Player 2: ${match.player2_name}</p>
-                <p>Status: ${match.status}</p>
-            `;
-            matchElement.setAttribute('match-id', match.room_id);
-            matchesContainer.appendChild(matchElement);
-        });
-        this.main.lobby.socket.send(JSON.stringify({
-            type: 'tournament-player-action',
-            id: this.id
-        }));
+            matches.forEach(match => {
+                const matchElement = document.createElement('div');
+                matchElement.className = 'match';
+                
+                matchElement.innerHTML = `
+                    <p>Room ID: ${match.room_id}</p>
+                    <p>Player 1: ${match.player1_name} vs. Player 2: ${match.player2_name}</p>
+                    <p>Status: ${match.status}</p>
+                `;
+                matchElement.setAttribute('match-id', match.room_id);
+                matchesContainer.appendChild(matchElement);
+            });
+            this.main.lobby.socket.send(JSON.stringify({
+                type: 'tournament-player-action',
+                id: this.id
+            }));
+        }
     }
 
     displayPlayerAction(matchId) {
@@ -183,6 +218,75 @@ export class Tournament {
         }
     }
 
+    updateMatchStatus(data) {
+        const roomId = data.room_id;
+        const newStatus = data.status;
+
+        const matchElement = document.querySelector(`[match-id="${roomId}"]`);
+
+        if (matchElement) {
+            const statusParagraph = matchElement.querySelectorAll('p')[2];
+            statusParagraph.innerHTML = `Status: ${newStatus}`;
+        }
+    }
+
+    winnerDisplay(data) {
+        const winnerName = data.winner;
+        const container = document.getElementById('winnerNameDisplay');
+
+        if (container) {
+            container.innerHTML = '';
+
+            const winnerMsg = document.createElement('div');
+            winnerMsg.classList.add('winnerMessage');
+            winnerMsg.textContent = `Tournament Terminated | Winner: ${winnerName}`;
+
+            const congratsMsg = document.createElement('div');
+            congratsMsg.classList.add('congratulationsMessage');
+            congratsMsg.textContent = 'Congratulations!';
+
+            container.appendChild(winnerMsg);
+            container.appendChild(congratsMsg);
+        }
+    }
+
+    scoreDisplay(matches) {
+        const container = document.getElementById('tournament-matches');
+        
+        if (container) {
+            // Clear previous content
+            container.innerHTML = '';
+
+            // Group matches by round number
+            const matchesByRound = matches.reduce((acc, match) => {
+                // If the round doesn't exist in the accumulator, add it
+                if (!acc[match.round_number]) {
+                    acc[match.round_number] = [];
+                }
+                // Add the match to the round
+                acc[match.round_number].push(match);
+                return acc;
+            }, {});
+
+            Object.keys(matchesByRound).forEach(round => {
+                // Create a section for each round
+                const roundSection = document.createElement('div');
+                roundSection.innerHTML = `<h3>Round ${round}</h3>`;
+                const list = document.createElement('ul');
+
+                matchesByRound[round].forEach(match => {
+                    // Create list item for each match in the round
+                    const item = document.createElement('li');
+                    item.textContent = `${match.player1_login} (${match.player1_score}) vs ${match.player2_login} (${match.player2_score}) - Winner: ${match.winner_login}`;
+                    list.appendChild(item);
+                });
+
+                roundSection.appendChild(list);
+                container.appendChild(roundSection);
+            });
+        }
+    }
+
     joinMatch(data) {
         $.ajax({
             url: '/game/tournament/join',
@@ -198,8 +302,10 @@ export class Tournament {
                 {
                     switch (info.game) {
                         case 'pong':
-                            this.game = new Pong(this.main, this.main.lobby, info);
-                            this.main.load('/pong', () => this.game.init());
+                            this.game = new Pong(this.main, this.main.lobby, info, this);
+                            this.main.load('/pong', () => {
+                                this.game.init();
+                            });
                             break;
                     }
                 }

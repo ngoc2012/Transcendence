@@ -269,14 +269,25 @@ def verify_qrcode(request):
         return JsonResponse({'result': '1'})
     return JsonResponse({'result': '0'})
 
+
 @csrf_exempt
 def new_tournament(request):
     if request.method == 'POST':
         name = request.POST.get('name')
+        print(name)
         game = request.POST.get('game')
+        print(game)
+        login = request.POST.get('login')
+        print(login)
         owner = PlayersModel.objects.get(login=request.POST['login'])
+        print(owner.id)
         try:
             tournament = TournamentModel.objects.create(name=name, game=game, owner=owner)
+            print(tournament.id)
+            player = PlayersModel.objects.get(login=login)
+            print(player.login)
+            tournament.participants.add(player)
+            print('add ok')
             return JsonResponse({'message': 'Tournament created successfully', 'id': str(tournament.id)}, status=200)
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=400)

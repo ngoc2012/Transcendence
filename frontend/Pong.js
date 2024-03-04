@@ -2,14 +2,15 @@ import {Draw} from './Draw.js'
 
 export class Pong
 {
-	constructor(m, l, r) {
+    constructor(m, l, r, t = null) {
         this.main = m;
         this.lobby = l;
         this.room = r;
         this.connected = false;
         this.socket = -1;
         this.draw = new Draw(this);
-    }
+        this.tournament = t;
+    }    
 
 	init() {
         this.dom_game_name = document.getElementById("game_name");
@@ -61,6 +62,10 @@ export class Pong
     start() {
         if (this.socket !== -1)
             this.socket.send('start');
+        if (this.tournament) {
+            // check if 2 players are here ?
+            this.main.lobby.socket.send(JSON.stringify({type: 'match_start', roomId: this.room.id}));
+        }
     }
 
     quit() {
@@ -89,7 +94,10 @@ export class Pong
                 return;
             let data = JSON.parse(e.data);
             //console.log(data.score);
-            if ('score' in data)
+            if ('win' in data) {
+                this.winnerBox(data);
+            }
+            else if ('score' in data)
             {
                 this.dom_score0.innerHTML = data.score[0];
                 this.dom_score1.innerHTML = data.score[1];
@@ -121,5 +129,43 @@ export class Pong
     set_state(e) {
         if (this.socket !== -1)
             this.socket.send(e);
+    }
+
+    winnerBox(data) {
+        let backdrop = document.createElement('div');
+        backdrop.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); z-index: 99;';
+        document.body.appendChild(backdrop);
+        document.getElementById('pongCanvas').style.filter = 'blur(8px)';
+
+        let winBox = document.createElement('div');
+        winBox.setAttribute('id', 'winBox');
+        winBox.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); padding: 20px; background-color: #fff; border: 2px solid #000; text-align: center; z-index: 100;';
+
+        let winnerText = document.createElement('p');
+        winnerText.textContent = `Winner: ${data.win}`;
+        winBox.appendChild(winnerText);
+
+        let scoreText = document.createElement('p');
+        scoreText.textContent = `Score - Player0: ${data.score[0]}, Player1: ${data.score[1]}`;
+        winBox.appendChild(scoreText);
+
+        let backButton = document.createElement('button');
+        backButton.textContent = 'Back to Lobby';
+        backButton.onclick = () => {
+            document.getElementById('pongCanvas').style.filter = '';
+            document.body.removeChild(backdrop);
+            document.body.removeChild(winBox);
+            if (this.tournament) {
+                this.set_state('quit');
+                if (this.socket !== -1) {
+                    this.socket.close();
+                    this.socket = -1;
+                }
+                this.tournament.endMatch(data);
+            };     
+        }   
+        winBox.appendChild(backButton);
+
+        document.body.appendChild(winBox);
     }
 }
