@@ -160,6 +160,7 @@ export class Lobby
     }
 
     rooms_update() {
+        console.log('rooms_update');
         if (this.socket === -1) {
             this.main.set_status('');
             this.socket = new WebSocket(
@@ -169,10 +170,30 @@ export class Lobby
             );
         }
         else {
-            this.socket.send(JSON.stringify({
-                type: 'update'
-            }));
+            console.log('socket already open');
+            $.ajax({
+                url: '/game/update',
+                method: 'GET',
+                success: (info) => {
+                    const rooms = JSON.parse(e.data);
+                    var options_rooms = this.dom_rooms && this.dom_rooms.options;
+                    this.dom_rooms.innerHTML = "";
+                    if (options_rooms && rooms && rooms.length > 0) {
+                        rooms.forEach((room) => {
+                            var option = document.createElement("option");
+                            option.value = room.id;
+                            option.text = room.name + " - " + room.id;
+                            this.dom_rooms.add(option);
+                        });
+                    }
+                },
+                error: () => this.main.set_status('Error: Can not update rooms')
+            });
         }
+
+        // this.socket.on = (e) => {
+        //     if (!('data' in e))
+        //         return;
 
         this.socket.onmessage = (e) => {
             if (!('data' in e))
@@ -218,7 +239,6 @@ export class Lobby
                         this.dom_rooms.add(option);
                     });
                 }
-
             };
         }
 

@@ -56,6 +56,14 @@ def new_game(request):
         }))
 
 @csrf_exempt
+def update(request):
+    return (JsonResponse([
+        {
+        "id": str(i),
+        "name": i.name
+        } for i in RoomsModel.objects.all()]))
+
+@csrf_exempt
 def join(request):
     if 'game_id' not in request.POST:
         return (HttpResponse("Error: No game id!"))
