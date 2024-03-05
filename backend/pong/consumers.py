@@ -7,7 +7,7 @@ import asyncio
 
 from .data import pong_data
 from .move import check_collision, update_ball, up, down, left, right
-from .game import get_info, get_room_data, get_teams_data, get_score_data, start_game, end_game, quit, change_side, change_server_direction
+from .game import get_info, get_room_data, get_teams_data, get_score_data, start_game, end_game, quit, change_side, change_server_direction, remove_player, check_player
 import random
 
 class PongConsumer(AsyncWebsocketConsumer):
@@ -34,6 +34,14 @@ class PongConsumer(AsyncWebsocketConsumer):
         await self.channel_layer.group_send(self.room_id, {'type': 'group_data'})
 
     async def disconnect(self, close_code):
+        # https://datatracker.ietf.org/doc/html/rfc6455#section-7.4.1
+        # 1000: Normal closure.
+        # 1001: Going away.
+        # 1006: Abnormal closure (such as a server crash).
+        # 1008: Policy violation.
+        # 1011: Internal error.
+        print('disconnect' + self.room_id + ' ' + self.player_id + ' ' + self.channel_name + ' ' + str(close_code))
+        await remove_player(self)
         await self.channel_layer.group_discard(
             self.room_id,
             self.channel_name
@@ -81,6 +89,10 @@ class PongConsumer(AsyncWebsocketConsumer):
         dy = self.dy
         while True:
             await asyncio.sleep(0.02)
+            check = await check_player(self)
+            if not check:
+                await quit(self)
+                await self.channel_layer.group_send(self.room_id, {'type': 'teams_data'})
             dy = await update_ball(self, dx, dy)
             dx = await check_collision(self, dx)
             if self.room.x <= 0 or self.room.x >= pong_data['WIDTH']:

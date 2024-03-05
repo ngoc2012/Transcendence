@@ -70,14 +70,28 @@ def end_game(consumer):
 
 @sync_to_async
 def quit(consumer):
+    #print(PlayerRoomModel.objects.filter(room=consumer.room_id).count())
     if PlayerRoomModel.objects.filter(room=consumer.room_id).count() == 1:
         consumer.room.delete()
+        return
+    if consumer.player == None:
         return
     if consumer.server == consumer.player:
         consumer.player.delete()
         change_server(consumer, PlayerRoomModel.objects.filter(room=consumer.room_id).first())
     else:
         consumer.player.delete()
+
+@sync_to_async
+def remove_player(consumer):
+    consumer.player.delete()
+
+@sync_to_async
+def check_player(consumer):
+    consumer.player = PlayerRoomModel.objects.get(id=consumer.player_id)
+    if (consumer.player == None):
+        return False
+    return True
 
 @sync_to_async
 def change_server_direction(consumer):
