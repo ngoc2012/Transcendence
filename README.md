@@ -759,7 +759,27 @@ Remember to secure your Django Admin by configuring the `ADMIN` settings in your
 
 [Disable logging](https://stackoverflow.com/questions/5255657/how-can-i-disable-logging-while-running-unit-tests-in-python-django)
 
-### Other stuffs
+## Javascript
+In Firefox Developer Tools, you can force the browser to reload JavaScript and bypass the cache by following these steps:
+
+1. **Open Developer Tools:**
+   - Right-click on the page and select "Inspect" from the context menu.
+   - Alternatively, you can press `Ctrl + Shift + I` (Windows/Linux) or `Cmd + Option + I` (Mac) to open Developer Tools.
+
+2. **Go to the "Network" tab:**
+   - In the Developer Tools panel, navigate to the "Network" tab.
+
+3. **Enable "Disable Cache":**
+   - At the top of the Network tab, there is a checkbox labeled "Disable Cache." Make sure this checkbox is checked. This ensures that the browser won't use cached resources, including JavaScript files.
+
+4. **Reload the page:**
+   - Press `Ctrl + R` (Windows/Linux) or `Cmd + R` (Mac) to reload the page.
+
+By disabling the cache in the Network tab, you force the browser to fetch all resources, including JavaScript files, from the server instead of using the cached versions.
+
+Alternatively, you can use a hard refresh to clear the cache. You can do this by pressing `Ctrl + Shift + R` (Windows/Linux) or `Cmd + Shift + R` (Mac) instead of a regular reload.
+
+These steps should help you ensure that your JavaScript changes are loaded without relying on cached versions.
 
 ## Javascript (SPA)
 

@@ -54,6 +54,7 @@ export class Lobby
                 if (typeof info === 'string')
                 {
                     this.main.set_status(info);
+                    this.rooms_update();
                 }
                 else
                 {
@@ -91,6 +92,7 @@ export class Lobby
                 if (typeof info === 'string')
                 {
                     this.main.set_status(info);
+                    this.rooms_update();
                 }
                 else
                 {
@@ -164,7 +166,7 @@ export class Lobby
     }
 
     rooms_update() {
-        console.log('rooms_update');
+        // console.log('rooms_update');
         if (this.socket === -1) {
             this.main.set_status('');
             this.socket = new WebSocket(

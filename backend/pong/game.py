@@ -70,7 +70,9 @@ def end_game(consumer):
 
 @sync_to_async
 def quit(consumer):
-    #print(PlayerRoomModel.objects.filter(room=consumer.room_id).count())
+    print(PlayerRoomModel.objects.filter(room=consumer.room_id).count())
+    if PlayerRoomModel.objects.filter(room=consumer.room_id).count() == 0:
+        return
     if PlayerRoomModel.objects.filter(room=consumer.room_id).count() == 1:
         consumer.room.delete()
         return
@@ -84,7 +86,8 @@ def quit(consumer):
 
 @sync_to_async
 def remove_player(consumer):
-    consumer.player.delete()
+    if consumer.player is not None:
+        consumer.player.delete()
 
 @sync_to_async
 def check_player(consumer):

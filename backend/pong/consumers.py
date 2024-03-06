@@ -40,8 +40,10 @@ class PongConsumer(AsyncWebsocketConsumer):
         # 1006: Abnormal closure (such as a server crash).
         # 1008: Policy violation.
         # 1011: Internal error.
-        print('disconnect' + self.room_id + ' ' + self.player_id + ' ' + self.channel_name + ' ' + str(close_code))
-        await remove_player(self)
+        #print('disconnect' + self.room_id + ' ' + self.player_id + ' ' + self.channel_name + ' ' + str(close_code))
+        #await remove_player(self)
+        await quit(self)
+        await self.channel_layer.group_send(self.room_id, {'type': 'teams_data'})
         await self.channel_layer.group_discard(
             self.room_id,
             self.channel_name
