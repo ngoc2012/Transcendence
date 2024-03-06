@@ -28,7 +28,11 @@ def get_room_data(players, room_id):
 
 @sync_to_async
 def get_teams_data(consumer, room_id):
-    consumer.room = RoomsModel.objects.get(id=consumer.room_id)
+    try:
+        consumer.room = RoomsModel.objects.get(id=consumer.room_id)
+    except RoomsModel.DoesNotExist:
+        print(f"Room with ID {room_id} does not exist.")
+        return
     consumer.player = PlayerRoomModel.objects.get(id=consumer.player_id)
     consumer.server = PlayerRoomModel.objects.get(player=consumer.room.server)
     players0 = PlayerRoomModel.objects.filter(room=room_id, side=0)

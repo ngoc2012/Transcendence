@@ -175,16 +175,15 @@ export class Lobby
                 + '/ws/game/rooms/'
             );
         }
-        else {
-            console.log('socket already open');
-            
-        }
+        // else {
+        //     console.log('socket already open');
+        // }
         
         $.ajax({
             url: '/game/update',
             method: 'GET',
             success: (rooms) => {
-                console.log(rooms);
+                // console.log(rooms);
                 // const rooms = JSON.parse(e.data);
                 var options_rooms = this.dom_rooms && this.dom_rooms.options;
                 this.dom_rooms.innerHTML = "";

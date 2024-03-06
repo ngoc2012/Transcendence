@@ -44,6 +44,7 @@ class PongConsumer(AsyncWebsocketConsumer):
         #await remove_player(self)
         await quit(self)
         await self.channel_layer.group_send(self.room_id, {'type': 'teams_data'})
+        await self.channel_layer.group_send(self.room_id, {'type': 'group_data'})
         await self.channel_layer.group_discard(
             self.room_id,
             self.channel_name
