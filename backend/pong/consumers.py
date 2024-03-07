@@ -64,8 +64,7 @@ class PongConsumer(AsyncWebsocketConsumer):
         elif text_data == 'down':
             await down(self)
         elif text_data == 'quit':
-            await quit(self)
-            await self.channel_layer.group_send(self.room_id, {'type': 'teams_data'})
+            next
         elif text_data == 'side':
             await change_side(self)
             await self.channel_layer.group_send(self.room_id, {'type': 'teams_data'})
@@ -80,7 +79,8 @@ class PongConsumer(AsyncWebsocketConsumer):
     
     async def teams_data(self, event):
         teams = await get_teams_data(self, self.room_id)
-        await self.send(text_data=teams)
+        if teams is not None:
+            await self.send(text_data=teams)
 
     async def score_data(self, event):
         score = await get_score_data(self.room_id)
