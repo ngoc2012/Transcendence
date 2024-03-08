@@ -42,7 +42,7 @@ export class qrcode_2fa
                 else
                 {
                     if (info.result == '1')
-                        this.main.load('/pages/lobby', () => this.main.lobby.events());
+                        this.main.load('/lobby', () => this.main.lobby.events());
                     else
                         this.main.set_status('Wrong code, please try again');
                 }
@@ -54,6 +54,6 @@ export class qrcode_2fa
 
     cancel() {
         this.main.set_status('');
-        this.main.load('/pages/lobby', () => this.main.lobby.events());
+        this.main.load('/lobby', () => this.main.lobby.events());
     }
 }

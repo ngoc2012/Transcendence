@@ -16,15 +16,25 @@ if (my42login !== null && my42login !== "" && my42email !== "" && my42JWT != "")
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    const   path = window.location.pathname;
-    if (path === '/login') {
-        window.history.pushState({}, '', '/login');
-        main.load('/pages/login', () => main.log_in.events());
-    } else if (path === '/signup') {
-        window.history.pushState({}, '', '/signup');
-        main.load('/pages/signup', () => main.signup.events());
-    } else {
-        window.history.pushState({}, '', '/');
-        main.load('/pages/lobby', () => main.lobby.events());
+    function    reload() {
+        const   path = window.location.pathname;
+        // console.log(path);
+        if (main.lobby.game && main.lobby.game !== undefined)
+        {
+            main.lobby.game.quit();
+            main.lobby.game = undefined;
+        }
+        if (path === '/login') {
+            main.load('/pages/login', () => main.log_in.events());
+        } else if (path === '/signup') {
+            main.load('/pages/signup', () => main.signup.events());
+        } else {
+            main.load('/lobby', () => main.lobby.events());
+        }
     }
+    
+    window.onpopstate = function (event) { reload();};
+    main.history_stack.push(window.location.pathname);
+    window.history.pushState({}, '', window.location.pathname);
+    reload();
 });

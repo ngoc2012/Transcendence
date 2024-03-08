@@ -75,8 +75,9 @@ export class Signup
                         });
                     }
                     else {
-                        this.main.load('/pages/lobby', () => this.main.lobby.events());
-                    this.main.lobby.socket.send(JSON.stringify({ type: "authenticate", login: this.main.login }));
+                        window.history.pushState({}, '', '/');
+                        this.main.load('/lobby', () => this.main.lobby.events());
+                        this.main.lobby.socket.send(JSON.stringify({ type: "authenticate", login: this.main.login }));
                     }
                 }
             },
@@ -87,6 +88,6 @@ export class Signup
     cancel() {
         this.main.set_status('');
         window.history.pushState({}, '', '/');
-        this.main.load('/pages/lobby', () => this.main.lobby.events());
+        this.main.load('/lobby', () => this.main.lobby.events());
     }
 }

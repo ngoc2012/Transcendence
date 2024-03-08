@@ -22,7 +22,6 @@ export class Login
         this.dom_log_in.addEventListener("click", () => this.login());
         this.dom_cancel.addEventListener("click", () => this.cancel());
         this.dom_log_in42.addEventListener("click", () => this.loginWith42());
-
     }
 
     login() {
@@ -54,7 +53,11 @@ export class Login
                     if (info.enable2fa == 'true')
                         this.main.load('/twofa', () => this.main.twofa.events());
                     else
-                        this.main.load('/pages/lobby', () => this.main.lobby.events());
+                    {
+                        this.main.history_stack.push('/');
+                        window.history.pushState({}, '', '/');
+                        this.main.load('/lobby', () => this.main.lobby.events());
+                    }
                     this.main.lobby.socket.send(JSON.stringify({ type: "authenticate", login: this.main.login }));
                 }
             },
@@ -75,6 +78,6 @@ export class Login
     cancel() {
         this.main.set_status('');
         window.history.pushState({}, '', '/');
-        this.main.load('/pages/lobby', () => this.main.lobby.events());
+        this.main.load('/lobby', () => this.main.lobby.events());
     }
 }

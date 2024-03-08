@@ -95,7 +95,11 @@ def remove_player(consumer):
 
 @sync_to_async
 def check_player(consumer):
-    consumer.player = PlayerRoomModel.objects.get(id=consumer.player_id)
+    try:
+        consumer.player = PlayerRoomModel.objects.get(id=consumer.player_id)
+    except RoomsModel.DoesNotExist:
+        print(f"Player with ID {consumer.player_id} does not exist in game.")
+        return False
     if (consumer.player == None):
         return False
     return True
