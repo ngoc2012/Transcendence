@@ -54,7 +54,7 @@ export class Login
                     if (info.enable2fa == 'true')
                         this.main.load('/twofa', () => this.main.twofa.events());
                     else
-                        this.main.load('/lobby', () => this.main.lobby.events());
+                        this.main.load('/pages/lobby', () => this.main.lobby.events());
                     this.main.lobby.socket.send(JSON.stringify({ type: "authenticate", login: this.main.login }));
                 }
             },
@@ -74,6 +74,7 @@ export class Login
 
     cancel() {
         this.main.set_status('');
-        this.main.load('/lobby', () => this.main.lobby.events());
+        window.history.pushState({}, '', '/');
+        this.main.load('/pages/lobby', () => this.main.lobby.events());
     }
 }

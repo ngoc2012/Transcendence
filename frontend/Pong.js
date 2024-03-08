@@ -70,7 +70,8 @@ export class Pong
             this.socket.close();
             this.socket = -1;
         }
-        this.main.load('/lobby', () => this.lobby.events());
+        window.history.pushState({}, '', '/');
+        this.main.load('/pages/lobby', () => this.lobby.events());
     }
 
     connect() {

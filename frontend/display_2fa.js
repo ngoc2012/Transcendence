@@ -15,7 +15,7 @@ export class display_2fa {
     }
 
     proceed() {
-        this.main.load('/lobby', () => this.main.lobby.events());
+        this.main.load('/pages/lobby', () => this.main.lobby.events());
     }
 
     generateQRCode() {

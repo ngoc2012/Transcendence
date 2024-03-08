@@ -28,6 +28,9 @@ SENDGRID_API_KEY = os.environ.get('SENDGRID_API_KEY')
 EMAIL_SENDER = os.environ.get('EMAIL_SENDER')
 
 
+def redirect(request):
+	return (render(request, 'index.html'))
+
 def index(request):
 	return (render(request, 'index.html'))
 

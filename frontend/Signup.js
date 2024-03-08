@@ -75,7 +75,7 @@ export class Signup
                         });
                     }
                     else {
-                        this.main.load('/lobby', () => this.main.lobby.events());
+                        this.main.load('/pages/lobby', () => this.main.lobby.events());
                     this.main.lobby.socket.send(JSON.stringify({ type: "authenticate", login: this.main.login }));
                     }
                 }
@@ -86,6 +86,7 @@ export class Signup
 
     cancel() {
         this.main.set_status('');
-        this.main.load('/lobby', () => this.main.lobby.events());
+        window.history.pushState({}, '', '/');
+        this.main.load('/pages/lobby', () => this.main.lobby.events());
     }
 }

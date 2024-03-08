@@ -42,32 +42,11 @@ export class Main
         this.dom_login.addEventListener("click", () => this.login_click());
     }
 
-    // load(page, callback) {
-    //     $.ajax({
-    //         url: page + '/',
-    //         method: 'GET',
-    //         success: (html) => {
-    //             //window.history.pushState({
-    //             //    "user": this.user
-    //             //}, page, page);
-    //             this.dom_container.innerHTML = html;
-    //             callback();
-    //         },
-    //         error: function(error) {
-    //             console.error('Error: pong GET fail', error.message);
-    //         }
-    //     });
-    // }
-
     load(page, callback) {
         $.ajax({
             url: page + '/',
             method: 'GET',
             success: (html) => {
-                //window.history.pushState({
-                //    "user": this.user
-                //}, page, page);
-                //console.log('Page loaded successfully');
                 this.dom_container.innerHTML = html;
                 //pas oublier de changer ca
                 if (callback && typeof callback === 'function') {
@@ -87,10 +66,6 @@ export class Main
             method: 'GET',
 			data : data,
             success: (html) => {
-                //window.history.pushState({
-                //    "user": this.user
-                //}, page, page);
-                //console.log('Page loaded successfully');
                 this.dom_container.innerHTML = html;
                 //pas oublier de changer ca
                 if (callback && typeof callback === 'function') {
@@ -104,13 +79,15 @@ export class Main
         });
     }
 
-    signup_click() {
-        this.load('/signup', () => this.signup.events());
-    }
-
     login_click() {
-        this.load('/login', () => this.log_in.events());
+        window.history.pushState({}, '', '/login');
+        this.load('/pages/login', () => this.log_in.events());
     }
     set_status(s) {this.dom_status.innerHTML = s;}
+
+    signup_click() {
+        window.history.pushState({}, '', '/signup');
+        this.load('/pages/signup', () => this.signup.events());
+    }
 
 }
