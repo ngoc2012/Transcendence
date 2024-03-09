@@ -18,7 +18,6 @@ if (my42login !== null && my42login !== "" && my42email !== "" && my42JWT != "")
 document.addEventListener('DOMContentLoaded', () => {
     function    reload() {
         const   path = window.location.pathname;
-        // console.log(path);
         if (main.lobby.game && main.lobby.game !== undefined)
         {
             main.lobby.game.quit();

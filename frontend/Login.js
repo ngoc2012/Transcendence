@@ -22,6 +22,9 @@ export class Login
         this.dom_log_in.addEventListener("click", () => this.login());
         this.dom_cancel.addEventListener("click", () => this.cancel());
         this.dom_log_in42.addEventListener("click", () => this.loginWith42());
+
+        this.dom_login.addEventListener("keydown", (event) => this.handle_key_press(event));
+        this.dom_password.addEventListener("keydown", (event) => this.handle_key_press(event));
     }
 
     login() {
@@ -69,6 +72,12 @@ export class Login
                 }
             }
         });
+    }
+
+    handle_key_press(event)
+    {
+        if (event.keyCode === 13)
+            this.login();
     }
 
     loginWith42() {

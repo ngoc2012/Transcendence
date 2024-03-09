@@ -24,7 +24,7 @@ def get_room_data(players, room_id):
             'players': [{'x': i.x, 'y': i.y} for i in players]
         })
     except ObjectDoesNotExist:
-        return "Error: Rooms not found"
+        print(f"Room with ID {room_id} does not exist.")
 
 @sync_to_async
 def get_teams_data(consumer, room_id):
@@ -81,7 +81,6 @@ def quit(consumer):
         return
     if consumer.player == None:
         return
-    print("Player deleted")
     if consumer.server == consumer.player:
         consumer.player.delete()
         change_server(consumer, PlayerRoomModel.objects.filter(room=consumer.room_id).first())
@@ -97,7 +96,7 @@ def remove_player(consumer):
 def check_player(consumer):
     try:
         consumer.player = PlayerRoomModel.objects.get(id=consumer.player_id)
-    except RoomsModel.DoesNotExist:
+    except PlayerRoomModel.DoesNotExist:
         print(f"Player with ID {consumer.player_id} does not exist in game.")
         return False
     if (consumer.player == None):

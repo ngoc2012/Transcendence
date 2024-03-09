@@ -43,7 +43,6 @@ export class Main
         this.dom_signup.addEventListener("click", () => this.signup_click());
         this.dom_login.addEventListener("click", () => this.login_click());
         this.dom_home.addEventListener("click", () => {
-            console.log("home clicked");
             if (this.lobby.game && this.lobby.game !== undefined)
             {
                 this.lobby.game.quit();

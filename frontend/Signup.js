@@ -16,6 +16,11 @@ export class Signup
 
         this.dom_signup.addEventListener("click", () => this.signup());
         this.dom_cancel.addEventListener("click", () => this.cancel());
+
+        this.dom_login.addEventListener("keydown", (event) => this.handle_key_press(event));
+        this.dom_password.addEventListener("keydown", (event) => this.handle_key_press(event));
+        this.dom_email.addEventListener("keydown", (event) => this.handle_key_press(event));
+        this.dom_name.addEventListener("keydown", (event) => this.handle_key_press(event));
     }
 
     signup() {
@@ -25,13 +30,13 @@ export class Signup
             return;
         }
         let checkbox = this.dom_enable2fa.checked;
-        console.log("Sending AJAX request with data:", {
-            "login": this.dom_login.value,
-            "password": this.dom_password.value,
-            "name": this.dom_name.value,
-            "email": this.dom_email.value,
-            "enable2fa": checkbox
-        });
+        // console.log("Sending AJAX request with data:", {
+        //     "login": this.dom_login.value,
+        //     "password": this.dom_password.value,
+        //     "name": this.dom_name.value,
+        //     "email": this.dom_email.value,
+        //     "enable2fa": checkbox
+        // });
 
         $.ajax({
             url: '/new_player/',
@@ -83,6 +88,12 @@ export class Signup
             },
             error: (data) => this.main.set_status(data.error)
         });
+    }
+
+    handle_key_press(event)
+    {
+        if (event.keyCode === 13)
+            this.signup();
     }
 
     cancel() {
