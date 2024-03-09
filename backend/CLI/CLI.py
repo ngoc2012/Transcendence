@@ -3,11 +3,13 @@ import subprocess
 import os
 import sys
 import urllib3
+import json
 
 # Disable SSL-related warnings
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 def main():
+    host = "https://127.0.0.1:8080"
     # Check if the SSL certificate and key files exist
     if not os.path.exists("minh-ngu.crt") or not os.path.exists("minh-ngu.key"):
         # Generate SSL certificate and key
@@ -23,20 +25,17 @@ def main():
 
     # login = input("Login: ")
     # password = getpass.getpass("Password: ")
-    login = "admisdfn"
+    login = "admin"
     password = "admin"
 
     try:
         # Include CSRF token in the data for the POST request
-        response = requests.post("https://127.0.0.1:8080/log_in/",
+        response = requests.post(host + "/log_in/",
                                 data={"login": login, "password": password}, 
                                 cert=("minh-ngu.crt", "minh-ngu.key"),
                                 verify=False)
 
-        if response.status_code == 200:
-            print("Request was successful!")
-            print("Response content:", response.text)
-        else:
+        if response.status_code != 200:
             print("Request failed with status code:", response.status_code)
 
     except requests.exceptions.SSLError as e:
@@ -45,7 +44,19 @@ def main():
     except requests.exceptions.RequestException as e:  
         print("Request failed. Error:", e)
         return 1
+    try:
+        response = requests.get(host + "/game/update",
+            cert=("minh-ngu.crt", "minh-ngu.key"), verify=False)
+        if response.status_code != 200:
+            print("Request failed with status code:", response.status_code)
+    except requests.exceptions.RequestException as e:  
+        print("Request failed. Error:", e)
+        return 1
+    rooms = json.loads(response.text)
+    print("Rooms: ", rooms)
 
 if __name__ == "__main__":
     exit_code = main()
+    os.remove("minh-ngu.crt")
+    os.remove("minh-ngu.key")
     sys.exit(exit_code)
