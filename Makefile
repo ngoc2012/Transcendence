@@ -37,11 +37,11 @@ re:
 	@make up
 
 clean:
-	@docker stop $$(docker ps -qa);\
-	docker rm $$(docker ps -qa);\
-	docker rmi -f $$(docker images -qa);\
-	docker volume rm $$(docker volume ls -q);\
-	docker network rm $$(docker network ls -q);\
+	-docker stop $$(docker ps -qa)
+	-docker rm $$(docker ps -qa)
+	-docker rmi -f $$(docker images -qa)
+	-docker volume rm $$(docker volume ls -q)
+	-docker network rm $$(docker network ls -q)
 	
 # gitf: git in final
 # gitd: git in developpement
@@ -66,7 +66,7 @@ gitf:
 	git push
 gitd:
 	make gitclean
-	git add -A -- :!*.o :!*.swp :!*.env
+	git add -A -- :!*.o :!*.swp :!*.env :!*.crt :!*.key
 	git commit -m "$(M)"
 	git push
 gitclean:

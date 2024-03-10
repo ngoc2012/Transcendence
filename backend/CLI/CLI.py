@@ -33,6 +33,7 @@ async def rooms_socket():
     ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
     # ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
     # ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS)
+    ssl_context.load_verify_locations(certfile)
     ssl_context.load_cert_chain(certfile, keyfile=keyfile)
 
     try:
@@ -59,16 +60,16 @@ async def rooms_socket():
 
 def main():
     
-    if not os.path.exists(certfile) or not os.path.exists("minh-ngu.key"):
-        try:
-            result = subprocess.run("openssl req -newkey rsa:4096 -x509 -sha256 -days 365 \
-                -nodes -out " + certfile + " -keyout " + keyfile + " \
-                -subj \"/C=FR/ST=Paris/L=Paris/O=42 School/OU=minh-ngu/CN=minh-ngu/\"",
-                shell=True, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-            print("SSL certificate and key files generated successfully!")
-        except subprocess.CalledProcessError as e:
-            print("Failed to generate SSL certificate and key files. Error:", e)
-            return 1
+    # if not os.path.exists(certfile) or not os.path.exists("minh-ngu.key"):
+    #     try:
+    #         result = subprocess.run("openssl req -newkey rsa:4096 -x509 -sha256 -days 365 \
+    #             -nodes -out " + certfile + " -keyout " + keyfile + " \
+    #             -subj \"/C=FR/ST=Paris/L=Paris/O=42 School/OU=minh-ngu/CN=127.0.0.1/\"",
+    #             shell=True, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    #         print("SSL certificate and key files generated successfully!")
+    #     except subprocess.CalledProcessError as e:
+    #         print("Failed to generate SSL certificate and key files. Error:", e)
+    #         return 1
 
     # login = input("Login: ")
     # password = getpass.getpass("Password: ")
@@ -105,6 +106,6 @@ def main():
 
 if __name__ == "__main__":
     exit_code = main()
-    os.remove(certfile)
-    os.remove(keyfile)
+    # os.remove(certfile)
+    # os.remove(keyfile)
     sys.exit(exit_code)
