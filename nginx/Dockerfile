@@ -11,12 +11,13 @@ RUN openssl req -newkey rsa:4096 -x509 -sha256 -days 365 -nodes \
   -subj "/C=FR/ST=Paris/L=Paris/O=42 School/OU=minh-ngu/CN=127.0.0.1/" \
   -addext "subjectAltName = IP:127.0.0.1"
 
-RUN mkdir -p /app/config
-RUN cp /etc/nginx/ssl/* /app/config
-
 COPY ./conf/nginx.conf /etc/nginx/conf.d
 
 RUN mkdir -p /run/nginx
+
+COPY entrypoint.sh .
+RUN chmod +x entrypoint.sh
+ENTRYPOINT [ "./entrypoint.sh" ]
 
 EXPOSE 80
 EXPOSE 443
