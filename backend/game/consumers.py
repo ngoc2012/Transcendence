@@ -149,7 +149,16 @@ class RoomsConsumer(AsyncWebsocketConsumer):
                 }
             )
         else:
-            data = json.loads(text_data)
+            try:
+                data = json.loads(text_data)
+            except ValueError as e:
+                await self.channel_layer.group_send(
+                    self.group_name,
+                    {
+                        'type': 'group_room_list'
+                    }
+                )
+                return
             if data.get('type') == 'update':
                 await self.channel_layer.group_send(
                 self.group_name,
