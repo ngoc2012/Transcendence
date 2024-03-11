@@ -49,6 +49,8 @@ async def websocket_listener():
         print(f"An unexpected error occurred: {e}")
     finally:
         print("WebSocket connection closed.")
+        with mutex:
+            disconnect = True
 
 async def on_key_press(key):
     global disconnect, mutex, websocket
@@ -72,6 +74,9 @@ async def keyboard_listener():
                 break
         else:
             await asyncio.sleep(0.1)
+        with mutex:
+            if disconnect == True:
+                break
 
 async def main():
     tasks = [keyboard_listener(), websocket_listener()]
