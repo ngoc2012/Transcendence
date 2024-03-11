@@ -83,4 +83,24 @@ async def main():
     await asyncio.gather(*tasks)
 
 if __name__ == "__main__":
+    # login = input("Login: ")
+    # password = getpass.getpass("Password: ")
+    login = "admin"
+    password = "admin"
+
+    try:
+        response = requests.post("https://" + host + "/log_in/",
+            data={"login": login, "password": password}, 
+            cert=(certfile, keyfile),
+            verify=False)
+
+        if response.status_code != 200:
+            print("Request failed with status code:", response.status_code)
+
+    except requests.exceptions.SSLError as e:
+        print("SSL Certificate verification failed. Error:", e)
+        exit(1)
+    except requests.exceptions.RequestException as e:  
+        print("Request failed. Error:", e)
+        exit(1)
     asyncio.run(main())
