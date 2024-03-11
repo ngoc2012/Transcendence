@@ -2,7 +2,6 @@ import requests
 import json
 import asyncio
 import ssl
-import sys
 import websockets
 from websockets import exceptions as ws_exceptions
 
@@ -29,13 +28,15 @@ async def websocket_listener():
     ssl_context.load_cert_chain(certfile, keyfile=keyfile)
 
     try:
-        async with websockets.connect(uri, ssl=ssl_context) as websocket:
+        async with websockets.connect(uri, ssl=ssl_context) as ws:
             print("Connected to the WebSocket server.")
+            websocket = ws
             while True:
+                print("Waiting for message.")
                 response = await websocket.recv()
-                print(f"Received: {response}")
-                # if disconnect:
-                #     break
+                for i in json.loads(response):
+                    print(i)
+                print("Press 'q' to exit: ")
                 with mutex:
                     if disconnect:
                         break
@@ -50,29 +51,39 @@ async def websocket_listener():
         print("WebSocket connection closed.")
 
 async def on_key_press(key):
-    global disconnect
+    global disconnect, mutex, websocket
     print(f"Key pressed: {key}")
     if key == "q":
         print("Exiting...")
         with mutex:
             disconnect = True
+    else:
+        await websocket.send(key)
 
-async def keyboard_listener():
-    global disconnect
-    await asyncio.sleep(1) 
-
-    while True:
-        key = input("Press 'q' to exit: ")
-        await on_key_press(key)
+async def on_key_press(key):
+    global disconnect, mutex, websocket
+    print(f"Key pressed: {key.name}")
+    if key.name == "q":
+        print("Exiting...")
         with mutex:
-            if disconnect:
-                print("Disconnect flag set. Breaking loop.")
+            disconnect = True
+    else:
+        await websocket.send(key.name)
+
+import keyboard
+async def keyboard_listener():
+    global disconnect, mutex, websocket
+    await asyncio.sleep(1)
+    while True:
+        if keyboard.is_pressed('q'):
+            with mutex:
+                disconnect = True
                 await websocket.send("exit")
                 break
+        else:
+            await asyncio.sleep(0.1)
 
 async def main():
-    # tasks = [websocket_listener(), keyboard_listener()]
-    # tasks = [websocket_listener()]
     tasks = [keyboard_listener(), websocket_listener()]
     await asyncio.gather(*tasks)
 
