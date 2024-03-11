@@ -18,6 +18,11 @@ mutex = threading.Lock()
 disconnect = False
 websocket = None
 
+# Function to clear the terminal screen
+import os
+def clear_terminal():
+    os.system('cls' if os.name == 'nt' else 'clear')
+
 async def websocket_listener():
     global disconnect, mutex, websocket
     uri = "wss://" + host + "/ws/game/rooms/"  # Replace with the WebSocket server URI
@@ -30,9 +35,9 @@ async def websocket_listener():
     try:
         async with websockets.connect(uri, ssl=ssl_context) as websocket:
             while True:
+                clear_terminal()
                 response = await websocket.recv()
                 rooms = json.loads(response)
-                print('\033c')
                 if isinstance(rooms, list):
                     for i in rooms:
                         print(i['name'] + ' - ' + i['id'])
@@ -63,7 +68,7 @@ async def on_key_press(key):
 import keyboard
 async def keyboard_listener():
     global disconnect, mutex, websocket
-    # await asyncio.sleep(1)
+    await asyncio.sleep(1)
     while True:
         if keyboard.is_pressed('q'):
             with mutex:
