@@ -16,10 +16,10 @@ keyfile = "minh-ngu.key"
 import threading
 mutex = threading.Lock()
 disconnect = False
-websocket = None
+rooms_socket = None
 
-async def websocket_listener():
-    global disconnect, mutex, websocket
+async def rooms_listener():
+    global disconnect, mutex, rooms_socket
     uri = "wss://" + host + "/ws/game/rooms/"  # Replace with the WebSocket server URI
     print(f"Connecting to {uri}...")
 
@@ -28,15 +28,15 @@ async def websocket_listener():
     ssl_context.load_cert_chain(certfile, keyfile=keyfile)
 
     try:
-        async with websockets.connect(uri, ssl=ssl_context) as websocket:
+        async with websockets.connect(uri, ssl=ssl_context) as rooms_socket:
             while True:
-                response = await websocket.recv()
+                response = await rooms_socket.recv()
                 rooms = json.loads(response)
                 print('\033c')
                 if isinstance(rooms, list):
                     for i in rooms:
                         print(i['name'] + ' - ' + i['id'])
-                print("Press 'q' to exit: ")
+                print("[0..9]: join game\nn: new game\nq: quit")
                 with mutex:
                     if disconnect:
                         break
@@ -53,24 +53,24 @@ async def websocket_listener():
             disconnect = True
 
 async def on_key_press(key):
-    global disconnect, mutex, websocket
+    global disconnect, mutex, rooms_socket
     print(f"Key pressed: {key.name}")
     if key.name == "q":
         print("Exiting...")
         with mutex:
             disconnect = True
     else:
-        await websocket.send(key.name)
+        await rooms_socket.send(key.name)
 
 import keyboard
 async def keyboard_listener():
-    global disconnect, mutex, websocket
-    # await asyncio.sleep(1)
+    global disconnect, mutex, rooms_socket
+    await asyncio.sleep(0.1)
     while True:
         if keyboard.is_pressed('q'):
             with mutex:
                 disconnect = True
-                await websocket.send("exit")
+                await rooms_socket.send("exit")
                 break
         else:
             await asyncio.sleep(0.1)
@@ -79,7 +79,7 @@ async def keyboard_listener():
                 break
 
 async def main():
-    tasks = [keyboard_listener(), websocket_listener()]
+    tasks = [keyboard_listener(), rooms_listener()]
     await asyncio.gather(*tasks)
 
 if __name__ == "__main__":
