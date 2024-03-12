@@ -141,7 +141,6 @@ class RoomsConsumer(AsyncWebsocketConsumer):
             await self.broadcast_user_list()
 
     async def receive(self, text_data):
-        print(text_data)
         if not text_data:
             await self.channel_layer.group_send(
                 self.group_name,
