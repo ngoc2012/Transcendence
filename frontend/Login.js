@@ -65,6 +65,13 @@ export class Login
                 }
             }
         });
+        $.ajax({
+            url: '/transchat/chat_lobby/',
+            method: 'POST',
+            data: {
+                'username': this.dom_login.value
+            }
+        })
     }
 
     loginWith42() {

@@ -5,6 +5,7 @@ export class Chat{
 	}
 
 	init(){
+        
 		this.dom_input = document.querySelector('#chat-message-input');
 		this.dom_chatlog = document.querySelector('#chat-log');
 		this.dom_submit = document.querySelector('#chat-message-submit');
@@ -16,13 +17,11 @@ export class Chat{
         this.socket = new WebSocket(
             'wss://'
             + window.location.host
-            + '/ws/transchat/'
-            + this.roomName
-            + '/'
+            + '/ws/transchat/general_chat/'
 			);
-			this.events(this.socket);
-		}
-		
+		this.events(this.socket);
+	}
+
 	events(e){
 		const socket = this.socket;
 		const login = this.main.login;
