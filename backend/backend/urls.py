@@ -20,7 +20,6 @@ from . import views
 from django.urls import include, path
 from .views import callback
 
-
 urlpatterns = [
     path('', views.index, name='index'),
     path("game/", include("game.urls")),
@@ -40,7 +39,9 @@ urlpatterns = [
     path('code_2fa/', views.code_2fa, name='code_2fa'),
     path('verify/', views.verify, name='verify'),
     path('verify_qrcode/', views.verify_qrcode, name='verify_qrcode'),
-
+    path('profile/<str:username>/', views.profile, name='profile'),
+    path('profile/<str:username>/alias/', views.alias, name='alias'),
+    path('profile/<str:username>/change_password/', views.password, name='password')
 ]   
 
 

@@ -11,6 +11,7 @@ import os
 import pyotp
 import random
 import jwt
+import json
 from datetime import datetime, timedelta
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
@@ -258,3 +259,48 @@ def verify_qrcode(request):
     if totp.verify(input_code):
         return JsonResponse({'result': '1'})
     return JsonResponse({'result': '0'})
+
+@csrf_exempt
+def profile(request, username):
+    user = PlayersModel.objects.filter(login=username).get(login=username)
+    context = {
+        'id': user.id,
+        'login': user.login,
+        'password': user.password,
+        'name': user.name,
+        'alias': user.tourn_alias,
+        'history': user.history,
+        'email': user.email
+    }
+    return render(request, 'profile.html', context = {'context': json.dumps(context)})
+
+@csrf_exempt
+def alias(request, username):
+    user = PlayersModel.objects.filter(login=username).get(login=username)
+    if request.method == 'GET':
+        return(render(request, 'alias.html'))
+    if request.method == 'POST':
+        if 'alias' in request.POST:
+            alias = request.POST['alias']
+            user.tourn_alias = alias
+            return HttpResponse('Tournament alias succesfully changed')
+        
+@csrf_exempt
+def password(request, username):
+    user= PlayersModel.objects.filter(login=username).get(login=username)
+    if request.method == 'POST':
+        if 'oldpwd' in request.POST and 'newpwd' in request.POST:
+            oldpwd = request.POST['oldpwd']
+            newpwd = request.POST['newpwd']
+            if check_password(oldpwd, user.password) == True:
+                new = make_password(newpwd)
+                user.password = new
+                user.save()
+                response = HttpResponse('Password changed succesfully')
+                response.status_code = 200
+                return response
+            else:
+                response = HttpResponse('Incorrect password')
+                response.status_code = 401
+                return response
+    return render(request, 'change_password.html')

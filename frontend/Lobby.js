@@ -1,5 +1,6 @@
 import {Pong} from './Pong.js'
 import { Chat } from './Chat.js'
+import { Profile } from './Profile.js'
 
 export class Lobby
 {
@@ -16,11 +17,13 @@ export class Lobby
         this.dom_pew = document.querySelector("#pew");
         this.dom_chat = document.querySelector("#chat");
         this.dom_delete = document.querySelector("#delete");
+        this.dom_profile = document.querySelector('#profile');
         this.dom_pong.addEventListener("click", () => this.new_game("pong"));
         this.dom_pew.addEventListener("click", () => this.new_game("pew"));
         this.dom_delete.addEventListener("click", () => this.delete_game());
         this.dom_join.addEventListener("click", () => this.join());
 		this.dom_chat.addEventListener("click", () => this.start_chat());
+        this.dom_profile.addEventListener("click", () => this.profile());
         this.rooms_update();
     }
 
@@ -37,9 +40,19 @@ export class Lobby
 				'username': this.main.login
 			}
 		});
-		this.chat = new Chat(this.main);
-        this.main.load('transchat/general_chat', () => this.chat.init());
+		this.main.chat = new Chat(this.main);
+        this.main.load('transchat/general_chat', () => this.main.chat.init());
 	}
+
+    profile(){
+        this.main.set_status('');
+        if (this.main.login === ''){
+            this.main.set_status('You must be logged in to see your profile');
+            return ;
+        }
+        this.main.profile = new Profile(this.main);
+        this.main.load('/profile/' + this.main.login, () => this.main.profile.init());
+    }
 
     join() {
         if (this.dom_rooms.selectedIndex === -1)

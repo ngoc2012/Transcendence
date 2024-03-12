@@ -7,6 +7,8 @@ class PlayersModel(models.Model):
     login = models.CharField(max_length=255)
     password = models.CharField(max_length=255)
     name = models.CharField(max_length=255)
+    tourn_alias = models.CharField(max_length=255)
+    history = models.CharField(max_length=20)
     secret_2fa = models.TextField(default='')
     email = models.EmailField(default='')  # gerer si mauvais email
     session_id = models.CharField(max_length=40, null=True)
