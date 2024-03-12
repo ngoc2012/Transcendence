@@ -152,7 +152,7 @@ class RoomsConsumer(AsyncWebsocketConsumer):
             try:
                 data = json.loads(text_data)
             except ValueError as e:
-                print(f"Invalid JSON: {e}")
+                # print(f"Invalid JSON: {e}")
                 await self.channel_layer.group_send(
                     self.group_name,
                     {

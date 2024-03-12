@@ -19,6 +19,7 @@ mutex = threading.Lock()
 quit_program = False
 quit_lobby = False
 quit_game = False
+quit_input = False
 
 rooms_socket = None
 pong_socket = None
@@ -39,11 +40,13 @@ async def rooms_listener():
     try:
         async with websockets.connect(uri, ssl=ssl_context) as rooms_socket:
             while True:
+                print("Waiting for message...")
                 response = await rooms_socket.recv()
                 obj = json.loads(response)
                 print('\033c')
                 if isinstance(obj, list):
-                    rooms = obj
+                    with mutex:
+                        rooms = obj
                     for i, r in enumerate(rooms):
                         print(str(i) + ' - ' + r['name'] + ' - ' + r['id'])
                 print("[0..9]: join game\nn: new game\nEsc: quit")
@@ -51,6 +54,7 @@ async def rooms_listener():
                     if quit_lobby:
                         rooms_socket = None
                         break
+                await asyncio.sleep(0.1)
     except ws_exceptions.ConnectionClosedOK:
         print("Connection closed gracefully.")
         with mutex:
@@ -90,6 +94,7 @@ async def pong_listener(room):
                     if quit_game:
                         pong_socket = True
                         break
+                await asyncio.sleep(0.1)
     except ws_exceptions.ConnectionClosedOK:
         print("Connection closed gracefully.")
     except ws_exceptions.ConnectionClosedError as e:
@@ -111,12 +116,13 @@ async def join(game):
             data={"login": login, "game_id": rooms[game]['id']}, 
             cert=(certfile, keyfile),
             verify=False)
+        print(response)
         if response.status_code != 200:
             print("Request failed with status code:", response.status_code)
             return
         with mutex:
             quit_game = False
-        asyncio.create_task(pong_listener(response))
+        asyncio.create_task(pong_listener(json.loads(response)))
     except requests.exceptions.SSLError as e:
         print("SSL Certificate verification failed. Error:", e)
         return
@@ -125,61 +131,66 @@ async def join(game):
         return
 
 async def lobby():
+    print("lobby")
     global mutex, quit_lobby
     with mutex:
         quit_lobby = False
     asyncio.create_task(rooms_listener())
 
-import keyboard
-async def keyboard_listener():
+from pynput import keyboard as pynput_keyboard
+def on_key_pressed(key):
     global quit_program, mutex, rooms_socket, quit_lobby, pong_socket, quit_game
-    await lobby()
-    await asyncio.sleep(0.1)
-    while True:
-        # game = number_keyboard()
-        game = -1
-        for i in range(10):
-            if keyboard.is_pressed(str(i)):
-                game = i
-        if game != -1:
-            join(game)
-        elif keyboard.is_pressed('esc'):
+    loop = asyncio.get_event_loop()
+
+    def run_sync_code():
+        global quit_program, mutex, rooms_socket, quit_lobby, pong_socket, quit_game
+        try:
+            key_char = key.char
+        except AttributeError:
+            key_char = key.name
+        print(key_char)
+        if key_char.isdigit():
+            asyncio.create_task(join(int(key_char)))
+        elif key_char == 'esc':
             with mutex:
                 quit_lobby = True
                 quit_game = True
-            if rooms_socket != None:
-                await rooms_socket.send("exit")
-            if pong_socket != None:
-                await pong_socket.send("exit")
+            if rooms_socket is not None:
+                loop.create_task(rooms_socket.send("exit"))
+            if pong_socket is not None:
+                loop.create_task(pong_socket.send("exit"))
             print("Bye")
-            break
-        elif keyboard.is_pressed('q'):
+            loop.stop()
+        elif key_char == 'q':
             with mutex:
                 quit_game = True
-            if pong_socket != None:
-                await pong_socket.send("exit")
-            if rooms_socket == None:
-                await lobby()
-        elif keyboard.is_pressed('up'):
-            if pong_socket != None:
-                await pong_socket.send('up')
-        elif keyboard.is_pressed('down'):
-            if pong_socket != None:
-                await pong_socket.send('down')
-        elif keyboard.is_pressed('left'):
-            if pong_socket != None:
-                await pong_socket.send('left')
-        elif keyboard.is_pressed('right'):
-            if pong_socket != None:
-                await pong_socket.send('right')
-        else:
-            await asyncio.sleep(0.1)
+            if pong_socket is not None:
+                loop.create_task(pong_socket.send("exit"))
+            if rooms_socket is None:
+                loop.create_task(lobby())
+        elif key_char in ['up', 'down', 'left', 'right']:
+            if pong_socket is not None:
+                loop.create_task(pong_socket.send(key_char))
+
         with mutex:
             if quit_program:
-                break
+                loop.stop()
+
+    threading.Thread(target=run_sync_code).start()
+
+
+# async def get_input():
+#     # asyncio.create_task(keyboard_listener())
+#     await keyboard_listener()
 
 async def main():
-    await asyncio.create_task(keyboard_listener())
+    global quit_lobby
+    # await lobby()
+    with mutex:
+        quit_lobby = False
+    await asyncio.create_task(rooms_listener())
+    # await asyncio.sleep(0.1)
+    # await get_input()
 
 def log_in():
     global login
@@ -204,4 +215,8 @@ def log_in():
 
 if __name__ == "__main__":
     # log_in()
-    asyncio.run(main())
+    # asyncio.run(main())
+    loop = asyncio.get_event_loop()
+    loop.create_task(main())
+    with pynput_keyboard.Listener(on_press=on_key_pressed) as listener:
+        loop.run_forever()
