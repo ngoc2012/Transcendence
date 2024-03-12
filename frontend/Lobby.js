@@ -187,22 +187,28 @@ export class Lobby
                 this.displayTournamentInvite(data.message.message, data.message.tour_id);
             }
             else if (data.type === 'tournament_invite_accepted') {
-                this.tournament.tournamentInviteAccepted(data.message);
+                if (this.tournament)
+                    this.tournament.tournamentInviteAccepted(data.message);
             }
             else if (data.type === 'tournament_ready') {
-                this.tournament.tournamentReady();
+                if (this.tournament)
+                    this.tournament.tournamentReady();
             }
             else if (data.type === 'tournament_infos') {
-                this.tournament.tournamentInfos(data.name, data.round)
+                if (this.tournament)
+                    this.tournament.tournamentInfos(data.name, data.round)
             }
-            else if (data.type === 'tournament_matches') {
-                this.tournament.displayTournamentMatches(data.matches);
+            else if (data.type === 'tournament_matches' || data.type === 'match_update') {
+                if (this.tournament)
+                    this.tournament.displayTournamentMatches(data.matches);
             }
             else if (data.type === 'tournament_join') {
-                this.tournament.displayPlayerAction(data.message);
+                if (this.tournament)
+                    this.tournament.displayPlayerAction(data.message);
             }
             else if (data.type === 'tournament_join_valid') {
-                this.tournament.joinMatch(data);
+                if (this.tournament)
+                    this.tournament.joinMatch(data);
             }
             else if (data.type === 'tournament_event_invite') {
                 this.displayEventInvite(data.message);
@@ -225,7 +231,7 @@ export class Lobby
                     this.tournament.winnerDisplay(data);
             }
             else if (data.type === 'all_tournament_matches') {
-                if (this.tournament)
+                if (this.tournament) 
                     this.tournament.scoreDisplay(data.matches);
             }
             else {
@@ -282,10 +288,8 @@ export class Lobby
             <button id="declineInviteBtn">Decline</button>
         `;
 
-        // append the invite notification to the container
         inviteContainer.appendChild(inviteNotification);
 
-        // event listeners accept / decline buttons
         document.getElementById('acceptInviteBtn').addEventListener('click', () => {
             this.tournamentInviteResponse('accept', tourId);
             inviteContainer.removeChild(inviteNotification);
@@ -297,61 +301,58 @@ export class Lobby
     }
 
     displayEventInvite(tourID) {
+        let noInviteContainer = document.getElementById('no-invite');
+        if (noInviteContainer)
+            return;
+    
         let inviteContainer = document.getElementById('inviteContainer');
         if (!inviteContainer) {
             inviteContainer = document.createElement('div');
             inviteContainer.id = 'inviteContainer';
-            document.body.appendChild(inviteContainer);
+            document.addEventListener('DOMContentLoaded', () => document.body.appendChild(inviteContainer));
         }
-
+    
         const inviteNotification = document.createElement('div');
         inviteNotification.classList.add('event-invite-notification');
         inviteNotification.innerHTML = `
             <p>Tournament is ready! Join?</p>
             <button id="acceptInviteBtn">Accept</button>
-            <button id="declineInviteBtn">Decline</button>
-        `;
-
-        // append the invite notification to the container
-        inviteContainer.appendChild(inviteNotification);
-
-        // event listeners accept / decline buttons
-        document.getElementById('acceptInviteBtn').addEventListener('click', () => {
-            inviteContainer.removeChild(inviteNotification);
-            this.tournament = new Tournament(this.main);
-            this.tournament.eventInvite(tourID);
-        });
-        document.getElementById('declineInviteBtn').addEventListener('click', () => {
-            inviteContainer.removeChild(inviteNotification);
-        });
-    }
+            <button id="declineInviteBtn">Decline</button>`;
+    
+        const appendInvite = () => {
+            if(document.body.contains(inviteContainer)) {
+                inviteContainer.appendChild(inviteNotification);
+    
+                document.getElementById('acceptInviteBtn').addEventListener('click', () => {
+                    inviteContainer.removeChild(inviteNotification);
+                    this.tournament = new Tournament(this.main);
+                    this.tournament.eventInvite(tourID);
+                });
+                document.getElementById('declineInviteBtn').addEventListener('click', () => {
+                    inviteContainer.removeChild(inviteNotification);
+                });
+            } else {
+                document.addEventListener('DOMContentLoaded', appendInvite);
+            }
+        };
+    
+        appendInvite();
+    }    
 
     displayTournamentBack(tourID) {
-        let backTournamentContainer = document.getElementById('backTournamentContainer');
-        if (!backTournamentContainer) {
-            backTournamentContainer = document.createElement('div');
-            backTournamentContainer.id = 'backTournamentContainer';
-            document.body.appendChild(backTournamentContainer);
+        const existingButton = document.getElementById('tournament');
+
+        if (existingButton) {
+            const newButton = document.createElement('button');
+            newButton.textContent = 'Tournament';
+            newButton.id = 'tournament';
+            newButton.addEventListener('click', () => {
+                    this.tournament = new Tournament(this.main);
+                    this.tournament.eventInvite(tourID);
+                    this.tournament.infoRequest(tourID);
+            });
+            existingButton.parentNode.replaceChild(newButton, existingButton);
         }
-
-        const inviteNotification = document.createElement('div');
-        inviteNotification.classList.add('event-invite-notification');
-        inviteNotification.innerHTML = `
-            <p>Join back the tournament?</p>
-            <button id="acceptInviteBtn">Accept</button>
-            <button id="declineInviteBtn">Decline</button>
-        `;
-
-        backTournamentContainer.appendChild(inviteNotification);
-
-        document.getElementById('acceptInviteBtn').addEventListener('click', () => {
-            backTournamentContainer.removeChild(inviteNotification);
-            this.tournament = new Tournament(this.main);
-            this.tournament.eventInvite(tourID);
-        });
-        document.getElementById('declineInviteBtn').addEventListener('click', () => {
-            backTournamentContainer.removeChild(inviteNotification);
-        });
     }
 
     alreadyInTournament(tourID) {
