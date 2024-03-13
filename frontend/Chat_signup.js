@@ -25,6 +25,8 @@ export class Chat_signup{
 			return ;
 		}
 		this.main.chat = new Chat(this.main);
+        this.main.history_stack.push('/transchat/' + this.roomname);
+        window.history.pushState({}, '', '/transchat/' + this.roomname);
 		this.main.load('transchat/' + this.roomname, () => this.main.chat.init());
 	}
 }

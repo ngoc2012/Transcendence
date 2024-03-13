@@ -41,6 +41,8 @@ export class Lobby
 			}
 		});
 		this.main.chat = new Chat(this.main);
+        this.main.history_stack.push('/transchat/general_chat/');
+        window.history.pushState({}, '', '/transchat/general_chat/');
         this.main.load('transchat/general_chat', () => this.main.chat.init());
 	}
 
@@ -51,6 +53,8 @@ export class Lobby
             return ;
         }
         this.main.profile = new Profile(this.main);
+        this.main.history_stack.push('/profile/' + this.main.login);
+        window.history.pushState({}, '', '/profile/' + this.main.login);
         this.main.load('/profile/' + this.main.login, () => this.main.profile.init());
     }
 
