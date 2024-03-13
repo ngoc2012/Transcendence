@@ -56,6 +56,17 @@ def new_game(request):
         }))
 
 @csrf_exempt
+def update(request):
+    data = [
+        {
+            "id": str(i),
+            "name": i.name
+        } for i in RoomsModel.objects.all()
+    ]
+    # print(data)
+    return JsonResponse(data, safe=False)
+
+@csrf_exempt
 def join(request):
     if 'game_id' not in request.POST:
         return (HttpResponse("Error: No game id!"))
@@ -66,6 +77,9 @@ def join(request):
     #uuid_obj = UUID(uuid_str)
     if not RoomsModel.objects.filter(id=request.POST['game_id']).exists():
         return (HttpResponse("Error: Room with id " + request.POST['game_id'] + " does not exist!"))
+    if 'game_id' not in request.POST:
+        return (HttpResponse("Error: No game id!"))
+    
     room = RoomsModel.objects.get(id=request.POST['game_id'])
     n0 = PlayerRoomModel.objects.filter(room=room, side=0).count()
     n1 = PlayerRoomModel.objects.filter(room=room, side=1).count()
@@ -76,6 +90,8 @@ def join(request):
         side = 1
         position = n1
     player = PlayersModel.objects.get(login=request.POST['login'])
+    if (PlayerRoomModel.objects.filter(room=room.id, player=player.id).count() > 0):
+        return (HttpResponse("Error: Player has been already in the game!"))
     player_room = PlayerRoomModel(
         player=player,
         room=room,
@@ -121,6 +137,9 @@ def delete(request):
     if room.owner != player:
         return JsonResponse({'error': "Login '{}' is not the owner of '{}'!".format(request.POST['login'], request.POST['game_id'])}, status=401)
 
+    if PlayerRoomModel.objects.filter(room=room.id).count() > 0:
+        return JsonResponse({'error': "Someone is still playing"}, status=401)
+    
     #JWT token check
     if 'Authorization' not in request.headers:
         return JsonResponse({'error': 'Authorization header missing'}, status=401)

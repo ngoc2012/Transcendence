@@ -28,7 +28,11 @@ def get_room_data(players, room_id):
 
 @sync_to_async
 def get_teams_data(consumer, room_id):
-    consumer.room = RoomsModel.objects.get(id=consumer.room_id)
+    try:
+        consumer.room = RoomsModel.objects.get(id=consumer.room_id)
+    except RoomsModel.DoesNotExist:
+        print(f"Room with ID {room_id} does not exist.")
+        return
     consumer.player = PlayerRoomModel.objects.get(id=consumer.player_id)
     consumer.server = PlayerRoomModel.objects.get(player=consumer.room.server)
     players0 = PlayerRoomModel.objects.filter(room=room_id, side=0)
@@ -86,14 +90,31 @@ def end_game(consumer):
 
 @sync_to_async
 def quit(consumer):
+    if PlayerRoomModel.objects.filter(room=consumer.room_id).count() == 0:
+        return
     if PlayerRoomModel.objects.filter(room=consumer.room_id).count() == 1:
         consumer.room.delete()
         return
+    if consumer.player == None:
+        return
+    print("Player deleted")
     if consumer.server == consumer.player:
         consumer.player.delete()
         change_server(consumer, PlayerRoomModel.objects.filter(room=consumer.room_id).first())
     else:
         consumer.player.delete()
+
+@sync_to_async
+def remove_player(consumer):
+    if consumer.player is not None:
+        consumer.player.delete()
+
+@sync_to_async
+def check_player(consumer):
+    consumer.player = PlayerRoomModel.objects.get(id=consumer.player_id)
+    if (consumer.player == None):
+        return False
+    return True
 
 @sync_to_async
 def change_server_direction(consumer):
