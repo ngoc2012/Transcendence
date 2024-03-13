@@ -113,10 +113,9 @@ async def pong_listener(room):
             quit_game = True
 
 async def join(game):
-    print("joining game", game)
+    print(join)
     global login, rooms, quit_game
     if game + 1 > len(rooms):
-        print("Game not found")
         return
     try:
         response = requests.post("https://" + host + "/game/join",
@@ -143,65 +142,55 @@ async def lobby():
         quit_lobby = False
     asyncio.create_task(rooms_listener())
 
-import aioconsole
 import keyboard
 async def keyboard_listener():
     global quit_program, mutex, rooms_socket, quit_lobby, pong_socket, quit_game
     await lobby()
     await asyncio.sleep(0.1)
     while True:
+        print("keyboard")
         # game = number_keyboard()
-        worked = False
-
-        key = await aioconsole.ainput()
-        print(key)
-        with mutex:
-            game = -1
-            for i in range(10):
-                if keyboard.is_pressed(str(i)):
-                    game = i
-                    break
-            # print()
-            if game != -1:
-                await join(game)
-                worked = True
-            elif keyboard.is_pressed('esc'):
-                print("esc")
+        game = -1
+        for i in range(10):
+            if keyboard.is_pressed(str(i)):
+                game = i
+        # print()
+        if game != -1:
+            await join(game)
+        elif keyboard.is_pressed('esc'):
+            with mutex:
                 quit_lobby = True
                 quit_game = True
-                if rooms_socket != None:
-                    await rooms_socket.send("exit")
-                if pong_socket != None:
-                    await pong_socket.send("exit")
-                print("Bye")
-                break
-            elif keyboard.is_pressed('q'):
-                print("q")
+            if rooms_socket != None:
+                await rooms_socket.send("exit")
+            if pong_socket != None:
+                await pong_socket.send("exit")
+            print("Bye")
+            break
+        elif keyboard.is_pressed('q'):
+            with mutex:
                 quit_game = True
-                if pong_socket != None:
-                    await pong_socket.send("exit")
-                if rooms_socket == None:
-                    await lobby()
-            elif keyboard.is_pressed('up'):
-                if pong_socket != None:
-                    await pong_socket.send('up')
-                    worked = True
-            elif keyboard.is_pressed('down'):
-                if pong_socket != None:
-                    await pong_socket.send('down')
-                    worked = True
-            elif keyboard.is_pressed('left'):
-                if pong_socket != None:
-                    await pong_socket.send('left')
-                    worked = True
-            elif keyboard.is_pressed('right'):
-                if pong_socket != None:
-                    await pong_socket.send('right')
-                    worked = True
+            if pong_socket != None:
+                await pong_socket.send("exit")
+            if rooms_socket == None:
+                await lobby()
+        elif keyboard.is_pressed('up'):
+            if pong_socket != None:
+                await pong_socket.send('up')
+        elif keyboard.is_pressed('down'):
+            if pong_socket != None:
+                await pong_socket.send('down')
+        elif keyboard.is_pressed('left'):
+            if pong_socket != None:
+                await pong_socket.send('left')
+        elif keyboard.is_pressed('right'):
+            if pong_socket != None:
+                await pong_socket.send('right')
+        else:
+            await asyncio.sleep(0.1)
+        with mutex:
             if quit_program:
                 break
-        if not worked:
-            await asyncio.sleep(0.1)
 
 async def main():
     await asyncio.create_task(keyboard_listener())

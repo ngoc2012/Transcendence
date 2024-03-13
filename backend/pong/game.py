@@ -1,19 +1,28 @@
 from django.core.exceptions import ObjectDoesNotExist
 import json
 from asgiref.sync import sync_to_async
-from channels.generic.websocket import AsyncWebsocketConsumer
+# from channels.generic.websocket import AsyncWebsocketConsumer
 from game.models import RoomsModel, PlayerRoomModel, PlayersModel
 
-import asyncio
+from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
+
+# import asyncio
 
 from .data import pong_data
 import random
 
 @sync_to_async
 def get_info(consumer):
-    consumer.room = RoomsModel.objects.get(id=consumer.room_id)
-    consumer.player = PlayerRoomModel.objects.get(id=consumer.player_id)
-    consumer.server = PlayerRoomModel.objects.get(player=consumer.room.server)
+    try:
+        consumer.room = RoomsModel.objects.get(id=consumer.room_id)
+        consumer.player = PlayerRoomModel.objects.get(id=consumer.player_id)
+        consumer.server = PlayerRoomModel.objects.get(player=consumer.room.server)
+    except ObjectDoesNotExist:
+        return False
+    except MultipleObjectsReturned:
+        return False
+    return True
+    
 
 @sync_to_async
 def get_room_data(players, room_id):

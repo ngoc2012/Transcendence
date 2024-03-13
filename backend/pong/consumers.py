@@ -23,7 +23,9 @@ class PongConsumer(AsyncWebsocketConsumer):
         self.server = None
         self.players0 = None
         self.players1 = None
-        await get_info(self)
+        check = await get_info(self)
+        if not check:
+            self.disconnect()
         await self.channel_layer.group_add(
             self.room_id,
             self.channel_name
