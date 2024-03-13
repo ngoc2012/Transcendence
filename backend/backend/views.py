@@ -1,7 +1,8 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from game.models import PlayersModel
+from game.models import PlayersModel, TournamentModel, TournamentMatchModel, RoomsModel, PlayerRoomModel
+from django.utils import timezone
 from transchat.models import Room
 from django.shortcuts import redirect
 from django.conf import settings
@@ -16,6 +17,7 @@ from datetime import datetime, timedelta
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 from django.contrib.auth.hashers import make_password, check_password
+import random, string
 
 API_PUBLIC = os.environ.get('API_PUBLIC')
 API_SECRET = os.environ.get('API_SECRET')
@@ -26,6 +28,9 @@ JWT_REFRESH_SECRET_KEY = os.environ.get('JWT_REFRESH_SECRET_KEY')
 SENDGRID_API_KEY = os.environ.get('SENDGRID_API_KEY')
 EMAIL_SENDER = os.environ.get('EMAIL_SENDER')
 
+
+def redirect(request):
+	return (render(request, 'index.html'))
 
 def index(request):
 	return (render(request, 'index.html'))
@@ -86,13 +91,22 @@ def mail_2fa(request):
 # verify the email code
 @csrf_exempt
 def verify(request):
-    input_code = request.POST.get('input_code') 
+    input_code = request.POST.get('input_code')
     if(input_code == settings.CODE):
         return JsonResponse({'result': '1'})
     return JsonResponse({'result': '0'})
 
 # create a new player in the database and his 2fa key used for authenticator
 
+
+def tournament(request):
+     return (render(request, 'tournament.html'))
+
+def tournament_lobby(request):
+     return (render(request, 'tournament_lobby.html'))
+
+def tournament_start(request, tournament_id):
+     return (render(request, 'tournament_start.html'))
 
 @csrf_exempt
 def new_player(request):
@@ -113,7 +127,7 @@ def new_player(request):
         mysecret = ''
 
     hashed_password = make_password(request.POST['password'])
-    
+
     new_player = PlayersModel(
         login=request.POST['login'],
         password=hashed_password,
@@ -160,7 +174,7 @@ def log_in(request):
                 enable2fa = 'true'
             else:
                 enable2fa = 'false'
-                
+
             # JWT handling
             if check_password(password, player.password):
                 access_token = jwt.encode({
@@ -203,7 +217,7 @@ def callback(request):
 
         token_data = token_response.json()
         access_token = token_data['access_token']
-        
+
         user_response = requests.get('https://api.intra.42.fr/v2/me', headers={
             'Authorization': f'Bearer {access_token}',
         })
@@ -239,14 +253,13 @@ def callback(request):
             'my42JWT': access_token_jwt
         })
         response.set_cookie('refresh_token', refresh_token_jwt, httponly=True)
-        
+
         return response
- 
+
     except Exception as e:
         print(f"An error occurred: {e}")
         return HttpResponse("An error occurred.")
 
-# verify the authenticator TOTP code
 @csrf_exempt
 def verify_qrcode(request):
     input_code = request.POST.get('input_code')
@@ -304,3 +317,20 @@ def password(request, username):
                 response.status_code = 401
                 return response
     return render(request, 'change_password.html')
+
+@csrf_exempt
+def new_tournament(request):
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        game = request.POST.get('game')
+        login = request.POST.get('login')
+        owner = PlayersModel.objects.get(login=request.POST['login'])
+        try:
+            tournament = TournamentModel.objects.create(name=name, game=game, owner=owner)
+            player = PlayersModel.objects.get(login=login)
+            tournament.participants.add(player)
+            return JsonResponse({'message': 'Tournament created successfully', 'id': str(tournament.id)}, status=200)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
+    else:
+         return JsonResponse({'error': 'Invalid request'}, status=405)

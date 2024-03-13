@@ -1,6 +1,11 @@
 import {Pong} from './Pong.js'
+<<<<<<< HEAD
 import { Chat } from './Chat.js'
 import { Profile } from './Profile.js'
+=======
+import { Chat_signup } from './Chat_signup.js'
+import {Tournament} from './Tournament.js';
+>>>>>>> 9b502c950ad0b66a32ca98a5a959f87a93a822c3
 
 export class Lobby
 {
@@ -8,10 +13,12 @@ export class Lobby
         this.main = m;
         this.socket = -1;
         this.game = null;
+        this.tournament = null;
     }
-    
+
     events() {
         this.dom_rooms = document.getElementById("rooms");
+        this.dom_tournament = document.getElementById("tournament");
         this.dom_join = document.querySelector("#join");
         this.dom_pong = document.querySelector("#pong");
         this.dom_pew = document.querySelector("#pew");
@@ -24,7 +31,9 @@ export class Lobby
         this.dom_join.addEventListener("click", () => this.join());
 		this.dom_chat.addEventListener("click", () => this.start_chat());
         this.dom_profile.addEventListener("click", () => this.profile());
+        this.dom_tournament.addEventListener("click", () => this.tournament_click());
         this.rooms_update();
+        this.queryTournament();
     }
 
 	start_chat(){
@@ -72,6 +81,7 @@ export class Lobby
                 if (typeof info === 'string')
                 {
                     this.main.set_status(info);
+                    this.rooms_update();
                 }
                 else
                 {
@@ -103,10 +113,13 @@ export class Lobby
             },
             success: (info) => {
                 if (this.socket !== -1)
-                    this.socket.send('update');
+                    this.socket.send(JSON.stringify({
+                        type: 'update'
+                    }));
                 if (typeof info === 'string')
                 {
                     this.main.set_status(info);
+                    this.rooms_update();
                 }
                 else
                 {
@@ -153,9 +166,15 @@ export class Lobby
                     const message = response.message;
                     this.main.set_status(message);
                     if (this.socket !== -1) {
-                        this.socket.send('update');
+                        this.socket.send(JSON.stringify({
+                        type: 'update'
+                    }));
                     }
                 }
+                if (this.socket !== -1)
+                    this.socket.send(JSON.stringify({
+                        type: 'update'
+                    }));
             },
             error: (xhr, textStatus, errorThrown) => {
             let errorMessage = "Error: Can not delete game";
@@ -174,32 +193,271 @@ export class Lobby
     }
 
     rooms_update() {
-        this.main.set_status('');
-        this.socket = new WebSocket(
-            'wss://'
-            + window.location.host
-            + '/ws/game/rooms/'
-        );
+        // console.log('rooms_update');
+        if (this.socket === -1) {
+            this.main.set_status('');
+            this.socket = new WebSocket(
+                'wss://'
+                + window.location.host
+                + '/ws/game/rooms/'
+            );
+        }
+        // else {
+        //     console.log('socket already open');
+        // }
+        
+        $.ajax({
+            url: '/game/update',
+            method: 'GET',
+            success: (rooms) => {
+                // console.log(rooms);
+                // const rooms = JSON.parse(e.data);
+                var options_rooms = this.dom_rooms && this.dom_rooms.options;
+                this.dom_rooms.innerHTML = "";
+                if (options_rooms && rooms && rooms.length > 0) {
+                    rooms.forEach((room) => {
+                        var option = document.createElement("option");
+                        option.value = room.id;
+                        option.text = room.name + " - " + room.id;
+                        this.dom_rooms.add(option);
+                    });
+                }
+            },
+            error: () => this.main.set_status('Error: Can not update rooms')
+        });
+        // this.socket.on = (e) => {
+        //     if (!('data' in e))
+        //         return;
 
         this.socket.onmessage = (e) => {
             if (!('data' in e))
                 return;
-            const rooms = JSON.parse(e.data);
-            var options_rooms = this.dom_rooms && this.dom_rooms.options;
-            this.dom_rooms.innerHTML = "";
-            if (options_rooms && rooms && rooms.length > 0) {
-                rooms.forEach((room) => {
-                    var option = document.createElement("option");
-                    option.value = room.id;
-                    option.text = room.name + " - " + room.id;
-                    this.dom_rooms.add(option);
-                });
+            const data = JSON.parse(e.data);
+            if (data.type === 'users_list' ) {
+                if (this.tournament)
+                    this.tournament.userList(data.users);
             }
-        };
+            else if (data.type == 'tournament_invite') {
+                this.displayTournamentInvite(data.message.message, data.message.tour_id);
+            }
+            else if (data.type === 'tournament_invite_accepted') {
+                if (this.tournament)
+                    this.tournament.tournamentInviteAccepted(data.message);
+            }
+            else if (data.type === 'tournament_ready') {
+                if (this.tournament)
+                    this.tournament.tournamentReady();
+            }
+            else if (data.type === 'tournament_infos') {
+                if (this.tournament)
+                    this.tournament.tournamentInfos(data.name, data.round)
+            }
+            else if (data.type === 'tournament_matches' || data.type === 'match_update') {
+                if (this.tournament)
+                    this.tournament.displayTournamentMatches(data.matches);
+            }
+            else if (data.type === 'tournament_join') {
+                if (this.tournament)
+                    this.tournament.displayPlayerAction(data.message);
+            }
+            else if (data.type === 'tournament_join_valid') {
+                if (this.tournament)
+                    this.tournament.joinMatch(data);
+            }
+            else if (data.type === 'tournament_event_invite') {
+                this.displayEventInvite(data.message);
+            }
+            else if (data.type === 'tournament_in_progress') {
+                this.displayTournamentBack(data.message);
+            }
+            else if (data.type === 'tournament_creation_OK') {
+                this.tournamentLaunch();
+            }
+            else if (data.type === 'already_in_tournament') {
+                this.alreadyInTournament(data.message);
+            }
+            else if (data.type === 'match_status_update') {
+                if (this.tournament)
+                    this.tournament.updateMatchStatus(data);
+            }
+            else if (data.type === 'tournament_winner') {
+                if (this.tournament)
+                    this.tournament.winnerDisplay(data);
+            }
+            else if (data.type === 'all_tournament_matches') {
+                if (this.tournament) 
+                    this.tournament.scoreDisplay(data.matches);
+            }
+            else {
+                const rooms = JSON.parse(e.data);
+                var options_rooms = this.dom_rooms && this.dom_rooms.options;
+                this.dom_rooms.innerHTML = "";
+                if (options_rooms && rooms && rooms.length > 0) {
+                    rooms.forEach((room) => {
+                        var option = document.createElement("option");
+                        option.value = room.id;
+                        option.text = room.name + " - " + room.id;
+                        this.dom_rooms.add(option);
+                    });
+                }
+            };
+        }
 
         this.socket.onclose = (e) => {
-            //console.error('Chat socket closed unexpectedly');
+            // console.error('Error: Socket Closed');
         };
+    }
+
+    tournament_click() {
+        if (this.main.login === '')
+        {
+            this.main.set_status('Please login or sign up');
+            return;
+        }
+        this.socket.send(JSON.stringify({
+            type: 'tournament_creation_request',
+            login: this.main.login
+        }));
+    }
+    
+    tournamentLaunch() {
+        this.tournament = new Tournament(this.main);
+        this.main.load('/tournament', () => this.tournament.events());
+    }
+
+    displayTournamentInvite(message, tourId) {
+        let inviteContainer = document.getElementById('inviteContainer');
+        if (!inviteContainer) {
+            inviteContainer = document.createElement('div');
+            inviteContainer.id = 'inviteContainer';
+            document.body.appendChild(inviteContainer);
+        }
+
+        const inviteNotification = document.createElement('div');
+        inviteNotification.classList.add('invite-notification');
+        inviteNotification.innerHTML = `
+            <p>${message}</p>
+            <button id="acceptInviteBtn">Accept</button>
+            <button id="declineInviteBtn">Decline</button>
+        `;
+
+        inviteContainer.appendChild(inviteNotification);
+
+        document.getElementById('acceptInviteBtn').addEventListener('click', () => {
+            this.tournamentInviteResponse('accept', tourId);
+            inviteContainer.removeChild(inviteNotification);
+        });
+        document.getElementById('declineInviteBtn').addEventListener('click', () => {
+            this.tournamentInviteResponse('decline', tourId);
+            inviteContainer.removeChild(inviteNotification);
+        });
+    }
+
+    displayEventInvite(tourID) {
+        let noInviteContainer = document.getElementById('no-invite');
+        if (noInviteContainer)
+            return;
+    
+        let inviteContainer = document.getElementById('inviteContainer');
+        if (!inviteContainer) {
+            inviteContainer = document.createElement('div');
+            inviteContainer.id = 'inviteContainer';
+            document.addEventListener('DOMContentLoaded', () => document.body.appendChild(inviteContainer));
+        }
+    
+        const inviteNotification = document.createElement('div');
+        inviteNotification.classList.add('event-invite-notification');
+        inviteNotification.innerHTML = `
+            <p>Tournament is ready! Join?</p>
+            <button id="acceptInviteBtn">Accept</button>
+            <button id="declineInviteBtn">Decline</button>`;
+    
+        const appendInvite = () => {
+            if(document.body.contains(inviteContainer)) {
+                inviteContainer.appendChild(inviteNotification);
+    
+                document.getElementById('acceptInviteBtn').addEventListener('click', () => {
+                    inviteContainer.removeChild(inviteNotification);
+                    this.tournament = new Tournament(this.main);
+                    this.tournament.eventInvite(tourID);
+                });
+                document.getElementById('declineInviteBtn').addEventListener('click', () => {
+                    inviteContainer.removeChild(inviteNotification);
+                });
+            } else {
+                document.addEventListener('DOMContentLoaded', appendInvite);
+            }
+        };
+    
+        appendInvite();
+    }    
+
+    displayTournamentBack(tourID) {
+        const existingButton = document.getElementById('tournament');
+
+        if (existingButton) {
+            const newButton = document.createElement('button');
+            newButton.textContent = 'Tournament';
+            newButton.id = 'tournament';
+            newButton.addEventListener('click', () => {
+                    this.tournament = new Tournament(this.main);
+                    this.tournament.eventInvite(tourID);
+                    this.tournament.infoRequest(tourID);
+            });
+            existingButton.parentNode.replaceChild(newButton, existingButton);
+        }
+    }
+
+    alreadyInTournament(tourID) {
+        let actionError = document.getElementById('errorContainer');
+        if (!actionError) {
+            actionError = document.createElement('div');
+            actionError.id = 'actionError';
+            document.body.appendChild(actionError);
+        }
+        const errorNotification = document.createElement('div');
+        errorNotification.classList.add('error-notification');
+        errorNotification.innerHTML = `
+            <p>You are already in a tournament!</p>
+            <button id="joinBtn">Join</button>
+            <button id="dissmissBtn">Dismiss</button>
+        `;
+        actionError.appendChild(errorNotification);
+        document.getElementById('joinBtn').addEventListener('click', () => {
+            actionError.removeChild(errorNotification);
+            this.tournament = new Tournament(this.main);
+            this.tournament.eventInvite(tourID);
+        });
+        actionError.appendChild(errorNotification);
+        document.getElementById('dissmissBtn').addEventListener('click', () => {
+            actionError.removeChild(errorNotification);
+        });
+    }
+
+    tournamentInviteResponse(response, tourId) {
+        if (response === 'accept') {
+            this.socket.send(JSON.stringify({
+                type: 'tournament_invite_resp',
+                response: 'accept',
+                id: tourId,
+                login: this.main.login
+            }));
+        } else {
+            this.socket.send(JSON.stringify({
+                type: 'tournament_invite_resp',
+                response: 'decline',
+                id: tourId,
+                login: this.main.login
+            }));
+        }
+    }
+
+    queryTournament() {
+        if (this.main.login !== '')
+            this.socket.send(JSON.stringify({
+                type: 'tournament_registered',
+                login: this.main.login
+        }));
     }
 
     quit() {

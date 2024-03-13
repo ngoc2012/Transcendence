@@ -1,6 +1,6 @@
 
 
-// Give the user the different way of login in our app (normal or through 42), 
+// Give the user the different way of login in our app (normal or through 42),
 // then in case of a normal connection start the 2fa verification process
 
 
@@ -9,7 +9,7 @@ export class Login
     constructor(m) {
         this.main = m;
     }
-    
+
     events() {
         this.main.set_status('');
         this.dom_login = document.querySelector("#login0");
@@ -22,6 +22,8 @@ export class Login
         this.dom_cancel.addEventListener("click", () => this.cancel());
         this.dom_log_in42.addEventListener("click", () => this.loginWith42());
 
+        this.dom_login.addEventListener("keydown", (event) => this.handle_key_press(event));
+        this.dom_password.addEventListener("keydown", (event) => this.handle_key_press(event));
     }
 
     login() {
@@ -53,7 +55,12 @@ export class Login
                     if (info.enable2fa == 'true')
                         this.main.load('/twofa', () => this.main.twofa.events());
                     else
+                    {
+                        this.main.history_stack.push('/');
+                        window.history.pushState({}, '', '/');
                         this.main.load('/lobby', () => this.main.lobby.events());
+                    }
+                    this.main.lobby.socket.send(JSON.stringify({ type: "authenticate", login: this.main.login }));
                 }
             },
             error: (xhr, textStatus, errorThrown) => {
@@ -73,12 +80,19 @@ export class Login
         })
     }
 
+    handle_key_press(event)
+    {
+        if (event.keyCode === 13)
+            this.login();
+    }
+
     loginWith42() {
         window.location.href = 'https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-bda043967d92d434d1d6c24cf1d236ce0c6cc9c718a9198973efd9c5236038ed&redirect_uri=https%3A%2F%2F127.0.0.1%3A8080%2Fcallback%2F&response_type=code';
     }
 
     cancel() {
         this.main.set_status('');
+        window.history.pushState({}, '', '/');
         this.main.load('/lobby', () => this.main.lobby.events());
     }
 }

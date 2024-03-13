@@ -9,6 +9,8 @@ services:
       no_cache: false
     ports:
       - 8080:443
+    volumes:
+      - cli_data:/app/config
     restart: always
     env_file:
      - .env
@@ -30,6 +32,22 @@ services:
       - django_data:/app
     networks:
       - network
+    depends_on:
+      - db
+  
+  db:
+    image: postgres:latest 
+    environment:
+      POSTGRES_DB: transcendence
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - network
+
 
 volumes:
   django_data:
@@ -37,6 +55,14 @@ volumes:
     driver_opts:
       type: none
       device: ./
+      o: bind
+  
+  postgres_data:
+  cli_data:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./backend/CLI
       o: bind
 
 networks:

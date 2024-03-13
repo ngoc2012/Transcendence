@@ -30,6 +30,8 @@ RUN     pip3 install google-auth google-auth-oauthlib google-auth-httplib2
 RUN     pip3 install pyotp
 RUN     pip3 install sendgrid
 
+RUN     pip3 install psycopg2-binary
+
 COPY entrypoint.sh .
 RUN chmod +x entrypoint.sh
 ENTRYPOINT [ "./entrypoint.sh" ]

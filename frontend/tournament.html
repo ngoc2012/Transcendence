@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Tournament - Transcendence</title>
+</head>
+<body>
+    <h3>Create a New Tournament</h3>
+    <form id="tournamentForm" method="post">
+        {% csrf_token %}
+        <label for="name">Tournament Name:</label>
+        <input type="text" id="tname" name="name" required><br><br>
+        <label for="game">Game:</label>
+        <select id="game" name="game" required>
+            <option value="">Select Game</option>
+            <option value="pong">Pong</option>
+        </select><br><br>
+        <button type="submit">Create Tournament</button>
+    </form>
+</body>
+</html>
