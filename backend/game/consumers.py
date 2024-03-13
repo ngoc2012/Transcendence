@@ -151,7 +151,7 @@ class RoomsConsumer(AsyncWebsocketConsumer):
     connected_users = set()
 
     async def connect(self):
-        user = self.scope['user']
+        # user = self.scope['user']
     
         self.group_name = "rooms"
         await self.channel_layer.group_add(
@@ -188,7 +188,23 @@ class RoomsConsumer(AsyncWebsocketConsumer):
                 }
             )
         else:
-            data = json.loads(text_data)
+            try:
+                data = json.loads(text_data)
+            except ValueError as e:
+                # print(f"Invalid JSON: {e}")
+                await self.channel_layer.group_send(
+                    self.group_name,
+                    {
+                        'type': 'group_room_list'
+                    }
+                )
+                return
+            await self.channel_layer.group_send(
+                self.group_name,
+                {
+                    'type': 'group_room_list'
+                }
+            )
             if data.get('type') == 'update':
                 await self.channel_layer.group_send(
                 self.group_name,

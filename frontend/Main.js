@@ -17,6 +17,7 @@ export class Main
     id = -1;
     status = '';
     secret_2fa = '';
+    history_stack = [];
 
     constructor()
     {
@@ -28,6 +29,7 @@ export class Main
         this.qrcode_2fa = new qrcode_2fa(this);
         this.display_2fa = new display_2fa(this);
 
+        this.dom_home = document.getElementById("home");
         this.dom_login = document.getElementById("login");
         this.dom_proceed = document.getElementById("proceed");
         this.dom_signup = document.getElementById("signup");
@@ -40,34 +42,22 @@ export class Main
 
         this.dom_signup.addEventListener("click", () => this.signup_click());
         this.dom_login.addEventListener("click", () => this.login_click());
+        this.dom_home.addEventListener("click", () => {
+            if (this.lobby.game && this.lobby.game !== undefined)
+            {
+                this.lobby.game.quit();
+                this.lobby.game = undefined;
+            }
+            window.history.pushState({}, '', '/');
+            this.load('/lobby', () => this.lobby.events());
+        });
     }
-
-    // load(page, callback) {
-    //     $.ajax({
-    //         url: page + '/',
-    //         method: 'GET',
-    //         success: (html) => {
-    //             //window.history.pushState({
-    //             //    "user": this.user
-    //             //}, page, page);
-    //             this.dom_container.innerHTML = html;
-    //             callback();
-    //         },
-    //         error: function(error) {
-    //             console.error('Error: pong GET fail', error.message);
-    //         }
-    //     });
-    // }
 
     load(page, callback) {
         $.ajax({
             url: page + '/',
             method: 'GET',
             success: (html) => {
-                //window.history.pushState({
-                //    "user": this.user
-                //}, page, page);
-                //console.log('Page loaded successfully');
                 this.dom_container.innerHTML = html;
                 //pas oublier de changer ca
                 if (callback && typeof callback === 'function') {
@@ -87,10 +77,6 @@ export class Main
             method: 'GET',
 			data : data,
             success: (html) => {
-                //window.history.pushState({
-                //    "user": this.user
-                //}, page, page);
-                //console.log('Page loaded successfully');
                 this.dom_container.innerHTML = html;
                 //pas oublier de changer ca
                 if (callback && typeof callback === 'function') {
@@ -104,13 +90,17 @@ export class Main
         });
     }
 
-    signup_click() {
-        this.load('/signup', () => this.signup.events());
-    }
-
     login_click() {
-        this.load('/login', () => this.log_in.events());
+        this.history_stack.push('/login');
+        window.history.pushState({page: '/login'}, '', '/login');
+        this.load('/pages/login', () => this.log_in.events());
     }
     set_status(s) {this.dom_status.innerHTML = s;}
+
+    signup_click() {
+        this.history_stack.push('/signup');
+        window.history.pushState({}, '', '/signup');
+        this.load('/pages/signup', () => this.signup.events());
+    }
 
 }

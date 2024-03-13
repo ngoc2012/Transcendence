@@ -9,6 +9,8 @@ services:
       no_cache: false
     ports:
       - 8080:443
+    volumes:
+      - cli_data:/app/config
     restart: always
     env_file:
      - .env
@@ -56,6 +58,12 @@ volumes:
       o: bind
   
   postgres_data:
+  cli_data:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./backend/CLI
+      o: bind
 
 networks:
   network:

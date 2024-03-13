@@ -75,6 +75,8 @@ export class Pong
             this.socket.close();
             this.socket = -1;
         }
+        this.main.history_stack.push('/');
+        window.history.pushState({}, '', '/');
         this.main.load('/lobby', () => this.lobby.events());
     }
 
@@ -88,6 +90,11 @@ export class Pong
             + this.room.player_id
             + '/'
         );
+        
+        this.socket.onopen = (e) => {
+            this.main.history_stack.push('/pong/' + this.room.id);
+            window.history.pushState({}, '', '/pong/' + this.room.id);
+        };
 
         this.socket.onmessage = (e) => {
             if (!('data' in e))
@@ -122,7 +129,7 @@ export class Pong
         };
 
         this.socket.onclose = (e) => {
-            //console.error('Chat socket closed unexpectedly');
+            this.main.load('/lobby', () => this.lobby.events());
         };
     }
 

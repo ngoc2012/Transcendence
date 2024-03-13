@@ -6,7 +6,7 @@
 #    By: minh-ngu <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/09/28 10:56:09 by minh-ngu          #+#    #+#              #
-#    Updated: 2024/02/08 12:10:30 by minh-ngu         ###   ########.fr        #
+#    Updated: 2024/03/12 19:16:23 by ngoc             ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -37,11 +37,11 @@ re:
 	@make up
 
 clean:
-	@docker stop $$(docker ps -qa);\
-	docker rm $$(docker ps -qa);\
-	docker rmi -f $$(docker images -qa);\
-	docker volume rm $$(docker volume ls -q);\
-	docker network rm $$(docker network ls -q);\
+	-docker stop $$(docker ps -qa)
+	-docker rm $$(docker ps -qa)
+	-docker rmi -f $$(docker images -qa)
+	-docker volume rm $$(docker volume ls -q)
+	-docker network rm $$(docker network ls -q)
 	
 # gitf: git in final
 # gitd: git in developpement
@@ -50,6 +50,10 @@ clean:
 
 #flush database : 
 #docker exec -it django python3 /app/backend/manage.py flush
+
+CLI:
+	cd backend/CLI && python3 CLI.py
+	#cd backend/CLI && node CLI.js
 
 M:=
 test:
@@ -63,7 +67,7 @@ gitf:
 	git push
 gitd:
 	make gitclean
-	git add -A -- :!*.o :!*.swp :!*.env
+	git add -A -- :!*.o :!*.swp :!*.env :!*.crt :!*.key
 	git commit -m "$(M)"
 	git push
 gitclean:

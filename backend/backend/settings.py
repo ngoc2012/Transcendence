@@ -153,7 +153,9 @@ STATICFILES_DIRS = [os.path.join(PROJECT_DIR, 'frontend')]
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
+# Protection Against XSS
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_BROWSER_XSS_FILTER = True
 
 #global variables
 GOOGLELOG = 'templog'

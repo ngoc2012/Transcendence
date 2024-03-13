@@ -23,7 +23,9 @@ class PongConsumer(AsyncWebsocketConsumer):
         self.server = None
         self.players0 = None
         self.players1 = None
-        await get_info(self)
+        check = await get_info(self)
+        if not check:
+            self.disconnect()
         await self.channel_layer.group_add(
             self.room_id,
             self.channel_name
@@ -100,6 +102,7 @@ class PongConsumer(AsyncWebsocketConsumer):
             if not check:
                 await quit(self)
                 await self.channel_layer.group_send(self.room_id, {'type': 'teams_data'})
+                return
             dy = await update_ball(self, dx, dy)
             dx = await check_collision(self, dx)
             if self.room.x <= 0 or self.room.x >= pong_data['WIDTH']:

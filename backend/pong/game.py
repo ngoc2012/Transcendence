@@ -1,19 +1,28 @@
 from django.core.exceptions import ObjectDoesNotExist
 import json
 from asgiref.sync import sync_to_async
-from channels.generic.websocket import AsyncWebsocketConsumer
+# from channels.generic.websocket import AsyncWebsocketConsumer
 from game.models import RoomsModel, PlayerRoomModel, PlayersModel
 
-import asyncio
+from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
+
+# import asyncio
 
 from .data import pong_data
 import random
 
 @sync_to_async
 def get_info(consumer):
-    consumer.room = RoomsModel.objects.get(id=consumer.room_id)
-    consumer.player = PlayerRoomModel.objects.get(id=consumer.player_id)
-    consumer.server = PlayerRoomModel.objects.get(player=consumer.room.server)
+    try:
+        consumer.room = RoomsModel.objects.get(id=consumer.room_id)
+        consumer.player = PlayerRoomModel.objects.get(id=consumer.player_id)
+        consumer.server = PlayerRoomModel.objects.get(player=consumer.room.server)
+    except ObjectDoesNotExist:
+        return False
+    except MultipleObjectsReturned:
+        return False
+    return True
+    
 
 @sync_to_async
 def get_room_data(players, room_id):
@@ -24,7 +33,7 @@ def get_room_data(players, room_id):
             'players': [{'x': i.x, 'y': i.y} for i in players]
         })
     except ObjectDoesNotExist:
-        return "Error: Rooms not found"
+        print(f"Room with ID {room_id} does not exist.")
 
 @sync_to_async
 def get_teams_data(consumer, room_id):
@@ -97,7 +106,6 @@ def quit(consumer):
         return
     if consumer.player == None:
         return
-    print("Player deleted")
     if consumer.server == consumer.player:
         consumer.player.delete()
         change_server(consumer, PlayerRoomModel.objects.filter(room=consumer.room_id).first())
@@ -111,7 +119,11 @@ def remove_player(consumer):
 
 @sync_to_async
 def check_player(consumer):
-    consumer.player = PlayerRoomModel.objects.get(id=consumer.player_id)
+    try:
+        consumer.player = PlayerRoomModel.objects.get(id=consumer.player_id)
+    except PlayerRoomModel.DoesNotExist:
+        print(f"Player with ID {consumer.player_id} does not exist in game.")
+        return False
     if (consumer.player == None):
         return False
     return True
