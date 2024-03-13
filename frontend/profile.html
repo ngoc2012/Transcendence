@@ -1,4 +1,16 @@
 {% load static %}
-{{ context|json_script:"user" }}
+<!-- {{ context|json_script:"user" }} -->
+<button id="log_in" type="button">Change your login</button>
+<button id="new_name" type="button">Change your name</button>
 <button id="alias" type="button">Change your tournament name</button>
 <button id="password" type="button">Change your password</button>
+<button id="email" type="button">Change your email</button>
+<button id="back" type="button">Back to lobby</button><br>
+Your name: {{ name }}<br>
+Your login: {{ login }}<br>
+{% if context != '' %}
+Your alias: {{ alias }} <br>
+{% endif %}
+Your match history: {% if history == '' %} No recent matches {% else %} {% for i in history %} {{ i }} {% endfor %} {% endif %} <br>
+Your email: {{ email }} <br>
+Your ranking {{ elo }}<br>

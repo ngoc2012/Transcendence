@@ -283,9 +283,10 @@ def profile(request, username):
         'name': user.name,
         'alias': user.tourn_alias,
         'history': user.history,
-        'email': user.email
+        'email': user.email,
+        'elo': user.elo
     }
-    return render(request, 'profile.html', context = {'context': json.dumps(context)})
+    return render(request, 'profile.html', context)
 
 @csrf_exempt
 def alias(request, username):
@@ -294,9 +295,15 @@ def alias(request, username):
         return(render(request, 'alias.html'))
     if request.method == 'POST':
         if 'alias' in request.POST:
-            alias = request.POST['alias']
-            user.tourn_alias = alias
-            return HttpResponse('Tournament alias succesfully changed')
+            try:
+                check_alias = PlayersModel.objects.get(tourn_alias=request.POST['alias'])
+            except PlayersModel.DoesNotExist:
+                user.tourn_alias = request.POST['alias']
+                user.save()
+                return HttpResponse('Tournament alias succesfully changed')
+            response = HttpResponse('Alias already in use')
+            response.status_code = 401
+            return response
         
 @csrf_exempt
 def password(request, username):
@@ -317,6 +324,59 @@ def password(request, username):
                 response.status_code = 401
                 return response
     return render(request, 'change_password.html')
+
+@csrf_exempt
+def email(request, username):
+    user = PlayersModel.objects.filter(login=username).get(login=username)
+    if request.method == 'POST':
+        if 'password' in request.POST:
+            if check_password(request.POST['password'], user.password) == False:
+                response = HttpResponse('Invalid password')
+                response.status_code = 401
+                return response
+            else:
+                user.email = request.POST['email']
+                user.save()
+                response = HttpResponse('Email changed succesfully')
+                response.status_code = 200
+                return response
+    return render(request, 'change_email.html')
+
+@csrf_exempt
+def change_login(request, username):
+    user = PlayersModel.objects.filter(login=username).get(login=username)
+    if request.method == 'POST':
+        if check_password(request.POST['password'], user.password) == False:
+            response = HttpResponse('Invalid password.')
+            response.status_code = 401
+            return response
+        try:
+            check_login = PlayersModel.objects.get(login=request.POST['new_login'])
+        except PlayersModel.DoesNotExist:
+            user.login = request.POST['new_login']
+            user.save()
+            response = HttpResponse('Login changed succesfully')
+            response.status_code = 200
+            return response
+        response = HttpResponse('Login not available')
+        response.status_code = 401
+        return response
+    return render(request, 'change_login.html')
+
+@csrf_exempt
+def name(request, username):
+    user = PlayersModel.objects.get(login=username)
+    if request.method == 'POST':
+        if check_password(request.POST['password'], user.password) == False:
+            response = HttpResponse('Invalid password')
+            response.status_code = 401
+            return response
+        user.name = request.POST['name']
+        user.save()
+        response = HttpResponse('Name changed succesfully')
+        response.status_code = 200
+        return response
+    return render(request, 'change_name.html')
 
 @csrf_exempt
 def new_tournament(request):

@@ -1,11 +1,7 @@
 import {Pong} from './Pong.js'
-<<<<<<< HEAD
 import { Chat } from './Chat.js'
 import { Profile } from './Profile.js'
-=======
-import { Chat_signup } from './Chat_signup.js'
 import {Tournament} from './Tournament.js';
->>>>>>> 9b502c950ad0b66a32ca98a5a959f87a93a822c3
 
 export class Lobby
 {
