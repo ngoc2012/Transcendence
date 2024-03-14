@@ -1,9 +1,28 @@
-import multiprocessing
 import keyboard
+
+while True:
+    key_event = keyboard.read_event(suppress=True)
+
+    if key_event.event_type == keyboard.KEY_DOWN:
+        key = key_event.name
+        if key == 'enter':
+            print('Enter is pressed')
+        elif key == 'q':
+            print('Quitting the program')
+            break
+        elif key == 's':
+            print('Skipping the things')
+
+
+import multiprocessing
 import time
+import keyboard
 
 def key_listener(queue):
-    keyboard.hook(lambda event: queue.put(event.name))
+    while True:
+        if keyboard.is_pressed('esc'):
+            queue.put('esc')
+            break
 
 def display_characters(queue):
     while True:
@@ -27,11 +46,8 @@ if __name__ == "__main__":
     listener_process.start()
     display_process.start()
 
-    # Wait for the key listener process to finish
-    listener_process.join()
-
-    # Signal the display process to exit by putting 'esc' in the queue
-    char_queue.put('esc')
-
-    # Wait for the display process to finish
+    # Wait for the display process to finish (since it contains the exit condition)
     display_process.join()
+
+    # Wait for the key listener process to finish (optional, as it continuously checks)
+    listener_process.join()
