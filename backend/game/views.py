@@ -1,7 +1,8 @@
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from .models import RoomsModel, PlayersModel, PlayerRoomModel
+from .models import RoomsModel, PlayersModel, PlayerRoomModel, TournamentModel, TournamentMatchModel
+from django.utils import timezone
 import jwt
 from pong.data import pong_data
 import os
@@ -55,6 +56,17 @@ def new_game(request):
         }))
 
 @csrf_exempt
+def update(request):
+    data = [
+        {
+            "id": str(i),
+            "name": i.name
+        } for i in RoomsModel.objects.all()
+    ]
+    # print(data)
+    return JsonResponse(data, safe=False)
+
+@csrf_exempt
 def join(request):
     if 'game_id' not in request.POST:
         return (HttpResponse("Error: No game id!"))
@@ -65,6 +77,9 @@ def join(request):
     #uuid_obj = UUID(uuid_str)
     if not RoomsModel.objects.filter(id=request.POST['game_id']).exists():
         return (HttpResponse("Error: Room with id " + request.POST['game_id'] + " does not exist!"))
+    if 'game_id' not in request.POST:
+        return (HttpResponse("Error: No game id!"))
+    
     room = RoomsModel.objects.get(id=request.POST['game_id'])
     n0 = PlayerRoomModel.objects.filter(room=room, side=0).count()
     n1 = PlayerRoomModel.objects.filter(room=room, side=1).count()
@@ -75,6 +90,8 @@ def join(request):
         side = 1
         position = n1
     player = PlayersModel.objects.get(login=request.POST['login'])
+    if (PlayerRoomModel.objects.filter(room=room.id, player=player.id).count() > 0):
+        return (HttpResponse("Error: Player has been already in the game!"))
     player_room = PlayerRoomModel(
         player=player,
         room=room,
@@ -109,17 +126,20 @@ def delete(request):
         player = PlayersModel.objects.get(login=request.POST['login'])
     except PlayersModel.DoesNotExist:
         return JsonResponse({'error': "Login '{}' does not exist!".format(request.POST['login'])}, status=404)
-    
+
     try:
         room = RoomsModel.objects.get(id=request.POST['game_id'])
     except RoomsModel.DoesNotExist:
         return JsonResponse({'error': "Room with id '{}' does not exist!".format(request.POST['game_id'])}, status=404)
-    
+
     s = "Room {} - {} deleted".format(room.name, room)
 
     if room.owner != player:
         return JsonResponse({'error': "Login '{}' is not the owner of '{}'!".format(request.POST['login'], request.POST['game_id'])}, status=401)
 
+    if PlayerRoomModel.objects.filter(room=room.id).count() > 0:
+        return JsonResponse({'error': "Someone is still playing"}, status=401)
+    
     #JWT token check
     if 'Authorization' not in request.headers:
         return JsonResponse({'error': 'Authorization header missing'}, status=401)
@@ -169,3 +189,52 @@ def delete(request):
         return JsonResponse({'error': 'Invalid token'}, status=401)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=400)
+
+@csrf_exempt
+def tournament_join(request):
+    if 'game_id' not in request.POST:
+        return (HttpResponse("Error: No game id!"))
+    if 'login' not in request.POST:
+        return (HttpResponse("Error: No login!"))
+    if not PlayersModel.objects.filter(login=request.POST['login']).exists():
+        return (HttpResponse("Error: Login " + request.POST['login'] + " does not exist!"))
+    #uuid_obj = UUID(uuid_str)
+    if not RoomsModel.objects.filter(id=request.POST['game_id']).exists():
+        return (HttpResponse("Error: Room with id " + request.POST['game_id'] + " does not exist!"))
+    room = RoomsModel.objects.get(id=request.POST['game_id'])
+    n0 = PlayerRoomModel.objects.filter(room=room, side=0).count()
+    n1 = PlayerRoomModel.objects.filter(room=room, side=1).count()
+    # if n1 > n0:
+    #     side = 0
+    #     position = n0
+    # else:
+    #     side = 1
+    #     position = n1
+    player = PlayersModel.objects.get(login=request.POST['login'])
+    match = TournamentMatchModel.objects.filter(room=room).first()
+    if player == match.player1:
+        side = 0
+        position = n0
+    else:
+        side = 1
+        position = n1
+    player_room = PlayerRoomModel(
+        player=player,
+        room=room,
+        side=side,
+        position=position
+    )
+    if room.game == 'pong':
+        player_room.x = position * pong_data['PADDLE_WIDTH'] + position * pong_data['PADDLE_DISTANCE']
+        if side == 1:
+            player_room.x = pong_data['WIDTH'] - player_room.x - pong_data['PADDLE_WIDTH']
+        player_room.y = pong_data['HEIGHT'] / 2 - pong_data['PADDLE_HEIGHT'] / 2
+    player_room.save()
+    player.save()
+    return (JsonResponse({
+        'id': str(room),
+        'game': room.game,
+        'name': room.name,
+        'player_id': str(player_room),
+        'data': get_data(room.game)
+        }))

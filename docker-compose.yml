@@ -6,8 +6,11 @@ services:
     build:
       context: ./nginx
       dockerfile: Dockerfile
+      no_cache: false
     ports:
       - 8080:443
+    volumes:
+      - cli_data:/app/config
     restart: always
     env_file:
      - .env
@@ -19,6 +22,7 @@ services:
     build:
       context: ./django
       dockerfile: Dockerfile
+      no_cache: false
     restart: always
     env_file:
      - .env
@@ -28,13 +32,31 @@ services:
       - django_data:/app
     networks:
       - network
-
-  ganache:
-    image: trufflesuite/ganache-cli:latest
+    depends_on:
+      - db
+  
+  db:
+    image: postgres:latest 
+    environment:
+      POSTGRES_DB: transcendence
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
     ports:
-      - "8545:8545"  # Port RPC
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
     networks:
       - network
+
+  ganache:
+    image: trufflesuite/ganache:latest
+    ports:
+      - "8545:8545"
+    networks:
+      - network
+    command: ["--db", "/ganache_db", "-m", "dizzy actress recipe trick gain desk future deliver bulk garage shaft arrow"]
+    volumes:
+      - ganache_db:/ganache_db
 
 volumes:
   django_data:
@@ -43,6 +65,16 @@ volumes:
       type: none
       device: ./
       o: bind
+  
+  postgres_data:
+  cli_data:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./backend/CLI
+      o: bind
+
+  ganache_db:
 
 networks:
   network:

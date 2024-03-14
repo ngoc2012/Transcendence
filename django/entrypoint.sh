@@ -21,10 +21,21 @@ else
     fi
 fi
 
-#deploy smart contracts
-cd /app/blockchain/.
-truffle deploy
-cd /app/backend/.
 
+#deploy smart contracts
+
+cd /app/blockchain/.
+
+contract_json="build/contracts/LoginRegistry.json"
+
+if [ ! -f "$contract_json" ]; then
+    echo "Deploying smart contracts..."
+    truffle deploy
+else
+    echo "Contracts already deployed. Skipping deployment."
+fi
+
+
+cd /app/backend/.
 
 exec "$@"

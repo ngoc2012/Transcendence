@@ -13,6 +13,15 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 from pathlib import Path
 import os
 
+# Load environment variables from .env file
+env_path = Path('../..') / '.env'
+if env_path.exists():
+    with env_path.open() as f:
+        lines = f.read().splitlines()
+        for line in lines:
+            key, value = line.split('=')
+            os.environ[key] = value
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 PROJECT_DIR = Path(__file__).resolve().parent.parent.parent
@@ -21,7 +30,7 @@ PROJECT_DIR = Path(__file__).resolve().parent.parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-^388jdohtd@b77bpcpu#r-7ql$de@kzg91r0__!coo)yjst-8r'
+SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -32,6 +41,7 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
+	'channels',
     'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -41,8 +51,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'game',
     'pong',
-    'chat',
-    'web3'
+    'transchat'
 ]
 
 MIDDLEWARE = [
@@ -88,11 +97,14 @@ CHANNEL_LAYERS = {
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'transcendence',
+        'USER': 'admin',
+        'PASSWORD': 'admin',
+        'HOST': 'db',
+        'PORT': '5432',
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
@@ -141,7 +153,9 @@ STATICFILES_DIRS = [os.path.join(PROJECT_DIR, 'frontend')]
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
+# Protection Against XSS
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_BROWSER_XSS_FILTER = True
 
 #global variables
 GOOGLELOG = 'templog'

@@ -1,7 +1,9 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from game.models import PlayersModel
+from game.models import PlayersModel, TournamentModel, TournamentMatchModel, RoomsModel, PlayerRoomModel
+from django.utils import timezone
+from transchat.models import Room
 from django.shortcuts import redirect
 from django.conf import settings
 import requests
@@ -15,8 +17,10 @@ from datetime import datetime, timedelta
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 from django.contrib.auth.hashers import make_password, check_password
-
+import random, string
 from web3 import Web3
+
+
 
 API_PUBLIC = os.environ.get('API_PUBLIC')
 API_SECRET = os.environ.get('API_SECRET')
@@ -27,20 +31,12 @@ JWT_REFRESH_SECRET_KEY = os.environ.get('JWT_REFRESH_SECRET_KEY')
 SENDGRID_API_KEY = os.environ.get('SENDGRID_API_KEY')
 EMAIL_SENDER = os.environ.get('EMAIL_SENDER')
 
-
-def index(request):
-	return (render(request, 'index.html'))
-
-def lobby(request):
-	return (render(request, 'lobby.html'))
-
-
-#https://www.polarsparc.com/xhtml/GanacheSolidityPython.html
-
-
-
 ganache_url = 'http://ganache:8545'
 web3 = Web3(Web3.HTTPProvider(ganache_url))
+
+
+
+
 
 def send_login(login, id):
     try:
@@ -52,39 +48,17 @@ def send_login(login, id):
         contract_address = contract_data['networks'][latest_network_id]['address']
         
         LoginRegistry = web3.eth.contract(address=contract_address, abi=contract_abi)
-
-
         # Get the list of available accounts from Ganache
         accounts = web3.eth.accounts
-
         # Choose the first account (index 0) from the list
         chosen_account = accounts[0]
-
-
-
         # Send transaction to add login
-        tx_hash = LoginRegistry.functions.addLogin(id, login).transact({'from': chosen_account})
-        
-        receipt = web3.eth.waitForTransactionReceipt(tx_hash)
-
-
+        tx_hash = LoginRegistry.functions.addLogin(login).transact({'from': chosen_account})
+        receipt = web3.eth.get_transaction_receipt(tx_hash)
 
         # Wait for the transaction receipt
         if receipt.status == 1:
             print("Login added successfully.")
-
-            # Filter events specific to the transaction
-            event_filter = LoginRegistry.events.LoginAdded.createFilter({'fromBlock': receipt.blockNumber, 'toBlock': receipt.blockNumber})
-
-            # Get all events from the filter
-            events = event_filter.get_all_entries()
-
-            # Process each event
-            for event in events:
-                print("User ID:", event['args']['userId'])
-                print("Login:", event['args']['login'])
-                print("Message:", event['args']['message'])
-
             return 1
         else:
             print("Transaction failed.")
@@ -92,10 +66,6 @@ def send_login(login, id):
     except Exception as e:
         print("Error:", e)
         return -1
-
-
-
-
 
 def get_login(id):
     try:
@@ -108,61 +78,49 @@ def get_login(id):
         
         LoginRegistry = web3.eth.contract(address=contract_address, abi=contract_abi)
 
-        return LoginRegistry.functions.getLogin(id).call()
+        return LoginRegistry.functions.getAllLogins().call()
     except Exception as e:
         print("Error:", e)
         return None
 
-
-
 def retrieve_logins_from_blockchain():
-    players = PlayersModel.objects.all()  # Assuming PlayersModel is your database model
-
+    players = PlayersModel.objects.all()
     for player in players:
         login = get_login(player.id)
         print(f"Player ID: {player.id}, Login: {login}")
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+def redirect(request):
+	return (render(request, 'index.html'))
+
+def index(request):
+	return (render(request, 'index.html'))
+
+def lobby(request):
+	return (render(request, 'lobby.html'))
+
 def signup(request):
-    # print('TEST WEB3')
-    # ganache_url = 'http://ganache:8545'
-    # web3 = Web3(Web3.HTTPProvider(ganache_url))
-    # block_number = web3.eth.block_number
-
-    # print('BONJOUR VOICI LE NUM DE BLOCK: ', block_number)
-
-    # if web3.is_connected():
-    #     print("Connection to Ganache successful!")
-    # else:
-    #     print("Failed to connect to Ganache.")
-
-
-
-
-
-    # with open('/app/blockchain/build/contracts/LoginRegistry.json') as f:
-    #     contract_data = json.load(f)
-    #     contract_abi = contract_data['abi']
-
-
-    # latest_network_id = max(contract_data['networks'].keys())
-
-    # contract_address = contract_data['networks'][latest_network_id]['address']
-    
-    # print('Contract adress : ', contract_address)
-    # LoginRegistry = web3.eth.contract(address=contract_address, abi=contract_abi)
-
-
-    # result = LoginRegistry.functions.getValue().call()
-    # print('Returned value:', result)
-
     return render(request, 'signup.html')
-
 
 def login(request):
 	return (render(request, 'login.html'))
-
 
 def twofa(request):
     return (render(request, 'twofa.html'))
@@ -186,7 +144,7 @@ def qrcode_2fa(request):
 @csrf_exempt
 def mail_2fa(request):
     sender_email = EMAIL_SENDER
-    recipient_email = request.GET.get('email') 
+    recipient_email = request.GET.get('email')
     print(recipient_email)
     code = ""
     for _ in range(6):
@@ -212,12 +170,25 @@ def mail_2fa(request):
 # verify the email code
 @csrf_exempt
 def verify(request):
-    input_code = request.POST.get('input_code') 
+    input_code = request.POST.get('input_code')
     if(input_code == settings.CODE):
         return JsonResponse({'result': '1'})
     return JsonResponse({'result': '0'})
 
+
+def tournament(request):
+     return (render(request, 'tournament.html'))
+
+def tournament_lobby(request):
+     return (render(request, 'tournament_lobby.html'))
+
+def tournament_start(request, tournament_id):
+     return (render(request, 'tournament_start.html'))
+
+
+
 # create a new player in the database and his 2fa key used for authenticator
+
 @csrf_exempt
 def new_player(request):
     if 'login' not in request.POST or request.POST['login'] == "":
@@ -237,7 +208,7 @@ def new_player(request):
         mysecret = ''
 
     hashed_password = make_password(request.POST['password'])
-    
+
     new_player = PlayersModel(
         login=request.POST['login'],
         password=hashed_password,
@@ -263,8 +234,9 @@ def new_player(request):
         'email': new_player.email,
         'secret': new_player.secret_2fa
     })
-    send_login(new_player.login, new_player.id)
     response.set_cookie('refresh_token', refresh_token, httponly=True)
+    send_login(new_player.login, new_player.id)
+
     return response
 
 # Login an user and set JWT token
@@ -285,7 +257,7 @@ def log_in(request):
                 enable2fa = 'true'
             else:
                 enable2fa = 'false'
-                
+
             # JWT handling
             if check_password(password, player.password):
                 access_token = jwt.encode({
@@ -328,7 +300,7 @@ def callback(request):
 
         token_data = token_response.json()
         access_token = token_data['access_token']
-        
+
         user_response = requests.get('https://api.intra.42.fr/v2/me', headers={
             'Authorization': f'Bearer {access_token}',
         })
@@ -364,14 +336,13 @@ def callback(request):
             'my42JWT': access_token_jwt
         })
         response.set_cookie('refresh_token', refresh_token_jwt, httponly=True)
-        
+
         return response
- 
+
     except Exception as e:
         print(f"An error occurred: {e}")
         return HttpResponse("An error occurred.")
 
-# verify the authenticator TOTP code
 @csrf_exempt
 def verify_qrcode(request):
     input_code = request.POST.get('input_code')
@@ -384,3 +355,21 @@ def verify_qrcode(request):
     if totp.verify(input_code):
         return JsonResponse({'result': '1'})
     return JsonResponse({'result': '0'})
+
+
+@csrf_exempt
+def new_tournament(request):
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        game = request.POST.get('game')
+        login = request.POST.get('login')
+        owner = PlayersModel.objects.get(login=request.POST['login'])
+        try:
+            tournament = TournamentModel.objects.create(name=name, game=game, owner=owner)
+            player = PlayersModel.objects.get(login=login)
+            tournament.participants.add(player)
+            return JsonResponse({'message': 'Tournament created successfully', 'id': str(tournament.id)}, status=200)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
+    else:
+         return JsonResponse({'error': 'Invalid request'}, status=405)

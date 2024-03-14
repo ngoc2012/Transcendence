@@ -1,6 +1,6 @@
 
 
-// Give the user the different way of login in our app (normal or through 42), 
+// Give the user the different way of login in our app (normal or through 42),
 // then in case of a normal connection start the 2fa verification process
 
 
@@ -8,8 +8,9 @@ export class Login
 {
     constructor(m) {
         this.main = m;
+		this.blocked_users = [];
     }
-    
+
     events() {
         this.main.set_status('');
         this.dom_login = document.querySelector("#login0");
@@ -22,6 +23,8 @@ export class Login
         this.dom_cancel.addEventListener("click", () => this.cancel());
         this.dom_log_in42.addEventListener("click", () => this.loginWith42());
 
+        this.dom_login.addEventListener("keydown", (event) => this.handle_key_press(event));
+        this.dom_password.addEventListener("keydown", (event) => this.handle_key_press(event));
     }
 
     login() {
@@ -53,11 +56,28 @@ export class Login
                     if (info.enable2fa == 'true')
                         this.main.load('/twofa', () => this.main.twofa.events());
                     else
+                    {
+                        this.main.history_stack.push('/');
+                        window.history.pushState({}, '', '/');
                         this.main.load('/lobby', () => this.main.lobby.events());
+                    }
+                    this.main.lobby.socket.send(JSON.stringify({ type: "authenticate", login: this.main.login }));
                 }
             },
-            error: (data) => this.main.set_status(data.error)
+            error: (xhr, textStatus, errorThrown) => {
+                if (xhr.responseJSON && xhr.responseJSON.error) {
+                    this.main.set_status(xhr.responseJSON.error);
+                } else {
+                    this.main.set_status('An error occurred during the request.');
+                }
+            }
         });
+    }
+
+    handle_key_press(event)
+    {
+        if (event.keyCode === 13)
+            this.login();
     }
 
     loginWith42() {
@@ -66,6 +86,7 @@ export class Login
 
     cancel() {
         this.main.set_status('');
+        window.history.pushState({}, '', '/');
         this.main.load('/lobby', () => this.main.lobby.events());
     }
 }
