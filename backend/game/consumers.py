@@ -109,6 +109,7 @@ def create_tournament_match(tournament, room, player1, player2, round_number):
     return TournamentMatchModel.objects.create(
         tournament=tournament,
         room=room,
+        room_uuid=room.id,
         player1=player1,
         player2=player2,
         round_number=round_number,
@@ -360,9 +361,11 @@ class RoomsConsumer(AsyncWebsocketConsumer):
         matches = await get_all_tournament_matches(tournament.id)
         channel_layer = get_channel_layer()
         await self.tournament_info_update(tournament)
-            
+
+        if not matches:
+            return      
         matches_data = [{
-            'room_id': str(match.room.id),
+            'room_id': str(match.room_uuid),
             'match_nbr': match.match_number,
             'player1_name': match.player1.name,
             'player2_name': match.player2.name if match.player2 else 'Awaiting player',
@@ -379,7 +382,6 @@ class RoomsConsumer(AsyncWebsocketConsumer):
             }
         }
         await channel_layer.group_send(group_name, message)
-
 
     async def update_match_status(self, data, text):
         roomId = data.get('roomId')
@@ -542,7 +544,7 @@ class RoomsConsumer(AsyncWebsocketConsumer):
             matches = await get_all_tournament_matches(tournament.id)
             
             matches_data = [{
-                'room_id': str(match.room.id) if match.room else None,
+                'room_id': str(match.room_uuid),
                 'match_nbr': match.match_number,
                 'player1_name': match.player1.login,
                 'player2_name': match.player2.login,

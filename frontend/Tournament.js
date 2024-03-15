@@ -57,6 +57,8 @@ export class Tournament {
             success: (response) => {
                 this.id = response.id;
                 this.main.set_status('Tournament created successfully');
+                this.main.history_stack.push('/');
+                window.history.pushState({}, '', '/');
                 this.main.load('/tournament/lobby', () => this.eventsLobby());
             },
             error: () => {
@@ -117,6 +119,8 @@ export class Tournament {
 
     queryTournamentRound() {
         const tournamentUrl = `/tournament/${this.id}`;
+        this.main.history_stack.push(tournamentUrl);
+        window.history.pushState({}, '', tournamentUrl);
         this.main.load(tournamentUrl, () => this.eventsStart());
         const data = {
             type: 'tournament_rounds',
@@ -127,6 +131,8 @@ export class Tournament {
 
     queryRoundList() {
         const tournamentUrl = `/tournament/${this.id}`;
+        this.main.history_stack.push(tournamentUrl);
+        window.history.pushState({}, '', tournamentUrl);
         this.main.load(tournamentUrl, () => this.eventsStart());
     }
 
@@ -353,10 +359,17 @@ export class Tournament {
         this.ready = -1;
         this.final = 0;
         this.lobby.tournament = null;
+        this.main.history_stack.push('/');
+        window.history.pushState({}, '', '/');
         this.main.load('/lobby', () => this.main.lobby.events());
     }
 
     backToLobby() {
+        // url = `/tournament/${this.id}`
+        // this.main.history_stack.push(url);
+        // window.history.pushState({}, '', url);
+        this.main.history_stack.push('/');
+        window.history.pushState({}, '', '/');
         this.main.load('/lobby', () => this.main.lobby.events());
     }
 }

@@ -72,6 +72,7 @@ class TournamentMatchModel(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     tournament = models.ForeignKey(TournamentModel, on_delete=models.CASCADE, related_name='tournament')
     room = models.OneToOneField(RoomsModel, on_delete=models.SET_NULL, null=True, related_name='tournament_room')
+    room_uuid = models.UUIDField(null=True, editable=False)
     player1 = models.ForeignKey(PlayersModel, on_delete=models.SET_NULL, null=True, related_name='tournament_player1')
     player2 = models.ForeignKey(PlayersModel, on_delete=models.SET_NULL, null=True, related_name='tournament_player2')
     p1_score = models.IntegerField(default=0)

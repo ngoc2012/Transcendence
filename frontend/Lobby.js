@@ -382,31 +382,31 @@ export class Lobby
         }
     }
 
-    alreadyInTournament(tourID) {
-        let actionError = document.getElementById('errorContainer');
-        if (!actionError) {
-            actionError = document.createElement('div');
-            actionError.id = 'actionError';
-            document.body.appendChild(actionError);
-        }
-        const errorNotification = document.createElement('div');
-        errorNotification.classList.add('error-notification');
-        errorNotification.innerHTML = `
-            <p>You are already in a tournament!</p>
-            <button id="joinBtn">Join</button>
-            <button id="dissmissBtn">Dismiss</button>
-        `;
-        actionError.appendChild(errorNotification);
-        document.getElementById('joinBtn').addEventListener('click', () => {
-            actionError.removeChild(errorNotification);
-            this.tournament = new Tournament(this.main);
-            this.tournament.eventInvite(tourID);
-        });
-        actionError.appendChild(errorNotification);
-        document.getElementById('dissmissBtn').addEventListener('click', () => {
-            actionError.removeChild(errorNotification);
-        });
-    }
+    // alreadyInTournament(tourID) {
+    //     let actionError = document.getElementById('errorContainer');
+    //     if (!actionError) {
+    //         actionError = document.createElement('div');
+    //         actionError.id = 'actionError';
+    //         document.body.appendChild(actionError);
+    //     }
+    //     const errorNotification = document.createElement('div');
+    //     errorNotification.classList.add('error-notification');
+    //     errorNotification.innerHTML = `
+    //         <p>You are already in a tournament!</p>
+    //         <button id="joinBtn">Join</button>
+    //         <button id="dissmissBtn">Dismiss</button>
+    //     `;
+    //     actionError.appendChild(errorNotification);
+    //     document.getElementById('joinBtn').addEventListener('click', () => {
+    //         actionError.removeChild(errorNotification);
+    //         this.tournament = new Tournament(this.main);
+    //         this.tournament.eventInvite(tourID);
+    //     });
+    //     actionError.appendChild(errorNotification);
+    //     document.getElementById('dissmissBtn').addEventListener('click', () => {
+    //         actionError.removeChild(errorNotification);
+    //     });
+    // }
 
     tournamentInviteResponse(response, tourId) {
         if (response === 'accept') {
