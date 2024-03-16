@@ -93,7 +93,6 @@ def join(game_id, login):
     
 import keyboard
 def keyboard_listener():
-    # print('Keyboard listener')
     global main_queue
     while True:
         key_event = keyboard.read_event(suppress=True)
@@ -138,15 +137,17 @@ def run_pong_listener(room):
 import curses
 
 def draw_pong(room, state):
-    HEIGHT = int(room['data']['HEIGHT'] / 5)
-    WIDTH = int(room['data']['WIDTH'] / 5)
-    PADDLE_WIDTH = int(room['data']['PADDLE_WIDTH'] / 5)
-    PADDLE_HEIGHT = int(room['data']['PADDLE_HEIGHT'] / 5)
+    ZX = 5
+    ZY = 10
+    HEIGHT = int(room['data']['HEIGHT'] / ZY)
+    WIDTH = int(room['data']['WIDTH'] / ZX)
+    PADDLE_WIDTH = int(room['data']['PADDLE_WIDTH'] / ZX)
+    PADDLE_HEIGHT = int(room['data']['PADDLE_HEIGHT'] / ZY)
 
     s = curses.initscr()
     curses.curs_set(0)
     # sh, sw = s.getmaxyx()
-    w = curses.newwin(HEIGHT + 3, WIDTH + 2, 0, 0)
+    w = curses.newwin(HEIGHT + 4, WIDTH + 3, 0, 0)
     # w.keypad(1)
     # w.timeout(100)
 
@@ -158,25 +159,26 @@ def draw_pong(room, state):
     border = '█'
 
     # Draw horizontal border
-    for j in range(WIDTH + 2):
+    for j in range(WIDTH + 1):
         w.addch(0, j, border)  # Top border
         w.addch(HEIGHT + 1, j, border)  # Bottom border
 
     # Draw vertical border
     for i in range(HEIGHT + 1):
         w.addch(i, 0, border)  # Left border
-        w.addch(i, WIDTH + 1, border)  # Right border
+        w.addch(i, WIDTH, border)  # Right border
 
     # Draw paddles
     for p in state['players']:
         for i in range(PADDLE_HEIGHT):
-            if int(p['y'] / 5) + i >= 0:
-                w.addstr(int(p['y'] / 5) + i, int(p['x'] / 5 + 1), paddle)
+            if int(p['y'] / ZY) + i + 1 >= 0:
+                w.addstr(int(p['y'] / ZY) + i + 1, int(p['x'] / ZX) + 1, paddle)
 
     # Draw ball
+    # w.addch(int(state['ball']['y'] / ZY) + 1, int(state['ball']['x'] / ZX) + 1, '●')
     for i in range(2):
         for j in range(2):
-            w.addch(int(state['ball']['y'] / 5) + i - 1, int(state['ball']['x'] / 5) + j - 1, ball[i * 2 + j])
+            w.addch(int(state['ball']['y'] / ZY) + i, int(state['ball']['x'] / ZX) + j, ball[i * 2 + j])
     w.refresh()
 
 from multiprocessing import Process
@@ -193,6 +195,7 @@ if __name__ == "__main__":
     pong_process = None
     rooms = []
     room = None
+    playing = False
 
 #     room: {'id': '8242ffeb-386b-4080-bfba-00b265295405', 'game': 'pong', 'name': 'Stars war', 'player_id': '8d8d3127-7a3a-4463-a29c-62e95959a0e8', 'data': {'HEIGHT': 400, 'WIDTH': 800, 'RADIUS': 10, 'STEP': 20, 'STEP_X': 20, 'DX': 5, 'DY': 5, 'PADDLE_WIDTH': 10, 'PADDLE_HEIGHT': 60, 'PADDLE_STEP': 5, 'PADDLE_DISTANCE': 20}}
 # Connecting to wss://127.0.0.1:8080/ws/pong/8242ffeb-386b-4080-bfba-00b265295405/8d8d3127-7a3a-4463-a29c-62e95959a0e8/...
@@ -214,8 +217,10 @@ if __name__ == "__main__":
         elif p == 'key':
             # print('Pong:', data)
             if data == 'esc':
+                if playing:
+                    curses.endwin()
                 break
-            elif data.isdigit():
+            elif data.isdigit() and not playing:
                 if (int(data) < 0) or (int(data) >= len(rooms)):
                     print('Invalid game number')
                     continue
@@ -227,22 +232,26 @@ if __name__ == "__main__":
                         rooms_process = None
                     pong_process = Process(target=run_pong_listener, args=(room,))
                     pong_process.start()
+                    playing = True
             elif data == 'q':
+                if playing:
+                    curses.endwin()
                 if pong_process != None:
                     pong_process.terminate()
                     pong_process.join()
+                    playing = False
                 if rooms_process == None:
                     rooms_process = Process(target=run_rooms_listener)
                     rooms_process.start()
-            elif data in ['up', 'down', 'left', 'right']:
-                if room != None:
-                    response = requests.get("https://" + host + "/pong/" + room['id'] + '/' + room['player_id'] + '/' + data,
-                    cert=(certfile, keyfile),
-                    verify=False)
+            elif data in ['up', 'down', 'left', 'right'] and playing:
+                response = requests.get("https://" + host + "/pong/" + room['id'] + '/' + room['player_id'] + '/' + data,
+                cert=(certfile, keyfile),
+                verify=False)
         elif p == 'pong':
             if 'ball' in data.keys():
                 draw_pong(room, data)
-    # curses.endwin()
+                playing = True
+    # 
     if rooms_process != None:
         rooms_process.terminate()
         rooms_process.join()
