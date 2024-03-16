@@ -6,7 +6,7 @@
 #    By: minh-ngu <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/09/28 10:56:09 by minh-ngu          #+#    #+#              #
-#    Updated: 2024/03/12 19:16:23 by ngoc             ###   ########.fr        #
+#    Updated: 2024/03/16 16:15:48 by ngoc             ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -52,7 +52,7 @@ clean:
 #docker exec -it django python3 /app/backend/manage.py flush
 
 CLI:
-	cd backend/CLI && python3 CLI.py
+	clear && cd backend/CLI && python3 CLI.py
 	#cd backend/CLI && node CLI.js
 
 M:=
