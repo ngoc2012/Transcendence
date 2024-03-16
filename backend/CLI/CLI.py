@@ -138,14 +138,11 @@ def run_pong_listener(room):
 import curses
 
 def draw_pong(room, state):
-    # print(room['data'])
-    # Adjusted dimensions
     HEIGHT = int(room['data']['HEIGHT'] / 5)
     WIDTH = int(room['data']['WIDTH'] / 5)
     PADDLE_WIDTH = int(room['data']['PADDLE_WIDTH'] / 5)
     PADDLE_HEIGHT = int(room['data']['PADDLE_HEIGHT'] / 5)
 
-    # print(HEIGHT, WIDTH, PADDLE_HEIGHT, PADDLE_WIDTH)
     s = curses.initscr()
     curses.curs_set(0)
     # sh, sw = s.getmaxyx()
@@ -228,11 +225,9 @@ if __name__ == "__main__":
                         rooms_process.terminate()
                         rooms_process.join()
                         rooms_process = None
-                    # print("room:", room)
                     pong_process = Process(target=run_pong_listener, args=(room,))
                     pong_process.start()
             elif data == 'q':
-                # curses.endwin()
                 if pong_process != None:
                     pong_process.terminate()
                     pong_process.join()
@@ -244,9 +239,6 @@ if __name__ == "__main__":
                     response = requests.get("https://" + host + "/pong/" + room['id'] + '/' + room['player_id'] + '/' + data,
                     cert=(certfile, keyfile),
                     verify=False)
-                    # if response.text == "done":
-
-                    
         elif p == 'pong':
             if 'ball' in data.keys():
                 draw_pong(room, data)

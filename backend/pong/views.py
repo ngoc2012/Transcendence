@@ -10,7 +10,6 @@ def index(request):
 
 from backend.asgi import channel_layer
 from asgiref.sync import async_to_sync
-
 def action(request, room_id, player_id, action):
     room = RoomsModel.objects.get(id=room_id)
     player = PlayerRoomModel.objects.get(id=player_id)
