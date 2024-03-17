@@ -12,9 +12,14 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 host = "127.0.0.1:8080"
 certfile = "minh-ngu.crt"
 keyfile = "minh-ngu.key"
+score = [0, 0]
+login = ""
+team0 = []
+team1 = []
 
 import multiprocessing
 main_queue = multiprocessing.Queue()
+
 
 async def rooms_listener():
     global main_queue
@@ -32,8 +37,11 @@ async def rooms_listener():
                 rooms = json.loads(response)
                 if isinstance(rooms, list):
                     main_queue.put(('rooms', rooms))
-                
-                # await asyncio.sleep(0.1)
+                elif 'type' in rooms.keys():
+                    if rooms['type'] == 'close' and rooms['login_id'] == login:
+                        break
+            # print("Rooms listener close")
+            await rooms_socket.close()
     except websockets.exceptions.ConnectionClosedOK:
         print("Connection closed gracefully.")
     except websockets.exceptions.ConnectionClosedError as e:
@@ -42,7 +50,7 @@ async def rooms_listener():
         print(f"An unexpected error occurred: {e}")
     finally:
         print("Rooms websocket connection closed.")
-    print("Rooms listener end")
+    # print("Rooms listener end")
 
 async def pong_listener(room):
     global main_queue
@@ -57,8 +65,14 @@ async def pong_listener(room):
     try:
         async with websockets.connect(uri, ssl=ssl_context) as pong_socket:
             while True:
-                response = await pong_socket.recv()
-                main_queue.put(('pong', json.loads(response)))
+                response_text = await pong_socket.recv()
+                response = json.loads(response_text)
+                if 'type' in response.keys():
+                    if response['type'] == 'close' and response['player_id'] == room['player_id']:
+                        break
+                main_queue.put(('pong', response))
+            # print("Pong listener close")
+            await pong_socket.close()
     except ws_exceptions.ConnectionClosedOK:
         print("Connection closed gracefully.")
     except ws_exceptions.ConnectionClosedError as e:
@@ -103,20 +117,21 @@ def keyboard_listener():
             if key == 'esc':
                 break
 
+import getpass
 def log_in():
     global login
-    # login = input("Login: ")
-    # password = getpass.getpass("Password: ")
-    login = "admin"
-    password = "admin"
+    login = input("Login: ")
+    password = getpass.getpass("Password: ")
+    # login = "admin"
+    # password = "admin"
     try:
-        response = requests.post("https://" + host + "/log_in/",
+        with requests.post("https://" + host + "/log_in/",
             data={"login": login, "password": password}, 
             cert=(certfile, keyfile),
-            verify=False)
-        if response.status_code != 200:
-            print("Request failed with status code:", response.status_code)
-            exit(1)
+            verify=False) as response:
+            if response.status_code != 200:
+                print("Request failed with status code:", response.status_code)
+                exit(1)
     except requests.exceptions.SSLError as e:
         print("SSL Certificate verification failed. Error:", e)
         exit(1)
@@ -124,9 +139,9 @@ def log_in():
         print("Request failed. Error:", e)
         exit(1)
 
-import signal
-def signal_handler(signal, frame):
-    exit(0)
+# import signal
+# def signal_handler(signal, frame):
+#     exit(0)
 
 def run_rooms_listener():
     asyncio.run(rooms_listener())
@@ -139,6 +154,7 @@ import curses
 def draw_pong(room, state):
     ZX = 5
     ZY = 10
+    DY = 1
     HEIGHT = int(room['data']['HEIGHT'] / ZY)
     WIDTH = int(room['data']['WIDTH'] / ZX)
     PADDLE_WIDTH = int(room['data']['PADDLE_WIDTH'] / ZX)
@@ -148,8 +164,6 @@ def draw_pong(room, state):
     curses.curs_set(0)
     # sh, sw = s.getmaxyx()
     w = curses.newwin(HEIGHT + 4, WIDTH + 3, 0, 0)
-    # w.keypad(1)
-    # w.timeout(100)
 
     w.clear()
     # w.refresh()
@@ -158,34 +172,37 @@ def draw_pong(room, state):
     ball = ['◜', '◝', '◟', '◞']
     border = '█'
 
+    s = "Login: " + login + " | " + str(team0) + " vs " + str(team1) + " | " + str(score[0]) + " - " + str(score[1]) + " | q: quit game | Esc: quit program"
+    w.addstr(0, 0, s[:(WIDTH + 2)])  # Top border
+
     # Draw horizontal border
     for j in range(WIDTH + 1):
-        w.addch(0, j, border)  # Top border
-        w.addch(HEIGHT + 1, j, border)  # Bottom border
+        w.addch(DY, j, border)              # Top border
+        w.addch(HEIGHT + 1 + DY, j, border) # Bottom border
 
     # Draw vertical border
     for i in range(HEIGHT + 1):
-        w.addch(i, 0, border)  # Left border
-        w.addch(i, WIDTH, border)  # Right border
+        w.addch(i + DY, 0, border)          # Left border
+        w.addch(i + DY, WIDTH + 1, border)  # Right border
 
     # Draw paddles
     for p in state['players']:
         for i in range(PADDLE_HEIGHT):
             if int(p['y'] / ZY) + i + 1 >= 0:
-                w.addstr(int(p['y'] / ZY) + i + 1, int(p['x'] / ZX) + 1, paddle)
+                w.addstr(int(p['y'] / ZY) + i + 1 + DY, int(p['x'] / ZX) + 1, paddle)
 
     # Draw ball
     # w.addch(int(state['ball']['y'] / ZY) + 1, int(state['ball']['x'] / ZX) + 1, '●')
     for i in range(2):
         for j in range(2):
-            w.addch(int(state['ball']['y'] / ZY) + i, int(state['ball']['x'] / ZX) + j, ball[i * 2 + j])
+            w.addch(int(state['ball']['y'] / ZY) + i + DY, int(state['ball']['x'] / ZX) + j, ball[i * 2 + j])
     w.refresh()
 
 from multiprocessing import Process
 if __name__ == "__main__":
     log_in()
-    signal.signal(signal.SIGINT, signal_handler)
-    signal.signal(signal.SIGTERM, signal_handler)
+    # signal.signal(signal.SIGINT, signal_handler)
+    # signal.signal(signal.SIGTERM, signal_handler)
     rooms_process = Process(target=run_rooms_listener)
     rooms_process.start()
 
@@ -210,7 +227,7 @@ if __name__ == "__main__":
         if p == 'rooms':
             rooms = data
             print('\033c')
-            print("[0..9]: join game | n: new game | Esc: quit", flush=True)
+            print("[0..9]: join game | n: new game | Esc: quit program", flush=True)
             for i, r in enumerate(rooms):
                 print(str(i) + ' - ' + r['name'] + ' - ' + r['id'])
             
@@ -227,7 +244,13 @@ if __name__ == "__main__":
                 room = join(rooms[int(data)]['id'], login)
                 if room != None:
                     if rooms_process != None:
-                        rooms_process.terminate()
+                        # rooms_process.terminate()
+                        with requests.get("https://" + host + "/game/close/" + login,
+                        cert=(certfile, keyfile),
+                        verify=False) as response:
+                            if response.status_code != 200:
+                                print("Request failed with status code:", response.status_code)
+                                exit(1)
                         rooms_process.join()
                         rooms_process = None
                     pong_process = Process(target=run_pong_listener, args=(room,))
@@ -237,25 +260,54 @@ if __name__ == "__main__":
                 if playing:
                     curses.endwin()
                 if pong_process != None:
-                    pong_process.terminate()
+                    # pong_process.terminate()
+                    with requests.get("https://" + host + "/pong/close/" + room['id'] + '/' + room['player_id'],
+                    cert=(certfile, keyfile),
+                    verify=False) as response:
+                        if response.status_code != 200:
+                            print("Request failed with status code:", response.status_code)
+                            exit(1)
                     pong_process.join()
                     playing = False
                 if rooms_process == None:
                     rooms_process = Process(target=run_rooms_listener)
                     rooms_process.start()
             elif data in ['up', 'down', 'left', 'right'] and playing:
-                response = requests.get("https://" + host + "/pong/" + room['id'] + '/' + room['player_id'] + '/' + data,
+                with requests.get("https://" + host + "/pong/" + room['id'] + '/' + room['player_id'] + '/' + data,
                 cert=(certfile, keyfile),
-                verify=False)
+                verify=False) as response:
+                    if response.status_code != 200:
+                        print("Request failed with status code:", response.status_code)
+                        exit(1)
         elif p == 'pong':
             if 'ball' in data.keys():
                 draw_pong(room, data)
                 playing = True
+            elif 'score' in data.keys():
+                score = data['score']
+            elif 'team0' in data.keys():
+                team0 = data['team0']
+                team1 = data['team1']
     # 
     if rooms_process != None:
-        rooms_process.terminate()
+        # print('Closing rooms_process')
+        # rooms_process.terminate()
+        with requests.get("https://" + host + "/game/close/" + login,
+        cert=(certfile, keyfile),
+        verify=False) as response:
+            if response.status_code != 200:
+                print("Request failed with status code:", response.status_code)
+                exit(1)
         rooms_process.join()
+        # print('rooms_process joined')
     if pong_process != None:
-        pong_process.terminate()
+        # pong_process.terminate()
+        with requests.get("https://" + host + "/pong/close/" + room['id'] + '/' + room['player_id'],
+        cert=(certfile, keyfile),
+        verify=False) as response:
+            if response.status_code != 200:
+                print("Request failed with status code:", response.status_code)
+                exit(1)
         pong_process.join()
+    # print(main_queue.qsize())
     keys_process.join()

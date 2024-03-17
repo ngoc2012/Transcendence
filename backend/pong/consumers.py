@@ -10,6 +10,13 @@ from .move import check_collision, update_ball, up, down, left, right
 from .game import get_info, get_room_data, get_teams_data, get_score_data, start_game, end_game, quit, change_side, change_server_direction, remove_player, check_player, get_win_data
 import random
 
+@sync_to_async
+def close(data):
+    return json.dumps({
+        "type": 'close',
+        "player_id": data['player_id']
+    })
+
 class PongConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.room_id = self.scope['url_route']['kwargs']['room_id']
@@ -70,8 +77,37 @@ class PongConsumer(AsyncWebsocketConsumer):
             await self.channel_layer.group_send(self.room_id, {'type': 'teams_data'})
         elif text_data == 'server':
             await change_server_direction(self)
+        # else:
+        #     try:
+        #         data = json.loads(text_data)
+        #     except ValueError as e:
+        #         await self.channel_layer.group_send(self.room_id, {'type': 'group_data'})
+        #         return
+                # next
+                # print(f"Invalid JSON: {e}")
+                # await self.channel_layer.group_send(
+                #     self.group_name,
+                #     {
+                #         'type': 'group_room_list'
+                #     }
+                # )
+                # return
+            # if data.get('type') == 'close':
+            #     await self.channel_layer.group_send(
+            #     self.room_id,
+            #     {
+            #         'type': 'close',
+            #         'player_id': data.get('type')
+            #     }
+            # )
         await self.channel_layer.group_send(self.room_id, {'type': 'group_data'})
     
+    async def close_connection(self, data):
+        await self.send(text_data=json.dumps({
+            "type": 'close',
+            "player_id": data['player_id']
+        }))
+
     async def group_data(self, event):
         players = PlayerRoomModel.objects.filter(room=self.room_id)
         room_data = await get_room_data(players, self.room_id)

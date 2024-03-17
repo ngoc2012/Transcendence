@@ -1,5 +1,5 @@
 # chat/urls.py
-from django.urls import path
+from django.urls import path, re_path
 
 from . import views
 
@@ -8,5 +8,6 @@ urlpatterns = [
     path("join", views.join, name="join"),
     path("delete", views.delete, name="delete"),
     path("update", views.update, name="update"),
+    re_path(r'^close/(?P<login_id>.+)$', views.close_connection, name='close_connection'),
     path("tournament/join", views.tournament_join, name="tournament_join")
 ]

@@ -50,3 +50,15 @@ def action(request, room_id, player_id, action):
                 room.save()
     async_to_sync(channel_layer.group_send)(room_id, {'type': 'group_data'})
     return HttpResponse("done")
+
+from backend.asgi import channel_layer
+from asgiref.sync import async_to_sync
+def close_connection(request, room_id, player_id):
+    async_to_sync(channel_layer.group_send)(
+        room_id,
+        {
+            'type': 'close_connection',
+            'player_id': player_id
+        }
+    )
+    return HttpResponse("done")

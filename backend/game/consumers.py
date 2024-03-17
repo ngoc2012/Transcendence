@@ -16,6 +16,14 @@ def room_list(rooms):
             "name": i.name
             } for i in rooms])
 
+@sync_to_async
+def close_connection(data):
+    print(data['login_id'])
+    return json.dumps({
+        "type": 'close',
+        "login_id": data['login_id']
+    })
+
 @database_sync_to_async
 def get_player_by_login(login):
     return PlayersModel.objects.filter(login=login).first()
@@ -199,6 +207,8 @@ class RoomsConsumer(AsyncWebsocketConsumer):
                     }
                 )
                 return
+            # if text_data['message'] == "close":
+            #     await self.close()
             await self.channel_layer.group_send(
                 self.group_name,
                 {
@@ -212,6 +222,14 @@ class RoomsConsumer(AsyncWebsocketConsumer):
                     'type': 'group_room_list'
                 }
             )
+            # elif data.get('type') == 'close':
+            #     await self.channel_layer.group_send(
+            #     self.group_name,
+            #     {
+            #         'type': 'close',
+            #         'room_id': data['room_id']
+            #     }
+            # )
             elif data.get('type') == 'authenticate':
                 login = data.get('login')
                 player = await get_player_by_login(login)
@@ -253,6 +271,12 @@ class RoomsConsumer(AsyncWebsocketConsumer):
                 await self.quit_tournament(data)
             elif data.get('type') == 'tournament-info-request':
                 await self.tour_info_request(data)
+    
+    async def close_connection(self, data):
+        await self.send(text_data=json.dumps({
+            "type": 'close',
+            "login_id": data['login_id']
+        }))
 
     async def tour_info_request(self, data):
         tourID = data.get('id')

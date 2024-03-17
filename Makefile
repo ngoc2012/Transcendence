@@ -6,7 +6,7 @@
 #    By: minh-ngu <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/09/28 10:56:09 by minh-ngu          #+#    #+#              #
-#    Updated: 2024/03/16 16:15:48 by ngoc             ###   ########.fr        #
+#    Updated: 2024/03/17 11:32:39 by ngoc             ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -53,6 +53,7 @@ clean:
 
 CLI:
 	clear && cd backend/CLI && python3 CLI.py
+	#clear && cd backend/CLI && valgrind --leak-check=full python3 CLI.py
 	#cd backend/CLI && node CLI.js
 
 M:=

@@ -238,3 +238,16 @@ def tournament_join(request):
         'player_id': str(player_room),
         'data': get_data(room.game)
         }))
+
+# from channels.layers import get_channel_layer
+from backend.asgi import channel_layer
+from asgiref.sync import async_to_sync
+def close_connection(request, login_id):
+    async_to_sync(channel_layer.group_send)(
+        "rooms",
+        {
+            'type': 'close_connection',
+            'login_id': login_id
+        }
+    )
+    return HttpResponse("done")
