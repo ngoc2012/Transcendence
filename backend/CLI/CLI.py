@@ -148,10 +148,10 @@ def keyboard_listener():
 import getpass
 def log_in():
     global login, name
-    # login = input("Login: ")
-    # password = getpass.getpass("Password: ")
-    login = "admin"
-    password = "admin"
+    login = input("Login: ")
+    password = getpass.getpass("Password: ")
+    # login = "admin"
+    # password = "admin"
     try:
         with requests.post("https://" + host + "/log_in/",
             data={"login": login, "password": password}, 
