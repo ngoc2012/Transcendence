@@ -25,16 +25,16 @@ def check_collision(consumer, dx):
 
 @sync_to_async
 def update_ball(consumer, dx, dy):
-    try:
-        consumer.room = RoomsModel.objects.get(id=consumer.room_id)
-        consumer.room.x += dx * pong_data['DX']
-        consumer.room.y += dy * consumer.ddy
-        consumer.room.save()
-        if consumer.room.y + pong_data['RADIUS'] >= pong_data['HEIGHT'] or consumer.room.y - pong_data['RADIUS'] <= 0:
-            dy *= -1
-        return dy
-    except ObjectDoesNotExist:
-        return dy
+    # try:
+    # consumer.room = RoomsModel.objects.get(id=consumer.room_id)
+    consumer.room.x += dx * pong_data['DX']
+    consumer.room.y += dy * consumer.ddy
+    consumer.room.save()
+    if consumer.room.y + pong_data['RADIUS'] >= pong_data['HEIGHT'] or consumer.room.y - pong_data['RADIUS'] <= 0:
+        dy *= -1
+    return dy
+    # except ObjectDoesNotExist:
+    #     return dy
 
 @sync_to_async
 def up(consumer):
