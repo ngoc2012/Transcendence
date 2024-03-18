@@ -12,8 +12,14 @@ from .data import pong_data
 def get_info(consumer):
     try:
         consumer.room = RoomsModel.objects.get(id=consumer.room_id)
+        print('consumer.room:')
+        print(consumer.room)
         consumer.player = PlayerRoomModel.objects.get(id=consumer.player_id)
+        print('consumer.player:')
+        print(consumer.player)
         consumer.server = PlayerRoomModel.objects.get(player=consumer.room.server)
+        print('consumer.server:')
+        print(consumer.server)
     except ObjectDoesNotExist:
         print(f"Room with ID {consumer.room_id} does not exist.")   
         return False

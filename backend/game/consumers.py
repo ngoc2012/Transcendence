@@ -55,11 +55,14 @@ def get_match(match_id):
 
 @database_sync_to_async
 def get_tournament_participants(tournament):
+    return list(tournament.participants.all())
+
+@database_sync_to_async
+def get_tournament_players(tournament):
     participants = tournament.participants.all()
     waitlist = tournament.waitlist.all()
     combined_list = list(participants) + list(waitlist)
     return combined_list
-    # return list(tournament.participants.all())
 
 @database_sync_to_async
 def add_player_to_tournament(player_id, tour_id):
@@ -96,18 +99,18 @@ get_connected_players_async = database_sync_to_async(get_connected_players)
 
 @database_sync_to_async
 def new_room(i, tournament, player1, player2):
-            room = RoomsModel.objects.create(
-                game=tournament.game,
-                name=f"{tournament.name} - Match {i}",
-                owner=player1,
-                server=player1,
-                tournamentRoom=True
-            )
-            if room.game == 'pong':
-                room.x = pong_data['PADDLE_WIDTH'] + pong_data['RADIUS']
-                room.y = pong_data['HEIGHT'] / 2
-                room.save()
-            return room
+    room = RoomsModel.objects.create(
+        game=tournament.game,
+        name=f"{tournament.name} - Match {i}",
+        owner=player1,
+        # server=player1,
+        tournamentRoom=True
+    )
+    if room.game == 'pong':
+        room.x = pong_data['PADDLE_WIDTH'] + pong_data['RADIUS']
+        room.y = pong_data['HEIGHT'] / 2
+        room.save()
+    return room
 
 @database_sync_to_async      
 def create_tournament_match(tournament, room, player1, player2, round_number):
@@ -452,7 +455,7 @@ class RoomsConsumer(AsyncWebsocketConsumer):
             await self.send(text_data=json.dumps({'error': 'handle_tourevent_invite Tournament not found'}))
             return
     
-        participants = await get_tournament_participants(tournament)
+        participants = await get_tournament_players(tournament)
         for participant in participants:
             if participant.id != self.user_id:
                 await self.send_message_to_user(participant.id, 'tournament_event_invite', str(tour_id))
