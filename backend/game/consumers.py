@@ -222,14 +222,6 @@ class RoomsConsumer(AsyncWebsocketConsumer):
                     'type': 'group_room_list'
                 }
             )
-            # elif data.get('type') == 'close':
-            #     await self.channel_layer.group_send(
-            #     self.group_name,
-            #     {
-            #         'type': 'close',
-            #         'room_id': data['room_id']
-            #     }
-            # )
             elif data.get('type') == 'authenticate':
                 login = data.get('login')
                 player = await get_player_by_login(login)

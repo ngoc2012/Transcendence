@@ -6,10 +6,7 @@ from game.models import RoomsModel, PlayerRoomModel, PlayersModel
 
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 
-# import asyncio
-
 from .data import pong_data
-import random
 
 @sync_to_async
 def get_info(consumer):
@@ -18,11 +15,14 @@ def get_info(consumer):
         consumer.player = PlayerRoomModel.objects.get(id=consumer.player_id)
         consumer.server = PlayerRoomModel.objects.get(player=consumer.room.server)
     except ObjectDoesNotExist:
+        print(f"Room with ID {consumer.room_id} does not exist.")   
         return False
     except MultipleObjectsReturned:
         return False
+    print(f"Player {consumer.player_id} connected to room {consumer.room_id}.", PlayerRoomModel.objects.filter(room=consumer.room_id).count())
+    if PlayerRoomModel.objects.filter(room=consumer.room_id).count() < 2:
+        return False
     return True
-    
 
 @sync_to_async
 def get_room_data(players, room_id):
@@ -34,6 +34,10 @@ def get_room_data(players, room_id):
         })
     except ObjectDoesNotExist:
         print(f"Room with ID {room_id} does not exist.")
+        return None
+    except MultipleObjectsReturned:
+        print(f"More than one room with ID {room_id}.")
+        return None
 
 @sync_to_async
 def get_teams_data(consumer, room_id):
@@ -41,11 +45,14 @@ def get_teams_data(consumer, room_id):
         consumer.room = RoomsModel.objects.get(id=consumer.room_id)
     except RoomsModel.DoesNotExist:
         print(f"Room with ID {room_id} does not exist.")
-        return
-    consumer.player = PlayerRoomModel.objects.get(id=consumer.player_id)
-    consumer.server = PlayerRoomModel.objects.get(player=consumer.room.server)
-    players0 = PlayerRoomModel.objects.filter(room=room_id, side=0)
-    players1 = PlayerRoomModel.objects.filter(room=room_id, side=1)
+        return None
+    try:
+        consumer.player = PlayerRoomModel.objects.get(id=consumer.player_id)
+        consumer.server = PlayerRoomModel.objects.get(player=consumer.room.server)
+        players0 = PlayerRoomModel.objects.filter(room=room_id, side=0)
+        players1 = PlayerRoomModel.objects.filter(room=room_id, side=1)
+    except MultipleObjectsReturned:
+        return None
     return json.dumps({
         'team0': [i.player.name for i in players0],
         'team1': [i.player.name for i in players1]
@@ -59,6 +66,8 @@ def get_score_data(room_id):
 @sync_to_async
 def get_win_data(room_id):
     room = RoomsModel.objects.get(id=room_id)
+    winner = ''
+    winning_score = 0
     if room.score0 > room.score1:
         winner = 'player0'
         winning_score = room.score0
@@ -74,10 +83,16 @@ def get_win_data(room_id):
 
 @sync_to_async
 def start_game(consumer):
-    consumer.room = RoomsModel.objects.get(id=consumer.room_id)
-    consumer.server = PlayerRoomModel.objects.get(player=consumer.room.server)
+    try:
+        consumer.room = RoomsModel.objects.get(id=consumer.room_id)
+        consumer.server = PlayerRoomModel.objects.get(player=consumer.room.server)
+    except ObjectDoesNotExist:
+        return False
+    except MultipleObjectsReturned:
+        return False
     consumer.room.started = True
     consumer.room.save()
+    return True
 
 @sync_to_async
 def end_game(consumer):
@@ -121,8 +136,7 @@ def remove_player(consumer):
 def check_player(consumer):
     try:
         consumer.player = PlayerRoomModel.objects.get(id=consumer.player_id)
-    except PlayerRoomModel.DoesNotExist:
-        print(f"Player with ID {consumer.player_id} does not exist in game.")
+    except ObjectDoesNotExist:
         return False
     if (consumer.player == None):
         return False

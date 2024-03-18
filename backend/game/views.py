@@ -251,3 +251,12 @@ def close_connection(request, login_id):
         }
     )
     return HttpResponse("done")
+
+def need_update(request):
+    async_to_sync(channel_layer.group_send)(
+        "rooms",
+        {
+            'type': 'group_room_list',
+        }
+    )
+    return HttpResponse("done")

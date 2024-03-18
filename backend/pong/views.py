@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from game.models import RoomsModel, PlayersModel, PlayerRoomModel
+from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 
 from .data import pong_data
 
@@ -11,9 +12,12 @@ def index(request):
 from backend.asgi import channel_layer
 from asgiref.sync import async_to_sync
 def action(request, room_id, player_id, action):
-    room = RoomsModel.objects.get(id=room_id)
-    player = PlayerRoomModel.objects.get(id=player_id)
-    server = PlayerRoomModel.objects.get(player=room.server)
+    try:
+        room = RoomsModel.objects.get(id=room_id)
+        player = PlayerRoomModel.objects.get(id=player_id)
+        server = PlayerRoomModel.objects.get(player=room.server)
+    except MultipleObjectsReturned:
+        return HttpResponse("error")
     if action == 'up':
         if player.y > 0:
             player.y -= pong_data['STEP']
@@ -59,6 +63,15 @@ def close_connection(request, room_id, player_id):
         {
             'type': 'close_connection',
             'player_id': player_id
+        }
+    )
+    return HttpResponse("done")
+
+def start(request, room_id):
+    async_to_sync(channel_layer.group_send)(
+        room_id,
+        {
+            'type': 'start',
         }
     )
     return HttpResponse("done")
