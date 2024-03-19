@@ -26,7 +26,7 @@ fi
 
 cd /app/blockchain/.
 
-contract_json="build/contracts/LoginRegistry.json"
+contract_json="build/contracts/TournamentRegistry.json"
 
 if [ ! -f "$contract_json" ]; then
     echo "Deploying smart contracts..."

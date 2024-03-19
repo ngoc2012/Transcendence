@@ -5,6 +5,7 @@ import {twofa} from './twofa.js'
 import {code_2fa} from './code_2fa.js'
 import {qrcode_2fa} from './qrcode_2fa.js'
 import {display_2fa} from './display_2fa.js'
+import {tournament_history} from './tournament_history.js'
 
 import {Tournament} from './Tournament.js'
 
@@ -28,9 +29,12 @@ export class Main
         this.code_2fa = new code_2fa(this);
         this.qrcode_2fa = new qrcode_2fa(this);
         this.display_2fa = new display_2fa(this);
+        this.tournament_history = new tournament_history(this);
 
         this.dom_home = document.getElementById("home");
         this.dom_login = document.getElementById("login");
+        this.dom_logout = document.getElementById("logout");
+
         this.dom_proceed = document.getElementById("proceed");
         this.dom_signup = document.getElementById("signup");
         this.dom_status = document.getElementById("status");
@@ -42,6 +46,10 @@ export class Main
 
         this.dom_signup.addEventListener("click", () => this.signup_click());
         this.dom_login.addEventListener("click", () => this.login_click());
+
+
+        this.dom_logout.addEventListener("click", () => this.logout_click());
+
         this.dom_home.addEventListener("click", () => {
             if (this.lobby.game && this.lobby.game !== undefined)
             {
@@ -98,9 +106,28 @@ export class Main
     set_status(s) {this.dom_status.innerHTML = s;}
 
     signup_click() {
+
         this.history_stack.push('/signup');
         window.history.pushState({}, '', '/signup');
         this.load('/pages/signup', () => this.signup.events());
     }
+
+
+
+
+    // logout_click() {
+    //     sessionStorage.setItem('JWTToken', '');
+    //     document.cookie = `refresh_token=${''}; path=/; secure; HttpOnly`;
+    //     this.login = '';
+    //     this.twofa = '';
+    //     this.name = '';
+    //     this.email = '';
+    //     this.id = -1;
+    //     this.status = '';
+    //     this.secret_2fa = '';
+    //     this.dom_name.innerHTML = "Anonyme";
+    //     // history_stack = [];
+    // }
+    
 
 }

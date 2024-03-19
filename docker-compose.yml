@@ -49,14 +49,27 @@ services:
       - network
 
   ganache:
-    image: trufflesuite/ganache:latest
+    container_name: ganache
+    build:
+      context: ./ganache
+      dockerfile: Dockerfile
     ports:
       - "8545:8545"
-    networks:
-      - network
-    command: ["--db", "/ganache_db", "-m", "dizzy actress recipe trick gain desk future deliver bulk garage shaft arrow"]
     volumes:
       - ganache_db:/ganache_db
+    networks:
+      - network
+
+
+  # ganache:
+  #   image: trufflesuite/ganache:latest
+  #   ports:
+  #     - "8545:8545"
+  #   networks:
+  #     - network
+  #   command: ["--db", "/ganache_db", "-m", "dizzy actress recipe trick gain desk future deliver bulk garage shaft arrow"]
+  #   volumes:
+  #     - ganache_db:/ganache_db
 
 volumes:
   django_data:

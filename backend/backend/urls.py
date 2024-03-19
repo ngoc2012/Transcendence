@@ -40,11 +40,14 @@ urlpatterns = [
     path('code_2fa/', views.code_2fa, name='code_2fa'),
     path('verify/', views.verify, name='verify'),
     path('verify_qrcode/', views.verify_qrcode, name='verify_qrcode'),
+    path('tournament_history/', views.tournament_history, name='tournament_history'),
+    path('get_tournament_data/', views.get_tournament_data, name='get_tournament_data'),
     path('tournament/', views.tournament, name='tournament'),
     path('tournament/new/', views.new_tournament, name='new_tournament'),
     path('tournament/lobby/', views.tournament_lobby, name='tournament_lobby'),
     path('tournament/<uuid:tournament_id>/', views.tournament_start, name='tournament_start'),
     re_path(r'^.*$', views.redirect, name='redirect'),
+    # path('log_out/', views.log_out, name='log_out')
     # path('tournament/<uuid:tournament_id>/', views.tournament_round, name="list_users")
 
 ]

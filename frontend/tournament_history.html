@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tournament Lobby - Transcendence</title>
+
+</head>
+<body>    
+    <form id="tournamentForm">
+        <label for="tournamentSelect">Select a Tournament to display:</label>
+        <select id="tournamentSelect" name="tournaments">
+            {% for name in names %}
+                <option value="{{ name }}">{{ name }}</option>
+            {% endfor %}
+        </select>
+        <button id="Select" type="button">Select</button>
+
+    </form>
+
+    <div id="selectedTournamentName"></div>
+</body>
+</html>

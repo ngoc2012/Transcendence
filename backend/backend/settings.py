@@ -158,6 +158,6 @@ SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_BROWSER_XSS_FILTER = True
 
 #global variables
-GOOGLELOG = 'templog'
-GOOGLENAME = 'tempname'
+# GOOGLELOG = 'templog'
+# GOOGLENAME = 'tempname'
 CODE = ''

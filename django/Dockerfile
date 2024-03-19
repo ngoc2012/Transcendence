@@ -44,6 +44,9 @@ RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
 
 RUN npm install -g truffle -y
 
+#pour netstat
+RUN apt update
+RUN apt install net-tools
 
 
 # RUN     pip3 install google-auth google-auth-oauthlib google-auth-httplib2
