@@ -148,10 +148,10 @@ def keyboard_listener():
 import getpass
 def log_in():
     global login, name
-    # login = input("Login: ")
-    # password = getpass.getpass("Password: ")
-    login = "admin"
-    password = "admin"
+    login = input("Login: ")
+    password = getpass.getpass("Password: ")
+    # login = "admin"
+    # password = "admin"
     try:
         with requests.post("https://" + host + "/log_in/",
             data={"login": login, "password": password}, 
@@ -204,9 +204,9 @@ def sign_up():
         return False
     return True
 
-# import signal
-# def signal_handler(signal, frame):
-#     exit(0)
+import signal
+def signal_handler(signal, frame):
+    exit(0)
 
 def run_rooms_listener():
     asyncio.run(rooms_listener())
@@ -237,7 +237,7 @@ def draw_pong(room, state):
     ball = ['◜', '◝', '◟', '◞']
     border = '█'
 
-    s = "Player: " + name + " | " + str(team0) + " vs " + str(team1) + " | " + str(score[0]) + " - " + str(score[1]) + " | Ctrl: start game | q: quit game | Esc: quit program"
+    s = "Player: " + name + " | " + str(team0) + " vs " + str(team1) + " | " + str(score[0]) + " - " + str(score[1]) + " | Ctrl: start game | x: quit game | Esc: quit program | " + room['id']
     w.addstr(0, 0, s[:(WIDTH + 2)])  # Top border
 
     # Draw horizontal border
@@ -279,8 +279,8 @@ if __name__ == "__main__":
         elif choice == '2':
             exit(0)
 
-    # signal.signal(signal.SIGINT, signal_handler)
-    # signal.signal(signal.SIGTERM, signal_handler)
+    signal.signal(signal.SIGINT, signal_handler)
+    signal.signal(signal.SIGTERM, signal_handler)
     rooms_process = Process(target=run_rooms_listener)
     rooms_process.start()
 
@@ -331,7 +331,7 @@ if __name__ == "__main__":
                     pong_process = Process(target=run_pong_listener, args=(room,))
                     pong_process.start()
                     playing = True
-            elif data == 'q':
+            elif data == 'x':
                 if playing:
                     curses.endwin()
                 if pong_process != None:
