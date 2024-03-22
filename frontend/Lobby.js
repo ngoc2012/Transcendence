@@ -26,7 +26,7 @@ export class Lobby
 		this.dom_chat.addEventListener("click", () => this.chat());
         this.dom_tournament.addEventListener("click", () => this.tournament_click());
         this.rooms_update();
-        this.queryTournament();
+        this.queryTournament();        
     }
 
 	chat(){
@@ -211,6 +211,10 @@ export class Lobby
                 if (this.tournament)
                     this.tournament.userList(data.users);
             }
+            if (data.type === 'already_in') {
+                if (this.tournament)
+                    this.tournament.alreadyIn(data.users)
+            }
             else if (data.type == 'tournament_invite') {
                 this.displayTournamentInvite(data.message.message, data.message.tour_id);
             }
@@ -244,11 +248,19 @@ export class Lobby
             else if (data.type === 'tournament_in_progress') {
                 this.displayTournamentBack(data.message);
             }
+            else if (data.type === 'tournament_owner_lobby') {
+                this.displayTournamentLobbyBack(data.message);
+            }
             else if (data.type === 'tournament_creation_OK') {
                 this.tournamentLaunch();
             }
             else if (data.type === 'already_in_tournament') {
-                this.alreadyInTournament(data.message);
+                // this.alreadyInTournament(data.message);
+                // WHEN ACTION IS NOT POSSIBLE -> MESSAGE BOX ?
+            }
+            else if (data.type === 'tournament_in_setup') {
+                if (this.tournament)
+                    this.tournament.inSetup();
             }
             else if (data.type === 'match_status_update') {
                 if (this.tournament)
@@ -352,8 +364,8 @@ export class Lobby
     
                 document.getElementById('acceptInviteBtn').addEventListener('click', () => {
                     inviteContainer.removeChild(inviteNotification);
-                    this.tournament = new Tournament(this.main);
-                    this.tournament.eventInvite(tourID);
+                    this.tournament = new Tournament(this.main, tourID);
+                    this.tournament.queryRoundList();
                 });
                 document.getElementById('declineInviteBtn').addEventListener('click', () => {
                     inviteContainer.removeChild(inviteNotification);
@@ -374,39 +386,27 @@ export class Lobby
             newButton.textContent = 'Tournament';
             newButton.id = 'tournament';
             newButton.addEventListener('click', () => {
-                    this.tournament = new Tournament(this.main);
-                    this.tournament.eventInvite(tourID);
-                    this.tournament.infoRequest(tourID);
+                    this.tournament = new Tournament(this.main, tourID);
+                    this.tournament.queryRoundList();
             });
             existingButton.parentNode.replaceChild(newButton, existingButton);
         }
     }
 
-    // alreadyInTournament(tourID) {
-    //     let actionError = document.getElementById('errorContainer');
-    //     if (!actionError) {
-    //         actionError = document.createElement('div');
-    //         actionError.id = 'actionError';
-    //         document.body.appendChild(actionError);
-    //     }
-    //     const errorNotification = document.createElement('div');
-    //     errorNotification.classList.add('error-notification');
-    //     errorNotification.innerHTML = `
-    //         <p>You are already in a tournament!</p>
-    //         <button id="joinBtn">Join</button>
-    //         <button id="dissmissBtn">Dismiss</button>
-    //     `;
-    //     actionError.appendChild(errorNotification);
-    //     document.getElementById('joinBtn').addEventListener('click', () => {
-    //         actionError.removeChild(errorNotification);
-    //         this.tournament = new Tournament(this.main);
-    //         this.tournament.eventInvite(tourID);
-    //     });
-    //     actionError.appendChild(errorNotification);
-    //     document.getElementById('dissmissBtn').addEventListener('click', () => {
-    //         actionError.removeChild(errorNotification);
-    //     });
-    // }
+    displayTournamentLobbyBack(tourID) {
+        const existingButton = document.getElementById('tournament');
+
+        if (existingButton) {
+            const newButton = document.createElement('button');
+            newButton.textContent = 'Tournament';
+            newButton.id = 'tournament';
+            newButton.addEventListener('click', () => {
+                    this.tournament = new Tournament(this.main, tourID);
+                    this.main.load('/tournament/lobby', () => this.tournament.eventsLobby());
+            });
+            existingButton.parentNode.replaceChild(newButton, existingButton);
+        }
+    }
 
     tournamentInviteResponse(response, tourId) {
         if (response === 'accept') {

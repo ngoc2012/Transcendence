@@ -3,10 +3,10 @@ import {Pong} from './Pong.js';
 
 export class Tournament {
 
-    constructor(m) {
+    constructor(m, id = null) {
         this.main = m;
         this.lobby = m.lobby;
-        this.id = -1;
+        this.id = id;
         this.game = null;
         this.ready = -1;
         this.final = 0;
@@ -22,6 +22,7 @@ export class Tournament {
         if (this.dom_player_list)
             this.main.lobby.socket.send(JSON.stringify({type: 'request_users_list'}));
             const inviteButton = document.querySelector(`button[data-login='${login}']`);
+            this.main.lobby.socket.send(JSON.stringify({type: 'request_users_in_tour', id: `${this.id}`}));
         this.dom_start_tournament = document.getElementById('start-tournament');
         this.dom_start_tournament.disabled = true;
         this.dom_quit_tournament = document.getElementById('quit-tournament');
@@ -56,38 +57,60 @@ export class Tournament {
             data: formData,
             success: (response) => {
                 this.id = response.id;
-                this.main.set_status('Tournament created successfully');
                 this.main.load('/tournament/lobby', () => this.eventsLobby());
+                this.main.lobby.socket.send(JSON.stringify({type: 'add_to_group', id: this.id}));
             },
             error: () => {
                 this.main.set_status('Error: Could not create tournament');
             }
         });
     }
+    
+    alreadyIn(users) {
+        const acceptedList = document.getElementById('accepted-list');
+        users.forEach(user => {
+            if (user.login === this.main.login) {
+                return;
+            }
+            const li = document.createElement('li');
+            li.setAttribute('data-login', user.login);
+            li.textContent = `${user.login}`;
+    
+            const acceptedButton = document.createElement('button');
+            acceptedButton.setAttribute('data-login', user.login);
+            acceptedButton.textContent = 'Accepted';
+            acceptedButton.disabled = true;
+            li.appendChild(acceptedButton);
+            acceptedList.appendChild(li);
+        });
+    }
+    
+
+    createUserListItem(user) {
+        const li = document.createElement('li');
+        li.textContent = user.login;
+        
+        const inviteButton = document.createElement('button');
+        inviteButton.setAttribute('data-login', user.login);
+        inviteButton.textContent = 'Send Invite';
+        inviteButton.onclick = () => this.sendInvite(user.login, this.id);
+        li.appendChild(inviteButton);
+        return li;
+    }
 
     userList(users) {
         const playersList = document.getElementById('players-list');
-        if (playersList) {
-            playersList.innerHTML = '';
-            users.forEach((user) => {
-                if (user.login === this.main.login) {
-                    return;
-                }
+        const acceptedList = document.getElementById('accepted-list');
+        const acceptedLogins = new Set([...acceptedList.querySelectorAll('[data-login]')].map(li => li.getAttribute('data-login')));
+        playersList.innerHTML = '';
         
-                const li = document.createElement('li');
-                li.textContent = `${user.login}`;
-                
-                const inviteButton = document.createElement('button');
-                inviteButton.setAttribute('data-login', user.login);
-                inviteButton.textContent = 'Send Invite';
-                inviteButton.onclick = () => {
-                    this.sendInvite(user.login, this.id);
-                };
-                
-                li.appendChild(inviteButton);
-                playersList.appendChild(li);
-            });
-        }
+        users.forEach(user => {
+            if (user.login === this.main.login || acceptedLogins.has(user.login)) {
+                return;
+            }
+            const li = this.createUserListItem(user);
+            playersList.appendChild(li);
+        });
     }
 
     tournamentInviteAccepted(login) {
@@ -95,6 +118,10 @@ export class Tournament {
         if (inviteButton) {
             inviteButton.textContent = 'Accepted';
             inviteButton.disabled = true;
+            
+            const li = inviteButton.closest('li');
+            const acceptedList = document.getElementById('accepted-list');
+            acceptedList.appendChild(li);
         }
     }
 
@@ -150,41 +177,24 @@ export class Tournament {
         this.main.lobby.socket.send(JSON.stringify(inviteData));
     }
 
-    eventInvite(tourID) {
-        this.id = tourID;
-        this.queryRoundList();
-    }
-
-    infoRequest(tourId) {
-        this.main.lobby.socket.send(JSON.stringify({
-            type: 'tournament-info-request',
-            id: this.id
-        }));
-    }
-
     tournamentInfos(name, round) {
         const tournamentInfosContainer = document.getElementById('tournament-infos');
         if (tournamentInfosContainer) {
-            tournamentInfosContainer.innerHTML = '';
-            
+            let content = '';
             if (round === -2) {
-                tournamentInfosContainer.innerHTML = `
-                    <h3>Tournament - ${name} - Results</h3>
-                `;
+                content = `<h3>Tournament - ${name} - Results</h3>`;
             }
             else if (round === -1) {
                 this.final = 1;
-                tournamentInfosContainer.innerHTML = `
-                    <h3>Tournament - ${name} - Round: Final</h3>
-                `;
+                content = `<h3>Tournament - ${name} - Round: Final</h3>`;
             }
             else {
-                tournamentInfosContainer.innerHTML = `
-                    <h3>Tournament - ${name} - Round: ${round}</h3>
-                `;
+                content = `<h3>Tournament - ${name} - Round: ${round}</h3>`;
             }
+    
+            tournamentInfosContainer.innerHTML = content;
         }
-    }
+    }    
 
     displayTournamentMatches(matches) {
         const matchesContainer = document.getElementById('tournament-matches');
@@ -359,4 +369,14 @@ export class Tournament {
     backToLobby() {
         this.main.load('/lobby', () => this.main.lobby.events());
     }
+
+    inSetup() {
+        const parentElement = document.getElementById('tournament-matches');
+        if (parentElement) {
+            const message = document.createElement('div');
+            message.innerHTML = 'Tournament is still in preparation';
+            parentElement.appendChild(message);
+        }
+    }
+
 }

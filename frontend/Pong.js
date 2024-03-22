@@ -62,10 +62,6 @@ export class Pong
     start() {
         if (this.socket !== -1)
             this.socket.send('start');
-        if (this.tournament) {
-            // check if 2 players are here ?
-            this.main.lobby.socket.send(JSON.stringify({type: 'match_start', roomId: this.room.id}));
-        }
     }
 
     quit() {
@@ -103,6 +99,11 @@ export class Pong
             //console.log(data.score);
             if ('win' in data) {
                 this.winnerBox(data);
+            }
+            else if (data.start === "tour_match_start") {
+                if (this.tournament) {
+                    this.main.lobby.socket.send(JSON.stringify({type: 'match_start', roomId: this.room.id}));
+                }
             }
             else if ('score' in data)
             {

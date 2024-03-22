@@ -7,7 +7,7 @@ import asyncio
 
 from .data import pong_data
 from .move import check_collision, update_ball, up, down, left, right
-from .game import get_info, get_room_data, get_teams_data, get_score_data, start_game, end_game, quit, change_side, change_server_direction, remove_player, check_player, get_win_data
+from .game import get_info, get_room_data, get_teams_data, get_score_data, start_game, end_game, quit, change_side, change_server_direction, remove_player, check_player, get_win_data, get_room_by_id
 import random
 
 class PongConsumer(AsyncWebsocketConsumer):
@@ -57,6 +57,10 @@ class PongConsumer(AsyncWebsocketConsumer):
             info = await get_info(self)
             if info and not self.room.started:
                 asyncio.create_task(self.game_loop())
+                if self.room.tournamentRoom:
+                    await self.send(text_data=json.dumps({
+                        text_data: "tour_match_start"
+                    }))
         elif text_data == 'left':
             await left(self)
         elif text_data == 'right':
