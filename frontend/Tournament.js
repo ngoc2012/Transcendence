@@ -291,41 +291,6 @@ export class Tournament {
         }
     }
 
-    scoreDisplay(matches) {
-        const container = document.getElementById('tournament-matches');
-        
-        if (container) {
-            container.innerHTML = '';
-
-            const matchesByRound = matches.reduce((acc, match) => {
-                // If the round doesn't exist in the accumulator, add it
-                if (!acc[match.round_number]) {
-                    acc[match.round_number] = [];
-                }
-                // Add the match to the round
-                acc[match.round_number].push(match);
-                return acc;
-            }, {});
-
-            Object.keys(matchesByRound).forEach(round => {
-                // Create a section for each round
-                const roundSection = document.createElement('div');
-                roundSection.innerHTML = `<h3>Round ${round}</h3>`;
-                const list = document.createElement('ul');
-
-                matchesByRound[round].forEach(match => {
-                    // Create list item for each match in the round
-                    const item = document.createElement('li');
-                    item.textContent = `${match.player1_login} (${match.player1_score}) vs ${match.player2_login} (${match.player2_score}) - Winner: ${match.winner_login}`;
-                    list.appendChild(item);
-                });
-
-                roundSection.appendChild(list);
-                container.appendChild(roundSection);
-            });
-        }
-    }
-
     joinMatch(data) {
         $.ajax({
             url: '/game/tournament/join',

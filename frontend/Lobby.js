@@ -270,10 +270,6 @@ export class Lobby
                 if (this.tournament)
                     this.tournament.winnerDisplay(data);
             }
-            else if (data.type === 'all_tournament_matches') {
-                if (this.tournament) 
-                    this.tournament.scoreDisplay(data.matches);
-            }
             else {
                 const rooms = JSON.parse(e.data);
                 var options_rooms = this.dom_rooms && this.dom_rooms.options;
