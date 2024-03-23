@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'game',
     'pong',
     'transchat',
+    'accounts'
 ]
 
 MIDDLEWARE = [
@@ -161,3 +162,9 @@ SECURE_BROWSER_XSS_FILTER = True
 GOOGLELOG = 'templog'
 GOOGLENAME = 'tempname'
 CODE = ''
+
+# AUTH USER CONFIG
+AUTH_USER_MODEL = "accounts.CustomUser"
+
+# LOGIN_REDIRECT_URL = "lobby"
+# LOGOUT_REDIRECT_URL = "lobby"
