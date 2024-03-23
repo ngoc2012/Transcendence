@@ -10,7 +10,7 @@ export class Pong
         this.socket = -1;
         this.draw = new Draw(this);
         this.tournament = t;
-    }    
+    }
 
 	init() {
         this.dom_game_name = document.getElementById("game_name");
