@@ -7,7 +7,7 @@ import asyncio
 
 from .data import pong_data
 from .move import check_collision, update_ball, up, down, left, right
-from .game import get_info, get_room_data, get_teams_data, get_score_data, start_game, end_game, quit, change_side, change_server_direction, remove_player, check_player, get_win_data, get_room_by_id
+from .game import get_info, get_room_data, get_teams_data, get_score_data, start_game, end_game, quit, change_side, remove_player, check_player, get_win_data, get_room_by_id, change_server_async, set_power_play
 import random
 
 class PongConsumer(AsyncWebsocketConsumer):
@@ -69,13 +69,15 @@ class PongConsumer(AsyncWebsocketConsumer):
             await up(self)
         elif text_data == 'down':
             await down(self)
+        elif text_data == 'power':
+            await set_power_play(self)
         elif text_data == 'quit':
             next
         elif text_data == 'side':
             await change_side(self)
             await self.channel_layer.group_send(self.room_id, {'type': 'teams_data'})
         elif text_data == 'server':
-            await change_server_direction(self)
+            await change_server_async(self)
         await self.channel_layer.group_send(self.room_id, {'type': 'group_data'})
     
     async def close_connection(self, data):
@@ -90,8 +92,7 @@ class PongConsumer(AsyncWebsocketConsumer):
         }))
 
     async def group_data(self, event):
-        players = PlayerRoomModel.objects.filter(room=self.room_id)
-        room_data = await get_room_data(players, self.room_id)
+        room_data = await get_room_data(self)
         if room_data is None:
             self.disconnect(1011)
             return
@@ -126,12 +127,14 @@ class PongConsumer(AsyncWebsocketConsumer):
             await asyncio.sleep(0.02)
             check = await check_player(self)
             if not check:
+                print("Player not found.")
                 await quit(self)
                 await self.channel_layer.group_send(self.room_id, {'type': 'teams_data'})
                 return
             dy = await update_ball(self, dx, dy)
             dx = await check_collision(self, dx)
             if self.room.x <= 0 or self.room.x >= pong_data['WIDTH']:
+                print("Game ended.")
                 await end_game(self)
                 await self.channel_layer.group_send(self.room_id, {'type': 'score_data'})
                 await self.channel_layer.group_send(self.room_id, {'type': 'group_data'})
