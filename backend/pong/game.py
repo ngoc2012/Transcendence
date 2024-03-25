@@ -40,6 +40,7 @@ def get_info(consumer):
 def get_room_data(consumer):
     try:
         players = PlayerRoomModel.objects.filter(room=consumer.room_id)
+        consumer.room = RoomsModel.objects.get(id=consumer.room_id)
         return json.dumps({
             'power_play': consumer.room.power,
             'ball': {'x': consumer.room.x, 'y':consumer.room.y},
