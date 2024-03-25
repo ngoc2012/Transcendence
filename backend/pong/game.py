@@ -11,6 +11,8 @@ from .data import pong_data
 @sync_to_async
 def get_room_by_id(roomId):
     return RoomsModel.objects.filter(id=roomId).first()
+
+@sync_to_async
 def set_power_play(consumer):
     if consumer.room.power:
         consumer.room.power = False
