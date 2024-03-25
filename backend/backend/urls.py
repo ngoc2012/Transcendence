@@ -18,11 +18,12 @@ from django.contrib import admin
 from django.urls import path
 from . import views
 from django.urls import include, path, re_path
-from .views import callback
+from .views import callback, csrf
 
 
 urlpatterns = [
     path('', views.index, name='index'),
+    path('get-csrf/', csrf, name='get-csrf'),
     path("game/", include("game.urls")),
     path('admin/', admin.site.urls),
     path('lobby/', views.lobby, name='lobby'),

@@ -51,10 +51,15 @@ export class Tournament {
             login: this.main.login,
         };
 
+        var csrftoken = this.main.getCookie('csrftoken');
+
         $.ajax({
             url: '/tournament/new/',
             method: 'POST',
             data: formData,
+            headers: {
+                'X-CSRFToken': csrftoken,
+            },
             success: (response) => {
                 this.id = response.id;
                 this.main.load('/tournament/lobby', () => this.eventsLobby());
@@ -292,9 +297,13 @@ export class Tournament {
     }
 
     joinMatch(data) {
+        var csrftoken = this.main.getCookie('csrftoken');
         $.ajax({
             url: '/game/tournament/join',
             method: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken,
+            },
             data: {
                 'login': this.main.login,
                 "game_id": data.matchId

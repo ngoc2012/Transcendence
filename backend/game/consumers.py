@@ -455,6 +455,7 @@ class RoomsConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=json.dumps(data))
 
     async def check_user_in_tournament(self, data):
+        
         login = data.get('login')
         user = await get_player_by_login(login)
         if user:

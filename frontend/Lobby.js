@@ -44,9 +44,13 @@ export class Lobby
     join() {
         if (this.dom_rooms.selectedIndex === -1)
             return;
+        var csrftoken = this.main.getCookie('csrftoken');
         $.ajax({
             url: '/game/join',
             method: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken,
+            },        
             data: {
                 'login': this.main.login,
                 "game_id": this.dom_rooms.options[this.dom_rooms.selectedIndex].value
@@ -77,9 +81,13 @@ export class Lobby
             this.main.set_status('Please login or sign up');
             return;
         }
+        var csrftoken = this.main.getCookie('csrftoken');
         $.ajax({
             url: '/game/new',
             method: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken,
+            },
             data: {
                 'name': 'Stars war',
                 'game': game,
@@ -119,6 +127,7 @@ export class Lobby
             this.main.set_status('Select a game');
             return;
         }
+        var csrftoken = this.main.getCookie('csrftoken');
         $.ajax({
             url: '/game/delete',
             method: 'POST',
@@ -126,9 +135,9 @@ export class Lobby
                 'game_id': this.dom_rooms.options[this.dom_rooms.selectedIndex].value,
                 'login': this.main.login,
             },
-            headers: {
-                'Authorization': `Bearer ${sessionStorage.JWTToken}`
-            },
+            // headers: {
+            //     'Authorization': `Bearer ${sessionStorage.JWTToken}`
+            // },
             success: (response) => {
                 if (response.token) {
                     sessionStorage.setItem('JWTToken', response.token);
@@ -291,11 +300,11 @@ export class Lobby
     }
 
     tournament_click() {
-        if (this.main.login === '')
-        {
-            this.main.set_status('Please login or sign up');
-            return;
-        }
+        // if (this.main.login === '')
+        // {
+        //     this.main.set_status('Please login or sign up');
+        //     return;
+        // }
         this.socket.send(JSON.stringify({
             type: 'tournament_creation_request',
             login: this.main.login

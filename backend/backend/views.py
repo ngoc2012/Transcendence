@@ -19,6 +19,7 @@ from sendgrid.helpers.mail import Mail
 from django.contrib.auth.hashers import make_password, check_password
 import random, string
 from django.db import IntegrityError
+from django.middleware.csrf import get_token
 from django.contrib.auth import authenticate, login as auth_login
 
 API_PUBLIC = os.environ.get('API_PUBLIC')
@@ -51,6 +52,9 @@ def twofa(request):
 
 def code_2fa(request):
     return (render(request, 'code_2fa.html'))
+
+def csrf(request):
+    return JsonResponse({'csrfToken': get_token(request)})
 
 @csrf_exempt
 def display_2fa(request):
@@ -110,7 +114,7 @@ def tournament_lobby(request):
 def tournament_start(request, tournament_id):
      return (render(request, 'tournament_start.html'))
 
-@csrf_exempt
+# @csrf_exempt
 def new_player(request):
     if 'login' not in request.POST or request.POST['login'] == "":
         return HttpResponse("Error: No login!")
@@ -136,27 +140,27 @@ def new_player(request):
     user.save
 
     #JWT handling
-    access_token = jwt.encode({
-        'user_id': user.id,
-        'exp': datetime.utcnow() + timedelta(hours=1)
-    }, JWT_SECRET_KEY, algorithm='HS256')
+    # access_token = jwt.encode({
+    #     'user_id': user.id,
+    #     'exp': datetime.utcnow() + timedelta(hours=1)
+    # }, JWT_SECRET_KEY, algorithm='HS256')
 
-    refresh_token = jwt.encode({
-        'user_id': user.id
-    }, JWT_REFRESH_SECRET_KEY, algorithm='HS256')
+    # refresh_token = jwt.encode({
+    #     'user_id': user.id
+    # }, JWT_REFRESH_SECRET_KEY, algorithm='HS256')
     response = JsonResponse({
-        'access_token': access_token,
+        # 'access_token': access_token,
         'login': user.username,
         'name': user.name,
         'email': user.email,
         'secret': user.secret_2fa
     })
-    response.set_cookie('refresh_token', refresh_token, httponly=True)
+    # response.set_cookie('refresh_token', refresh_token, httponly=True)
     return response
 
 
 # Login an user and set JWT token
-@csrf_exempt
+# @csrf_exempt
 def log_in(request):
     if request.method == 'POST':
         username = request.POST.get('login')

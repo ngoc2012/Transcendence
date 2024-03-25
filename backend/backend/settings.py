@@ -58,9 +58,9 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -165,7 +165,9 @@ CODE = ''
 
 # AUTH USER CONFIG
 AUTH_USER_MODEL = "accounts.PlayersModel"
-# AUTH_USER_MODEL = "accounts.CustomUser"
+
+SESSION_COOKIE_SECURE = True
+SESSION_COOKIE_HTTPONLY = True
 
 # LOGIN_REDIRECT_URL = "lobby"
 # LOGOUT_REDIRECT_URL = "lobby"

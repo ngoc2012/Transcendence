@@ -27,9 +27,14 @@ export class qrcode_2fa
             this.main.set_status('Field must not be empty');
             return;
         }
+
+        var csrftoken = this.main.getCookie('csrftoken');
         $.ajax({
             url: '/verify_qrcode/',
             method: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken,
+            },
             data: {
                 "input_code": this.dom_code.value,
                 'login': this.main.login

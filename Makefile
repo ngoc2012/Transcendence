@@ -32,7 +32,9 @@ remove_images:
 
 re:
 	gio trash -f backend/game/migrations/[!__init__.py]*
-	gio trash -f backend/db.sqlite3
+	gio trash -f backend/accounts/migrations/[!__init__.py]*
+	gio trash -f backend/pong/migrations/[!__init__.py]*
+	gio trash -f backend/transchat/migrations/[!__init__.py]*
 	@make down
 	@make up
 
