@@ -23,6 +23,7 @@ class RoomsModel(models.Model):
     server = models.ForeignKey(PlayersModel, on_delete=models.CASCADE, related_name='serve', null=True)
     expires = models.DateTimeField(default=timezone.now() + timezone.timedelta(minutes=15))
     started = models.BooleanField(default=False)
+    power = models.BooleanField(default=False)
     x = models.IntegerField(blank=True, null=True)
     y = models.IntegerField(blank=True, null=True)
     score0 = models.IntegerField(default=0)

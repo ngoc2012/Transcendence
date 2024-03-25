@@ -61,7 +61,8 @@ export class Login
                         window.history.pushState({}, '', '/');
                         this.main.load('/lobby', () => this.main.lobby.events());
                     }
-                    this.main.lobby.socket.send(JSON.stringify({ type: "authenticate", login: this.main.login }));
+                    if (this.main.lobby.socket.readyState !== 1)
+                        this.main.lobby.socket.send(JSON.stringify({ type: "authenticate", login: this.main.login }));
                 }
             },
             error: (xhr, textStatus, errorThrown) => {
