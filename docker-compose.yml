@@ -38,7 +38,7 @@ services:
   db:
     image: postgres:latest 
     environment:
-      POSTGRES_DB: transcendence
+      POSTGRES_DB: transdb
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin
     ports:

@@ -1,7 +1,8 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
-from game.models import RoomsModel, PlayersModel, PlayerRoomModel
+from game.models import RoomsModel, PlayerRoomModel
+from accounts.models import PlayersModel
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 
 from .data import pong_data

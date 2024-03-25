@@ -1,7 +1,8 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from game.models import PlayersModel, TournamentModel, TournamentMatchModel, RoomsModel, PlayerRoomModel
+from game.models import TournamentModel, TournamentMatchModel, RoomsModel, PlayerRoomModel
+from accounts.models import PlayersModel
 from django.utils import timezone
 from transchat.models import Room
 from django.shortcuts import redirect
@@ -17,7 +18,6 @@ from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 from django.contrib.auth.hashers import make_password, check_password
 import random, string
-from accounts.models import CustomUser
 from django.db import IntegrityError
 from django.contrib.auth import authenticate, login as auth_login
 
@@ -121,7 +121,7 @@ def new_player(request):
     if 'name' not in request.POST or request.POST['name'] == "":
         return HttpResponse("Error: No name!")
     try:
-        user = CustomUser.objects.create_user(request.POST['login'], request.POST['email'], request.POST['password'])
+        user = PlayersModel.objects.create_user(request.POST['login'], request.POST['email'], request.POST['password'])
         user.name = request.POST['name']
         user.save
     except IntegrityError:

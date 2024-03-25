@@ -49,10 +49,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'accounts',
     'game',
     'pong',
-    'transchat',
-    'accounts'
+    'transchat'
 ]
 
 MIDDLEWARE = [
@@ -99,7 +99,7 @@ CHANNEL_LAYERS = {
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'transcendence',
+        'NAME': 'transdb',
         'USER': 'admin',
         'PASSWORD': 'admin',
         'HOST': 'db',
@@ -164,7 +164,8 @@ GOOGLENAME = 'tempname'
 CODE = ''
 
 # AUTH USER CONFIG
-AUTH_USER_MODEL = "accounts.CustomUser"
+AUTH_USER_MODEL = "accounts.PlayersModel"
+# AUTH_USER_MODEL = "accounts.CustomUser"
 
 # LOGIN_REDIRECT_URL = "lobby"
 # LOGOUT_REDIRECT_URL = "lobby"

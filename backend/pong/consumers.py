@@ -1,7 +1,8 @@
 import json
 from asgiref.sync import sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
-from game.models import RoomsModel, PlayerRoomModel, PlayersModel
+from game.models import RoomsModel, PlayerRoomModel
+from accounts.models import PlayersModel
 
 import asyncio
 

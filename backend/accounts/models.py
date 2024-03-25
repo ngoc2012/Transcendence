@@ -1,15 +1,15 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
-class CustomUser(AbstractUser):
-    pass
+
+class PlayersModel(AbstractUser):
     name = models.CharField(max_length=255)
     secret_2fa = models.TextField(default='', blank=True)
     session_id = models.CharField(max_length=40, null=True, blank=True)
     elo = models.IntegerField(default=1500)
 
-    def __str__(self):
-        return self.username
+    # def __str__(self):
+    #     return self.username
 
 # class PlayersModel(models.Model):
 #     id = models.AutoField(primary_key=True)
