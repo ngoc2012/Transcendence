@@ -14,15 +14,17 @@ export class Tournament {
 
     events() {
         this.dom_tournamentForm = document.getElementById('tournamentForm');
-        this.dom_tournamentForm.addEventListener('submit', (e) => this.tournamentSubmit(e));
+        if (this.dom_tournamentForm)
+            this.dom_tournamentForm.addEventListener('submit', (e) => this.tournamentSubmit(e));
     }
 
     eventsLobby() {
         this.dom_player_list = document.getElementById('players-list');
-        if (this.dom_player_list)
+        if (this.dom_player_list) {
             this.main.lobby.socket.send(JSON.stringify({type: 'request_users_list'}));
             const inviteButton = document.querySelector(`button[data-login='${login}']`);
             this.main.lobby.socket.send(JSON.stringify({type: 'request_users_in_tour', id: `${this.id}`}));
+        }
         this.dom_start_tournament = document.getElementById('start-tournament');
         this.dom_start_tournament.disabled = true;
         this.dom_quit_tournament = document.getElementById('quit-tournament');
@@ -51,24 +53,31 @@ export class Tournament {
             login: this.main.login,
         };
 
+        const jwtToken = sessionStorage.getItem('JWTToken');
         var csrftoken = this.main.getCookie('csrftoken');
 
-        $.ajax({
-            url: '/tournament/new/',
-            method: 'POST',
-            data: formData,
-            headers: {
-                'X-CSRFToken': csrftoken,
-            },
-            success: (response) => {
-                this.id = response.id;
-                this.main.load('/tournament/lobby', () => this.eventsLobby());
-                this.main.lobby.socket.send(JSON.stringify({type: 'add_to_group', id: this.id}));
-            },
-            error: () => {
-                this.main.set_status('Error: Could not create tournament');
-            }
-        });
+        if (jwtToken && csrftoken) {
+            $.ajax({
+                url: '/tournament/new/',
+                method: 'POST',
+                data: formData,
+                headers: {
+                    'Authorization': 'Bearer ' + jwtToken,
+                    'X-CSRFToken': csrftoken,
+                },
+                success: (response) => {
+                    this.id = response.id;
+                    this.main.load('/tournament/lobby', () => this.eventsLobby());
+                    this.main.lobby.socket.send(JSON.stringify({type: 'add_to_group', id: this.id}));
+                },
+                error: () => {
+                    this.main.set_status('Error: Could not create tournament');
+                }
+            });
+        } else {
+            console.log('Login required')
+            this.main.load('/pages/login', () => this.main.log_in.events());
+        }
     }
     
     alreadyIn(users) {
@@ -297,34 +306,42 @@ export class Tournament {
     }
 
     joinMatch(data) {
+        const jwtToken = sessionStorage.getItem('JWTToken');
         var csrftoken = this.main.getCookie('csrftoken');
-        $.ajax({
-            url: '/game/tournament/join',
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': csrftoken,
-            },
-            data: {
-                'login': this.main.login,
-                "game_id": data.matchId
-            },
-            success: (info) => {
-                if (typeof info === 'string')
-                    return;
-                else
-                {
-                    switch (info.game) {
-                        case 'pong':
-                            this.game = new Pong(this.main, this.main.lobby, info, this);
-                            this.main.load('/pong', () => {
-                                this.game.init();
-                            });
-                            break;
+
+        if (jwtToken && csrftoken) {
+            $.ajax({
+                url: '/game/tournament/join',
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Bearer ' + jwtToken,
+                    'X-CSRFToken': csrftoken,
+                },
+                data: {
+                    'login': this.main.login,
+                    "game_id": data.matchId
+                },
+                success: (info) => {
+                    if (typeof info === 'string')
+                        return;
+                    else
+                    {
+                        switch (info.game) {
+                            case 'pong':
+                                this.game = new Pong(this.main, this.main.lobby, info, this);
+                                this.main.load('/pong', () => {
+                                    this.game.init();
+                                });
+                                break;
+                        }
                     }
-                }
-            },
-            error: () => this.main.set_status('Error: Can not join game')
-        });
+                },
+                error: () => this.main.set_status('Error: Can not join game')
+            });
+        } else {
+            console.log('Login required');
+            this.main.load('/pages/login', () => this.main.log_in.events());
+        }
     }
 
     quitTournament() {

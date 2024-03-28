@@ -1,8 +1,5 @@
-
-
-// Give the user the different way of login in our app (normal or through 42),
-// then in case of a normal connection start the 2fa verification process
-
+// // Give the user the different way of login in our app (normal or through 42),
+// // then in case of a normal connection start the 2fa verification process
 
 export class Login
 {
@@ -33,7 +30,9 @@ export class Login
             this.main.set_status('Field must not be empty');
             return;
         }
+
         var csrftoken = this.main.getCookie('csrftoken');
+
         $.ajax({
             url: '/log_in/',
             method: 'POST',
@@ -51,8 +50,8 @@ export class Login
                 }
                 else
                 {
-                    // sessionStorage.setItem('JWTToken', info.access_token);
-                    // document.cookie = `refresh_token=${info.refresh_token}; path=/; secure; HttpOnly`;
+                    sessionStorage.setItem('JWTToken', info.access_token);
+                    document.cookie = `refresh_token=${info.refresh_token}; path=/; secure; HttpOnly`;
                     this.main.email = info.email;
                     this.main.login = info.login;
                     this.main.name = info.name;

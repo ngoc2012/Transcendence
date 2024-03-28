@@ -63,6 +63,7 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'backend.customMiddleware.JWTMiddleware',
 ]
 
 ROOT_URLCONF = 'backend.urls'
@@ -169,5 +170,9 @@ AUTH_USER_MODEL = "accounts.PlayersModel"
 SESSION_COOKIE_SECURE = True
 SESSION_COOKIE_HTTPONLY = True
 
+LOGIN_URL = '/pages/login/'
 # LOGIN_REDIRECT_URL = "lobby"
 # LOGOUT_REDIRECT_URL = "lobby"
+
+JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY')
+JWT_REFRESH_SECRET_KEY = os.environ.get('JWT_REFRESH_SECRET_KEY')

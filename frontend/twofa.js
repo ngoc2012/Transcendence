@@ -22,9 +22,14 @@ export class twofa
     }
 
     loginWithemail() {
+        var csrftoken = this.main.getCookie('csrftoken');
+
         $.ajax({
             url: '/mail_2fa/',
             method: 'GET',
+            headers: {
+                'X-CSRFToken': csrftoken,
+            },
             data: {
                 "login": this.main.login,
                 "name": this.main.name,

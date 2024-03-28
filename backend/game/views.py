@@ -173,7 +173,7 @@ def delete(request):
 
             new_token = jwt.encode({
                 'user_id': player.id,
-                'exp': datetime.utcnow() + timedelta(hours=1)  # Access token expiration time
+                'exp': datetime.now(pytz.utc) + timedelta(hours=1)  # Access token expiration time
             }, JWT_SECRET_KEY, algorithm='HS256')
             print("JWT token expired but a new one has been created using the Refresh token")
             room.delete()

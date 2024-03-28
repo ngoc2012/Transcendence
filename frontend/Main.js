@@ -5,7 +5,6 @@ import {twofa} from './twofa.js'
 import {code_2fa} from './code_2fa.js'
 import {qrcode_2fa} from './qrcode_2fa.js'
 import {display_2fa} from './display_2fa.js'
-
 import {Tournament} from './Tournament.js'
 
 export class Main
@@ -18,7 +17,6 @@ export class Main
     status = '';
     secret_2fa = '';
     history_stack = [];
-    csrftoken = '';
 
     constructor()
     {
@@ -54,7 +52,8 @@ export class Main
         });
     }
 
-    load(page, callback) {
+    load_noJWT(page, callback) {
+        console.log('no JWT load')
         $.ajax({
             url: page + '/',
             method: 'GET',
@@ -66,17 +65,80 @@ export class Main
                 }
                 // callback();  // fait erreur "callback is not a function"
             },
-            error: function(error) {
-                console.error('Error: pong GET fail', error.message);
+            error: (jqXHR, textStatus, errorThrown) => {
+                if (jqXHR.status === 401) {
+                    this.login_click();
+                }
+            }
+        });
+    }
+
+    load_data_noJWT(page, callback, data) {
+        $.ajax({
+            url: page + '/',
+            method: 'GET',
+            headers: {
+                'X-CSRFToken': csrftoken,
+            },
+            data : data,
+            success: (html) => {
+                this.dom_container.innerHTML = html;
+                //pas oublier de changer ca
+                if (callback && typeof callback === 'function') {
+                    callback();
+                }
+                // callback();  // fait erreur "callback is not a function"
+            },
+            error: (jqXHR, textStatus, errorThrown) => {
+                if (jqXHR.status === 401) {
+                    this.login_click();
+                }
+            }
+        });
+    }
+
+    load(page, callback) {
+        const jwtToken = sessionStorage.getItem('JWTToken');
+
+        if (!jwtToken)
+            return this.load_noJWT(page, callback);
+
+        $.ajax({
+            url: page + '/',
+            method: 'GET',
+            headers: {
+                'Authorization': 'Bearer ' + jwtToken,
+            },
+            success: (html) => {
+                this.dom_container.innerHTML = html;
+                //pas oublier de changer ca
+                if (callback && typeof callback === 'function') {
+                    callback();
+                }
+                // callback();  // fait erreur "callback is not a function"
+            },
+            error: (jqXHR, textStatus, errorThrown) => {
+                if (jqXHR.status === 401) {
+                    this.login_click();
+                }
             }
         });
     }
 
 	load_with_data(page, callback, data) {
+        const jwtToken = sessionStorage.getItem('JWTToken');
+
+        if (!jwtToken)
+            return this.load_noJWT(page, callback, data);
+
         $.ajax({
             url: page + '/',
             method: 'GET',
-			data : data,
+            headers: {
+                'Authorization': 'Bearer ' + jwtToken,
+                'X-CSRFToken': csrftoken,
+            },
+            data : data,
             success: (html) => {
                 this.dom_container.innerHTML = html;
                 //pas oublier de changer ca
@@ -85,8 +147,10 @@ export class Main
                 }
                 // callback();  // fait erreur "callback is not a function"
             },
-            error: function(error) {
-                console.error('Error: pong GET fail', error.message);
+            error: (jqXHR, textStatus, errorThrown) => {
+                if (jqXHR.status === 401) {
+                    this.login_click();
+                }
             }
         });
     }
@@ -110,7 +174,6 @@ export class Main
             const cookies = document.cookie.split(';');
             for (let i = 0; i < cookies.length; i++) {
                 const cookie = cookies[i].trim();
-                // Does this cookie string begin with the name we want?
                 if (cookie.substring(0, name.length + 1) === (name + '=')) {
                     cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
                     break;

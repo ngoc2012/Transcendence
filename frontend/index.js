@@ -1,6 +1,6 @@
 import {Main} from './Main.js'
 
-var main = new Main();
+export var main = new Main();
 
 //recupere la data obtenue du callback de l'auth 42 
 if (my42login !== null && my42login !== "" && my42email !== "" && my42JWT != "")
@@ -15,7 +15,7 @@ if (my42login !== null && my42login !== "" && my42email !== "" && my42JWT != "")
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-
+    
     if (!main.csrftoken) {
         fetch('/get-csrf/')
         .then(response => response.json())
@@ -23,8 +23,64 @@ document.addEventListener('DOMContentLoaded', () => {
             main.csrftoken = data.csrfToken;
         });
     }
+    
+    checkSession();
+
+    function checkSession() {
+        const jwtToken = sessionStorage.getItem('JWTToken');
+        if (jwtToken) {
+            console.log(jwtToken)
+            validateSessionToken(jwtToken).then(data => {
+                if (data && data.validSession) {
+                    main.email = data.email;
+                    main.login = data.login;
+                    main.name = data.name;
+                    main.dom_name.innerHTML = data.name;
+                    
+                    if (data.enable2fa == 'true') {
+                        main.load('/twofa', () => main.twofa.events());
+                    } else {
+                        main.history_stack.push('/');
+                        window.history.pushState({}, '', '/');
+                        main.load('/lobby', () => main.lobby.events());
+                    }
+                } else {
+                    console.log('Session is not valid');
+                }
+            });
+        } else {
+            console.log('No JWT token found');
+        }
+    }
+
+    async function validateSessionToken(jwtToken) {
+        try {
+            let response = await fetch('/validate-session/', {
+                method: 'GET',
+                headers: {
+                    'Authorization': 'Bearer ' + jwtToken,
+                },
+            });
+            if (response.ok) {
+                let data = await response.json();
+                if (data.validSession) {
+                    return data;
+                } else {
+                    console.error('Session validation failed: Invalid session');
+                    return null;
+                }
+            } else {
+                console.error('Session validation request failed:', response.statusText);
+                return null;
+            }
+        } catch (error) {
+            console.error('Error during session validation:', error);
+            return null;
+        }
+    }
 
     function    reload() {
+        // console.log('reload path')
         const   path = window.location.pathname;
         if (main.lobby.game && main.lobby.game !== undefined)
         {

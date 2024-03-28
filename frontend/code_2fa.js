@@ -27,29 +27,38 @@ export class code_2fa
             this.main.set_status('Field must not be empty');
             return;
         }
-        $.ajax({
-            url: '/verify/',
-            method: 'POST',
-            data: {
-                "input_code": this.dom_code.value,
-            },
-            success: (info) => {
-                if (typeof info === 'string')
-                {
-                    this.main.set_status(info);
-                }
-                else
-                {
-                    if (info.result == '1')
-                        this.main.load('/lobby', () => this.main.lobby.events());
-                    else
-                        this.main.set_status('Wrong code, please try again');
-                }
-            },
-            error: (data) => this.main.set_status(data.error)
-        });
-    }
 
+        const jwtToken = sessionStorage.getItem('JWTToken');
+        var csrftoken = this.main.getCookie('csrftoken');
+
+        if (jwtToken && csrftoken) {
+            $.ajax({
+                url: '/verify/',
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Bearer ' + jwtToken,
+                    'X-CSRFToken': csrftoken,
+                },
+                data: {
+                    "input_code": this.dom_code.value,
+                },
+                success: (info) => {
+                    if (typeof info === 'string') {
+                        this.main.set_status(info);
+                    } else if (info.result === '1') {
+                        this.main.load('/lobby', () => this.main.lobby.events());
+                    } else {
+                        this.main.set_status('Wrong code, please try again');
+                    }
+                },
+                error: (data) => this.main.set_status(data.error)
+            });
+        }
+        else {
+            console.log('Login required');
+            this.main.load('/pages/login', () => this.main.log_in.events());
+        }
+    }
 
     cancel() {
         this.main.set_status('');
