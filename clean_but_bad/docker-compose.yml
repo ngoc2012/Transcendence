@@ -1,0 +1,83 @@
+version: '3'
+
+services:
+  nginx:
+    container_name: nginx
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+      no_cache: false
+    ports:
+      - 8080:443
+    volumes:
+      - cli_data:/app/config
+    restart: always
+    env_file:
+     - .env
+    networks:
+      - network
+
+  django:
+    container_name: django
+    build:
+      context: ./django
+      dockerfile: Dockerfile
+      no_cache: false
+    restart: always
+    env_file:
+     - .env
+    ports:
+      - 8000:8000
+    volumes:
+      - django_data:/app
+    networks:
+      - network
+    depends_on:
+      - db
+  
+  db:
+    image: postgres:latest 
+    environment:
+      POSTGRES_DB: transcendence
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - network
+
+  ganache:
+    container_name: ganache
+    build:
+      context: ./ganache
+      dockerfile: Dockerfile
+    ports:
+      - "8545:8545"
+    volumes:
+      - ganache_db:/ganache_db
+    networks:
+      - network
+
+volumes:
+  django_data:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./
+      o: bind
+  
+  postgres_data:
+  cli_data:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./backend/CLI
+      o: bind
+
+  ganache_db:
+
+networks:
+  network:
+    driver: bridge

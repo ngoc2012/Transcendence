@@ -1,0 +1,12 @@
+*.swp
+.vscode
+__pycache__
+package-lock.json
+.env
+backend/db.sqlite3
+backend/game/migrations/*.py
+backend/CLI/*.crt
+backend/CLI/*.key
+backend/venv
+backend/db.sqlite3
+to_do.txt

@@ -1,0 +1,41 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Transcendence</title>
+  <link rel="stylesheet" href="{% static 'bootstrap-4.0.0-dist/css/bootstrap.css' %}">
+  <link rel="icon" type="image/gif" href="{% static 'icons8-home.gif' %}">
+  <script src="{% static 'jquery-3.7.1.js' %}"></script>
+  <script src="{% static 'bootstrap-4.0.0-dist/js/bootstrap.bundle.js' %}"></script>
+  <script src="{% static 'index.js' %}" type="module"></script>
+  <script src="{% static 'qrcode.min.js' %}"></script>
+  <script src="{% static 'three.min.js' %}"></script>
+  <script>
+    var my42login = '{{ my42login }}';
+    var my42name = '{{ my42name }}';
+    var my42email = '{{ my42email }}';
+    var my42JWT = '{{ my42JWT }}';
+  </script>
+  
+  <style>
+    canvas {
+      border: 1px solid #000;
+      display: block;
+      margin: 20px auto;
+    }
+  </style>
+  <base href="/">
+</head>
+<body>
+
+    <a id="home">Home</a>
+    <div style="display: inline">Hello <div id="name"></div></div>
+    <button id="login" type="button">Login</button>
+    <button id="signup" type="signup">Signup</button>
+    <div id="status"></div>
+    <div id="container"></div>
+
+</body>
+</html>

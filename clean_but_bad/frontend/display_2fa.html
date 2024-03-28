@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2FA Setup</title>
+    <style>
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            text-align: center;
+        }
+
+        #qrcode {
+            margin-top: 10px;
+        }
+
+        #proceed {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Two-Factor Authentication Setup</h1>
+        <p>Thank you for signing up! You are now eligible to enable Two-Factor Authentication (2FA) for added security.</p>
+        
+        <h2>Email for 2FA:</h2>
+        <p>This following email address will be used for Two-Factor Authentication:</p>
+        <p><strong>{{ email }}</strong></p>
+
+        <h2>Secret Key for Authenticator:</h2>
+        <p>Before you proceed, please save the following secret key. You'll need to enter this key into your authenticator app:</p>
+        <p><strong>{{ secret_key }}</strong></p>
+        <p id="secretKey" data-secret="{{ secret_key }}"></p>
+
+        <div id="qrcode"></div>
+
+        <p><em>Make sure to securely save this secret key. It will be needed if you ever lose access to your authenticator app.</em></p>
+
+        <button id="proceed" type="button">Proceed</button>
+    </div>
+</body>
+</html>
