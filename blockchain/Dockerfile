@@ -30,6 +30,9 @@ RUN     apt-get update
 RUN     apt-get install netcat -y
 RUN     pip3 install web3
 RUN     pip3 install pyjwt
+RUN     pip3 install --no-cache-dir psycopg2-binary sqlalchemy
+
+RUN     pip3 install Flask
 
 RUN apt-get update && apt-get install -y curl
 
