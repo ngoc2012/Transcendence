@@ -46,6 +46,30 @@ services:
     networks:
       - network
 
+  ganache:
+    container_name: ganache
+    build:
+      context: ./ganache
+      dockerfile: Dockerfile
+    ports:
+      - "8545:8545"
+    volumes:
+      - ganache_db:/ganache_db
+    networks:
+      - network
+
+  blockchain:
+      container_name: blockchain
+      build:
+        context: ./blockchain
+        dockerfile: Dockerfile
+      restart: always
+      ports:
+        - "9000:9000"
+      volumes:
+        - blockchain_data:/app
+      networks:
+        - network
 
 volumes:
   django_data:
@@ -61,6 +85,15 @@ volumes:
     driver_opts:
       type: none
       device: ./backend/CLI
+      o: bind
+
+  ganache_db:
+
+  blockchain_data:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./
       o: bind
 
 networks:
