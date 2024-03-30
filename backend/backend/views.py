@@ -71,9 +71,7 @@ def tournament_history(request):
         response.raise_for_status()
 
         data = response.json()
-        # print(data)
         tournament_names = data.get('names', [])
-        # print(tournament_names)
         return render(request, 'tournament_history.html', {'names' : tournament_names})
 
     except requests.exceptions.RequestException as e:
@@ -88,49 +86,16 @@ def tournament_history(request):
 @csrf_exempt
 def get_tournament_data(request):
     try:
-        tournament_name = request.GET.get('name')
-        # print("mon tournoi = ", tournament_name)
-        
+        tournament_name = request.GET.get('name')        
         if not tournament_name:
             return JsonResponse({"error": "Tournament name is required"}, status=400)
+        url = f"http://blockchain:9000/tournaments/{tournament_name}"
+        response = requests.get(url)
+        response.raise_for_status()
 
-
-
-        # with open('/app/blockchain/build/contracts/TournamentRegistry.json') as f:
-        #     contract_data = json.load(f)
-        #     contract_abi = contract_data['abi']
-
-        # latest_network_id = max(contract_data['networks'].keys())
-        # contract_address = contract_data['networks'][latest_network_id]['address']
-        
-        # TournamentRegistry = web3.eth.contract(address=contract_address, abi=contract_abi)
-
-
-        # tournament_index = TournamentRegistry.functions.getTournamentIndex(tournament_name).call()
-
-        # if tournament_index == -1:
-        #     return JsonResponse({"error": "Tournament not found."}, status=400)
-        
-
-        # contenders = TournamentRegistry.functions.getContenders(tournament_index).call()
-
-
-        # matches = TournamentRegistry.functions.getMatches(tournament_index).call()
-
-
-        
-        # tournament_winner = TournamentRegistry.functions.getTournamentWinner(tournament_index).call()
-        # is_pending = TournamentRegistry.functions.isTournamentPending(tournament_index).call()
-        
-
-        data = {
-            'tournament_name': 'tournament_name',
-            'tournament_winner': 'tournament_winner',
-            'is_pending': 'is_pending',
-            'contenders': 'contenders',
-            'matches': 'matches'
-        }
-
+        data = response.json()
+        # print(response)
+        # print(data)
 
         return JsonResponse(data)
     except Exception as e:
@@ -144,7 +109,7 @@ def display_2fa(request):
     secret = request.POST['secret']
     # response = requests.get("http://blockchain:9000/print_me")
     # data = response.json()
-    print("data est egal a = ", data)
+    # print("data est egal a = ", data)
     return render(request, 'display_2fa.html', {'email': email, 'secret_key': secret})
 
 
@@ -378,11 +343,19 @@ def new_tournament(request):
             player = PlayersModel.objects.get(login=login)
             tournament.participants.add(player)
 
-
-            # i want to call the function here with "player" variable as an argument how to do it in a simple way?
-            url = f"http://blockchain:9000/add_tournament/{name}"  # Assuming player has a 'tournament_name' attribute
+            url = f"http://blockchain:9000/add_tournament/{name}"
             response = requests.post(url)
-            response.raise_for_status()  # Raise an exception for non-2xx status codes
+            response.raise_for_status()
+
+            player_data = {
+                'id': player.id,
+                'login': player.login,
+                'elo': player.elo,
+            }
+            url = f"http://blockchain:9000/add_player/"
+            data = {"name": name, "player": player_data}
+            response = requests.post(url, json=data)
+            response.raise_for_status()
 
             return JsonResponse({'message': 'Tournament created successfully', 'id': str(tournament.id)}, status=200)
         except requests.exceptions.RequestException as e:
