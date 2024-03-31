@@ -239,10 +239,6 @@ def add_tournament_route(tournament_name):
 
 
 def add_match_to_tournament_blockchain(match, player1, player2):
-    # print (match)
-    # print (player1)
-    # print (player2)
-    # print("elo du player2 : ", player2.get('elo'))
 
     try:
         with open('/app/blockchain/build/contracts/TournamentRegistry.json') as f:
@@ -296,21 +292,6 @@ def add_match():
         return jsonify({"error": "Failed to add match to blockchain"}), 500
     else:
         return jsonify({"message": "Match added successfully"}), 201
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
