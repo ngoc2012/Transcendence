@@ -143,16 +143,54 @@ def get_tournament_data(tournament_name):
 
 
 
+def add_winner_to_tournament_blockchain(name, tournament_winner):
+    try:
+        with open('/app/blockchain/build/contracts/TournamentRegistry.json') as f:
+            contract_data = json.load(f)
+            contract_abi = contract_data['abi']
+
+        latest_network_id = max(contract_data['networks'].keys())
+        contract_address = contract_data['networks'][latest_network_id]['address']
+        TournamentRegistry = web3.eth.contract(address=contract_address, abi=contract_abi)
+        accounts = web3.eth.accounts
+        chosen_account = accounts[0]
+        tournament_name = name
+        tournament_index = TournamentRegistry.functions.getTournamentIndex(tournament_name).call()
+        if tournament_index == -1:
+            print("Error:", e)
+            return -1
+
+        TournamentRegistry.functions.setTournamentWinner(tournament_index, tournament_winner).transact({'from': chosen_account})
+        TournamentRegistry.functions.setTournamentPending(tournament_index, False).transact({'from': chosen_account})
+
+    except Exception as e:
+        print("Error:", e)
+        return -1
+
+@app.route("/add_winner/", methods=["POST"])
+def add_winner():
+    player_data = request.json
+    if not player_data:
+        return jsonify({"error": "Missing player data"}), 400
+    name = player_data.get('name')
+    winner = player_data.get('winner')
+
+    result = add_winner_to_tournament_blockchain(name, winner)
+    if result == -1:
+        return jsonify({"error": "Failed to add winner to blockchain"}), 500
+    else:
+        return jsonify({"message": "Winner added successfully"}), 201
+
+
+
+
 @app.route("/tournaments/<tournament_name>", methods=["GET"])
 def get_tournament_data_route(tournament_name):
     try:
         data = get_tournament_data(tournament_name)
-
         if not data:
             return HttpResponseBadRequest(json.dumps({"error": "Tournament not found."}))  # Keep JSON for error responses
-
-        return jsonify(data)  # Pass data to template
-
+        return jsonify(data)
     except Exception as e:
         print(f"Error retrieving tournament data: {e}")
         return HttpResponseBadRequest(json.dumps({"error": "Internal server error."}))
@@ -186,111 +224,96 @@ def add_tournament_route(tournament_name):
         return jsonify({"message": "Internal server error"}), 500
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+def add_match_to_tournament_blockchain(match, player1, player2):
+    # print (match)
+    # print (player1)
+    # print (player2)
+    # print("elo du player2 : ", player2.get('elo'))
+
+    try:
+        with open('/app/blockchain/build/contracts/TournamentRegistry.json') as f:
+            contract_data = json.load(f)
+            contract_abi = contract_data['abi']
+
+        latest_network_id = max(contract_data['networks'].keys())
+        contract_address = contract_data['networks'][latest_network_id]['address']
+        
+        TournamentRegistry = web3.eth.contract(address=contract_address, abi=contract_abi)
+        accounts = web3.eth.accounts
+        chosen_account = accounts[0]
+        tournament_name = match.get('name')
+        tournament_index = TournamentRegistry.functions.getTournamentIndex(tournament_name).call()
+
+
+        matches = [
+            {'player1': {'name': player1.get('login'), 'elo': player1.get('elo')}, 'player2': {'name': player2.get('login'), 'elo': player2.get('elo')}, 'scorePlayer1': player1.get('score'), 'scorePlayer2': player2.get('score'), 'round': str(match.get('round')) , 'winner': match.get('winner')}
+        ]
+        for match_data in matches:
+            player1 = match_data['player1']
+            player2 = match_data['player2']
+            TournamentRegistry.functions.addMatch(tournament_index,
+                                                   player1['name'], 
+                                                   player2['name'],
+                                                   match_data['scorePlayer1'], 
+                                                   match_data['scorePlayer2'],
+                                                   match_data['round'], 
+                                                   match_data['winner']).transact({'from': chosen_account})
+    except Exception as e:
+        print("Error:", e)
+        return -1
     
+@app.route("/add_match/", methods=["POST"])
+def add_match():
+    data = request.json
+    if not data:
+        return jsonify({"error": "Missing match data"}), 400
+    match = data.get('match')
+    player1 = data.get('player1')
+    player2 = data.get('player2')
+
+    print (match)
+    print (player1)
+    print (player2)
+
+    result  = 1
+
+    result = add_match_to_tournament_blockchain(match, player1, player2)
+    if result == -1:
+        return jsonify({"error": "Failed to add match to blockchain"}), 500
+    else:
+        return jsonify({"message": "Match added successfully"}), 201
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=9000)
 
-
-
-
-# @database_sync_to_async
-# def add_player_2_tournament_blockchain(name, player):
-#     print("je suis bien dans la fonction blockchain voici player : ", player.login)
-#     try:
-#         with open('/app/blockchain/build/contracts/TournamentRegistry.json') as f:
-#             contract_data = json.load(f)
-#             contract_abi = contract_data['abi']
-
-#         latest_network_id = max(contract_data['networks'].keys())
-#         contract_address = contract_data['networks'][latest_network_id]['address']
-        
-#         TournamentRegistry = web3.eth.contract(address=contract_address, abi=contract_abi)
-#         accounts = web3.eth.accounts
-#         chosen_account = accounts[0]
-#         tournament_name = name
-#         tournament_index = TournamentRegistry.functions.getTournamentIndex(tournament_name).call()
-#         # print("j'ai bien recup le tournoi")
-#         if tournament_index == -1:
-#             print("Error:", e)
-#             return -1
-
-#         elo = player.elo
-#         players = [
-#             {'name': player.login, 'elo': elo},
-#         ]
-#         # print("j'ai bien recup le joueur : ", player.login)
-#         for player_data in players:
-#             TournamentRegistry.functions.addPlayer(tournament_index, player_data['name'], player_data['elo']).transact({'from': chosen_account})
-
-#     except Exception as e:
-#         print("Error:", e)
-#         return -1
-
-
-
-# @sync_to_async
-# def add_winner_to_tournament_blockchain(name, tournament_winner):
-#     print("je suis bien dans la fonction add winner")
-#     try:
-#         with open('/app/blockchain/build/contracts/TournamentRegistry.json') as f:
-#             contract_data = json.load(f)
-#             contract_abi = contract_data['abi']
-
-#         latest_network_id = max(contract_data['networks'].keys())
-#         contract_address = contract_data['networks'][latest_network_id]['address']
-        
-#         TournamentRegistry = web3.eth.contract(address=contract_address, abi=contract_abi)
-#         accounts = web3.eth.accounts
-#         chosen_account = accounts[0]
-#         tournament_name = name
-#         tournament_index = TournamentRegistry.functions.getTournamentIndex(tournament_name).call()
-#         if tournament_index == -1:
-#             print("Error:", e)
-#             return -1
-
-#         TournamentRegistry.functions.setTournamentWinner(tournament_index, tournament_winner).transact({'from': chosen_account})
-
-#         TournamentRegistry.functions.setTournamentPending(tournament_index, False).transact({'from': chosen_account})
-
-#     except Exception as e:
-#         print("Error:", e)
-#         return -1
-
-
-# @sync_to_async
-# def add_match_to_tournament_blockchain(name, match):
-#     print('EH')
-#     print('on ajoute un match, le winner est : ', match.winner.login)
-#     try:
-#         with open('/app/blockchain/build/contracts/TournamentRegistry.json') as f:
-#             contract_data = json.load(f)
-#             contract_abi = contract_data['abi']
-
-#         latest_network_id = max(contract_data['networks'].keys())
-#         contract_address = contract_data['networks'][latest_network_id]['address']
-        
-#         TournamentRegistry = web3.eth.contract(address=contract_address, abi=contract_abi)
-#         accounts = web3.eth.accounts
-#         chosen_account = accounts[0]
-#         tournament_name = name
-#         tournament_index = TournamentRegistry.functions.getTournamentIndex(tournament_name).call()
-
-
-#         matches = [
-#             {'player1': {'name': match.player1.login, 'elo': match.player1.elo}, 'player2': {'name': match.player2.login, 'elo': match.player2.elo}, 'scorePlayer1': match.p1_score, 'scorePlayer2': match.p2_score, 'round': str(match.round_number) , 'winner': match.winner.login}
-#         ]
-#         # print('bob')
-#         for match_data in matches:
-#             player1 = match_data['player1']
-#             player2 = match_data['player2']
-#             TournamentRegistry.functions.addMatch(tournament_index,
-#                                                    player1['name'], 
-#                                                    player2['name'],
-#                                                    match_data['scorePlayer1'], 
-#                                                    match_data['scorePlayer2'],
-#                                                    match_data['round'], 
-#                                                    match_data['winner']).transact({'from': chosen_account})
-#     except Exception as e:
-#         print("Error:", e)
-#         return -1

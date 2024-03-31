@@ -7,6 +7,7 @@ from .models import RoomsModel, PlayersModel, TournamentModel, TournamentMatchMo
 from pong.data import pong_data
 from django.utils import timezone
 from django.db.models import Q
+import requests
 
 @sync_to_async
 def room_list(rooms):
@@ -70,6 +71,17 @@ def add_player_to_tournament(player_id, tour_id):
         tournament = TournamentModel.objects.get(id=tour_id)
         player = PlayersModel.objects.get(id=player_id)
         tournament.participants.add(player)
+
+        player_data = {
+            'id': player.id,
+            'login': player.login,
+            'elo': player.elo,
+        }
+        url = f"http://blockchain:9000/add_player/"
+        data = {"name": tournament.name, "player": player_data}
+        response = requests.post(url, json=data)
+        response.raise_for_status()
+
         return True, {"participants_count": tournament.participants.count()}
     except (TournamentModel.DoesNotExist, PlayersModel.DoesNotExist):
         return False, {}
@@ -330,6 +342,33 @@ class RoomsConsumer(AsyncWebsocketConsumer):
             match.p1_score = data.get('score')[0]
             match.p2_score = data.get('score')[1]
             tournament = match.tournament
+
+
+
+            # ici on add match a blockchain
+            player1_data = {
+                'id': match.player1.id,
+                'login': match.player1.login,
+                'elo': match.player1.elo,
+                'score': match.p1_score
+            }
+            player2_data = {
+                'id': match.player2.id,
+                'login': match.player2.login,
+                'elo': match.player2.elo,
+                'score': match.p2_score
+            }
+            match_data = {
+                'name': match.tournament.name,
+                'winner': match.winner.login,
+                'round': match.round_number,
+            }
+            url = f"http://blockchain:9000/add_match/"
+            data = {"match": match_data, "player1": player1_data, "player2": player2_data}
+            response = requests.post(url, json=data)
+            response.raise_for_status()
+
+
             await add_loser_to_eleminated(tournament, match.loser)
             await database_sync_to_async(match.save)()
             data_status = {'roomId': roomId}
@@ -368,6 +407,11 @@ class RoomsConsumer(AsyncWebsocketConsumer):
         group_name = f"tournament_{tournament.id}"
 
         if tournament.terminated == True:
+
+            url = f"http://blockchain:9000/add_winner/"
+            data = {"name": tournament.name, "winner": tournament.winner.login}
+            response = requests.post(url, json=data)
+            response.raise_for_status()
             message = {
                 'type': 'tournament_infos',
                 'data': {
