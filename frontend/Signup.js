@@ -5,6 +5,7 @@ export class Signup
     }
 
     events() {
+        this.main.checkcsrf();
         this.main.set_status('');
         this.dom_login = document.querySelector("#login1");
         this.dom_password = document.querySelector("#password1");
@@ -61,7 +62,6 @@ export class Signup
                     } else {
                         window.history.pushState({}, '', '/lobby');
                         this.main.load('/lobby', () => this.main.lobby.events());
-                        // this.main.lobby.socket.send(JSON.stringify({ type: "authenticate", login: this.main.login }));
                     }
                 }
             },

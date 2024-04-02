@@ -9,6 +9,7 @@ export class Login
     }
 
     events() {
+        this.main.checkcsrf();
         this.main.set_status('');
         this.dom_login = document.querySelector("#login0");
         this.dom_password = document.querySelector("#password0");
@@ -34,7 +35,7 @@ export class Login
         var csrftoken = this.main.getCookie('csrftoken');
 
         $.ajax({
-            url: '/log_in/',
+            url: 'log_in/',
             method: 'POST',
             headers: {
                 'X-CSRFToken': csrftoken,
@@ -64,7 +65,22 @@ export class Login
                         window.history.pushState({}, '', '/');
                         this.main.load('/lobby', () => this.main.lobby.events());
                     }
-                    this.main.lobby.socket.send(JSON.stringify({ type: "authenticate", login: this.main.login }));
+                   
+                    var dom_log_in = document.getElementById('login');
+                    if (dom_log_in) {
+                        dom_log_in.style.display = "none";
+                    }
+
+                    var dom_signup = document.getElementById('signup');
+                    if (dom_signup) {
+                        dom_signup.style.display = "none";
+                        dom_signup.insertAdjacentHTML('afterend', '<button id="logoutButton">Logout</button>');
+                    }
+
+                    var dom_logout = document.getElementById('logoutButton');
+                    if (dom_logout) {
+                        dom_logout.addEventListener('click', () => this.main.logout());
+                    }
                 }
             },
             error: (xhr, textStatus, errorThrown) => {

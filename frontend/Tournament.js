@@ -13,12 +13,14 @@ export class Tournament {
     }
 
     events() {
+        this.main.checkcsrf();
         this.dom_tournamentForm = document.getElementById('tournamentForm');
         if (this.dom_tournamentForm)
             this.dom_tournamentForm.addEventListener('submit', (e) => this.tournamentSubmit(e));
     }
 
     eventsLobby() {
+        this.main.checkcsrf();
         this.dom_player_list = document.getElementById('players-list');
         if (this.dom_player_list) {
             this.main.lobby.socket.send(JSON.stringify({type: 'request_users_list'}));
@@ -32,6 +34,7 @@ export class Tournament {
     }
 
     eventsStart() {
+        this.main.checkcsrf();
         this.dom_matches = document.getElementById('tournament-matches');
         if (this.dom_matches) {
             const data = {
@@ -115,16 +118,20 @@ export class Tournament {
     userList(users) {
         const playersList = document.getElementById('players-list');
         const acceptedList = document.getElementById('accepted-list');
-        const acceptedLogins = new Set([...acceptedList.querySelectorAll('[data-login]')].map(li => li.getAttribute('data-login')));
-        playersList.innerHTML = '';
-        
-        users.forEach(user => {
-            if (user.login === this.main.login || acceptedLogins.has(user.login)) {
-                return;
+        if (acceptedList) {
+            const acceptedLogins = new Set([...acceptedList.querySelectorAll('[data-login]')].map(li => li.getAttribute('data-login')));
+            if (acceptedLogins) {
+                playersList.innerHTML = '';
+                
+                users.forEach(user => {
+                    if (user.login === this.main.login || acceptedLogins.has(user.login)) {
+                        return;
+                    }
+                    const li = this.createUserListItem(user);
+                    playersList.appendChild(li);
+                });
             }
-            const li = this.createUserListItem(user);
-            playersList.appendChild(li);
-        });
+        }
     }
 
     tournamentInviteAccepted(login) {
@@ -208,7 +215,7 @@ export class Tournament {
     
             tournamentInfosContainer.innerHTML = content;
         }
-    }    
+    }
 
     displayTournamentMatches(matches) {
         const matchesContainer = document.getElementById('tournament-matches');

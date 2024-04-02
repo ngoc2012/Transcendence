@@ -5,6 +5,7 @@ export class Chat{
 	}
 
 	init(){
+		this.main.checkcsrf();
 		this.dom_input = document.querySelector('#chat-message-input');
 		this.dom_chatlog = document.querySelector('#chat-log');
 		this.dom_submit = document.querySelector('#chat-message-submit');

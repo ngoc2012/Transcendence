@@ -24,12 +24,12 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    checkSession();
+    if (!main.login)
+        checkSession();
 
     function checkSession() {
         const jwtToken = sessionStorage.getItem('JWTToken');
         if (jwtToken) {
-            console.log(jwtToken)
             validateSessionToken(jwtToken).then(data => {
                 if (data && data.validSession) {
                     main.email = data.email;
@@ -48,8 +48,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     console.log('Session is not valid');
                 }
             });
-        } else {
-            console.log('No JWT token found');
         }
     }
 

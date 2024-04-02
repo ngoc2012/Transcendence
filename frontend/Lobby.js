@@ -12,6 +12,7 @@ export class Lobby
     }
 
     events() {
+        this.main.checkcsrf();
         this.dom_rooms = document.getElementById("rooms");
         this.dom_tournament = document.getElementById("tournament");
         this.dom_join = document.querySelector("#join");
@@ -25,8 +26,10 @@ export class Lobby
         this.dom_join.addEventListener("click", () => this.join());
 		this.dom_chat.addEventListener("click", () => this.chat());
         this.dom_tournament.addEventListener("click", () => this.tournament_click());
-        this.rooms_update();
-        this.queryTournament();
+        if (this.main.login != '') {
+            this.rooms_update();
+            this.queryTournament();
+        }
     }
 
 	chat(){
@@ -213,6 +216,11 @@ export class Lobby
         // else {
         //     console.log('socket already open');
         // }
+        this.socket.onopen = () => {
+            this.socket.send(JSON.stringify({
+                type: "authenticate", login: this.main.login
+            }));
+        };
         
         $.ajax({
             url: '/game/update',
@@ -230,7 +238,6 @@ export class Lobby
                         this.dom_rooms.add(option);
                     });
                 }
-                this.queryTournament();
             },
             error: () => this.main.set_status('Error: Can not update rooms')
         });
@@ -326,17 +333,15 @@ export class Lobby
     }
 
     tournament_click() {
-        // if (this.main.login === '')
-        // {
-        //     this.main.set_status('Please login or sign up');
-        //     return;
-        // }
-        // this.socket.send(JSON.stringify({
-        //     type: 'tournament_creation_request',
-        //     login: 'q',
-        // }));
-        this.tournament = new Tournament(this.main);
-        this.main.load('/tournament', () => this.tournament.events());
+        if (this.main.login === '')
+        {
+            this.main.set_status('Please login or sign up');
+            return;
+        }
+        this.socket.send(JSON.stringify({
+            type: 'tournament_creation_request',
+            login: 'q',
+        }));
     }
     
     tournamentLaunch() {
@@ -466,15 +471,14 @@ export class Lobby
                     type: 'tournament_registered',
                     login: this.main.login
                 }));
-            } else {
-                this.socket.addEventListener('open', () => {
-                    this.socket.send(JSON.stringify({
-                        type: 'tournament_registered',
-                        login: this.main.login
-                    }));
-                });
             }
-        }   
+        }
+    }
+
+    checkLogin() {
+        if (this.main.login != '') {
+            this.dom_l
+        }
     }
 
     quit() {

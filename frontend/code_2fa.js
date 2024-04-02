@@ -10,6 +10,7 @@ export class code_2fa
     }
     
     events() {
+        this.main.checkcsrf();
         this.main.set_status('');
 
         this.dom_code = document.querySelector("#code0");

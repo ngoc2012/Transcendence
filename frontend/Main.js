@@ -17,6 +17,7 @@ export class Main
     status = '';
     secret_2fa = '';
     history_stack = [];
+    csrftoken = '';
 
     constructor()
     {
@@ -53,7 +54,6 @@ export class Main
     }
 
     load_noJWT(page, callback) {
-        console.log('no JWT load')
         $.ajax({
             url: page + '/',
             method: 'GET',
@@ -77,9 +77,6 @@ export class Main
         $.ajax({
             url: page + '/',
             method: 'GET',
-            headers: {
-                'X-CSRFToken': csrftoken,
-            },
             data : data,
             success: (html) => {
                 this.dom_container.innerHTML = html;
@@ -136,7 +133,6 @@ export class Main
             method: 'GET',
             headers: {
                 'Authorization': 'Bearer ' + jwtToken,
-                'X-CSRFToken': csrftoken,
             },
             data : data,
             success: (html) => {
@@ -181,5 +177,47 @@ export class Main
             }
         }
         return cookieValue;
+    }
+
+    checkcsrf() {
+        if (!this.csrftoken) {
+            fetch('/get-csrf/')
+            .then(response => response.json())
+            .then(data => {
+                this.csrftoken = data.csrfToken;
+            });
+        }
+    }
+
+    logout() {
+        $.ajax({
+            url: 'logout/',
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': this.csrftoken,
+            },   
+            success: (info) => {
+                if (typeof info === 'string')
+                {
+                    this.main.set_status(info);
+                }
+                else
+                {
+                    this.main.history_stack.push('/');
+                    window.history.pushState({}, '', '/');
+                    this.main.load('/lobby', () => this.main.lobby.events());
+                    this.main.dom_log_in.style.display = "block";
+                    this.main.dom_signup.style.display = "block";
+                    this.main.dom_logout.remove();
+                }
+            },
+            error: (xhr, textStatus, errorThrown) => {
+                if (xhr.responseJSON && xhr.responseJSON.error) {
+                    this.main.set_status(xhr.responseJSON.error);
+                } else {
+                    this.main.set_status('An error occurred during the request.');
+                }
+            }
+        });
     }
 }

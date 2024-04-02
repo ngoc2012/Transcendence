@@ -9,6 +9,7 @@ export class twofa
     }
     
     events() {
+        this.main.checkcsrf();
         this.main.set_status('');
 
         this.dom_log_in_qrcode = document.querySelector("#log_in_with_qrcode");

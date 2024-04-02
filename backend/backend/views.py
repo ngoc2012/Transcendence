@@ -14,7 +14,7 @@ from sendgrid.helpers.mail import Mail
 from django.contrib.auth.hashers import make_password, check_password
 from django.db import IntegrityError
 from django.middleware.csrf import get_token
-from django.contrib.auth import authenticate, login as auth_login, get_user_model
+from django.contrib.auth import authenticate, login as auth_login, get_user_model, logout as auth_logout
 
 API_PUBLIC = os.environ.get('API_PUBLIC')
 API_SECRET = os.environ.get('API_SECRET')
@@ -177,6 +177,10 @@ def new_player(request):
             'secret': user.secret_2fa
         })
         response.set_cookie('refresh_token', refresh_token, httponly=True, samesite='Lax')
+
+        usera = authenticate(request, username=user.username, password=request.POST['password'])
+        auth_login(request, usera)
+        
         return response
 
     except IntegrityError:
@@ -285,6 +289,9 @@ def callback(request):
     except Exception as e:
         print(f"An error occurred: {e}")
         return HttpResponse("An error occurred.")
+    
+def logout(request):
+    auth_logout(request)
 
 @csrf_exempt
 def verify_qrcode(request):
@@ -304,7 +311,6 @@ def new_tournament(request):
     if request.method == 'POST':
         name = request.POST.get('name')
         game = request.POST.get('game')
-        print(request.user.login)
         owner = PlayersModel.objects.get(username=request.user.login)
         try:
             tournament = TournamentModel.objects.create(name=name, game=game, owner=owner)
@@ -315,3 +321,4 @@ def new_tournament(request):
             return JsonResponse({'error': str(e)}, status=400)
     else:
          return JsonResponse({'error': 'Invalid request'}, status=405)
+    
