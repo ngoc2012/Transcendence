@@ -1,13 +1,14 @@
 import json
 from asgiref.sync import sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
-from game.models import RoomsModel, PlayerRoomModel, PlayersModel
+# from game.models import RoomsModel, PlayerRoomModel, PlayersModel
 
 import asyncio
 
 from .data import pong_data
 from .move import check_collision, update_ball, up, down, left, right
-from .game import get_info, get_room_data, get_teams_data, get_score_data, start_game, end_game, quit, change_side, remove_player, check_player, get_win_data, get_room_by_id, change_server_async, set_power_play
+from .game import get_info, get_room_data, get_teams_data, get_score_data, start_game, end_game, quit, change_side, check_player, get_win_data, change_server_async, set_power_play
+from .ai_player import ai_player
 import random
 
 class PongConsumer(AsyncWebsocketConsumer):
@@ -15,8 +16,8 @@ class PongConsumer(AsyncWebsocketConsumer):
         self.room_id = self.scope['url_route']['kwargs']['room_id']
         self.player_id = self.scope['url_route']['kwargs']['player_id']
         self.choices = [5, 10]
-        self.dx = 1
-        self.dy = 1
+        # self.dx = 1
+        # self.dy = 1
         self.ddy = random.choice(self.choices)
         self.room = None
         self.player = None
@@ -71,6 +72,8 @@ class PongConsumer(AsyncWebsocketConsumer):
             await down(self)
         elif text_data == 'power':
             await set_power_play(self)
+        elif text_data == 'ai_player':
+            await ai_player(self)
         elif text_data == 'quit':
             next
         elif text_data == 'side':
@@ -117,12 +120,13 @@ class PongConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=win)
 
     async def game_loop(self):
+        print("Game started.")
         start = await start_game(self)
         if not start:
             self.disconnect(1011)
             return
-        dx = self.dx
-        dy = self.dy
+        # dx = self.dx
+        # dy = self.dy
         while True:
             await asyncio.sleep(0.02)
             check = await check_player(self)
@@ -131,8 +135,10 @@ class PongConsumer(AsyncWebsocketConsumer):
                 await quit(self)
                 await self.channel_layer.group_send(self.room_id, {'type': 'teams_data'})
                 return
-            dy = await update_ball(self, dx, dy)
-            dx = await check_collision(self, dx)
+            # dy = await update_ball(self, dx, dy)
+            # dx = await check_collision(self, dx)
+            await update_ball(self)
+            await check_collision(self)
             if self.room.x <= 0 or self.room.x >= pong_data['WIDTH']:
                 print("Game ended.")
                 await end_game(self)

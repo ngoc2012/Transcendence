@@ -1,16 +1,17 @@
 from django.core.exceptions import ObjectDoesNotExist
 import json
 from asgiref.sync import sync_to_async
-from game.models import RoomsModel, PlayerRoomModel
+from game.models import RoomsModel, PlayerRoomModel, PlayersModel
 
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 from django.db.models import Q
 
 from .data import pong_data
-
-@sync_to_async
-def get_room_by_id(roomId):
-    return RoomsModel.objects.filter(id=roomId).first()
+import random
+import time
+# @sync_to_async
+# def get_room_by_id(roomId):
+#     return RoomsModel.objects.filter(id=roomId).first()
 
 @sync_to_async
 def set_power_play(consumer):
@@ -21,11 +22,21 @@ def set_power_play(consumer):
     consumer.room.save()
 
 @sync_to_async
+def set_ai_player(consumer):
+    if consumer.room.ai_player:
+        consumer.room.ai_player = False
+    else:
+        consumer.room.ai_player = True
+    consumer.room.save()
+
+@sync_to_async
 def get_info(consumer):
     try:
         consumer.room = RoomsModel.objects.get(id=consumer.room_id)
         consumer.player = PlayerRoomModel.objects.get(id=consumer.player_id)
         consumer.server = PlayerRoomModel.objects.get(player=consumer.room.server)
+        consumer.room.dy = random.choice([1, -1])
+        # consumer.room.ddy = random.choice(consumer.choices)
     except ObjectDoesNotExist:
         print(f"Room with ID {consumer.room_id} does not exist.")   
         return False
@@ -42,6 +53,7 @@ def get_room_data(consumer):
         players = PlayerRoomModel.objects.filter(room=consumer.room_id)
         consumer.room = RoomsModel.objects.get(id=consumer.room_id)
         return json.dumps({
+            'ai_player': consumer.room.ai_player,
             'power_play': consumer.room.power,
             'ball': {'x': consumer.room.x, 'y':consumer.room.y},
             'players': [{'x': i.x, 'y': i.y} for i in players]
@@ -126,6 +138,17 @@ def quit(consumer):
     if PlayerRoomModel.objects.filter(room=consumer.room_id).count() == 1:
         consumer.room.delete()
         return
+    if PlayerRoomModel.objects.filter(room=consumer.room_id).count() == 2 and consumer.room.ai_player:
+        consumer.room.ai_player = False
+        consumer.room.save()
+        try:
+            player = PlayersModel.objects.get(login='ai')
+        except PlayersModel.DoesNotExist:
+            print("Error: AI player not found.")
+        PlayerRoomModel.objects.get(room=consumer.room.id, player=player.id).delete()
+        time.sleep(1.01)
+        consumer.room.delete()
+        return
     if consumer.player == None:
         return
     if consumer.server == consumer.player:
@@ -138,6 +161,7 @@ def quit(consumer):
 def remove_player(consumer):
     if consumer.player is not None:
         consumer.player.delete()
+
 
 @sync_to_async
 def check_player(consumer):
@@ -159,7 +183,8 @@ def change_side(consumer):
             consumer.server = PlayerRoomModel.objects.get(player=consumer.room.server)
             consumer.room.x = consumer.server.x - pong_data['RADIUS']
             consumer.room.y = consumer.server.y + pong_data['PADDLE_HEIGHT'] / 2
-            consumer.dx = -1
+            consumer.room.dx = -1
+            consumer.room.dy = random.choice([1, -1])
             consumer.room.save()
     else:
         consumer.player.side = 0
@@ -169,7 +194,8 @@ def change_side(consumer):
             consumer.server = PlayerRoomModel.objects.get(player=consumer.room.server)
             consumer.room.x = consumer.server.x + pong_data['PADDLE_WIDTH'] + pong_data['RADIUS']
             consumer.room.y = consumer.server.y + pong_data['PADDLE_HEIGHT'] / 2
-            consumer.dx = 1
+            consumer.room.dx = 1
+            consumer.room.dy = random.choice([1, -1])
             consumer.room.save()
 
 @sync_to_async
@@ -187,9 +213,11 @@ def change_server(consumer):
     if consumer.server.side == 0:
         consumer.room.x = consumer.server.x + pong_data['PADDLE_WIDTH'] + pong_data['RADIUS']
         consumer.room.y = consumer.server.y + pong_data['PADDLE_HEIGHT'] / 2
-        consumer.dx = 1
+        consumer.room.dx = 1
+        consumer.room.dy = random.choice([1, -1])
     else:
         consumer.room.x = consumer.server.x - pong_data['RADIUS']
         consumer.room.y = consumer.server.y + pong_data['PADDLE_HEIGHT'] / 2
-        consumer.dx = -1
+        consumer.room.dx = -1
+        consumer.room.dy = random.choice([1, -1])
     consumer.room.save()

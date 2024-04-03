@@ -5,6 +5,8 @@ services:
       context: ./nginx
       dockerfile: Dockerfile
       no_cache: false
+    depends_on:
+      - django
     ports:
       - 8080:443
     volumes:
