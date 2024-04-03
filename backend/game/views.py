@@ -202,22 +202,16 @@ def tournament_join(request):
     if not RoomsModel.objects.filter(id=request.POST['game_id']).exists():
         return (HttpResponse("Error: Room with id " + request.POST['game_id'] + " does not exist!"))
     room = RoomsModel.objects.get(id=request.POST['game_id'])
-    n0 = PlayerRoomModel.objects.filter(room=room, side=0).count()
-    n1 = PlayerRoomModel.objects.filter(room=room, side=1).count()
-    # if n1 > n0:
-    #     side = 0
-    #     position = n0
-    # else:
-    #     side = 1
-    #     position = n1
     player = PlayersModel.objects.get(login=request.POST['login'])
     match = TournamentMatchModel.objects.filter(room=room).first()
-    if player == match.player1:
+    if not room.server:
+        room.server = player
+        room.save()
         side = 0
-        position = n0
+        position = 0
     else:
         side = 1
-        position = n1
+        position = 1
     player_room = PlayerRoomModel(
         player=player,
         room=room,
@@ -238,3 +232,25 @@ def tournament_join(request):
         'player_id': str(player_room),
         'data': get_data(room.game)
         }))
+
+# from channels.layers import get_channel_layer
+from backend.asgi import channel_layer
+from asgiref.sync import async_to_sync
+def close_connection(request, login_id):
+    async_to_sync(channel_layer.group_send)(
+        "rooms",
+        {
+            'type': 'close_connection',
+            'login_id': login_id
+        }
+    )
+    return HttpResponse("done")
+
+def need_update(request):
+    async_to_sync(channel_layer.group_send)(
+        "rooms",
+        {
+            'type': 'group_room_list',
+        }
+    )
+    return HttpResponse("done")

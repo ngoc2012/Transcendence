@@ -24,6 +24,8 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "backend.settings")
 # is populated before importing code that may import ORM models.
 django_asgi_app = get_asgi_application()
 
+from channels.layers import get_channel_layer
+channel_layer = get_channel_layer()
 #import chat.routing
 
 application = ProtocolTypeRouter(
@@ -33,8 +35,6 @@ application = ProtocolTypeRouter(
             AuthMiddlewareStack(URLRouter([
                 # re_path(r"^ws/transchat/(?P<room_name>/\w+)/$", ChatConsumer.as_asgi()),
                 path("ws/transchat/", ChatConsumer.as_asgi()),
-                #re_path(r"ws/pong/(?P<room_id>\w+)/$", PongConsumer.as_asgi()),
-                #re_path(r'^ws/pong/(?P<room_id>[0-9a-f-]+)/$', PongConsumer.as_asgi()),
                 re_path(r'^ws/pong/(?P<room_id>[0-9a-f-]+)/(?P<player_id>[0-9a-f-]+)/$', PongConsumer.as_asgi()),
                 path("ws/game/rooms/", RoomsConsumer.as_asgi()),
 				re_path(r"ws/transchat/(?P<room_name>\w+)/$", ChatConsumer.as_asgi())

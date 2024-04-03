@@ -7,7 +7,7 @@ import asyncio
 
 from .data import pong_data
 from .move import check_collision, update_ball, up, down, left, right
-from .game import get_info, get_room_data, get_teams_data, get_score_data, start_game, end_game, quit, change_side, change_server_direction, remove_player, check_player, get_win_data
+from .game import get_info, get_room_data, get_teams_data, get_score_data, start_game, end_game, quit, change_side, remove_player, check_player, get_win_data, get_room_by_id, change_server_async, set_power_play
 import random
 
 class PongConsumer(AsyncWebsocketConsumer):
@@ -23,9 +23,10 @@ class PongConsumer(AsyncWebsocketConsumer):
         self.server = None
         self.players0 = None
         self.players1 = None
+        
         check = await get_info(self)
         if not check:
-            self.disconnect()
+            self.disconnect(1011)
         await self.channel_layer.group_add(
             self.room_id,
             self.channel_name
@@ -42,8 +43,7 @@ class PongConsumer(AsyncWebsocketConsumer):
         # 1006: Abnormal closure (such as a server crash).
         # 1008: Policy violation.
         # 1011: Internal error.
-        #print('disconnect' + self.room_id + ' ' + self.player_id + ' ' + self.channel_name + ' ' + str(close_code))
-        #await remove_player(self)
+        print(f"Player {self.player_id} disconnected with code {close_code}.")
         await quit(self)
         await self.channel_layer.group_send(self.room_id, {'type': 'teams_data'})
         await self.channel_layer.group_send(self.room_id, {'type': 'group_data'})
@@ -54,9 +54,13 @@ class PongConsumer(AsyncWebsocketConsumer):
 
     async def receive(self, text_data):
         if text_data == 'start':
-            await get_info(self)
-            if not self.room.started:
+            info = await get_info(self)
+            if info and not self.room.started:
                 asyncio.create_task(self.game_loop())
+                if self.room.tournamentRoom:
+                    await self.send(text_data=json.dumps({
+                        text_data: "tour_match_start"
+                    }))
         elif text_data == 'left':
             await left(self)
         elif text_data == 'right':
@@ -65,27 +69,47 @@ class PongConsumer(AsyncWebsocketConsumer):
             await up(self)
         elif text_data == 'down':
             await down(self)
+        elif text_data == 'power':
+            await set_power_play(self)
         elif text_data == 'quit':
             next
         elif text_data == 'side':
             await change_side(self)
             await self.channel_layer.group_send(self.room_id, {'type': 'teams_data'})
         elif text_data == 'server':
-            await change_server_direction(self)
+            await change_server_async(self)
         await self.channel_layer.group_send(self.room_id, {'type': 'group_data'})
     
+    async def close_connection(self, data):
+        await self.send(text_data=json.dumps({
+            "type": 'close',
+            "player_id": data['player_id']
+        }))
+
+    async def start(self, data):
+        await self.send(text_data=json.dumps({
+            "type": 'start'
+        }))
+
     async def group_data(self, event):
-        players = PlayerRoomModel.objects.filter(room=self.room_id)
-        room_data = await get_room_data(players, self.room_id)
+        room_data = await get_room_data(self)
+        if room_data is None:
+            self.disconnect(1011)
+            return
         await self.send(text_data=room_data)
     
     async def teams_data(self, event):
         teams = await get_teams_data(self, self.room_id)
-        if teams is not None:
-            await self.send(text_data=teams)
+        if teams is None:
+            self.disconnect(1011)
+            return
+        await self.send(text_data=teams)
 
     async def score_data(self, event):
         score = await get_score_data(self.room_id)
+        if score is None:
+            self.disconnect(1011)
+            return
         await self.send(text_data=score)
 
     async def win_data(self, event):
@@ -93,19 +117,24 @@ class PongConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=win)
 
     async def game_loop(self):
-        await start_game(self)
+        start = await start_game(self)
+        if not start:
+            self.disconnect(1011)
+            return
         dx = self.dx
         dy = self.dy
         while True:
             await asyncio.sleep(0.02)
             check = await check_player(self)
             if not check:
+                print("Player not found.")
                 await quit(self)
                 await self.channel_layer.group_send(self.room_id, {'type': 'teams_data'})
                 return
             dy = await update_ball(self, dx, dy)
             dx = await check_collision(self, dx)
             if self.room.x <= 0 or self.room.x >= pong_data['WIDTH']:
+                print("Game ended.")
                 await end_game(self)
                 await self.channel_layer.group_send(self.room_id, {'type': 'score_data'})
                 await self.channel_layer.group_send(self.room_id, {'type': 'group_data'})

@@ -1,5 +1,5 @@
 pong_data = {
-    'HEIGHT': 400,
+    'HEIGHT': 420,
     'WIDTH': 800,
     'RADIUS': 10,
     'STEP': 20,
