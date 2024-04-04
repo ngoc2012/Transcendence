@@ -7,6 +7,7 @@ from django.contrib.auth.hashers import make_password
 
 import pyotp
 import time
+import requests
 
 def hit_position(x, p0, p1):
     if p0[0] == p1[0]:
@@ -58,7 +59,7 @@ def ai_listener(consumer, ai_player):
             break
     print("AI player stopped.")
 
-from multiprocessing import Process
+
 @sync_to_async
 def ai_player(consumer):
     if consumer.room.ai_player:
@@ -68,6 +69,16 @@ def ai_player(consumer):
             player = PlayersModel.objects.get(login='ai')
         except PlayersModel.DoesNotExist:
             print("Error: AI player not found.")
+        
+        print("AI player deleted.")
+        with requests.post("http://ai:5000/ai/del",
+            data = {
+                'room_id': consumer.room.id,
+                'player_id': player.id
+            }) as response:
+            if response.status_code != 200:
+                print("Request failed with status code:", response.status_code)
+            print(response.text)
         PlayerRoomModel.objects.get(room=consumer.room.id, player=player.id).delete()
         return
     else:
@@ -110,5 +121,14 @@ def ai_player(consumer):
         ai_player.x = pong_data['WIDTH'] - ai_player.x - pong_data['PADDLE_WIDTH']
     ai_player.y = pong_data['HEIGHT'] / 2 - pong_data['PADDLE_HEIGHT'] / 2
     ai_player.save()
-    ai_process = Process(target=ai_listener, args=(consumer, ai_player))
-    ai_process.start()
+    
+
+    print("AI player created. Send request to AI server.")
+    with requests.post("http://ai:5000/ai/new",
+        data = {
+            'room_id': consumer.room.id,
+            'player_id': player.id
+        }) as response:
+        if response.status_code != 200:
+            print("Request failed with status code:", response.status_code)
+        print(response.text)

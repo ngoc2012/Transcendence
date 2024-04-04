@@ -122,14 +122,14 @@ def start_game(consumer):
 
 @sync_to_async
 def end_game(consumer):
-    print(f"Ending game in room {consumer.room_id}.")
-    change_server(consumer)
+    # print(f"Ending game in room {consumer.room_id}.")
     if consumer.room.x <= 0:
         consumer.room.score1 += 1
     else:
         consumer.room.score0 += 1
     consumer.room.started = False
     consumer.room.save()
+    change_server(consumer)
 
 @sync_to_async
 def quit(consumer):

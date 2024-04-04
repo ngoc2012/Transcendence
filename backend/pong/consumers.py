@@ -131,7 +131,7 @@ class PongConsumer(AsyncWebsocketConsumer):
             await asyncio.sleep(0.02)
             check = await check_player(self)
             if not check:
-                print("Player not found.")
+                # print("Player not found.")
                 await quit(self)
                 await self.channel_layer.group_send(self.room_id, {'type': 'teams_data'})
                 return
@@ -140,7 +140,7 @@ class PongConsumer(AsyncWebsocketConsumer):
             await update_ball(self)
             await check_collision(self)
             if self.room.x <= 0 or self.room.x >= pong_data['WIDTH']:
-                print("Game ended.")
+                # print("Game ended.")
                 await end_game(self)
                 await self.channel_layer.group_send(self.room_id, {'type': 'score_data'})
                 await self.channel_layer.group_send(self.room_id, {'type': 'group_data'})
