@@ -50,21 +50,6 @@ def code_2fa(request):
     return (render(request, 'code_2fa.html'))
 
 
-# def tournament_history(request):
-
-#     try:
-
-
-#         response = requests.get("http://blockchain:9000/tournament_history")
-#         data = response.json()
-
-#         return render(request, 'tournament_history.html', {'names' : tournament_names})
-
-#     except Exception as e:
-#         print("Error:", e)
-#         return -1
-
-
 def tournament_history(request):
     try:
         response = requests.get("http://blockchain:9000/tournament_history")
@@ -80,9 +65,6 @@ def tournament_history(request):
         return render(request, 'tournament_history.html', context)
 
 
-
-
-
 @csrf_exempt
 def get_tournament_data(request):
     try:
@@ -94,8 +76,6 @@ def get_tournament_data(request):
         response.raise_for_status()
 
         data = response.json()
-        # print(response)
-        # print(data)
 
         return JsonResponse(data)
     except Exception as e:
@@ -339,6 +319,9 @@ def new_tournament(request):
         login = request.POST.get('login')
         owner = PlayersModel.objects.get(login=request.POST['login'])
         try:
+            if TournamentModel.objects.filter(name=name).exists():
+                return JsonResponse({'error': 'A tournament with the same name already exists'}, status=400)
+
             tournament = TournamentModel.objects.create(name=name, game=game, owner=owner)
             player = PlayersModel.objects.get(login=login)
             tournament.participants.add(player)

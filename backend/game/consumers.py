@@ -318,6 +318,10 @@ class RoomsConsumer(AsyncWebsocketConsumer):
         tourId = data.get('tour_id')
         tournament = await get_tournament(tourId)
         if (tournament):
+            name = tournament.name
+            url = f"http://blockchain:9000/delete_tournament/{name}"
+            response = requests.get(url)
+            response.raise_for_status()
             await database_sync_to_async(tournament.delete)()
 
     async def update_match_result(self, data):

@@ -25,7 +25,7 @@ export class tournament_history {
         {
             document.getElementById("selectedTournamentName").innerHTML = `
             <h2></h2>
-            <h3>There is no created tournament yet !</h3>
+            <h3>There is no active or finished tournament to display !</h3>
         `;
         }
         $.ajax({
