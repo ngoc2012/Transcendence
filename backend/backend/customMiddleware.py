@@ -18,12 +18,11 @@ class JWTMiddleware(MiddlewareMixin):
             try:
                 decoded = jwt.decode(access_token, settings.JWT_SECRET_KEY, algorithms=["HS256"])
                 jwtid = decoded.get('user_id')
-                print(jwtid)
                 if jwtid:
                     User = get_user_model()
                     user = User.objects.get(id=jwtid)
-                    if access_token == user.acc:
-                        request.user = User.objects.get(id=jwtid)
+                    if decoded == jwt.decode(user.acc, settings.JWT_SECRET_KEY, algorithms=["HS256"]):
+                        request.user = user
                     else:
                         print('key not the same as in db')
                 else:
@@ -33,12 +32,13 @@ class JWTMiddleware(MiddlewareMixin):
                 if refresh_token:
                     print('refresh token enter')
                     try:
-                        decoded_refresh = jwt.decode(refresh_token, settings.JWT_REFRESH_SECRET_KEY, algorithms=["HS256"])
-                        new_accces_token, new_refresh_token = self.generate_jwt_tokens(decoded_refresh.get('user_id'))
+                        decoded = jwt.decode(refresh_token, settings.JWT_REFRESH_SECRET_KEY, algorithms=["HS256"])
+                        new_accces_token, new_refresh_token = self.generate_jwt_tokens(decoded.get('user_id'))
                         request.new_access_token = new_accces_token
                         request.new_refresh_token = new_refresh_token
                         User = get_user_model()
-                        user = User.objects.get(id=decoded_refresh.get('user_id'))
+                        user = User.objects.get(id=decoded.get('user_id'))
+                        request.user = user
                         user.acc = new_accces_token
                         user.ref = new_refresh_token
                         user.save()
@@ -56,10 +56,10 @@ class JWTMiddleware(MiddlewareMixin):
 
         return None
 
-    def generate_jwt_tokens(user_id):
+    def generate_jwt_tokens(self, user_id):
         access_token = jwt.encode({
             'user_id': user_id,
-            'exp': datetime.now(pytz.utc) + timedelta(hours=1)
+            'exp': datetime.now(pytz.utc) + timedelta(minutes=1)
         }, settings.JWT_SECRET_KEY, algorithm='HS256')
 
         refresh_token = jwt.encode({

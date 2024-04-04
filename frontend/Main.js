@@ -133,41 +133,56 @@ export class Main
     }
 
     logout() {
-        this.history_stack.push('/');
-        window.history.pushState({}, '', '/');
-        this.load('/lobby', () => this.main.lobby.events());
-        this.dom_log_in.style.display = "block";
-        this.dom_signup.style.display = "block";
-        this.dom_logout.remove();
-    //     $.ajax({
-    //         url: 'logout/',
-    //         method: 'POST',
-    //         headers: {
-    //             'X-CSRFToken': this.csrftoken,
-    //         },   
-    //         success: (info) => {
-    //             if (typeof info === 'string')
-    //             {
-    //                 this.main.set_status(info);
-    //             }
-    //             else
-    //             {
-    //                 this.main.history_stack.push('/');
-    //                 window.history.pushState({}, '', '/');
-    //                 this.main.load('/lobby', () => this.main.lobby.events());
-    //                 this.main.dom_log_in.style.display = "block";
-    //                 this.main.dom_signup.style.display = "block";
-    //                 this.main.dom_logout.remove();
-    //             }
-    //         },
-    //         error: (xhr, textStatus, errorThrown) => {
-    //             if (xhr.responseJSON && xhr.responseJSON.error) {
-    //                 this.main.set_status(xhr.responseJSON.error);
-    //             } else {
-    //                 this.main.set_status('An error occurred during the request.');
-    //             }
-    //         }
-    //     });
-    // }
+        $.ajax({
+            url: 'logout/',
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': this.csrftoken,
+            },   
+            success: (info) => {
+                if (typeof info === 'string')
+                {
+                    this.set_status(info);
+                }
+                else
+                {
+                    this.lobby.quit()
+
+                    this.email = '';
+                    this.login = '';
+                    this.name = '';
+                    this.dom_name.innerHTML = 'Anonyme';
+                    this.lobby.ws = '';
+
+                    this.history_stack.push('/');
+                    window.history.pushState({}, '', '/');
+                    this.load('/lobby', () => this.lobby.events());
+
+                    var dom_log_in = document.getElementById('login');
+                    if (dom_log_in) {
+                        dom_log_in.style.display = "block";
+                        dom_log_in.addEventListener("click", () => this.login_click());
+                    }
+
+                    var dom_signup = document.getElementById('signup');
+                    if (dom_signup) {
+                        dom_signup.style.display = "block";
+                        dom_signup.addEventListener("click", () => this.signup_click());
+                    }
+
+                    var dom_logout = document.getElementById('logoutButton');
+                    if (dom_logout) {
+                        dom_logout.style.display = "none";
+                    }
+                }
+            },
+            error: (xhr, textStatus, errorThrown) => {
+                if (xhr.responseJSON && xhr.responseJSON.error) {
+                    this.set_status(xhr.responseJSON.error);
+                } else {
+                    this.set_status('An error occurred during the request.');
+                }
+            }
+        });
     }
 }

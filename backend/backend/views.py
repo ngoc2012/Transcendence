@@ -60,23 +60,39 @@ def validate_session(request):
             user_id = decoded_refresh.get('user_id')
             User = get_user_model()
             user = User.objects.get(id=user_id)
-            ws_token = user.generate_ws_token()
-            if user and user.ref == refresh_token:
-                enable2fa = 'true' if getattr(user, 'secret_2fa', '') else 'false'
-                return JsonResponse({
+            test1 = jwt.decode(user.ref, settings.JWT_REFRESH_SECRET_KEY, algorithms=["HS256"])
+            print(test1)
+            print(decoded_refresh)
+            if user and jwt.decode(user.ref, settings.JWT_REFRESH_SECRET_KEY, algorithms=["HS256"]) == decoded_refresh:
+                print('decode ok')
+                access_token, refresh_token = generate_jwt_tokens(user.id)
+                user.acc = access_token
+                user.ref = refresh_token
+
+                ws_token = user.generate_ws_token()
+                enable2fa = request.POST.get('enable2fa', 'false') == 'true'
+                user.secret_2fa = pyotp.random_base32() if enable2fa else ''
+                user.save()
+
+                response_data = {
                     "validSession": True,
                     'login': user.username,
                     'name': user.name,
                     'email': user.email,
                     'enable2fa': enable2fa,
                     'ws': ws_token
-                })
+                }
+                response = JsonResponse(response_data)
+                response.set_cookie('refresh_token', refresh_token, httponly=True, samesite='Lax', secure=True)
+                response.set_cookie('access_token', access_token, httponly=True, samesite='Lax', secure=True)
+                return response
         except jwt.ExpiredSignatureError:
             return JsonResponse({"validSession": False, "message": "Token expired."}, status=200)
         except (jwt.InvalidTokenError, User.DoesNotExist):
             return JsonResponse({"validSession": False, "message": "Invalid session."}, status=200)
         except Exception as e:
             return JsonResponse({"validSession": False, "message": str(e)}, status=200)
+        return JsonResponse({"validSession": False, "message": "Invalid or mismatched token."}, status=200)
     else:
         return JsonResponse({"validSession": False, "message": "No Authorization token provided."}, status=200)
 
@@ -139,7 +155,7 @@ def tournament_start(request, tournament_id):
 def generate_jwt_tokens(user_id):
     access_token = jwt.encode({
         'user_id': user_id,
-        'exp': datetime.now(pytz.utc) + timedelta(hours=1)
+        'exp': datetime.now(pytz.utc) + timedelta(minutes=1)
     }, JWT_SECRET_KEY, algorithm='HS256')
 
     refresh_token = jwt.encode({
@@ -187,7 +203,7 @@ def new_player(request):
         response = JsonResponse(response_data)
         response.set_cookie('refresh_token', refresh_token, httponly=True, samesite='Lax', secure=True)
         response.set_cookie('access_token', access_token, httponly=True, samesite='Lax', secure=True)
-        return JsonResponse(response_data)
+        return response
 
     except IntegrityError:
         return JsonResponse({'error': 'Error: Login or email not available.'}, status=409)
@@ -291,7 +307,12 @@ def callback(request):
         return HttpResponse("An error occurred.")
     
 def logout(request):
-    print('logout')
+    user = request.user
+    user.acc = ''
+    user.ref = ''
+    user.save()
+    return JsonResponse({'logout': 'success'})
+
 
 def verify_qrcode(request):
     input_code = request.POST.get('input_code')
