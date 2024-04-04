@@ -321,7 +321,6 @@ export class Tournament {
                     'X-CSRFToken': csrftoken,
                 },
                 data: {
-                    'login': this.main.login,
                     "game_id": data.matchId
                 },
                 success: (info) => {

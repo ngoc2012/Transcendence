@@ -311,7 +311,11 @@ def logout(request):
     user.acc = ''
     user.ref = ''
     user.save()
-    return JsonResponse({'logout': 'success'})
+
+    response = JsonResponse({'logout': 'success'})
+    response.delete_cookie('access_token')
+    response.delete_cookie('refresh_token')
+    return response
 
 
 def verify_qrcode(request):

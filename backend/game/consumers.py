@@ -19,12 +19,6 @@ def get_user_from_token(token):
         return user
     except(get_user_model().DoesNotExist) as e:
         return None
-    # try:
-    #     decoded_data = jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=["HS256"])
-    #     user = get_user_model().objects.get(id=decoded_data['user_id'])
-    #     return user
-    # except (jwt.InvalidTokenError, get_user_model().DoesNotExist) as e:
-    #     return None
 
 @sync_to_async
 def room_list(rooms):

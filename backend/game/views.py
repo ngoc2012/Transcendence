@@ -141,69 +141,63 @@ def delete(request):
     if PlayerRoomModel.objects.filter(room=room.id).count() > 0:
         return JsonResponse({'error': "Someone is still playing"}, status=401)
     
-    #JWT token check
-    if 'Authorization' not in request.headers:
-        return JsonResponse({'error': 'Authorization header missing'}, status=401)
-    auth_header = request.headers['Authorization']
-    try:
-        token_type, token = auth_header.split(' ')
-        if token_type != 'Bearer':
-            return JsonResponse({'error': 'Invalid token type'}, status=401)
-    except ValueError:
-        return JsonResponse({'error': 'Malformed Authorization header'}, status=401)
+    # #JWT token check
+    # if 'Authorization' not in request.headers:
+    #     return JsonResponse({'error': 'Authorization header missing'}, status=401)
+    # auth_header = request.headers['Authorization']
+    # try:
+    #     token_type, token = auth_header.split(' ')
+    #     if token_type != 'Bearer':
+    #         return JsonResponse({'error': 'Invalid token type'}, status=401)
+    # except ValueError:
+    #     return JsonResponse({'error': 'Malformed Authorization header'}, status=401)
 
-    try:
-        payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=['HS256'])
-        player_id = payload['user_id']
-        if player_id != player.id:
-            return JsonResponse({'error': 'Invalid JWT token'}, status=401)
+    # try:
+    #     payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=['HS256'])
+    #     player_id = payload['user_id']
+    #     if player_id != player.id:
+    #         return JsonResponse({'error': 'Invalid JWT token'}, status=401)
 
-        print("Valid JWT token used")
-        room.delete()
-        return JsonResponse({'message': s})
+    #     print("Valid JWT token used")
+    #     room.delete()
+    #     return JsonResponse({'message': s})
 
-    #Token refresh handling
-    except jwt.ExpiredSignatureError:
-        if 'refresh_token' not in request.COOKIES:
-            return JsonResponse({'error': 'JWT token expired and Refresh token missing'}, status=401)
-        refresh_token = request.COOKIES.get('refresh_token')
-        try:
+    # #Token refresh handling
+    # except jwt.ExpiredSignatureError:
+    #     if 'refresh_token' not in request.COOKIES:
+    #         return JsonResponse({'error': 'JWT token expired and Refresh token missing'}, status=401)
+    #     refresh_token = request.COOKIES.get('refresh_token')
+    #     try:
 
-            payload = jwt.decode(refresh_token, JWT_REFRESH_SECRET_KEY, algorithms=['HS256'])
+    #         payload = jwt.decode(refresh_token, JWT_REFRESH_SECRET_KEY, algorithms=['HS256'])
 
-            new_token = jwt.encode({
-                'user_id': player.id,
-                'exp': datetime.now(pytz.utc) + timedelta(hours=1)  # Access token expiration time
-            }, JWT_SECRET_KEY, algorithm='HS256')
-            print("JWT token expired but a new one has been created using the Refresh token")
-            room.delete()
-            return JsonResponse({'message': s, 'token': new_token})
+    #         new_token = jwt.encode({
+    #             'user_id': player.id,
+    #             'exp': datetime.now(pytz.utc) + timedelta(hours=1)  # Access token expiration time
+    #         }, JWT_SECRET_KEY, algorithm='HS256')
+    #         print("JWT token expired but a new one has been created using the Refresh token")
+    #         room.delete()
+    #         return JsonResponse({'message': s, 'token': new_token})
 
-        except jwt.ExpiredSignatureError:
-            return JsonResponse({'error': 'JWT token expired and Refresh token expired, log in again'}, status=401)
-        except jwt.InvalidTokenError:
-            return JsonResponse({'error': 'JWT token expired and Invalid refresh token, log in again'}, status=401)
-        except Exception as e:
-            return JsonResponse({'error': str(e)}, status=400)
+    #     except jwt.ExpiredSignatureError:
+    #         return JsonResponse({'error': 'JWT token expired and Refresh token expired, log in again'}, status=401)
+    #     except jwt.InvalidTokenError:
+    #         return JsonResponse({'error': 'JWT token expired and Invalid refresh token, log in again'}, status=401)
+    #     except Exception as e:
+    #         return JsonResponse({'error': str(e)}, status=400)
 
-    except jwt.InvalidTokenError:
-        return JsonResponse({'error': 'Invalid token'}, status=401)
-    except Exception as e:
-        return JsonResponse({'error': str(e)}, status=400)
+    # except jwt.InvalidTokenError:
+    #     return JsonResponse({'error': 'Invalid token'}, status=401)
+    # except Exception as e:
+    #     return JsonResponse({'error': str(e)}, status=400)
 
-@csrf_exempt
 def tournament_join(request):
     if 'game_id' not in request.POST:
         return (HttpResponse("Error: No game id!"))
-    if 'login' not in request.POST:
-        return (HttpResponse("Error: No login!"))
-    if not PlayersModel.objects.filter(login=request.POST['login']).exists():
-        return (HttpResponse("Error: Login " + request.POST['login'] + " does not exist!"))
-    #uuid_obj = UUID(uuid_str)
     if not RoomsModel.objects.filter(id=request.POST['game_id']).exists():
         return (HttpResponse("Error: Room with id " + request.POST['game_id'] + " does not exist!"))
     room = RoomsModel.objects.get(id=request.POST['game_id'])
-    player = PlayersModel.objects.get(login=request.POST['login'])
+    player = PlayersModel.objects.get(id=request.user.id)
     match = TournamentMatchModel.objects.filter(room=room).first()
     if not room.server:
         room.server = player
