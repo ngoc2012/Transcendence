@@ -50,13 +50,12 @@ export class Signup
                 if (info.error) {
                     this.main.set_status(info.error);
                 } else {
-                    sessionStorage.setItem('JWTToken', info.access_token);
-                    
+                    // sessionStorage.setItem('JWTToken', info.access_token);
                     this.main.email = info.email;
                     this.main.login = info.login;
                     this.main.name = info.name;
                     this.main.dom_name.innerHTML = info.name;
-    
+                    this.main.lobby.ws = info.ws;
                     if (checkbox) {
                         this.display2FASetup(info.secret);
                     } else {
@@ -72,15 +71,13 @@ export class Signup
     }
     
     display2FASetup(secret) {
-        const jwtToken = sessionStorage.getItem('JWTToken');
         let csrftoken = this.main.getCookie('csrftoken');
 
-        if (jwtToken && csrftoken) {
+        if (csrftoken) {
             $.ajax({
                 url: '/display_2fa/',
                 method: 'POST',
                 headers: {
-                    'Authorization': 'Bearer ' + jwtToken,
                     'X-CSRFToken': csrftoken,
                 },
                 data: {

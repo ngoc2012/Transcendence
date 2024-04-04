@@ -8,6 +8,23 @@ from accounts.models import PlayersModel
 from pong.data import pong_data
 from django.utils import timezone
 from django.db.models import Q
+import jwt
+from django.contrib.auth import get_user_model
+from django.conf import settings
+
+@database_sync_to_async
+def get_user_from_token(token):
+    try:
+        user = get_user_model().objects.get(ws_token=token)
+        return user
+    except(get_user_model().DoesNotExist) as e:
+        return None
+    # try:
+    #     decoded_data = jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=["HS256"])
+    #     user = get_user_model().objects.get(id=decoded_data['user_id'])
+    #     return user
+    # except (jwt.InvalidTokenError, get_user_model().DoesNotExist) as e:
+    #     return None
 
 @sync_to_async
 def room_list(rooms):
@@ -225,10 +242,8 @@ class RoomsConsumer(AsyncWebsocketConsumer):
                     'type': 'group_room_list'
                 }
             )
-            if not hasattr(self, 'user_id'):
-                await self.authenticate()
             elif data.get('type') == 'authenticate':
-                await self.authenticate()
+                await self.authenticate(data['token'])
             elif data.get('type') == 'request_users_list':
                 await self.broadcast_user_list()
             elif data.get('type') == 'request_users_in_tour':
@@ -260,17 +275,17 @@ class RoomsConsumer(AsyncWebsocketConsumer):
             elif data.get('type') == 'add_to_group':
                 await self.add_owner_to_group(data)
 
-    async def authenticate(self):
-        if self.scope["user"].is_authenticated:
-            player = await get_player_by_login(self.scope["user"].login)
-            if player:
-                self.user_id = player.id
-                unique_group_name = f"user_{self.user_id}"
-                await self.channel_layer.group_add(unique_group_name, self.channel_name)
-                RoomsConsumer.connected_users.add(self.user_id)
-                await self.broadcast_user_list()
+    async def authenticate(self, token):
+        user = await get_user_from_token(token)
+        if user:
+            self.user = user
+            self.user_id = user.id
+            unique_group_name = f"user_{self.user_id}"
+            await self.channel_layer.group_add(unique_group_name, self.channel_name)
+            RoomsConsumer.connected_users.add(self.user_id)
+            await self.broadcast_user_list()
         else:
-            print('error auth')
+            await self.close(code=4001)
     
     async def add_owner_to_group(self, data):
         id = data.get('id')
@@ -306,7 +321,7 @@ class RoomsConsumer(AsyncWebsocketConsumer):
     async def quit_tournament(self, data):
         tourId = data.get('tour_id')
         tournament = await get_tournament(tourId)
-        if tournament and self.scope["user"].login == tournament.owner.login:
+        if tournament and self.user.login == tournament.owner.login:
             await database_sync_to_async(tournament.delete)()
 
     async def update_match_result(self, data):
@@ -455,17 +470,14 @@ class RoomsConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=json.dumps(data))
 
     async def check_user_in_tournament(self, data):
-        if self.scope["user"].is_authenticated:
-            user = await get_player_by_login(self.scope["user"].login)
-            if user:
-                tournament = await check_player_in_tournament(user)
-                if tournament:
-                    await self.send_message_to_user(user.id, 'already_in_tournament', str(tournament.id))
-                    return
-                await self.send_message_to_user(user.id, 'tournament_creation_OK', self.scope["user"].login)
+        tournament = await check_player_in_tournament(self.user)
+        if tournament:
+            await self.send_message_to_user(self.user.id, 'already_in_tournament', str(tournament.id))
+            return
+        await self.send_message_to_user(self.user.id, 'tournament_creation_OK', self.user.id)
 
     async def handle_tournament_registered(self, data):
-        login = self.scope["user"].login
+        login = self.user.login
         user = await get_player_by_login(login)
         if user:
             tournament = await check_player_in_tournament(user)
@@ -605,7 +617,7 @@ class RoomsConsumer(AsyncWebsocketConsumer):
     async def process_tournament_invite_response(self, data):
         response = data.get('response')
         tournament_id = data.get('id')
-        login = self.scope["user"].login
+        login = self.user.login
         user = await get_player_by_login(login)
         if response == 'accept':
             tournament_check = await check_player_in_tournament(user)

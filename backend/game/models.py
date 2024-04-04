@@ -48,9 +48,6 @@ class PlayerRoomModel(models.Model):
         return str(self.id)
     
 # Tournament classes
-    
-# def default_expires():
-#     return timezone.now() + timezone.timedelta(minutes=60)
 
 class TournamentModel(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -66,7 +63,6 @@ class TournamentModel(models.Model):
     final = models.BooleanField(default=False)
     terminated = models.BooleanField(default=False)
     winner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='won_tournament', null=True, blank=True)
-    # expires = models.DateTimeField(default=default_expires)
     def __str__(self):
         return self.name
 

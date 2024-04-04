@@ -53,59 +53,10 @@ export class Main
         });
     }
 
-    load_noJWT(page, callback) {
-        $.ajax({
-            url: page + '/',
-            method: 'GET',
-            success: (html) => {
-                this.dom_container.innerHTML = html;
-                //pas oublier de changer ca
-                if (callback && typeof callback === 'function') {
-                    callback();
-                }
-                // callback();  // fait erreur "callback is not a function"
-            },
-            error: (jqXHR, textStatus, errorThrown) => {
-                if (jqXHR.status === 401) {
-                    this.login_click();
-                }
-            }
-        });
-    }
-
-    load_data_noJWT(page, callback, data) {
-        $.ajax({
-            url: page + '/',
-            method: 'GET',
-            data : data,
-            success: (html) => {
-                this.dom_container.innerHTML = html;
-                //pas oublier de changer ca
-                if (callback && typeof callback === 'function') {
-                    callback();
-                }
-                // callback();  // fait erreur "callback is not a function"
-            },
-            error: (jqXHR, textStatus, errorThrown) => {
-                if (jqXHR.status === 401) {
-                    this.login_click();
-                }
-            }
-        });
-    }
-
     load(page, callback) {
-        const jwtToken = sessionStorage.getItem('JWTToken');
-
-        if (!jwtToken)
-            return this.load_noJWT(page, callback);
-
         $.ajax({
             url: page + '/',
             method: 'GET',
-            headers: {
-                'Authorization': 'Bearer ' + jwtToken,
-            },
             success: (html) => {
                 this.dom_container.innerHTML = html;
                 //pas oublier de changer ca
@@ -123,17 +74,9 @@ export class Main
     }
 
 	load_with_data(page, callback, data) {
-        const jwtToken = sessionStorage.getItem('JWTToken');
-
-        if (!jwtToken)
-            return this.load_noJWT(page, callback, data);
-
         $.ajax({
             url: page + '/',
             method: 'GET',
-            headers: {
-                'Authorization': 'Bearer ' + jwtToken,
-            },
             data : data,
             success: (html) => {
                 this.dom_container.innerHTML = html;
@@ -190,34 +133,41 @@ export class Main
     }
 
     logout() {
-        $.ajax({
-            url: 'logout/',
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': this.csrftoken,
-            },   
-            success: (info) => {
-                if (typeof info === 'string')
-                {
-                    this.main.set_status(info);
-                }
-                else
-                {
-                    this.main.history_stack.push('/');
-                    window.history.pushState({}, '', '/');
-                    this.main.load('/lobby', () => this.main.lobby.events());
-                    this.main.dom_log_in.style.display = "block";
-                    this.main.dom_signup.style.display = "block";
-                    this.main.dom_logout.remove();
-                }
-            },
-            error: (xhr, textStatus, errorThrown) => {
-                if (xhr.responseJSON && xhr.responseJSON.error) {
-                    this.main.set_status(xhr.responseJSON.error);
-                } else {
-                    this.main.set_status('An error occurred during the request.');
-                }
-            }
-        });
+        this.history_stack.push('/');
+        window.history.pushState({}, '', '/');
+        this.load('/lobby', () => this.main.lobby.events());
+        this.dom_log_in.style.display = "block";
+        this.dom_signup.style.display = "block";
+        this.dom_logout.remove();
+    //     $.ajax({
+    //         url: 'logout/',
+    //         method: 'POST',
+    //         headers: {
+    //             'X-CSRFToken': this.csrftoken,
+    //         },   
+    //         success: (info) => {
+    //             if (typeof info === 'string')
+    //             {
+    //                 this.main.set_status(info);
+    //             }
+    //             else
+    //             {
+    //                 this.main.history_stack.push('/');
+    //                 window.history.pushState({}, '', '/');
+    //                 this.main.load('/lobby', () => this.main.lobby.events());
+    //                 this.main.dom_log_in.style.display = "block";
+    //                 this.main.dom_signup.style.display = "block";
+    //                 this.main.dom_logout.remove();
+    //             }
+    //         },
+    //         error: (xhr, textStatus, errorThrown) => {
+    //             if (xhr.responseJSON && xhr.responseJSON.error) {
+    //                 this.main.set_status(xhr.responseJSON.error);
+    //             } else {
+    //                 this.main.set_status('An error occurred during the request.');
+    //             }
+    //         }
+    //     });
+    // }
     }
 }

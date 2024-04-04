@@ -28,43 +28,43 @@ document.addEventListener('DOMContentLoaded', () => {
         checkSession();
 
     function checkSession() {
-        const jwtToken = sessionStorage.getItem('JWTToken');
-        if (jwtToken) {
-            validateSessionToken(jwtToken).then(data => {
-                if (data && data.validSession) {
-                    main.email = data.email;
-                    main.login = data.login;
-                    main.name = data.name;
-                    main.dom_name.innerHTML = data.name;
-                    
-                    if (data.enable2fa == 'true') {
-                        main.load('/twofa', () => main.twofa.events());
-                    } else {
-                        main.history_stack.push('/');
-                        window.history.pushState({}, '', '/');
-                        main.load('/lobby', () => main.lobby.events());
-                    }
+        validateSessionToken().then(data => {
+            if (data && data.validSession) {
+                main.email = data.email;
+                main.login = data.login;
+                main.name = data.name;
+                main.dom_name.innerHTML = data.name;
+                main.lobby.ws = data.ws;
+                if (data.enable2fa == 'true') {
+                    main.load('/twofa', () => main.twofa.events());
                 } else {
-                    console.log('Session is not valid');
+                    main.history_stack.push('/');
+                    window.history.pushState({}, '', '/');
+                    main.load('/lobby', () => main.lobby.events());
                 }
-            });
-        }
+            } else {
+                main.email = '';
+                main.login = '';
+                main.name = '';
+                main.dom_name.innerHTML = 'Anonyme';
+                main.lobby.ws = '';
+                // main.history_stack.push('/');
+                // window.history.pushState({}, '', '/');
+                // main.load('/lobby', () => main.lobby.events());
+            }
+        });
     }
 
-    async function validateSessionToken(jwtToken) {
+    async function validateSessionToken() {
         try {
             let response = await fetch('/validate-session/', {
                 method: 'GET',
-                headers: {
-                    'Authorization': 'Bearer ' + jwtToken,
-                },
             });
             if (response.ok) {
                 let data = await response.json();
                 if (data.validSession) {
                     return data;
                 } else {
-                    console.error('Session validation failed: Invalid session');
                     return null;
                 }
             } else {
@@ -78,7 +78,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function    reload() {
-        // console.log('reload path')
         const   path = window.location.pathname;
         if (main.lobby.game && main.lobby.game !== undefined)
         {

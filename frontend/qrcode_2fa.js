@@ -27,16 +27,13 @@ export class qrcode_2fa
             this.main.set_status('Field must not be empty');
             return;
         }
-
-        const jwtToken = sessionStorage.getItem('JWTToken');
         var csrftoken = this.main.getCookie('csrftoken');
 
-        if (jwtToken && csrftoken) {
+        if (csrftoken) {
             $.ajax({
                 url: '/verify_qrcode/',
                 method: 'POST',
                 headers: {
-                    'Authorization': 'Bearer ' + jwtToken,
                     'X-CSRFToken': csrftoken,
                 },
                 data: {

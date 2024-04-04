@@ -56,16 +56,14 @@ export class Tournament {
             login: this.main.login,
         };
 
-        const jwtToken = sessionStorage.getItem('JWTToken');
         var csrftoken = this.main.getCookie('csrftoken');
 
-        if (jwtToken && csrftoken) {
+        if (csrftoken) {
             $.ajax({
                 url: '/tournament/new/',
                 method: 'POST',
                 data: formData,
                 headers: {
-                    'Authorization': 'Bearer ' + jwtToken,
                     'X-CSRFToken': csrftoken,
                 },
                 success: (response) => {
@@ -313,15 +311,13 @@ export class Tournament {
     }
 
     joinMatch(data) {
-        const jwtToken = sessionStorage.getItem('JWTToken');
         var csrftoken = this.main.getCookie('csrftoken');
 
-        if (jwtToken && csrftoken) {
+        if (csrftoken) {
             $.ajax({
                 url: '/game/tournament/join',
                 method: 'POST',
                 headers: {
-                    'Authorization': 'Bearer ' + jwtToken,
                     'X-CSRFToken': csrftoken,
                 },
                 data: {

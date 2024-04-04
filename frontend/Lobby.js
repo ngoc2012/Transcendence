@@ -9,6 +9,7 @@ export class Lobby
         this.socket = -1;
         this.game = null;
         this.tournament = null;
+        this.ws = null;
     }
 
     events() {
@@ -48,15 +49,13 @@ export class Lobby
         if (this.dom_rooms.selectedIndex === -1)
             return;
 
-        const jwtToken = sessionStorage.getItem('JWTToken');
         var csrftoken = this.main.getCookie('csrftoken');
 
-        if (jwtToken && csrftoken) {
+        if (csrftoken) {
             $.ajax({
                 url: '/game/join',
                 method: 'POST',
                 headers: {
-                    'Authorization': 'Bearer ' + jwtToken,
                     'X-CSRFToken': csrftoken,
                 },        
                 data: {
@@ -91,15 +90,13 @@ export class Lobby
             return;
         }
 
-        const jwtToken = sessionStorage.getItem('JWTToken');
         var csrftoken = this.main.getCookie('csrftoken');
 
-        if (jwtToken && csrftoken) {
+        if (csrftoken) {
             $.ajax({
                 url: '/game/new',
                 method: 'POST',
                 headers: {
-                    'Authorization': 'Bearer ' + jwtToken,
                     'X-CSRFToken': csrftoken,
                 },
                 data: {
@@ -119,7 +116,6 @@ export class Lobby
                     }
                     else
                     {
-                        //this.main.set_status('Game ' + info.name + ' created.');
                         switch (info.game) {
                             case 'pong':
                                 this.pong_game(info);
@@ -146,15 +142,13 @@ export class Lobby
             return;
         }
 
-        const jwtToken = sessionStorage.getItem('JWTToken');
         var csrftoken = this.main.getCookie('csrftoken');
 
-        if (jwtToken && csrftoken) {
+        if (csrftoken) {
             $.ajax({
                 url: '/game/delete',
                 method: 'POST',
                 headers: {
-                    'Authorization': 'Bearer ' + jwtToken,
                     'X-CSRFToken': csrftoken,
                 },
                 data: {
@@ -204,7 +198,6 @@ export class Lobby
     }
 
     rooms_update() {
-        // console.log('rooms_update');
         if (this.socket === -1) {
             this.main.set_status('');
             this.socket = new WebSocket(
@@ -213,12 +206,14 @@ export class Lobby
                 + '/ws/game/rooms/'
             );
         }
-        // else {
-        //     console.log('socket already open');
-        // }
+
         this.socket.onopen = () => {
             this.socket.send(JSON.stringify({
-                type: "authenticate", login: this.main.login
+                type: "authenticate",
+                token: this.ws,
+            }));
+            this.socket.send(JSON.stringify({
+                type: 'tournament_registered',
             }));
         };
         
@@ -226,8 +221,6 @@ export class Lobby
             url: '/game/update',
             method: 'GET',
             success: (rooms) => {
-                // console.log(rooms);
-                // const rooms = JSON.parse(e.data);
                 var options_rooms = this.dom_rooms && this.dom_rooms.options;
                 this.dom_rooms.innerHTML = "";
                 if (options_rooms && rooms && rooms.length > 0) {
@@ -241,9 +234,6 @@ export class Lobby
             },
             error: () => this.main.set_status('Error: Can not update rooms')
         });
-        // this.socket.on = (e) => {
-        //     if (!('data' in e))
-        //         return;
 
         this.socket.onmessage = (e) => {
             if (!('data' in e))
@@ -328,7 +318,7 @@ export class Lobby
         }
 
         this.socket.onclose = (e) => {
-            // console.error('Error: Socket Closed');
+
         };
     }
 
@@ -340,7 +330,6 @@ export class Lobby
         }
         this.socket.send(JSON.stringify({
             type: 'tournament_creation_request',
-            login: 'q',
         }));
     }
     
@@ -465,11 +454,10 @@ export class Lobby
     }
 
     queryTournament() {
-        if (this.main.login !== '' && this.socket !== -1) {
+        if (this.socket !== -1) {
             if (this.socket.readyState === WebSocket.OPEN) {
                 this.socket.send(JSON.stringify({
                     type: 'tournament_registered',
-                    login: this.main.login
                 }));
             }
         }
