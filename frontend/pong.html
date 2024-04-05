@@ -1,7 +1,35 @@
-  <h3 class="text-center" id="game_name">Pong Game</h3>
-  <ul id="team0"></ul>
-  <ul id="team1"></ul>
-  <div id="score0">0</div><div id="score1">0</div>
-  <canvas id="pongCanvas"></canvas>
-  <button id="start" type="button">Start</button> 
-  <button id="quit" type="button">Quit</button> 
+<h3 class="text-center" id="game_name">Pong Game</h3>
+<ul id="team0"></ul>
+<ul id="team1"></ul>
+<div id="score0">0</div><div id="score1">0</div>
+<div id="pongThreeJS" style="display: none;"></div>
+<canvas id="pongCanvas"></canvas>
+<button id="start" type="button">Start</button> 
+<button id="quit" type="button">Quit</button>
+<button id="toggle_AI" type="button">AI</button> 
+<button id="power_play" type="button">Power play off</button>
+<button id="toggle_display" type="button">3D</button>
+<button id="toggle_display_board" type="button"  style="display: none;">Show display board</button>
+<div id="display_board" style="display: none;">
+  <div>Camera:
+    <div>Angle: <input type="range" min="10" max="90" step="1" value="50" id="angle"></div>
+    <div>Ratio: <input type="range" min="1"  max="10" step="1" value="2"  id="ratio"></div>
+    <div>Near:  <input type="range" min="1" max="10" step="1"  value="1"  id="near" ></div>
+    <div>Far:   <input type="range" min="100" max="2000" step="100"  value="1000"  id="far"  ></div>
+    <div>x: <input type="range" min="-3.0" max="3.0" step="0.2" value="0" id="pos_x"></div>
+    <div>y: <input type="range" min="-3.0" max="0.0" step="0.2" value="-1.0" id="pos_y"></div>
+    <div>z: <input type="range" min="0.1" max="3.0" step="0.1" value="2.0" id="pos_z"></div>
+  </div>
+  <div>Camera Center:
+    <div>x: <input type="range" min="-10" max="10" step="1" value="0" id="center_x"></div>
+    <div>y: <input type="range" min="-10" max="10" step="1" value="0" id="center_y"></div>
+    <div>z: <input type="range" min="-10" max="10" step="1" value="0" id="center_z"></div>
+  </div>
+  <div>Light:
+    <div>Ambient Density: <input type="range" min="0.0" max="1.0" step="0.1" value="0.5" id="amb_dens"></div>
+    <div>Direction Density: <input type="range" min="0.0" max="1.0" step="0.1" value="0.5" id="dir_dens"></div>
+    <div>x: <input type="range" min="0.0" max="1.0" step="0.1" value="-0.5" id="light_x"></div>
+    <div>y: <input type="range" min="0.0" max="1.0" step="0.1" value="1.0" id="light_y"></div>
+    <div>z: <input type="range" min="0.0" max="1.0" step="0.1" value="0.5" id="light_z"></div>
+  </div>
+</div>

@@ -16,6 +16,7 @@ export class Lobby
         this.main.checkcsrf();
         this.dom_rooms = document.getElementById("rooms");
         this.dom_tournament = document.getElementById("tournament");
+        this.dom_tournament_history = document.getElementById("tournament_history");
         this.dom_join = document.querySelector("#join");
         this.dom_pong = document.querySelector("#pong");
         this.dom_pew = document.querySelector("#pew");
@@ -27,6 +28,7 @@ export class Lobby
         this.dom_join.addEventListener("click", () => this.join());
 		this.dom_chat.addEventListener("click", () => this.chat());
         this.dom_tournament.addEventListener("click", () => this.tournament_click());
+        this.dom_tournament_history.addEventListener("click", () => this.tournament_history_click());
         if (this.main.login != '') {
             this.rooms_update();
             this.queryTournament();
@@ -89,7 +91,7 @@ export class Lobby
             this.main.set_status('Please login or sign up');
             return;
         }
-
+        
         var csrftoken = this.main.getCookie('csrftoken');
 
         if (csrftoken) {
@@ -131,6 +133,10 @@ export class Lobby
         }
     }
 
+    tournament_history_click() {
+        this.main.load('/tournament_history', () => this.main.tournament_history.events());
+    }
+ 
     delete_game() {
         this.main.set_status('');
         if (this.main.login === '') {

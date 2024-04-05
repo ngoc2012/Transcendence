@@ -1,14 +1,25 @@
 from django.shortcuts import render
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from game.models import RoomsModel, PlayerRoomModel
 from accounts.models import PlayersModel
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 
 from .data import pong_data
+import json
+import os
+
+from django.conf import settings
 
 def index(request):
     return render(request, "pong.html")
+
+def load_font(request):
+    print(settings.STATICFILES_DIRS[0])
+    file_path = settings.STATICFILES_DIRS[0] + '/helvetiker_bold.typeface.json'
+    with open(file_path, 'r') as file:
+        data = json.load(file)
+    return JsonResponse(data)
 
 from backend.asgi import channel_layer
 from asgiref.sync import async_to_sync

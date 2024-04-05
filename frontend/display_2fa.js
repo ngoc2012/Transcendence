@@ -29,3 +29,4 @@ export class display_2fa {
         new QRCode(qrCodeElement, secret);
     }
 }
+

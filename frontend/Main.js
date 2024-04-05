@@ -5,6 +5,7 @@ import {twofa} from './twofa.js'
 import {code_2fa} from './code_2fa.js'
 import {qrcode_2fa} from './qrcode_2fa.js'
 import {display_2fa} from './display_2fa.js'
+import {tournament_history} from './tournament_history.js'
 import {Tournament} from './Tournament.js'
 
 export class Main
@@ -28,6 +29,7 @@ export class Main
         this.code_2fa = new code_2fa(this);
         this.qrcode_2fa = new qrcode_2fa(this);
         this.display_2fa = new display_2fa(this);
+        this.tournament_history = new tournament_history(this);
 
         this.dom_home = document.getElementById("home");
         this.dom_login = document.getElementById("login");

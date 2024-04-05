@@ -71,14 +71,20 @@ export class Tournament {
                     this.main.load('/tournament/lobby', () => this.eventsLobby());
                     this.main.lobby.socket.send(JSON.stringify({type: 'add_to_group', id: this.id}));
                 },
-                error: () => {
+                error: (xhr, textStatus, errorThrown) => {
+                    if (xhr.status === 400) {
+                    var errorResponse = JSON.parse(xhr.responseText);
+                    this.main.set_status('Error: ' + errorResponse.error);
+                } else {
                     this.main.set_status('Error: Could not create tournament');
-                }
+                    }
+            }
             });
         } else {
             console.log('Login required')
             this.main.load('/pages/login', () => this.main.log_in.events());
         }
+        
     }
     
     alreadyIn(users) {
@@ -371,5 +377,4 @@ export class Tournament {
             parentElement.appendChild(message);
         }
     }
-
 }

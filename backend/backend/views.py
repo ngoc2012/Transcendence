@@ -96,11 +96,49 @@ def validate_session(request):
     else:
         return JsonResponse({"validSession": False, "message": "No Authorization token provided."}, status=200)
 
+
+def tournament_history(request):
+    try:
+        response = requests.get("http://blockchain:9000/tournament_history")
+        response.raise_for_status()
+
+        data = response.json()
+        tournament_names = data.get('names', [])
+        return render(request, 'tournament_history.html', {'names' : tournament_names})
+
+    except requests.exceptions.RequestException as e:
+        print(f"Error retrieving tournament history: {e}")
+        context = {'error_message': 'Failed to retrieve tournament history.'}
+        return render(request, 'tournament_history.html', context)
+
+
+@csrf_exempt
+def get_tournament_data(request):
+    try:
+        tournament_name = request.GET.get('name')        
+        if not tournament_name:
+            return JsonResponse({"error": "Tournament name is required"}, status=400)
+        url = f"http://blockchain:9000/tournaments/{tournament_name}"
+        response = requests.get(url)
+        response.raise_for_status()
+
+        data = response.json()
+
+        return JsonResponse(data)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+    
+
 @csrf_exempt
 def display_2fa(request):
+
     email = request.POST['email']
     secret = request.POST['secret']
+    # response = requests.get("http://blockchain:9000/print_me")
+    # data = response.json()
+    # print("data est egal a = ", data)
     return render(request, 'display_2fa.html', {'email': email, 'secret_key': secret})
+
 
 
 def qrcode_2fa(request):
@@ -335,11 +373,32 @@ def new_tournament(request):
     name = request.POST.get('name')
     game = request.POST.get('game')
     try:
+            if TournamentModel.objects.filter(name=name).exists():
+                return JsonResponse({'error': 'A tournament with the same name already exists'}, status=400)
+
         owner = PlayersModel.objects.get(username=request.user.username)
         tournament = TournamentModel.objects.create(name=name, game=game, owner=owner)
         tournament.participants.add(owner)
         tournament.save()
+
+            url = f"http://blockchain:9000/add_tournament/{name}"
+            response = requests.post(url)
+            response.raise_for_status()
+
+            player_data = {
+                'id': player.id,
+                'login': player.login,
+                'elo': player.elo,
+            }
+            url = f"http://blockchain:9000/add_player/"
+            data = {"name": name, "player": player_data}
+            response = requests.post(url, json=data)
+            response.raise_for_status()
+
         return JsonResponse({'message': 'Tournament created successfully', 'id': str(tournament.id)}, status=200)
+        except requests.exceptions.RequestException as e:
+            print(f"Error calling add_tournament_route: {e}")
+            return JsonResponse({'error': 'Failed to interact with blockchain'}, status=500)
     except ObjectDoesNotExist:
         return JsonResponse({'error': 'Owner not found'}, status=404)
     except IntegrityError as e:
@@ -350,3 +409,4 @@ def new_tournament(request):
         return JsonResponse({'error': 'An unexpected error occurred'}, status=500)
 
     
+
