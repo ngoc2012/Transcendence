@@ -17,7 +17,6 @@ def get_data(game):
         return pong_data
     return {}
 
-@csrf_exempt
 def new_game(request):
     if 'game' not in request.POST:
         return (HttpResponse("Error: No game!"))
@@ -56,7 +55,6 @@ def new_game(request):
         'data': get_data(new_room.game)
         }))
 
-@csrf_exempt
 def update(request):
     data = [
         {
@@ -67,7 +65,6 @@ def update(request):
     # print(data)
     return JsonResponse(data, safe=False)
 
-@csrf_exempt
 def join(request):
     if 'game_id' not in request.POST:
         return (HttpResponse("Error: No game id!"))
@@ -116,7 +113,6 @@ def join(request):
 
 
 #delete a room with a JWT check
-@csrf_exempt
 def delete(request):
     if 'game_id' not in request.POST:
         return JsonResponse({'error': 'No game id!'}, status=400)
