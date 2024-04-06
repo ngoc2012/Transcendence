@@ -262,8 +262,22 @@ def draw_pong(room, state):
             w.addch(int(state['ball']['y'] / ZY) + i + DY, int(state['ball']['x'] / ZX) + j, ball[i * 2 + j])
     w.refresh()
 
+import sys
+import re
 from multiprocessing import Process
+
 if __name__ == "__main__":
+    if len(sys.argv) != 3:
+        print("Usage: python3 CLI.py <ip> <port> ...")
+        sys.exit(1)
+    if not re.match(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$", sys.argv[1]):
+        print("Invalid IP address")
+        sys.exit(1)
+    port_number = int(sys.argv[2])
+    if port_number < 0 or port_number > 65535:
+        print("Invalid port number")
+        sys.exit(1)
+    host = sys.argv[1] + ":" + sys.argv[2]
     while not log_in():
         print("Login failed")
         choice = input("0: retry login | 1: sign up | 2: quit program\nYour choice : ")

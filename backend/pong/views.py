@@ -1,33 +1,45 @@
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from game.models import RoomsModel, PlayersModel, PlayerRoomModel
+from game.models import RoomsModel, PlayerRoomModel
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 
 from .data import pong_data
-import json
-import os
+# import json
+# import os
 
-from django.conf import settings
+# from django.conf import settings
 
 def index(request):
     return render(request, "pong.html")
-
-def load_font(request):
-    print(settings.STATICFILES_DIRS[0])
-    file_path = settings.STATICFILES_DIRS[0] + '/helvetiker_bold.typeface.json'
-    with open(file_path, 'r') as file:
-        data = json.load(file)
-    return JsonResponse(data)
 
 from backend.asgi import channel_layer
 from asgiref.sync import async_to_sync
 def action(request, room_id, player_id, action):
     try:
         room = RoomsModel.objects.get(id=room_id)
-        player = PlayerRoomModel.objects.get(id=player_id)
-        server = PlayerRoomModel.objects.get(player=room.server)
+    except ObjectDoesNotExist:
+        return HttpResponse("NULL")
+    if action == 'state':
+        try:
+            players = PlayerRoomModel.objects.filter(room=room_id)
+        except ObjectDoesNotExist:
+            return HttpResponse("error")
+        return JsonResponse({
+            'ai_player': room.ai_player,
+            'power_play': room.power,
+            'ball': {'x': room.x, 'y':room.y},
+            'side': {i.player.login: i.side for i in players},
+            'dx': room.dx,
+            'started': room.started,
+            'x': {i.player.login: i.x for i in players},
+            'y': {i.player.login: i.y for i in players},
+            'players': [{'x': i.x, 'y': i.y} for i in players]
+        })
+    try:
+        player, server = PlayerRoomModel.objects.get(player=player_id), PlayerRoomModel.objects.get(player=room.server)
     except MultipleObjectsReturned:
+        return HttpResponse("error")
+    except ObjectDoesNotExist:
         return HttpResponse("error")
     if action == 'up':
         if player.y > 0:

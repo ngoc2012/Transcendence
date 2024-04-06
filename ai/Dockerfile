@@ -12,11 +12,19 @@ RUN apt-get update \
 
 # Install Python dependencies
 RUN pip3 install --upgrade pip \
-    && pip3 install Flask
+    && pip3 install Flask \
+    && pip3 install requests
 
 # Expose the port that Daphne will run on
 EXPOSE 5000
 
-COPY ai.py .
+RUN mkdir -p /app/backend
+
+COPY ai.py /app
+COPY data.py /app
+COPY __init__.py /app
+
+WORKDIR /app
+
 
 CMD ["python3", "-m", "flask", "--app", "ai", "run", "--host=0.0.0.0", "--debug"]
