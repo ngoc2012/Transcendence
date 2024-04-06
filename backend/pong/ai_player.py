@@ -1,64 +1,13 @@
 from asgiref.sync import sync_to_async
 
-from game.models import PlayersModel, RoomsModel, PlayerRoomModel
+from game.models import PlayersModel, PlayerRoomModel
 from pong.data import pong_data
+from .game import change_server
 
 from django.contrib.auth.hashers import make_password
-
 import pyotp
-import time
+
 import requests
-
-def hit_position(x, p0, p1):
-    if p0[0] == p1[0]:
-        return -1
-    y = (x - p0[0]) / (p1[0] - p0[0]) * (p1[1] - p0[1]) + p0[1]
-    while y < 0 or y > pong_data['HEIGHT']:
-        if y < 0:
-            y = -y
-        if y > pong_data['HEIGHT']:
-            y = 2 * pong_data['HEIGHT'] - y
-    return y
-
-def ai_listener(consumer, ai_player):
-    room_id = consumer.room_id
-    print("AI player started.")
-    # print(consumer.room.ai_player)
-    last_pos = (consumer.room.x, consumer.room.y)
-    curr_pos = (consumer.room.x, consumer.room.y)
-    check_time = time.time()
-    room = RoomsModel.objects.get(id=room_id)
-    while room.ai_player:
-        if (check_time + 1 < time.time()):
-            check_time = time.time()
-            try:
-                consumer.room = RoomsModel.objects.get(id=room_id)
-            except RoomsModel.DoesNotExist:
-                print("Room with ID {consumer.room_id} does not exist.")
-                break
-            curr_pos = (consumer.room.x, consumer.room.y)
-            # if consumer.room.ai_player:
-            #     if consumer.room.y + pong_data['PADDLE_HEIGHT'] / 2 > ai_player.y + pong_data['PADDLE_HEIGHT'] / 2:
-            #         ai_player.y += pong_data['STEP']
-            #     elif consumer.room.y + pong_data['PADDLE_HEIGHT'] / 2 < ai_player.y + pong_data['PADDLE_HEIGHT'] / 2:
-            #         ai_player.y -= pong_data['STEP']
-            #     ai_player.save()
-            if last_pos[0] != curr_pos[0]:
-                y = hit_position(ai_player.x, last_pos, curr_pos)
-                if ai_player.y < y:
-                    ai_player.y += pong_data['STEP']
-                else:
-                    ai_player.y -= pong_data['STEP']
-                ai_player.save()
-                last_pos = curr_pos
-        time.sleep(0.02)
-        try:
-            room = RoomsModel.objects.get(id=room_id)
-        except RoomsModel.DoesNotExist:
-            print("Room with ID {consumer.room_id} does not exist.")
-            break
-    print("AI player stopped.")
-
 
 @sync_to_async
 def ai_player(consumer):
@@ -78,8 +27,9 @@ def ai_player(consumer):
             }) as response:
             if response.status_code != 200:
                 print("Request failed with status code:", response.status_code)
-            print(response.text)
         PlayerRoomModel.objects.get(room=consumer.room.id, player=player.id).delete()
+        if consumer.room.server == player:
+            change_server(consumer)
         return
     else:
         consumer.room.ai_player = True

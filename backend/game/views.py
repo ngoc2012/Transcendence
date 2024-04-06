@@ -1,8 +1,8 @@
-from django.shortcuts import render
+# from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from .models import RoomsModel, PlayersModel, PlayerRoomModel, TournamentModel, TournamentMatchModel
-from django.utils import timezone
+# from django.utils import timezone
 import jwt
 from pong.data import pong_data
 import os
