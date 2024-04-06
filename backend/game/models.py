@@ -10,7 +10,7 @@ class PlayersModel(models.Model):
     name = models.CharField(max_length=255)
     tourn_alias = models.CharField(max_length=255)
     history = ArrayField(models.CharField(max_length=1), size=20, null=True)
-    score_history = ArrayField(models.CharField(max_length=10), size=20, null=True)
+    score_history = ArrayField(models.TextField(max_length=10), size=20, null=True)
     date_history = ArrayField(models.DateTimeField(), size=20, null=True)
     secret_2fa = models.TextField(default='')
     friends = models.ManyToManyField("self", blank=True)

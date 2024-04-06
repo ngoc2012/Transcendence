@@ -316,7 +316,7 @@ def profile(request, username):
     user = PlayersModel.objects.filter(login=username).get(login=username)
     if request.method == 'POST':
         if 'status' in request.POST:
-            user.online_status = request.POST['status']score
+            user.online_status = request.POST['status']
     context = {
         'id': user.id,
         'login': user.login,
@@ -330,6 +330,7 @@ def profile(request, username):
         'history_score': user.score_history,
         'friends': user.friends.all()
     }
+    print(user.history)
     return render(request, 'profile.html', context)
 
 @csrf_exempt

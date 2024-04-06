@@ -98,6 +98,8 @@ def get_win_data(room_id):
     if room.score0 > room.score1:
         winner = 'player0'
         winning_score = room.score0
+        print(players.get(side=0))
+        print(players.get(side=1))
         players.get(side=0).player.history += 'W'
         players.get(side=1).player.history += 'L'
         players.get(side=0).player.score_history += str(room.score0) + '-' + str(room.score1)
@@ -109,6 +111,8 @@ def get_win_data(room_id):
     elif room.score1 > room.score0:
         winner = 'player1'
         winning_score = room.score1
+        print(players.get(side=0))
+        print(players.get(side=1))
         players.get(side=0).player.history += 'L'
         players.get(side=1).player.history += 'W'
         players.get(side=0).player.score_history += str(room.score0) + '-' + str(room.score1)
@@ -117,6 +121,7 @@ def get_win_data(room_id):
         players.get(side=1).player.date_history += room.expires
         players.get(side=0).save()
         players.get(side=1).save()
+    print('on entre la dedans ?')
     return json.dumps({
         'win': winner,
         'score': [room.score0, room.score1],
