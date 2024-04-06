@@ -6,7 +6,8 @@ export class tournament_history {
 
     events() {
         this.main.set_status('');
-
+        this.dom_proceed = document.querySelector("#proceed");
+        this.dom_proceed.addEventListener("click", () => this.proceed());
         this.dom_Select = document.querySelector("#Select");
         this.dom_Select.addEventListener("click", () => this.selectTournament());
 
@@ -20,6 +21,13 @@ export class tournament_history {
         const selectedTournamentElement = document.getElementById("selectedTournamentName");
         selectedTournamentElement.innerText = "Selected Tournament: " + tournament_name;
 
+        if (!tournament_name)
+        {
+            document.getElementById("selectedTournamentName").innerHTML = `
+            <h2></h2>
+            <h3>There is no active or finished tournament to display !</h3>
+        `;
+        }
         $.ajax({
             url: '/get_tournament_data/',
             method: 'GET',
@@ -74,6 +82,10 @@ export class tournament_history {
                 console.error('Error:', error);
             }
         });
+    }
+
+    proceed() {
+        this.main.load('/lobby', () => this.main.lobby.events());
     }
 
 }

@@ -8,6 +8,7 @@ export class Pong
         this.room = r;
         this.connected = false;
         this.power_play = false;
+        // this.ai_player = false;
         this.socket = -1;
         this.draw = new Draw(this);
         this.tournament = t;
@@ -48,6 +49,7 @@ export class Pong
 		this.dom_light_x = document.getElementById("light_x");
 		this.dom_light_y = document.getElementById("light_y");
 		this.dom_light_z = document.getElementById("light_z");
+        this.dom_toggle_AI = document.getElementById("toggle_AI");
         this.dom_power_play = document.getElementById("power_play");
         this.dom_toggle_display = document.getElementById('toggle_display');
         this.dom_toggle_display_board = document.getElementById('toggle_display_board');
@@ -86,9 +88,10 @@ export class Pong
             }
         });
 
-        this.dom_power_play.addEventListener('click', () => {this.set_state('power')})
-		this.dom_toggle_display.addEventListener('click', () => {this.toggle_display()})
-        this.dom_toggle_display_board.addEventListener('click', () => {this.toggle_display_board()})
+        this.dom_toggle_AI.addEventListener('click', () => {this.set_state('ai_player')});
+        this.dom_power_play.addEventListener('click', () => {this.set_state('power')});
+		this.dom_toggle_display.addEventListener('click', () => {this.toggle_display()});
+        this.dom_toggle_display_board.addEventListener('click', () => {this.toggle_display_board()});
         this.connect();
 
         this.draw.init();
@@ -134,6 +137,14 @@ export class Pong
             this.dom_power_play.innerHTML = "Power play off";
         else
             this.dom_power_play.innerHTML = "Power play on";
+    }
+
+    set_ai_player(val) {
+        // this.ai_player = val;
+        if (val)
+            this.dom_toggle_AI.innerHTML = "AI player off";
+        else
+            this.dom_toggle_AI.innerHTML = "AI player on";
     }
 
     toggle_display_board() {
@@ -217,6 +228,8 @@ export class Pong
             {
                 if ('power_play' in data)
                     this.set_power_play(data.power_play);
+                if ('ai_player' in data)
+                    this.set_ai_player(data.ai_player);
                 this.draw.update(data);
                 this.draw.execute(data);
             }

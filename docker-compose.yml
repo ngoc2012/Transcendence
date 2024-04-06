@@ -5,6 +5,8 @@ services:
       context: ./nginx
       dockerfile: Dockerfile
       no_cache: false
+    depends_on:
+      - django
     ports:
       - 8080:443
     volumes:
@@ -70,6 +72,19 @@ services:
         - blockchain_data:/app
       networks:
         - network
+  ai:
+    container_name: ai
+    build:
+      context: ./ai
+      dockerfile: Dockerfile
+      no_cache: false
+    restart: always
+    env_file:
+     - .env
+    ports:
+      - 5000:5000
+    networks:
+      - network
 
 volumes:
   django_data:

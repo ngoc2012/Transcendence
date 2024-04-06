@@ -52,10 +52,11 @@ RUN apt install net-tools
 
 COPY entrypoint.sh .
 RUN chmod +x entrypoint.sh
-ENTRYPOINT [ "./entrypoint.sh" ]
+
 
 COPY web3_handling.py .
 
+ENTRYPOINT [ "./entrypoint.sh" ]
 
 EXPOSE 7000
 

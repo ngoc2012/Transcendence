@@ -20,18 +20,16 @@ contract TournamentRegistry {
         string winner;
     }
 
-
     struct Tournament {
         string TournamentName;
-        Player[] contenders; //liste des joueurs
-        Match[] matches; //liste des matchs dans l'ordre
+        Player[] contenders;
+        Match[] matches;
         string winner;
         bool pending;
+        bool started;
     }
 
-// liste de tous les tournois
     Tournament[] public tournaments;
-
 
 //Tournament getters
 
@@ -39,6 +37,38 @@ contract TournamentRegistry {
     function getTournaments() public view returns (Tournament[] memory) {
         return tournaments;
     }
+
+    function deleteTournament(string memory name) public {
+        for (uint i = 0; i < tournaments.length; i++) {
+            if (keccak256(abi.encodePacked(tournaments[i].TournamentName)) == keccak256(abi.encodePacked(name))) {
+                for (uint j = i; j < tournaments.length - 1; j++) {
+                    tournaments[j] = tournaments[j + 1];
+                }
+                tournaments.pop();
+                break;
+            }
+        }
+    }
+    
+    function getActiveTournamentNames() public view returns (string[] memory) {
+        uint startedCount = 0;
+        for (uint i = 0; i < tournaments.length; i++) {
+            if (tournaments[i].started) {
+                startedCount++;
+            }
+        }
+        
+        string[] memory names = new string[](startedCount);
+        uint index = 0;
+        for (uint i = 0; i < tournaments.length; i++) {
+            if (tournaments[i].started) {
+                names[index] = tournaments[i].TournamentName;
+                index++;
+            }
+        }
+        return names;
+    }
+
 
     function getTournamentNames() public view returns (string[] memory) {
         string[] memory names = new string[](tournaments.length);
@@ -139,7 +169,7 @@ contract TournamentRegistry {
         return -1;
     }
 
-  //  SETTERS
+  //  SETTERSTournament setters
 
     // Setter for adding a new tournament
 
@@ -147,6 +177,7 @@ contract TournamentRegistry {
         Tournament storage p = tournaments.push();
         p.TournamentName = newName;
         p.pending = true;
+        p.started = false;
     }
 
     function addPlayer(uint tournamentIndex, string memory newName, uint newElo) public {
@@ -179,6 +210,7 @@ contract TournamentRegistry {
         newMatch.scorePlayer2 = newscorePlayer2;
         newMatch.round = newround;
         newMatch.winner = newwinner;
+        tournaments[tournamentIndex].started = true;
     }
 
 
@@ -193,4 +225,8 @@ contract TournamentRegistry {
         tournaments[tournamentIndex].pending = isPending;
     }
 
+    // Setter for updating tournament started status
+    function setTournamentStarted(uint tournamentIndex, bool isStarted) public {
+        tournaments[tournamentIndex].started = isStarted;
+    }
 }
