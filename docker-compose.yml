@@ -86,6 +86,20 @@ services:
     networks:
       - network
 
+  redis:
+    container_name: redis
+    build:
+      context: ./redis
+      dockerfile: Dockerfile
+      no_cache: false
+    restart: always
+    env_file:
+     - .env
+    ports:
+      - 6379:6379
+    networks:
+      - network
+
 volumes:
   django_data:
     driver: local
