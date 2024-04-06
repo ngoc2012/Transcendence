@@ -114,6 +114,13 @@ export class Lobby
                     this.socket.send(JSON.stringify({
                         type: 'update'
                     }));
+                $.ajax({
+                    url: '/profile/' + this.main.login + '/',
+                    method: 'POST',
+                    data:{
+                        'status': 'In-game'
+                    }
+                })
                 if (typeof info === 'string')
                 {
                     this.main.set_status(info);
@@ -203,6 +210,15 @@ export class Lobby
                 + window.location.host
                 + '/ws/game/rooms/'
             );
+        }
+        if (this.main.login != ''){
+            $.ajax({
+                url: '/profile/' + this.main.login + '/',
+                method: 'POST',
+                data:{
+                    'status': 'Online'
+                }
+            })
         }
         // else {
         //     console.log('socket already open');

@@ -175,8 +175,6 @@ class RoomsConsumer(AsyncWebsocketConsumer):
     connected_users = set()
 
     async def connect(self):
-        # user = self.scope['user']
-    
         self.group_name = "rooms"
         await self.channel_layer.group_add(
             self.group_name,
@@ -204,6 +202,7 @@ class RoomsConsumer(AsyncWebsocketConsumer):
             await self.broadcast_user_list()
 
     async def receive(self, text_data):
+        print("uWu" + text_data)
         if not text_data:
             await self.channel_layer.group_send(
                 self.group_name,

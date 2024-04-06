@@ -1,6 +1,7 @@
 import uuid
 from django.db import models
 from django.utils import timezone
+from django.contrib.postgres.fields import ArrayField
 
 class PlayersModel(models.Model):
     id = models.AutoField(primary_key=True)
@@ -8,12 +9,16 @@ class PlayersModel(models.Model):
     password = models.CharField(max_length=255)
     name = models.CharField(max_length=255)
     tourn_alias = models.CharField(max_length=255)
-    history = models.CharField(max_length=20)
+    history = ArrayField(models.CharField(max_length=1), size=20, null=True)
+    score_history = ArrayField(models.CharField(max_length=10), size=20, null=True)
+    date_history = ArrayField(models.DateTimeField(), size=20, null=True)
     secret_2fa = models.TextField(default='')
+    friends = models.ManyToManyField("self", blank=True)
     email = models.EmailField(default='')  # gerer si mauvais email
     session_id = models.CharField(max_length=40, null=True)
     expires = models.DateTimeField(null=True)
     elo = models.IntegerField(default=1500)
+    online_status = models.TextField(default='Offline')
     def __str__(self):
         return str(self.id)
 

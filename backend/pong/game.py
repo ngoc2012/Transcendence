@@ -80,14 +80,31 @@ def get_score_data(room_id):
 @sync_to_async
 def get_win_data(room_id):
     room = RoomsModel.objects.get(id=room_id)
+    players = PlayerRoomModel.objects.filter(room=room.id)
     winner = ''
     winning_score = 0
     if room.score0 > room.score1:
         winner = 'player0'
         winning_score = room.score0
+        players.get(side=0).player.history += 'W'
+        players.get(side=1).player.history += 'L'
+        players.get(side=0).player.score_history += str(room.score0) + '-' + str(room.score1)
+        players.get(side=1).player.score_history += str(room.score0) + '-' + str(room.score1)
+        players.get(side=0).player.date_history += room.expires
+        players.get(side=1).player.date_history += room.expires
+        players.get(side=0).save()
+        players.get(side=1).save()
     elif room.score1 > room.score0:
         winner = 'player1'
         winning_score = room.score1
+        players.get(side=0).player.history += 'L'
+        players.get(side=1).player.history += 'W'
+        players.get(side=0).player.score_history += str(room.score0) + '-' + str(room.score1)
+        players.get(side=1).player.score_history += str(room.score0) + '-' + str(room.score1)
+        players.get(side=0).player.date_history += room.expires
+        players.get(side=1).player.date_history += room.expires
+        players.get(side=0).save()
+        players.get(side=1).save()
     return json.dumps({
         'win': winner,
         'score': [room.score0, room.score1],

@@ -1,5 +1,6 @@
 {% load static %}
 <!-- {{ context|json_script:"user" }} -->
+<!-- {% csrf_token %} -->
 <button id="log_in" type="button">Change your login</button>
 <button id="new_name" type="button">Change your name</button>
 <button id="alias" type="button">Change your tournament name</button>
@@ -11,6 +12,9 @@ Your login: {{ login }}<br>
 {% if context != '' %}
 Your alias: {{ alias }} <br>
 {% endif %}
-Your match history: {% if history == '' %} No recent matches {% else %} {% for i in history %} {{ i }} {% endfor %} {% endif %} <br>
+Your match history: {% if history == null %} No recent matches {% else %} {% for i in history %} {{ i }} {% endfor %} {% endif %} <br>
 Your email: {{ email }} <br>
 Your ranking {{ elo }}<br>
+Your friends: {% for i in friends %} {{ i.login }} {% endfor %}<br>
+Test = {% for i in history_date %} {{ i }} {% endfor %}<br>
+Test2 = {% for i in history_score %} {{ i }} {% endfor %}<br>
