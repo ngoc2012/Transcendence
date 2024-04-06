@@ -15,7 +15,7 @@ class PongConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.room_id = self.scope['url_route']['kwargs']['room_id']
         self.player_id = self.scope['url_route']['kwargs']['player_id']
-        self.choices = [5, 10]
+        self.choices = [0, 5, 10]
         # self.dx = 1
         # self.dy = 1
         self.ddy = random.choice(self.choices)
@@ -73,6 +73,7 @@ class PongConsumer(AsyncWebsocketConsumer):
         elif text_data == 'power':
             await set_power_play(self)
         elif text_data == 'ai_player':
+            print("AI player activated.")
             await ai_player(self)
         elif text_data == 'quit':
             next
