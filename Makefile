@@ -37,12 +37,13 @@ re:
 	@make up
 
 clean:
+	docker exec -it blockchain rm -rf app/blockchain/build
 	-docker stop $$(docker ps -qa)
 	-docker rm $$(docker ps -qa)
 	-docker rmi -f $$(docker images -qa)
 	-docker volume rm $$(docker volume ls -q)
 	-docker network rm $$(docker network ls -q)
-#	sudo rm -rf blockchain/build
+
 	
 # gitf: git in final
 # gitd: git in developpement
