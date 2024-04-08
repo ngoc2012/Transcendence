@@ -9,7 +9,7 @@ import requests, pyotp, secrets, os, random, jwt, string, pytz
 class JWTMiddleware(MiddlewareMixin):
     def process_request(self, request):
         # print(request.META)
-        if '/admin/' in request.path or request.path in self.get_unauthenticated_paths():
+        if '/admin/' or 'callback' in request.path or request.path in self.get_unauthenticated_paths():
             return None
 
         access_token = request.COOKIES.get('access_token')

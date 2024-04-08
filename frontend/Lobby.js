@@ -383,6 +383,8 @@ export class Lobby
             inviteContainer.id = 'inviteContainer';
             document.addEventListener('DOMContentLoaded', () => document.body.appendChild(inviteContainer));
         }
+        else
+            return;
     
         const inviteNotification = document.createElement('div');
         inviteNotification.classList.add('event-invite-notification');

@@ -358,7 +358,6 @@ class RoomsConsumer(AsyncWebsocketConsumer):
             tournament = match.tournament
 
 
-
             # ici on add match a blockchain
             player1_data = {
                 'id': match.player1.id,

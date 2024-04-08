@@ -61,10 +61,7 @@ def validate_session(request):
             User = get_user_model()
             user = User.objects.get(id=user_id)
             test1 = jwt.decode(user.ref, settings.JWT_REFRESH_SECRET_KEY, algorithms=["HS256"])
-            print(test1)
-            print(decoded_refresh)
             if user and jwt.decode(user.ref, settings.JWT_REFRESH_SECRET_KEY, algorithms=["HS256"]) == decoded_refresh:
-                print('decode ok')
                 access_token, refresh_token = generate_jwt_tokens(user.id)
                 user.acc = access_token
                 user.ref = refresh_token
@@ -301,6 +298,7 @@ def callback(request):
         })
 
         token_data = token_response.json()
+        print(token_data)
         access_token = token_data['access_token']
 
         user_response = requests.get('https://api.intra.42.fr/v2/me', headers={
@@ -321,23 +319,22 @@ def callback(request):
 
         player = PlayersModel.objects.get(login=user_data['login'])
 
-        # JWT handling
-        access_token_jwt = jwt.encode({
-            'user_id': player.id,
-            'exp': datetime.now(pytz.utc) + timedelta(hours=1)
-        }, JWT_SECRET_KEY, algorithm='HS256')
+        access_token, refresh_token = generate_jwt_tokens(player.id)
+        player.acc = access_token
+        player.ref = refresh_token
 
-        refresh_token_jwt = jwt.encode({
-            'user_id': player.id
-        }, JWT_REFRESH_SECRET_KEY, algorithm='HS256')
+        ws_token = player.generate_ws_token()
+        player.secret_2fa = ''
+        player.save()
 
         response = render(request, 'index.html', {
             'my42login': user_data['login'],
             'my42name': user_data['usual_full_name'],
             'my42email': user_data['email'],
-            'my42JWT': access_token_jwt
+            'ws': ws_token
         })
-        response.set_cookie('refresh_token', refresh_token_jwt, httponly=True)
+        response.set_cookie('refresh_token', refresh_token, httponly=True, samesite='Lax', secure=True)
+        response.set_cookie('access_token', access_token, httponly=True, samesite='Lax', secure=True)
         return response
 
     except Exception as e:
