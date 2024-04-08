@@ -76,7 +76,6 @@ class PongConsumer(AsyncWebsocketConsumer):
         elif text_data == 'power':
             await set_power_play(self)
         elif text_data == 'ai_player':
-            # print("AI player activated.")
             await ai_player(self)
         elif text_data == 'quit':
             next
@@ -129,10 +128,9 @@ class PongConsumer(AsyncWebsocketConsumer):
         if not start:
             self.disconnect(1011)
             return
-        # dx = self.dx
-        # dy = self.dy
         while True:
-            await asyncio.sleep(0.02)
+            print(cache.get(self.k_x), cache.get(self.k_y))
+            await asyncio.sleep(5.0)
             check = await check_player(self)
             if not check:
                 await quit(self)
@@ -141,7 +139,8 @@ class PongConsumer(AsyncWebsocketConsumer):
             await update_ball(self)
             await check_collision(self)
             #if self.room.x <= 0 or self.room.x >= pong_data['WIDTH']:
-            if cache.get(self.k_x) <= 0 or self.room.x >= pong_data['WIDTH']:
+            x = cache.get(self.k_x)
+            if x <= 0 or x >= pong_data['WIDTH']:
                 # print("Game ended.")
                 await end_game(self)
                 await self.channel_layer.group_send(self.room_id, {'type': 'score_data'})

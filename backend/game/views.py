@@ -49,8 +49,9 @@ def new_game(request):
     if new_room.game == 'pong':
         # player_room.x = 0
         # player_room.y = pong_data['HEIGHT'] / 2 - pong_data['PADDLE_HEIGHT'] / 2
-        cache.set(str(new_room.id) + "_x", 0)
-        cache.set(str(new_room.id) + "_" + str(owner.id) + "_y", pong_data['HEIGHT'] / 2 - pong_data['PADDLE_HEIGHT'] / 2)
+        print(str(new_room.id) + "_" + str(player_room.id) + "_y")
+        cache.set(str(new_room.id) + "_" + str(player_room.id) + "_x", 0)
+        cache.set(str(new_room.id) + "_" + str(player_room.id) + "_y", pong_data['HEIGHT'] / 2 - pong_data['PADDLE_HEIGHT'] / 2)
     player_room.save()
     return (JsonResponse({
         'id': str(new_room),
@@ -104,13 +105,15 @@ def join(request):
         position=position
     )
     if room.game == 'pong':
+        k_player_x = str(room.id) + "_" + str(player_room.id) + "_x"
+        k_player_y = str(room.id) + "_" + str(player_room.id) + "_y"
         # player_room.x = position * pong_data['PADDLE_WIDTH'] + position * pong_data['PADDLE_DISTANCE']
-        cache.set(str(room.id) + "_" + str(player.id) + "_x", position * pong_data['PADDLE_WIDTH'] + position * pong_data['PADDLE_DISTANCE'])
+        cache.set(k_player_x, position * pong_data['PADDLE_WIDTH'] + position * pong_data['PADDLE_DISTANCE'])
         if side == 1:
             # player_room.x = pong_data['WIDTH'] - player_room.x - pong_data['PADDLE_WIDTH']
-            cache.set(str(room.id) + "_" + str(player.id) + "_x", pong_data['WIDTH'] - player_room.x - pong_data['PADDLE_WIDTH'])
+            cache.set(k_player_x, pong_data['WIDTH'] - cache.get(k_player_x) - pong_data['PADDLE_WIDTH'])
         # player_room.y = pong_data['HEIGHT'] / 2 - pong_data['PADDLE_HEIGHT'] / 2
-        cache.set(str(room.id) + "_" + str(player.id) + "_y", pong_data['HEIGHT'] / 2 - pong_data['PADDLE_HEIGHT'] / 2)
+        cache.set(k_player_y, pong_data['HEIGHT'] / 2 - pong_data['PADDLE_HEIGHT'] / 2)
     player_room.save()
     # player.save()
     return (JsonResponse({
@@ -231,10 +234,10 @@ def tournament_join(request):
         #if side == 1:
         #    player_room.x = pong_data['WIDTH'] - player_room.x - pong_data['PADDLE_WIDTH']
         #player_room.y = pong_data['HEIGHT'] / 2 - pong_data['PADDLE_HEIGHT'] / 2
-        cache.set(str(room.id) + "_" + str(player.id) + "_x", position * pong_data['PADDLE_WIDTH'] + position * pong_data['PADDLE_DISTANCE'])
+        cache.set(str(room.id) + "_" + str(player_room.id) + "_x", position * pong_data['PADDLE_WIDTH'] + position * pong_data['PADDLE_DISTANCE'])
         if side == 1:
-            cache.set(str(room.id) + "_" + str(player.id) + "_x", pong_data['WIDTH'] - player_room.x - pong_data['PADDLE_WIDTH'])
-        cache.set(str(room.id) + "_" + str(player.id) + "_y", pong_data['HEIGHT'] / 2 - pong_data['PADDLE_HEIGHT'] / 2)
+            cache.set(str(room.id) + "_" + str(player_room.id) + "_x", pong_data['WIDTH'] - player_room.x - pong_data['PADDLE_WIDTH'])
+        cache.set(str(room.id) + "_" + str(player_room.id) + "_y", pong_data['HEIGHT'] / 2 - pong_data['PADDLE_HEIGHT'] / 2)
     player_room.save()
     player.save()
     return (JsonResponse({

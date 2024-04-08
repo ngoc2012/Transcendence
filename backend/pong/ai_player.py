@@ -75,10 +75,10 @@ def ai_player(consumer):
     #    ai_player.x = pong_data['WIDTH'] - ai_player.x - pong_data['PADDLE_WIDTH']
     #ai_player.y = pong_data['HEIGHT'] / 2 - pong_data['PADDLE_HEIGHT'] / 2
     ai_player.save()
-    cache.set(str(consumer.room_id) + "_" + str(player.id) + "_x", position * pong_data['PADDLE_WIDTH'] + position * pong_data['PADDLE_DISTANCE'])
+    cache.set(str(consumer.room_id) + "_" + str(ai_player.id) + "_x", position * pong_data['PADDLE_WIDTH'] + position * pong_data['PADDLE_DISTANCE'])
     if side == 1:
-        cache.set(str(consumer.room_id) + "_" + str(player.id) + "_x", pong_data['WIDTH'] - player_room.x - pong_data['PADDLE_WIDTH'])
-    cache.set(str(consumer.room_id) + "_" + str(player.id) + "_y", pong_data['HEIGHT'] / 2 - pong_data['PADDLE_HEIGHT'] / 2)
+        cache.set(str(consumer.room_id) + "_" + str(ai_player.id) + "_x", pong_data['WIDTH'] - cache.get(str(consumer.room_id) + "_" + str(ai_player.id) + "_x") - pong_data['PADDLE_WIDTH'])
+    cache.set(str(consumer.room_id) + "_" + str(ai_player.id) + "_y", pong_data['HEIGHT'] / 2 - pong_data['PADDLE_HEIGHT'] / 2)
     
 
     print("AI player created. Send request to AI server.")

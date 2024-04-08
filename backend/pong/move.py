@@ -34,8 +34,8 @@ def check_collision(consumer):
 def update_ball(consumer):
     # consumer.room.x += consumer.room.dx * pong_data['DX']
     # consumer.room.y += consumer.room.dy * consumer.ddy
-    cache.set(consumer.k_x, cache.get(consumer.k_dx) * pong_data['DX'])
-    cache.set(consumer.k_y, cache.get(consumer.k_dy) * cache.get(consumer.k_ddy))
+    cache.set(consumer.k_x, cache.get(consumer.k_x) + cache.get(consumer.k_dx) * pong_data['DX'])
+    cache.set(consumer.k_y, cache.get(consumer.k_x) + cache.get(consumer.k_dy) * cache.get(consumer.k_ddy))
     
     # if consumer.room.y + pong_data['RADIUS'] >= pong_data['HEIGHT'] or consumer.room.y - pong_data['RADIUS'] <= 0:
     #     consumer.room.dy *= -1

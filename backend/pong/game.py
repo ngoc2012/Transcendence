@@ -19,7 +19,7 @@ def set_power_play(consumer):
     # else:
     #     consumer.room.power = True
     # consumer.room.save()
-    if cache.set(consumer.k_pow):
+    if cache.get(consumer.k_pow):
         cache.set(consumer.k_pow, False)
     else:
         cache.set(consumer.k_pow, True)
@@ -31,6 +31,7 @@ def game_init(consumer):
         # consumer.ddy = random.choice(consumer.choices)
         # consumer.room.dy = random.choice([1, -1])
         # consumer.room.save()
+        cache.set(consumer.k_dx, 1)
         cache.set(consumer.k_ddy, random.choice(consumer.choices))
         cache.set(consumer.k_dy, random.choice([1, -1]))
         cache.set(consumer.k_score0, 0)
@@ -63,8 +64,8 @@ def get_room_data(consumer):
             #'ball': {'x': consumer.room.x, 'y':consumer.room.y},
             'ball': {'x': cache.get(consumer.k_x), 'y': cache.get(consumer.k_y)},
             # 'players': [{'x': i.x, 'y': i.y} for i in players]
-            'players': [{'x': cache.get(str(consumer.room_id) + "_" + str(i.player.id) + "_x"),
-                         'y': cache.get(str(consumer.room_id) + "_" + str(i.player.id) + "_y")} for i in players]
+            'players': [{'x': cache.get(str(consumer.room_id) + "_" + str(i.id) + "_x"),
+                         'y': cache.get(str(consumer.room_id) + "_" + str(i.id) + "_y")} for i in players]
         })
     except ObjectDoesNotExist:
         print(f"Room with ID {consumer.room.id} does not exist.")
