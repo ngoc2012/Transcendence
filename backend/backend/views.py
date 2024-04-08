@@ -60,7 +60,6 @@ def validate_session(request):
             user_id = decoded_refresh.get('user_id')
             User = get_user_model()
             user = User.objects.get(id=user_id)
-            test1 = jwt.decode(user.ref, settings.JWT_REFRESH_SECRET_KEY, algorithms=["HS256"])
             if user and jwt.decode(user.ref, settings.JWT_REFRESH_SECRET_KEY, algorithms=["HS256"]) == decoded_refresh:
                 access_token, refresh_token = generate_jwt_tokens(user.id)
                 user.acc = access_token
@@ -183,6 +182,9 @@ def tournament(request):
 
 def tournament_lobby(request):
      return (render(request, 'tournament_lobby.html'))
+
+def tournament_local(request):
+    return (render(request, 'tournament_local.html'))
 
 def tournament_start(request, tournament_id):
      return (render(request, 'tournament_start.html'))
@@ -369,6 +371,7 @@ def verify_qrcode(request):
 def new_tournament(request):
     name = request.POST.get('name')
     game = request.POST.get('game')
+    local = request.POST.get('local')
     try:
         if TournamentModel.objects.filter(name=name).exists():
             return JsonResponse({'error': 'A tournament with the same name already exists'}, status=400)
@@ -377,6 +380,10 @@ def new_tournament(request):
         tournament = TournamentModel.objects.create(name=name, game=game, owner=owner)
         tournament.participants.add(owner)
         tournament.save()
+
+        if local == 'true':
+            tournament.local = True
+            tournament.save()
 
         url = f"http://blockchain:9000/add_tournament/{name}"
         response = requests.post(url)
@@ -392,7 +399,7 @@ def new_tournament(request):
         response = requests.post(url, json=data)
         response.raise_for_status()
 
-        return JsonResponse({'message': 'Tournament created successfully', 'id': str(tournament.id)}, status=200)
+        return JsonResponse({'message': 'Tournament created successfully', 'id': str(tournament.id), 'local': tournament.local}, status=200)
     except requests.exceptions.RequestException as e:
         print(f"Error calling add_tournament_route: {e}")
         return JsonResponse({'error': 'Failed to interact with blockchain'}, status=500)

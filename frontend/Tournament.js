@@ -50,11 +50,21 @@ export class Tournament {
     tournamentSubmit(event) {
         event.preventDefault();
 
-        const formData = {
-            name: document.getElementById('tname').value,
-            game: document.getElementById('game').value,
-            login: this.main.login,
-        };
+        if (document.getElementById('local').checked) {
+            const formData = {
+                name: document.getElementById('tname').value,
+                game: document.getElementById('game').value,
+                login: this.main.login,
+                local: 'true'
+            };
+        } else {
+            const formData = {
+                name: document.getElementById('tname').value,
+                game: document.getElementById('game').value,
+                login: this.main.login,
+                local: 'false'
+            };
+        }
 
         var csrftoken = this.main.getCookie('csrftoken');
 
@@ -67,9 +77,14 @@ export class Tournament {
                     'X-CSRFToken': csrftoken,
                 },
                 success: (response) => {
-                    this.id = response.id;
-                    this.main.load('/tournament/lobby', () => this.eventsLobby());
-                    this.main.lobby.socket.send(JSON.stringify({type: 'add_to_group', id: this.id}));
+                    if (response.local) {
+                        this.id = response.id;
+                        this.main.load('/tournament/local', () => this.eventsLobby());
+                    } else {
+                        this.id = response.id;
+                        this.main.load('/tournament/lobby', () => this.eventsLobby());
+                        this.main.lobby.socket.send(JSON.stringify({type: 'add_to_group', id: this.id}));
+                    }
                 },
                 error: (xhr, textStatus, errorThrown) => {
                     if (xhr.status === 400) {

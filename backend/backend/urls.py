@@ -47,6 +47,7 @@ urlpatterns = [
     path('get_tournament_data/', views.get_tournament_data, name='get_tournament_data'),
     path('tournament/new/', views.new_tournament, name='new_tournament'),
     path('tournament/lobby/', views.tournament_lobby, name='tournament_lobby'),
+    path('tournament/local/', views.tournament_local, name='tournament_local'),
     path('tournament/<uuid:tournament_id>/', views.tournament_start, name='tournament_start'),
     path('validate-session/', views.validate_session, name='validate_session'),
     re_path(r'^.*$', views.redirect, name='redirect'),
