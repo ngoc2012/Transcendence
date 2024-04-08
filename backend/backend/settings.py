@@ -161,3 +161,17 @@ SECURE_BROWSER_XSS_FILTER = True
 GOOGLELOG = 'templog'
 GOOGLENAME = 'tempname'
 CODE = ''
+
+# settings.py
+
+CACHES = {
+    "default": {
+        # "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": "redis://redis:6379",
+        "BACKEND": "django_redis.cache.RedisCache",
+        # "LOCATION": "redis://redis:6379/1",
+        # "OPTIONS": {
+        #     "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        # }
+    }
+}

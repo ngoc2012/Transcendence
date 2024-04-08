@@ -9,10 +9,13 @@ import pyotp
 
 import requests
 
+from django.core.cache import cache
+
 @sync_to_async
 def ai_player(consumer):
     if consumer.room.ai_player:
         consumer.room.ai_player = False
+        cache.set(consumer.k_ai, False)
         consumer.room.save()
         try:
             player = PlayersModel.objects.get(login='ai')
@@ -33,6 +36,7 @@ def ai_player(consumer):
         return
     else:
         consumer.room.ai_player = True
+        cache.set(consumer.k_ai, True)
         consumer.room.save()
     # print("ai player")
     try:
@@ -66,11 +70,15 @@ def ai_player(consumer):
         side=side,
         position=position
     )
-    ai_player.x = position * pong_data['PADDLE_WIDTH'] + position * pong_data['PADDLE_DISTANCE']
-    if side == 1:
-        ai_player.x = pong_data['WIDTH'] - ai_player.x - pong_data['PADDLE_WIDTH']
-    ai_player.y = pong_data['HEIGHT'] / 2 - pong_data['PADDLE_HEIGHT'] / 2
+    #ai_player.x = position * pong_data['PADDLE_WIDTH'] + position * pong_data['PADDLE_DISTANCE']
+    #if side == 1:
+    #    ai_player.x = pong_data['WIDTH'] - ai_player.x - pong_data['PADDLE_WIDTH']
+    #ai_player.y = pong_data['HEIGHT'] / 2 - pong_data['PADDLE_HEIGHT'] / 2
     ai_player.save()
+    cache.set(str(consumer.room_id) + "_" + str(player.id) + "_x", position * pong_data['PADDLE_WIDTH'] + position * pong_data['PADDLE_DISTANCE'])
+    if side == 1:
+        cache.set(str(consumer.room_id) + "_" + str(player.id) + "_x", pong_data['WIDTH'] - player_room.x - pong_data['PADDLE_WIDTH'])
+    cache.set(str(consumer.room_id) + "_" + str(player.id) + "_y", pong_data['HEIGHT'] / 2 - pong_data['PADDLE_HEIGHT'] / 2)
     
 
     print("AI player created. Send request to AI server.")

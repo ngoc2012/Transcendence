@@ -1,12 +1,13 @@
-# from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from .models import RoomsModel, PlayersModel, PlayerRoomModel, TournamentModel, TournamentMatchModel
-# from django.utils import timezone
+
 import jwt
 from pong.data import pong_data
 import os
 from datetime import datetime, timedelta
+
+from django.core.cache import cache
 
 JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY')
 JWT_REFRESH_SECRET_KEY = os.environ.get('JWT_REFRESH_SECRET_KEY')
@@ -34,8 +35,10 @@ def new_game(request):
         server=owner
     )
     if new_room.game == 'pong':
-        new_room.x = pong_data['PADDLE_WIDTH'] + pong_data['RADIUS']
-        new_room.y = pong_data['HEIGHT'] / 2
+        # new_room.x = pong_data['PADDLE_WIDTH'] + pong_data['RADIUS']
+        # new_room.y = pong_data['HEIGHT'] / 2
+        cache.set(str(new_room.id) + "_x", pong_data['PADDLE_WIDTH'] + pong_data['RADIUS'])
+        cache.set(str(new_room.id) + "_y", pong_data['HEIGHT'] / 2)
     new_room.save()
     player_room = PlayerRoomModel(
         player=owner,
@@ -44,8 +47,10 @@ def new_game(request):
         position=0
     )
     if new_room.game == 'pong':
-        player_room.x = 0
-        player_room.y = pong_data['HEIGHT'] / 2 - pong_data['PADDLE_HEIGHT'] / 2
+        # player_room.x = 0
+        # player_room.y = pong_data['HEIGHT'] / 2 - pong_data['PADDLE_HEIGHT'] / 2
+        cache.set(str(new_room.id) + "_x", 0)
+        cache.set(str(new_room.id) + "_" + str(owner.id) + "_y", pong_data['HEIGHT'] / 2 - pong_data['PADDLE_HEIGHT'] / 2)
     player_room.save()
     return (JsonResponse({
         'id': str(new_room),
@@ -99,10 +104,13 @@ def join(request):
         position=position
     )
     if room.game == 'pong':
-        player_room.x = position * pong_data['PADDLE_WIDTH'] + position * pong_data['PADDLE_DISTANCE']
+        # player_room.x = position * pong_data['PADDLE_WIDTH'] + position * pong_data['PADDLE_DISTANCE']
+        cache.set(str(room.id) + "_" + str(player.id) + "_x", position * pong_data['PADDLE_WIDTH'] + position * pong_data['PADDLE_DISTANCE'])
         if side == 1:
-            player_room.x = pong_data['WIDTH'] - player_room.x - pong_data['PADDLE_WIDTH']
-        player_room.y = pong_data['HEIGHT'] / 2 - pong_data['PADDLE_HEIGHT'] / 2
+            # player_room.x = pong_data['WIDTH'] - player_room.x - pong_data['PADDLE_WIDTH']
+            cache.set(str(room.id) + "_" + str(player.id) + "_x", pong_data['WIDTH'] - player_room.x - pong_data['PADDLE_WIDTH'])
+        # player_room.y = pong_data['HEIGHT'] / 2 - pong_data['PADDLE_HEIGHT'] / 2
+        cache.set(str(room.id) + "_" + str(player.id) + "_y", pong_data['HEIGHT'] / 2 - pong_data['PADDLE_HEIGHT'] / 2)
     player_room.save()
     # player.save()
     return (JsonResponse({
@@ -219,10 +227,14 @@ def tournament_join(request):
         position=position
     )
     if room.game == 'pong':
-        player_room.x = position * pong_data['PADDLE_WIDTH'] + position * pong_data['PADDLE_DISTANCE']
+        #player_room.x = position * pong_data['PADDLE_WIDTH'] + position * pong_data['PADDLE_DISTANCE']
+        #if side == 1:
+        #    player_room.x = pong_data['WIDTH'] - player_room.x - pong_data['PADDLE_WIDTH']
+        #player_room.y = pong_data['HEIGHT'] / 2 - pong_data['PADDLE_HEIGHT'] / 2
+        cache.set(str(room.id) + "_" + str(player.id) + "_x", position * pong_data['PADDLE_WIDTH'] + position * pong_data['PADDLE_DISTANCE'])
         if side == 1:
-            player_room.x = pong_data['WIDTH'] - player_room.x - pong_data['PADDLE_WIDTH']
-        player_room.y = pong_data['HEIGHT'] / 2 - pong_data['PADDLE_HEIGHT'] / 2
+            cache.set(str(room.id) + "_" + str(player.id) + "_x", pong_data['WIDTH'] - player_room.x - pong_data['PADDLE_WIDTH'])
+        cache.set(str(room.id) + "_" + str(player.id) + "_y", pong_data['HEIGHT'] / 2 - pong_data['PADDLE_HEIGHT'] / 2)
     player_room.save()
     player.save()
     return (JsonResponse({

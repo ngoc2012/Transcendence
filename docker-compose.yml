@@ -34,6 +34,7 @@ services:
       - network
     depends_on:
       - db
+      - redis
   
   db:
     image: postgres:latest 
@@ -59,19 +60,24 @@ services:
       - ganache_db:/ganache_db
     networks:
       - network
+    profiles:
+      - donotstart
 
   blockchain:
-      container_name: blockchain
-      build:
-        context: ./blockchain
-        dockerfile: Dockerfile
-      restart: always
-      ports:
-        - "9000:9000"
-      volumes:
-        - blockchain_data:/app
-      networks:
-        - network
+    container_name: blockchain
+    build:
+      context: ./blockchain
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "9000:9000"
+    volumes:
+      - blockchain_data:/app
+    networks:
+      - network
+    profiles:
+    - donotstart
+    
   ai:
     container_name: ai
     build:
@@ -92,6 +98,7 @@ services:
       context: ./redis
       dockerfile: Dockerfile
       no_cache: false
+    privileged: true
     restart: always
     env_file:
      - .env
