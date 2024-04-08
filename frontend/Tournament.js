@@ -33,6 +33,46 @@ export class Tournament {
         this.dom_quit_tournament.addEventListener('click', (e) => this.quitTournament())
     }
 
+    eventsLocal() {
+        document.getElementById('playerCount').addEventListener('change', function() {
+            const numberOfPlayers = this.value;
+            const form = document.getElementById('playerForm');
+            form.innerHTML = '';
+            
+            for (let i = 1; i <= numberOfPlayers; i++) {
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.name = 'player' + i;
+                input.placeholder = 'Player ' + i + ' Nickname';
+                form.appendChild(input);
+                form.appendChild(document.createElement('br'));
+            }
+            
+            if (numberOfPlayers > 0) {
+                const submitButton = document.createElement('button');
+                submitButton.type = 'submit';
+                submitButton.textContent = 'Submit';
+                form.appendChild(submitButton);
+            }
+        });
+        
+        document.getElementById('playerForm').addEventListener('submit', function(event) {
+            const inputs = this.querySelectorAll('input[type="text"]');
+            let allFilled = true;
+            inputs.forEach(input => {
+                if (input.value === '') {
+                    allFilled = false;
+                }
+            });
+        
+            if (!allFilled) {
+                event.preventDefault();
+                alert('Please fill out all player nicknames.');
+            }
+        });
+        
+    }
+
     eventsStart() {
         this.main.checkcsrf();
         this.dom_matches = document.getElementById('tournament-matches');
@@ -45,25 +85,22 @@ export class Tournament {
         }
         this.dom_lobby_tournament = document.getElementById('Lobby');
         this.dom_lobby_tournament.addEventListener('click', (e) => this.backToLobby())
+        this.dom_quit_tournament = document.getElementById('quit-tournament');
+        this.dom_quit_tournament.addEventListener('click', (e) => this.quitTournament())
     }
     
     tournamentSubmit(event) {
         event.preventDefault();
 
+        let formData = {
+            name: document.getElementById('tname').value,
+            game: document.getElementById('game').value,
+            login: this.main.login,
+            local: 'false'
+        };
+        
         if (document.getElementById('local').checked) {
-            const formData = {
-                name: document.getElementById('tname').value,
-                game: document.getElementById('game').value,
-                login: this.main.login,
-                local: 'true'
-            };
-        } else {
-            const formData = {
-                name: document.getElementById('tname').value,
-                game: document.getElementById('game').value,
-                login: this.main.login,
-                local: 'false'
-            };
+            formData.local = 'true';
         }
 
         var csrftoken = this.main.getCookie('csrftoken');
@@ -77,9 +114,10 @@ export class Tournament {
                     'X-CSRFToken': csrftoken,
                 },
                 success: (response) => {
+                    console.log(response);
                     if (response.local) {
                         this.id = response.id;
-                        this.main.load('/tournament/local', () => this.eventsLobby());
+                        this.main.load('/tournament/local', () => this.eventsLocal());
                     } else {
                         this.id = response.id;
                         this.main.load('/tournament/lobby', () => this.eventsLobby());
@@ -368,16 +406,20 @@ export class Tournament {
     }
 
     quitTournament() {
-        this.main.lobby.socket.send(JSON.stringify({
-            type: 'tournament-quit',
-            tour_id: this.id,
-        }));
-        this.id = -1;
-        this.game = null;
-        this.ready = -1;
-        this.final = 0;
-        this.lobby.tournament = null;
-        this.main.load('/lobby', () => this.main.lobby.events());
+    const confirmQuit = confirm("Warning: Quitting the tournament will end tournament for every player. Are you sure?");
+    
+    if (confirmQuit) {
+            this.main.lobby.socket.send(JSON.stringify({
+                type: 'tournament-quit',
+                tour_id: this.id,
+            }));
+            this.id = -1;
+            this.game = null;
+            this.ready = -1;
+            this.final = 0;
+            this.lobby.tournament = null;
+            this.main.load('/lobby', () => this.main.lobby.events());
+        } 
     }
 
     backToLobby() {

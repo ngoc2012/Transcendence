@@ -317,6 +317,8 @@ class RoomsConsumer(AsyncWebsocketConsumer):
                 'type': 'tournament_ready',
                 'status': 'tournamentOK',
             }))
+        else:
+            await self.send(text_data=json.dumps({"type": "error_nf"}))
     
     async def close_connection(self, data):
         await self.send(text_data=json.dumps({
@@ -327,12 +329,14 @@ class RoomsConsumer(AsyncWebsocketConsumer):
     async def quit_tournament(self, data):
         tourId = data.get('tour_id')
         tournament = await get_tournament(tourId)
-        if tournament and self.user.login == tournament.owner.login:
+        if tournament and self.user in await get_tournament_players(tournament) or self.user == tournament.owner:
             name = tournament.name
             url = f"http://blockchain:9000/delete_tournament/{name}"
             response = requests.get(url)
             response.raise_for_status()
             await database_sync_to_async(tournament.delete)()
+        else:
+            await self.send(text_data=json.dumps({"type": "error_nf"}))
 
     async def update_match_result(self, data):
         roomId = data.get('roomid')

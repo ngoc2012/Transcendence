@@ -308,6 +308,9 @@ export class Lobby
                 if (this.tournament)
                     this.tournament.winnerDisplay(data);
             }
+            else if (data.type === 'error_nf') {
+                this.main.load('/tournament/lobby', () => this.eventsLobby());
+            }
             else {
                 const rooms = JSON.parse(e.data);
                 var options_rooms = this.dom_rooms && this.dom_rooms.options;
