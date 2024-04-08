@@ -306,41 +306,70 @@ def callback(request):
         })
 
         user_data = user_response.json()
-        hashed_password = make_password('password')
-        if not PlayersModel.objects.filter(login=user_data['login']).exists():
-            new_player = PlayersModel(
-                login=user_data['login'],
-                password=hashed_password,
-                name=user_data['usual_full_name'],
-                email=user_data['email'],
-                secret_2fa=''
-            )
-            new_player.save()
 
-        player = PlayersModel.objects.get(login=user_data['login'])
+#       essayer de connecter sinon creer : 
+        user = authenticate(username=user_data['login'], password='')
 
-        access_token, refresh_token = generate_jwt_tokens(player.id)
-        player.acc = access_token
-        player.ref = refresh_token
+        if user is not None:
+            enable2fa = 'true' if getattr(user, 'secret_2fa', '') else 'false'
 
-        ws_token = player.generate_ws_token()
-        player.secret_2fa = ''
-        player.save()
+            access_token, refresh_token = generate_jwt_tokens(user.id)
 
-        response = render(request, 'index.html', {
-            'my42login': user_data['login'],
-            'my42name': user_data['usual_full_name'],
-            'my42email': user_data['email'],
-            'ws': ws_token
-        })
+            user.acc = access_token
+            user.ref = refresh_token
+            user.save()
+
+            ws_token = user.generate_ws_token()
+
+            response = {
+                'my42login': user.username,
+                'my42name': user.name,
+                'my42email': user.email,
+                'my42enable2fa': enable2fa,
+                'my42ws': ws_token
+            }
+
+            response = render(request, 'index.html', response)
+            response.set_cookie('refresh_token', refresh_token, httponly=True, samesite='Lax', secure=True)
+            response.set_cookie('access_token', access_token, httponly=True, samesite='Lax', secure=True)
+
+            return response
+
+        User = get_user_model()
+        user = User.objects.create_user(
+            username=user_data['login'],
+            email=user_data['email'],
+            password='',
+            name=user_data['usual_full_name'],
+        )
+
+        access_token, refresh_token = generate_jwt_tokens(user.id)
+        user.acc = access_token
+        user.ref = refresh_token
+
+        ws_token = user.generate_ws_token()
+        enable2fa = 'false'
+        user.secret_2fa = pyotp.random_base32() if enable2fa else ''
+        user.save()
+        
+        response = {
+            'my42login': user.username,
+            'my42name': user.name,
+            'my42email': user.email,
+            'my42enable2fa': enable2fa,
+            'my42ws': ws_token
+        }
+
+        response = render(request, 'index.html', response)
         response.set_cookie('refresh_token', refresh_token, httponly=True, samesite='Lax', secure=True)
         response.set_cookie('access_token', access_token, httponly=True, samesite='Lax', secure=True)
-        return response
 
+        return response
     except Exception as e:
         print(f"An error occurred: {e}")
         return HttpResponse("An error occurred.")
-    
+
+
 def logout(request):
     user = request.user
     user.acc = ''
