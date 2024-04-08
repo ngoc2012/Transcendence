@@ -373,32 +373,32 @@ def new_tournament(request):
     name = request.POST.get('name')
     game = request.POST.get('game')
     try:
-            if TournamentModel.objects.filter(name=name).exists():
-                return JsonResponse({'error': 'A tournament with the same name already exists'}, status=400)
+        if TournamentModel.objects.filter(name=name).exists():
+            return JsonResponse({'error': 'A tournament with the same name already exists'}, status=400)
 
         owner = PlayersModel.objects.get(username=request.user.username)
         tournament = TournamentModel.objects.create(name=name, game=game, owner=owner)
         tournament.participants.add(owner)
         tournament.save()
 
-            url = f"http://blockchain:9000/add_tournament/{name}"
-            response = requests.post(url)
-            response.raise_for_status()
+        url = f"http://blockchain:9000/add_tournament/{name}"
+        response = requests.post(url)
+        response.raise_for_status()
 
-            player_data = {
-                'id': player.id,
-                'login': player.login,
-                'elo': player.elo,
-            }
-            url = f"http://blockchain:9000/add_player/"
-            data = {"name": name, "player": player_data}
-            response = requests.post(url, json=data)
-            response.raise_for_status()
+        player_data = {
+            'id': owner.id,
+            'login': owner.login,
+            'elo': owner.elo,
+        }
+        url = f"http://blockchain:9000/add_player/"
+        data = {"name": name, "player": player_data}
+        response = requests.post(url, json=data)
+        response.raise_for_status()
 
         return JsonResponse({'message': 'Tournament created successfully', 'id': str(tournament.id)}, status=200)
-        except requests.exceptions.RequestException as e:
-            print(f"Error calling add_tournament_route: {e}")
-            return JsonResponse({'error': 'Failed to interact with blockchain'}, status=500)
+    except requests.exceptions.RequestException as e:
+        print(f"Error calling add_tournament_route: {e}")
+        return JsonResponse({'error': 'Failed to interact with blockchain'}, status=500)
     except ObjectDoesNotExist:
         return JsonResponse({'error': 'Owner not found'}, status=404)
     except IntegrityError as e:
