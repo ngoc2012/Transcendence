@@ -47,13 +47,6 @@ def action(request, room_id, player_id, action):
             cache.set(k_player_y, y - pong_data['STEP'])
             if not room.started and server == player:
                 cache.set(room_id + "_y", cache.get(room_id + "_y") - pong_data['STEP'])
-        # if player.y > 0:
-        #     player.y -= pong_data['STEP']
-        #     player.save()
-        #     if not room.started and server == player:
-        #         room = RoomsModel.objects.get(id=room_id)
-        #         room.y -= pong_data['STEP']
-        #         room.save()
     elif action == 'down':
         k_player_y = room_id + "_" + str(player.id) + "_y"
         y = cache.get(k_player_y)
@@ -61,13 +54,6 @@ def action(request, room_id, player_id, action):
             cache.set(k_player_y, y + pong_data['STEP'])
             if not room.started and server == player:
                 cache.set(room_id + "_y", cache.get(room_id + "_y") + pong_data['STEP'])
-        # if player.y < pong_data['HEIGHT'] - pong_data['PADDLE_HEIGHT']:
-        #     player.y += pong_data['STEP']
-        #     player.save()
-        #     if not room.started and server == player:
-        #         room = RoomsModel.objects.get(id=room_id)
-        #         room.y += pong_data['STEP']
-        #         room.save()
     elif action == 'left':
         k_player_x = room_id + "_" + str(player.id) + "_x"
         x = cache.get(k_player_x)

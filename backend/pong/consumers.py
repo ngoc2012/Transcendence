@@ -124,7 +124,7 @@ class PongConsumer(AsyncWebsocketConsumer):
             # print(cache.get(self.k_x), cache.get(self.k_y))
             await asyncio.sleep(0.04)
             players = cache.get(self.k_all)
-            if not len(players):
+            if players == None or len(players) == 0:
                 await quit(self)
                 await self.channel_layer.group_send(self.room_id, {'type': 'teams_data'})
                 return
