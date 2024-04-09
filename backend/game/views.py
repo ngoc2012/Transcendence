@@ -17,49 +17,6 @@ def get_data(game):
         return pong_data
     return {}
 
-@csrf_exempt
-def new_game(request):
-    if 'game' not in request.POST:
-        return (HttpResponse("Error: No game!"))
-    if 'login' not in request.POST:
-        return (HttpResponse("Error: No login!"))
-    if 'name' not in request.POST:
-        return (HttpResponse("Error: No name!"))
-    if not PlayersModel.objects.filter(login=request.POST['login']).exists():
-        return (HttpResponse("Error: Login '" + request.POST['login'] + "' does not exist!"))
-    owner = PlayersModel.objects.get(login=request.POST['login'])
-    new_room = RoomsModel(
-        game=request.POST['game'],
-        name=request.POST['name'],
-        owner=owner,
-        server=owner
-    )
-    if new_room.game == 'pong':
-        cache.set(str(new_room.id) + "_x", pong_data['PADDLE_WIDTH'] + pong_data['RADIUS'])
-        cache.set(str(new_room.id) + "_y", pong_data['HEIGHT'] / 2)
-    new_room.save()
-    if new_room.game == 'pong':
-        cache.set(str(new_room.id) + "_" + str(owner.id) + "_x", 0)
-        cache.set(str(new_room.id) + "_" + str(owner.id) + "_y", pong_data['HEIGHT'] / 2 - pong_data['PADDLE_HEIGHT'] / 2)
-    return (JsonResponse({
-        'id': str(new_room),
-        'game': new_room.game,
-        'name': new_room.name,
-        'player_id': str(owner.id),
-        'data': get_data(new_room.game)
-        }))
-
-@csrf_exempt
-def update(request):
-    data = [
-        {
-            "id": str(i),
-            "name": i.name
-        } for i in RoomsModel.objects.all()
-    ]
-    # print(data)
-    return JsonResponse(data, safe=False)
-
 def add_player_to_room(game_id, login):
     if not RoomsModel.objects.filter(id=game_id).exists():
         return None, None
@@ -75,21 +32,64 @@ def add_player_to_room(game_id, login):
     team1 = cache.get(k_team1)
     n0 = len(team0)
     n1 = len(team1)
-    if n1 > n0:
+    if n1 >= n0:
         cache.set(k_team0, team0.append(player.id))
         position = n0
     else:
         cache.set(k_team1, team1.append(player.id))
         position = n1
-    team1 = cache.get(k_team1)
+    team0 = cache.get(k_team0)
     if room.game == 'pong':
         k_player_x = str(room.id) + "_" + str(player.id) + "_x"
         k_player_y = str(room.id) + "_" + str(player.id) + "_y"
-        cache.set(k_player_x, position * pong_data['PADDLE_WIDTH'] + position * pong_data['PADDLE_DISTANCE'])
-        if player.id in team1:
+        if player.id in team0:
+            cache.set(k_player_x, position * pong_data['PADDLE_WIDTH'] + position * pong_data['PADDLE_DISTANCE'])
+        else:
             cache.set(k_player_x, pong_data['WIDTH'] - cache.get(k_player_x) - pong_data['PADDLE_WIDTH'])
         cache.set(k_player_y, pong_data['HEIGHT'] / 2 - pong_data['PADDLE_HEIGHT'] / 2)
     return room, player
+
+@csrf_exempt
+def new_game(request):
+    if 'game' not in request.POST:
+        return (HttpResponse("Error: No game!"))
+    if 'login' not in request.POST:
+        return (HttpResponse("Error: No login!"))
+    if 'name' not in request.POST:
+        return (HttpResponse("Error: No name!"))
+    if not PlayersModel.objects.filter(login=request.POST['login']).exists():
+        return (HttpResponse("Error: Login '" + request.POST['login'] + "' does not exist!"))
+    room = RoomsModel(
+        game=request.POST['game'],
+        name=request.POST['name'],
+    )
+    room.save()
+    if room.game == 'pong':
+        cache.set(str(room.id) + "_x", pong_data['PADDLE_WIDTH'] + pong_data['RADIUS'])
+        cache.set(str(room.id) + "_y", pong_data['HEIGHT'] / 2)
+        cache.set(str(room.id) + "_team0", [])
+        cache.set(str(room.id) + "_team1", [])
+        room, player = add_player_to_room(room.id, request.POST['login'])
+    return (JsonResponse({
+        'id': str(room),
+        'game': room.game,
+        'name': room.name,
+        'player_id': player.id,
+        'data': get_data(room.game)
+        }))
+
+@csrf_exempt
+def update(request):
+    data = [
+        {
+            "id": str(i),
+            "name": i.name
+        } for i in RoomsModel.objects.all()
+    ]
+    # print(data)
+    return JsonResponse(data, safe=False)
+
+
 
 @csrf_exempt
 def join(request):

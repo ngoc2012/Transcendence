@@ -21,8 +21,8 @@ def set_power_play(consumer):
 def game_init(consumer):
     if cache.get(consumer.k_all) == None:
         print("Game init")
-        cache.set(consumer.k_team0, [consumer.player.id])
-        cache.set(consumer.k_team1, [])
+        # cache.set(consumer.k_team0, [consumer.player.id])
+        # cache.set(consumer.k_team1, [])
         cache.set(consumer.k_all, [consumer.player.id])
         cache.set(consumer.k_server, consumer.player.id)
         cache.set(consumer.k_started, False)
