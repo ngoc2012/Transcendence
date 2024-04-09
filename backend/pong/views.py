@@ -4,10 +4,7 @@ from game.models import RoomsModel, PlayerRoomModel
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 
 from .data import pong_data
-# import json
-# import os
-
-# from django.conf import settings
+from django.core.cache import cache
 
 def index(request):
     return render(request, "pong.html")
@@ -25,56 +22,68 @@ def action(request, room_id, player_id, action):
         except ObjectDoesNotExist:
             return HttpResponse("error")
         return JsonResponse({
-            'ai_player': room.ai_player,
-            'power_play': room.power,
-            'ball': {'x': room.x, 'y':room.y},
+            'ai_player': cache.get(room_id + "_ai"),
+            'power_play': cache.get(room_id + "_pow"),
+            'ball': {'x': cache.get(room_id + "_x"), 'y':cache.get(room_id + "_y")},
             'side': {i.player.login: i.side for i in players},
-            'dx': room.dx,
+            'dx': cache.get(room_id + "_dx"),
             'started': room.started,
-            'x': {i.player.login: i.x for i in players},
-            'y': {i.player.login: i.y for i in players},
-            'players': [{'x': i.x, 'y': i.y} for i in players]
+            'x': {i.player.login: cache.get(room_id + "_" + str(i.id) + "_x") for i in players},
+            'y': {i.player.login: cache.get(room_id + "_" + str(i.id) + "_y") for i in players},
+            'players': [{'x': cache.get(room_id + "_" + str(i.id) + "_x"),
+                         'y': cache.get(room_id + "_" + str(i.id) + "_y")} for i in players]
         })
     try:
-        player, server = PlayerRoomModel.objects.get(player=player_id), PlayerRoomModel.objects.get(player=room.server)
+        player, server =    PlayerRoomModel.objects.get(room=room_id, player=player_id), \
+                            PlayerRoomModel.objects.get(room=room_id, player=room.server)
     except MultipleObjectsReturned:
         return HttpResponse("error")
     except ObjectDoesNotExist:
         return HttpResponse("error")
     if action == 'up':
-        if player.y > 0:
-            player.y -= pong_data['STEP']
-            player.save()
+        k_player_y = room_id + "_" + str(player.id) + "_y"
+        y = cache.get(k_player_y)
+        if y > 0:
+            cache.set(k_player_y, y - pong_data['STEP'])
             if not room.started and server == player:
-                room = RoomsModel.objects.get(id=room_id)
-                room.y -= pong_data['STEP']
-                room.save()
+                cache.set(room_id + "_y", cache.get(room_id + "_y") - pong_data['STEP'])
+        # if player.y > 0:
+        #     player.y -= pong_data['STEP']
+        #     player.save()
+        #     if not room.started and server == player:
+        #         room = RoomsModel.objects.get(id=room_id)
+        #         room.y -= pong_data['STEP']
+        #         room.save()
     elif action == 'down':
-        if player.y < pong_data['HEIGHT'] - pong_data['PADDLE_HEIGHT']:
-            player.y += pong_data['STEP']
-            player.save()
+        k_player_y = room_id + "_" + str(player.id) + "_y"
+        y = cache.get(k_player_y)
+        if y < pong_data['HEIGHT'] - pong_data['PADDLE_HEIGHT']:
+            cache.set(k_player_y, y + pong_data['STEP'])
             if not room.started and server == player:
-                room = RoomsModel.objects.get(id=room_id)
-                room.y += pong_data['STEP']
-                room.save()
+                cache.set(room_id + "_y", cache.get(room_id + "_y") + pong_data['STEP'])
+        # if player.y < pong_data['HEIGHT'] - pong_data['PADDLE_HEIGHT']:
+        #     player.y += pong_data['STEP']
+        #     player.save()
+        #     if not room.started and server == player:
+        #         room = RoomsModel.objects.get(id=room_id)
+        #         room.y += pong_data['STEP']
+        #         room.save()
     elif action == 'left':
-        if  (player.side == 0 and player.x > 0) \
-            or (player.side == 1 and player.x > 3 * pong_data['WIDTH'] / 4):
-            player.x -= pong_data['STEP_X']
-            player.save()
+        k_player_x = room_id + "_" + str(player.id) + "_x"
+        x = cache.get(k_player_x)
+        if (player.side == 0 and x > 0) \
+            or (player.side == 1 and x > 3 * pong_data['WIDTH'] / 4):
+            cache.set(k_player_x, x - pong_data['STEP_X'])
             if not room.started and server == player:
-                room = RoomsModel.objects.get(id=room_id)
-                room.x -= pong_data['STEP']
-                room.save()
+                cache.set(room_id + "_x", cache.get(room_id + "_x") - pong_data['STEP_X'])
     elif action == 'right':
-        if (player.side == 0 and player.x < pong_data['WIDTH'] / 4 - pong_data['PADDLE_WIDTH']) \
-            or (player.side == 1 and player.x < pong_data['WIDTH'] - pong_data['PADDLE_WIDTH']):
-            player.x += pong_data['STEP_X']
-            player.save()
+        k_player_x = room_id + "_" + str(player.id) + "_x"
+        x = cache.get(k_player_x)
+        if (player.side == 0 and x < pong_data['WIDTH'] / 4 - pong_data['PADDLE_WIDTH']) \
+            or (player.side == 1 and x < pong_data['WIDTH'] - pong_data['PADDLE_WIDTH']):
+            cache.set(k_player_x, x + pong_data['STEP_X'])
             if not room.started and server == player:
-                room = RoomsModel.objects.get(id=room_id)
-                room.x += pong_data['STEP']
-                room.save()
+                cache.set(room_id + "_x", cache.get(room_id + "_x") + pong_data['STEP_X'])
     async_to_sync(channel_layer.group_send)(room_id, {'type': 'group_data'})
     return HttpResponse("done")
 

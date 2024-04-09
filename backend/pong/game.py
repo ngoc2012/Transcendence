@@ -13,12 +13,6 @@ from django.core.cache import cache
 
 @sync_to_async
 def set_power_play(consumer):
-    # consumer.room = RoomsModel.objects.get(id=consumer.room_id)
-    # if consumer.room.power:
-    #     consumer.room.power = False
-    # else:
-    #     consumer.room.power = True
-    # consumer.room.save()
     if cache.get(consumer.k_pow):
         cache.set(consumer.k_pow, False)
     else:
@@ -26,11 +20,13 @@ def set_power_play(consumer):
 
 @sync_to_async
 def game_init(consumer):
-    if PlayerRoomModel.objects.filter(room=consumer.room_id).count() == 1:
+    if cache.get(consumer.k_all) == None:
         print("Game init")
-        # consumer.ddy = random.choice(consumer.choices)
-        # consumer.room.dy = random.choice([1, -1])
-        # consumer.room.save()
+        cache.set(consumer.k_team0, [consumer.player.id])
+        cache.set(consumer.k_team1, [])
+        cache.set(consumer.k_all, [consumer.player.id])
+        cache.set(consumer.k_server, consumer.player.id)
+        cache.set(consumer.k_started, False)
         cache.set(consumer.k_dx, 1)
         cache.set(consumer.k_ddy, random.choice(consumer.choices))
         cache.set(consumer.k_dy, random.choice([1, -1]))
@@ -41,67 +37,49 @@ def game_init(consumer):
 def get_info(consumer):
     try:
         consumer.room = RoomsModel.objects.get(id=consumer.room_id)
-        consumer.player = PlayerRoomModel.objects.get(room=consumer.room_id, id=consumer.player_id)
-        consumer.server = PlayerRoomModel.objects.get(room=consumer.room_id, player=consumer.room.server)
     except ObjectDoesNotExist:
         print(f"Room with ID {consumer.room_id} does not exist.")   
         return False
     except MultipleObjectsReturned:
+        print(f"Many rooms with ID {consumer.room_id} exist.")  
         return False
-    print(f"Player {consumer.player_id} connected to room {consumer.room_id}.", PlayerRoomModel.objects.filter(room=consumer.room_id).count())
-    # if PlayerRoomModel.objects.filter(room=consumer.room_id).count() < 2:
-    #     return False
+    try:
+        consumer.player = PlayersModel.objects.get(id=consumer.player_id)
+    except ObjectDoesNotExist:
+        print(f"Player with ID {consumer.player_id} does not exist.")   
+        return False
+    except MultipleObjectsReturned:
+        print(f"Many players with ID {consumer.player_id} exist.")  
+        return False
+    print(f"Player {consumer.player_id} connected to room {consumer.room_id}.")
     return True
 
 @sync_to_async
 def get_room_data(consumer):
-    try:
-        players = PlayerRoomModel.objects.filter(room=consumer.room_id)
-        consumer.room = RoomsModel.objects.get(id=consumer.room_id)
-        return json.dumps({
-            'ai_player': cache.get(consumer.k_ai),
-            'power_play': cache.get(consumer.k_pow),
-            #'ball': {'x': consumer.room.x, 'y':consumer.room.y},
-            'ball': {'x': cache.get(consumer.k_x), 'y': cache.get(consumer.k_y)},
-            # 'players': [{'x': i.x, 'y': i.y} for i in players]
-            'players': [{'x': cache.get(str(consumer.room_id) + "_" + str(i.id) + "_x"),
-                         'y': cache.get(str(consumer.room_id) + "_" + str(i.id) + "_y")} for i in players]
-        })
-    except ObjectDoesNotExist:
-        print(f"Room with ID {consumer.room.id} does not exist.")
-        return None
-    except MultipleObjectsReturned:
-        print(f"More than one room with ID {consumer.room.id}.")
-        return None
+    players = cache.get(consumer.k_all)
+    return json.dumps({
+        'ai_player': cache.get(consumer.k_ai),
+        'power_play': cache.get(consumer.k_pow),
+        'ball': {'x': cache.get(consumer.k_x), 'y': cache.get(consumer.k_y)},
+        'players': [{'x': cache.get(str(consumer.room_id) + "_" + str(i) + "_x"),
+                     'y': cache.get(str(consumer.room_id) + "_" + str(i) + "_y")} for i in players]
+    })
 
 @sync_to_async
 def get_teams_data(consumer, room_id):
-    try:
-        consumer.room = RoomsModel.objects.get(id=consumer.room_id)
-    except RoomsModel.DoesNotExist:
-        print(f"Room with ID {room_id} does not exist.")
-        return None
-    try:
-        consumer.player = PlayerRoomModel.objects.get(room=room_id, id=consumer.player_id)
-        consumer.server = PlayerRoomModel.objects.get(room=room_id, player=consumer.room.server)
-        players0 = PlayerRoomModel.objects.filter(room=room_id, side=0)
-        players1 = PlayerRoomModel.objects.filter(room=room_id, side=1)
-    except MultipleObjectsReturned:
-        return None
+    team0 = cache.get(consumer.k_team0)
+    team1 = cache.get(consumer.k_team1)
     return json.dumps({
-        'team0': [i.player.name for i in players0],
-        'team1': [i.player.name for i in players1]
+        'team0': [PlayersModel.objects.get(id=i).name for i in team0],
+        'team1': [PlayersModel.objects.get(id=i).name for i in team1]
         })
 
 @sync_to_async
 def get_score_data(consumer):
-    # room = RoomsModel.objects.get(id=room_id)
-    # return json.dumps({ 'score': [room.score0, room.score1] })
     return json.dumps({ 'score': [cache.get(consumer.k_score0), cache.get(consumer.k_score1)] })
 
 @sync_to_async
 def get_win_data(consumer):
-    # room = RoomsModel.objects.get(id=consumer.room_id)
     winner = ''
     winning_score = 0
     score0 = cache.get(consumer.k_score0)
@@ -121,52 +99,36 @@ def get_win_data(consumer):
     })
 
 @sync_to_async
-def start_game(consumer):
-    try:
-        consumer.room = RoomsModel.objects.get(id=consumer.room_id)
-        consumer.server = PlayerRoomModel.objects.get(room=consumer.room_id, player=consumer.room.server)
-    except ObjectDoesNotExist:
-        return False
-    except MultipleObjectsReturned:
-        return False
-    consumer.room.started = True
-    consumer.room.save()
-    return True
-
-@sync_to_async
 def end_game(consumer):
     # print(f"Ending game in room {consumer.room_id}.")
-    if consumer.room.x <= 0:
-        consumer.room.score1 += 1
+    if cache.get(consumer.k_x) <= 0:
         cache.set(consumer.k_score1, cache.get(consumer.k_score1) + 1)
     else:
-        consumer.room.score0 += 1
         cache.set(consumer.k_score0, cache.get(consumer.k_score0) + 1)
-    consumer.room.started = False
-    consumer.room.save()
+    cache.set(consumer.k_started, False)
     change_server(consumer)
 
 @sync_to_async
 def quit(consumer):
-    if PlayerRoomModel.objects.filter(room=consumer.room_id).count() == 0:
+    all = cache.get(consumer.k_all)
+    if len(all) == 0:
         return
-    if PlayerRoomModel.objects.filter(room=consumer.room_id).count() == 1:
-        for i in ['x', 'y', 'dx', 'dy', 'ddy', 'ai', 'pow', 'score0', 'score1']:
+    if len(all) == 1:
+        for i in ['x', 'y', 'dx', 'dy', 'ddy', 'ai', 'pow', 'score0', 'score1', 'started', 'server', 'team0', 'team1', 'all']:
             cache.delete(getattr(consumer, "k_" + i))
         for i in ['x', 'y']:
             cache.delete(getattr(consumer, "k_player_" + i))
         consumer.room.delete()
         return
-    if PlayerRoomModel.objects.filter(room=consumer.room_id).count() == 2 and consumer.room.ai_player:
-        consumer.room.ai_player = False
-        consumer.room.save()
-        try:
-            player = PlayersModel.objects.get(login='ai')
-        except PlayersModel.DoesNotExist:
-            print("Error: AI player not found.")
-        PlayerRoomModel.objects.get(room=consumer.room.id, player=player.id).delete()
+    if len(all) == 2 and cache.get(consumer.k_ai):
+        # cache.set(consumer.k_ai, False)
+        # try:
+        #     player = PlayersModel.objects.get(login='ai')
+        # except PlayersModel.DoesNotExist:
+        #     print("Error: AI player not found.")
+        # PlayerRoomModel.objects.get(room=consumer.room.id, player=player.id).delete()
         # time.sleep(1.01)
-        for i in ['x', 'y', 'dx', 'dy', 'ddy', 'ai', 'pow', 'score0', 'score1']:
+        for i in ['x', 'y', 'dx', 'dy', 'ddy', 'ai', 'pow', 'score0', 'score1', 'started', 'server', 'team0', 'team1', 'all']:
             cache.delete(getattr(consumer, "k_" + i))
         for i in ['x', 'y']:
             cache.delete(getattr(consumer, "k_player_" + i))
@@ -186,45 +148,25 @@ def remove_player(consumer):
         consumer.player.delete()
 
 @sync_to_async
-def check_player(consumer):
-    try:
-        consumer.player = PlayerRoomModel.objects.get(room=consumer.room_id, id=consumer.player_id)
-    except ObjectDoesNotExist:
-        return False
-    if (consumer.player == None):
-        return False
-    return True
-
-@sync_to_async
 def change_side(consumer):
-    if consumer.player.side == 0:
-        consumer.player.side = 1
-        #consumer.player.x = pong_data['WIDTH'] - consumer.player.x - pong_data['PADDLE_WIDTH']
-        consumer.player.save()
+    team0 = cache.get(consumer.k_team0)
+    team1 = cache.get(consumer.k_team1)
+    server = cache.get(consumer.k_server)
+    started = cache.get(consumer.k_started)
+    if consumer.player_id in team0:
+        cache.set(consumer.k_team0, team0.remove(consumer.player_id))
+        cache.set(consumer.k_team1, team1.append(consumer.player_id))
         cache.set(consumer.k_player_x, pong_data['WIDTH'] - consumer.player.x - pong_data['PADDLE_WIDTH'])
-        if not consumer.room.started and consumer.server == consumer.player:
-            consumer.server = PlayerRoomModel.objects.get(room=consumer.room_id, player=consumer.room.server)
-            #consumer.room.x = consumer.server.x - pong_data['RADIUS']
-            #consumer.room.y = consumer.server.y + pong_data['PADDLE_HEIGHT'] / 2
-            #consumer.room.dx = -1
-            #consumer.room.dy = random.choice([1, -1])
-            consumer.room.save()
+        if not started and consumer.player_id == server:
             cache.set(consumer.k_x, consumer.server.x - pong_data['RADIUS'])
             cache.set(consumer.k_y, consumer.server.y + pong_data['PADDLE_HEIGHT'] / 2)
             cache.set(consumer.k_dx, -1)
             cache.set(consumer.k_dy, random.choice([1, -1]))
     else:
         consumer.player.side = 0
-        #consumer.player.x = pong_data['WIDTH'] - consumer.player.x - pong_data['PADDLE_WIDTH']
         consumer.player.save()
         cache.set(consumer.k_player_x, pong_data['WIDTH'] - consumer.player.x - pong_data['PADDLE_WIDTH'])
-        if not consumer.room.started and consumer.server == consumer.player:
-            consumer.server = PlayerRoomModel.objects.get(room=consumer.room_id, player=consumer.room.server)
-            # consumer.room.x = consumer.server.x + pong_data['PADDLE_WIDTH'] + pong_data['RADIUS']
-            # consumer.room.y = consumer.server.y + pong_data['PADDLE_HEIGHT'] / 2
-            # consumer.room.dx = 1
-            # consumer.room.dy = random.choice([1, -1])
-            consumer.room.save()
+        if not started and consumer.player_id == server:
             cache.set(consumer.k_x, consumer.server.x + pong_data['PADDLE_WIDTH'] + pong_data['RADIUS'])
             cache.set(consumer.k_y, consumer.server.y + pong_data['PADDLE_HEIGHT'] / 2)
             cache.set(consumer.k_dx, 1)
@@ -234,31 +176,33 @@ def change_side(consumer):
 def change_server_async(consumer):
     change_server(consumer)
 
+def random_choice(a, exclude):
+    if len(a) == 1:
+        return a[0]
+    filtered = [e for e in a if e != exclude]
+    return random.choice(filtered)
+
 def change_server(consumer):
     print(f"Changing server in room {consumer.room_id}.")
-    if (PlayerRoomModel.objects.filter(room=consumer.room_id).count() > 1):
-        condition = ~Q(id=consumer.server.id)
-        consumer.server = PlayerRoomModel.objects.get(condition, room=consumer.room_id)
-    else:
-        consumer.server = PlayerRoomModel.objects.filter(room=consumer.room_id).first()
-    consumer.room.server = consumer.server.player
-    if consumer.server.side == 0:
-        #consumer.room.x = consumer.server.x + pong_data['PADDLE_WIDTH'] + pong_data['RADIUS']
-        #consumer.room.y = consumer.server.y + pong_data['PADDLE_HEIGHT'] / 2
-        #consumer.room.dx = 1
-        #consumer.room.dy = random.choice([1, -1])
-        cache.set(consumer.k_x, consumer.server.x + pong_data['PADDLE_WIDTH'] + pong_data['RADIUS'])
-        cache.set(consumer.k_y, consumer.server.y + pong_data['PADDLE_HEIGHT'] / 2)
+    # if (PlayerRoomModel.objects.filter(room=consumer.room_id).count() > 1):
+    #     condition = ~Q(id=consumer.server.id)
+    #     consumer.server = PlayerRoomModel.objects.get(condition, room=consumer.room_id)
+    #     cache.set(consumer.k_server, consumer.server.id)
+    # else:
+    #     consumer.server = PlayerRoomModel.objects.filter(room=consumer.room_id).first()
+    # consumer.room.server = consumer.server.player
+    server = random_choice(cache.get(consumer.k_all), cache.get(consumer.k_server))
+    cache.set(consumer.k_server, server)
+    x_server = cache.get(consumer.room_id + "_" + str(server) + "_x")
+    y_server = cache.get(consumer.room_id + "_" + str(server) + "_y")
+    team0 = cache.get(consumer.k_team0)
+    if server in team0:
+        cache.set(consumer.k_x, x_server + pong_data['PADDLE_WIDTH'] + pong_data['RADIUS'])
+        cache.set(consumer.k_y, y_server + pong_data['PADDLE_HEIGHT'] / 2)
         cache.set(consumer.k_dx, 1)
         cache.set(consumer.k_dy, random.choice([1, -1]))
     else:
-        #consumer.room.x = consumer.server.x - pong_data['RADIUS']
-        #consumer.room.y = consumer.server.y + pong_data['PADDLE_HEIGHT'] / 2
-        #consumer.room.dx = -1
-        #consumer.room.dy = random.choice([1, -1])
-        cache.set(consumer.k_x, consumer.server.x - pong_data['RADIUS'])
-        cache.set(consumer.k_y, consumer.server.y + pong_data['PADDLE_HEIGHT'] / 2)
+        cache.set(consumer.k_x, x_server - pong_data['RADIUS'])
+        cache.set(consumer.k_y, y_server + pong_data['PADDLE_HEIGHT'] / 2)
         cache.set(consumer.k_dx, -1)
         cache.set(consumer.k_dy, random.choice([1, -1]))
-    consumer.room.save()
-    

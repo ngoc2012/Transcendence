@@ -124,7 +124,6 @@ def join(request):
         'data': get_data(room.game)
         }))
 
-
 #delete a room with a JWT check
 @csrf_exempt
 def delete(request):
