@@ -67,7 +67,11 @@ def get_room_data(consumer):
 @sync_to_async
 def get_teams_data(consumer, room_id):
     team0 = cache.get(consumer.k_team0)
+    if team0 == None:
+        team0 = []
     team1 = cache.get(consumer.k_team1)
+    if team1 == None:
+        team1 = []
     return json.dumps({
         'team0': [PlayersModel.objects.get(id=i).name for i in team0],
         'team1': [PlayersModel.objects.get(id=i).name for i in team1]
@@ -128,6 +132,8 @@ def quit(consumer):
         return
     cache.set(consumer.k_all, cache.get(consumer.k_all).remove(consumer.player_id))
     team0 = cache.get(consumer.k_team0)
+    if team0 == None:
+        team0 = []
     if consumer.player_id in team0:
         cache.set(consumer.k_team0, team0.remove(consumer.player_id))
     else:
@@ -138,7 +144,11 @@ def quit(consumer):
 @sync_to_async
 def change_side(consumer):
     team0 = cache.get(consumer.k_team0)
+    if team0 == None:
+        team0 = []
     team1 = cache.get(consumer.k_team1)
+    if team1 == None:
+        team1 = []
     server = cache.get(consumer.k_server)
     started = cache.get(consumer.k_started)
     x_server = cache.get(consumer.room_id + "_" + str(server) + "_x")
@@ -182,6 +192,8 @@ def change_server(consumer):
     x_server = cache.get(consumer.room_id + "_" + str(server) + "_x")
     y_server = cache.get(consumer.room_id + "_" + str(server) + "_y")
     team0 = cache.get(consumer.k_team0)
+    if team0 == None:
+        team0 = []
     if server in team0:
         cache.set(consumer.k_x, x_server + pong_data['PADDLE_WIDTH'] + pong_data['RADIUS'])
         cache.set(consumer.k_y, y_server + pong_data['PADDLE_HEIGHT'] / 2)

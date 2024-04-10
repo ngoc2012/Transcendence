@@ -13,7 +13,7 @@ from django.core.cache import cache
 class PongConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.room_id = self.scope['url_route']['kwargs']['room_id']
-        self.player_id = self.scope['url_route']['kwargs']['player_id'] # 1, 2, 3 ...
+        self.player_id = int(self.scope['url_route']['kwargs']['player_id']) # 1, 2, 3 ...
         self.choices = [0, 5, 10]
         self.room = None
         self.player = None

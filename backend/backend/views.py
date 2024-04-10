@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from game.models import PlayersModel, TournamentModel, TournamentMatchModel, RoomsModel, PlayerRoomModel
+from game.models import PlayersModel, TournamentModel, TournamentMatchModel, RoomsModel
 from django.utils import timezone
 from transchat.models import Room
 from django.shortcuts import redirect

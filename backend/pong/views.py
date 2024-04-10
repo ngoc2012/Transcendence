@@ -1,10 +1,11 @@
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
-from game.models import RoomsModel, PlayerRoomModel
+from game.models import RoomsModel
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 
 from .data import pong_data
 from django.core.cache import cache
+import json
 
 def index(request):
     return render(request, "pong.html")
@@ -19,7 +20,11 @@ def action(request, room_id, player_id, action):
 
     started = cache.get(room_id + "_started")
     team0 = cache.get(room_id + "_team0")
+    if team0 == None:
+        team0 = []
     team1 = cache.get(room_id + "_team1")
+    if team1 == None:
+        team1 = []
     server = cache.get(room_id + "_server")
     x = cache.get(k_x)
     y = cache.get(k_y)

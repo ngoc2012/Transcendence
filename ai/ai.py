@@ -50,7 +50,6 @@ def ai_listener(room_id, player_id):
                         pos[0] = (state['ball']['x'], state['ball']['y'])
                     else:
                         pos.append((state['ball']['x'], state['ball']['y']))
-                    
                 if (player_id in state['team0'] and state['dx'] == -1) or (player_id in state['team1'] and state['dx'] == 1):
                     if state['started']:
                         pos.append((state['ball']['x'], state['ball']['y']))

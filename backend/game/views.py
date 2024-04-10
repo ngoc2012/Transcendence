@@ -1,6 +1,6 @@
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from .models import RoomsModel, PlayersModel, PlayerRoomModel, TournamentModel, TournamentMatchModel
+from .models import RoomsModel, PlayersModel, TournamentModel, TournamentMatchModel
 
 import jwt
 from pong.data import pong_data
@@ -8,6 +8,7 @@ import os
 from datetime import datetime, timedelta
 
 from django.core.cache import cache
+import json
 
 JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY')
 JWT_REFRESH_SECRET_KEY = os.environ.get('JWT_REFRESH_SECRET_KEY')
@@ -29,7 +30,11 @@ def add_player_to_room(game_id, login):
     k_team0 = str(room.id) + "_team0"
     k_team1 = str(room.id) + "_team1"
     team0 = cache.get(k_team0)
+    if team0 == None:
+        team0 = []
     team1 = cache.get(k_team1)
+    if team1 == None:
+        team1 = []
     n0 = len(team0)
     n1 = len(team1)
     if n1 >= n0:
@@ -38,14 +43,13 @@ def add_player_to_room(game_id, login):
     else:
         cache.set(k_team1, team1.append(player.id))
         position = n1
-    team0 = cache.get(k_team0)
     if room.game == 'pong':
         k_player_x = str(room.id) + "_" + str(player.id) + "_x"
         k_player_y = str(room.id) + "_" + str(player.id) + "_y"
-        if player.id in team0:
-            cache.set(k_player_x, position * pong_data['PADDLE_WIDTH'] + position * pong_data['PADDLE_DISTANCE'])
-        else:
-            cache.set(k_player_x, pong_data['WIDTH'] - cache.get(k_player_x) - pong_data['PADDLE_WIDTH'])
+        player_x = position * pong_data['PADDLE_WIDTH'] + position * pong_data['PADDLE_DISTANCE']
+        cache.set(k_player_x, player_x)
+        if player.id not in team0:
+            cache.set(k_player_x, pong_data['WIDTH'] - player_x - pong_data['PADDLE_WIDTH'])
         cache.set(k_player_y, pong_data['HEIGHT'] / 2 - pong_data['PADDLE_HEIGHT'] / 2)
     return room, player
 
