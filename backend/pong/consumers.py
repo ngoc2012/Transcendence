@@ -14,7 +14,7 @@ class PongConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.room_id = self.scope['url_route']['kwargs']['room_id']
         self.player_id = int(self.scope['url_route']['kwargs']['player_id']) # 1, 2, 3 ...
-        self.choices = [0, 5, 10]
+        self.choices = [1, 2, 5, 10]
         self.room = None
         self.player = None
         for i in ['x', 'y', 'dx', 'dy', 'ddy', 'ai', 'pow', 'score0', 'score1', 'started', 'server', 'team0', 'team1', 'all']:
@@ -122,7 +122,7 @@ class PongConsumer(AsyncWebsocketConsumer):
         cache.set(self.k_started, True)
         while True:
             # print(cache.get(self.k_x), cache.get(self.k_y))
-            await asyncio.sleep(0.04)
+            await asyncio.sleep(0.02)
             players = cache.get(self.k_all)
             if players == None or len(players) == 0:
                 await quit(self)

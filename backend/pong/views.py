@@ -1,11 +1,8 @@
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
-from game.models import RoomsModel
-from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 
 from .data import pong_data
 from django.core.cache import cache
-import json
 
 def index(request):
     return render(request, "pong.html")
@@ -33,7 +30,6 @@ def action(request, room_id, player_id, action):
     if started == None:
         return HttpResponse("NULL")
     if action == 'state':
-        # players = cache.get(room_id + "_all")
         return JsonResponse({
             'ai_player': cache.get(room_id + "_ai"),
             'power_play': cache.get(room_id + "_pow"),
@@ -45,7 +41,7 @@ def action(request, room_id, player_id, action):
             'x': player_x,
             'y': player_y,
         })
-    
+    player_id = int(player_id)
     if action == 'up':
         if player_y > 0:
             cache.set(k_player_y, player_y - pong_data['STEP'])

@@ -6,7 +6,6 @@ from .data import pong_data
 import random
 
 from django.core.cache import cache
-import json
 
 @sync_to_async
 def check_collision(consumer):
@@ -25,6 +24,10 @@ def check_collision(consumer):
             if x - pong_data['RADIUS'] == p_x + pong_data['PADDLE_WIDTH'] and y >= p_y and y <= p_y + pong_data['PADDLE_HEIGHT']:
                 cache.set(consumer.k_dx, 1)
                 cache.set(consumer.k_ddy, random.choice(consumer.choices))
+                if p_y + pong_data['PADDLE_HEIGHT'] / 2 > y:
+                    cache.set(consumer.k_dy, -1)
+                else:
+                    cache.set(consumer.k_dy, 1)
     else:
         for p in team1:
             p_x = cache.get(consumer.room_id + "_" + str(p) + "_x")
@@ -32,6 +35,10 @@ def check_collision(consumer):
             if x + pong_data['RADIUS'] == p_x and y >= p_y and y <= p_y + pong_data['PADDLE_HEIGHT']:
                 cache.set(consumer.k_dx, -1)
                 cache.set(consumer.k_ddy, random.choice(consumer.choices))
+                if p_y + pong_data['PADDLE_HEIGHT'] / 2 > y:
+                    cache.set(consumer.k_dy, -1)
+                else:
+                    cache.set(consumer.k_dy, 1)
 
 @sync_to_async
 def update_ball(consumer):
@@ -71,11 +78,12 @@ def left(consumer):
     team0 = cache.get(consumer.k_team0)
     if team0 == None:
         team0 = []
-    if  (consumer.player_id in team0 and x > 0) \
+    print(x, consumer.player_id, team0)
+    if (consumer.player_id in team0 and x > 0) \
         or (consumer.player_id not in team0 and x > 3 * pong_data['WIDTH'] / 4):
-        cache.set(consumer.k_player_x, x - pong_data['STEP'])
+        cache.set(consumer.k_player_x, x - pong_data['STEP_X'])
         if not cache.get(consumer.k_started) and consumer.player_id == cache.get(consumer.k_server):
-            cache.set(consumer.k_x, cache.get(consumer.k_x) - pong_data['STEP'])
+            cache.set(consumer.k_x, cache.get(consumer.k_x) - pong_data['STEP_X'])
 
 @sync_to_async
 def right(consumer):
@@ -87,6 +95,6 @@ def right(consumer):
         team0 = []
     if (consumer.player_id in team0 and x < pong_data['WIDTH'] / 4 - pong_data['PADDLE_WIDTH']) \
         or (consumer.player_id not in team0 and x < pong_data['WIDTH'] - pong_data['PADDLE_WIDTH']):
-        cache.set(consumer.k_player_x, x + pong_data['STEP'])
+        cache.set(consumer.k_player_x, x + pong_data['STEP_X'])
         if not cache.get(consumer.k_started) and consumer.player_id == cache.get(consumer.k_server):
-            cache.set(consumer.k_x, cache.get(consumer.k_x) + pong_data['STEP'])
+            cache.set(consumer.k_x, cache.get(consumer.k_x) + pong_data['STEP_X'])

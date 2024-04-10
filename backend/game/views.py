@@ -1,6 +1,6 @@
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from .models import RoomsModel, PlayersModel, TournamentModel, TournamentMatchModel
+from .models import RoomsModel, PlayersModel, TournamentMatchModel
 
 import jwt
 from pong.data import pong_data
@@ -8,7 +8,6 @@ import os
 from datetime import datetime, timedelta
 
 from django.core.cache import cache
-import json
 
 JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY')
 JWT_REFRESH_SECRET_KEY = os.environ.get('JWT_REFRESH_SECRET_KEY')
@@ -29,20 +28,29 @@ def add_player_to_room(game_id, login):
 
     k_team0 = str(room.id) + "_team0"
     k_team1 = str(room.id) + "_team1"
+    k_players = str(room.id) + "_all"
     team0 = cache.get(k_team0)
     if team0 == None:
         team0 = []
     team1 = cache.get(k_team1)
     if team1 == None:
         team1 = []
+    players = cache.get(k_players)
+    if players == None:
+        players = []
     n0 = len(team0)
     n1 = len(team1)
     if n1 >= n0:
-        cache.set(k_team0, team0.append(player.id))
+        team0.append(player.id)
+        cache.set(k_team0, team0)
         position = n0
     else:
-        cache.set(k_team1, team1.append(player.id))
+        team1.append(player.id)
+        cache.set(k_team1, team1)
         position = n1
+    players.append(player.id)
+    cache.set(k_players, players)
+    print("test", cache.get(k_team0), cache.get(k_team1))
     if room.game == 'pong':
         k_player_x = str(room.id) + "_" + str(player.id) + "_x"
         k_player_y = str(room.id) + "_" + str(player.id) + "_y"
@@ -71,8 +79,6 @@ def new_game(request):
     if room.game == 'pong':
         cache.set(str(room.id) + "_x", pong_data['PADDLE_WIDTH'] + pong_data['RADIUS'])
         cache.set(str(room.id) + "_y", pong_data['HEIGHT'] / 2)
-        cache.set(str(room.id) + "_team0", [])
-        cache.set(str(room.id) + "_team1", [])
         room, player = add_player_to_room(room.id, request.POST['login'])
     return (JsonResponse({
         'id': str(room),
@@ -92,8 +98,6 @@ def update(request):
     ]
     # print(data)
     return JsonResponse(data, safe=False)
-
-
 
 @csrf_exempt
 def join(request):
@@ -140,8 +144,8 @@ def delete(request):
     if room.owner != player:
         return JsonResponse({'error': "Login '{}' is not the owner of '{}'!".format(request.POST['login'], request.POST['game_id'])}, status=401)
 
-    if PlayerRoomModel.objects.filter(room=room.id).count() > 0:
-        return JsonResponse({'error': "Someone is still playing"}, status=401)
+    # if PlayerRoomModel.objects.filter(room=room.id).count() > 0:
+    #     return JsonResponse({'error': "Someone is still playing"}, status=401)
     
     #JWT token check
     if 'Authorization' not in request.headers:

@@ -40,7 +40,8 @@ def ai_listener(room_id, player_id):
                     print("Room does not exist.")
                     break
                 state = response.json()
-                if player_id not in state['team0'] and player_id not in state['team1']:
+                # print(state)
+                if int(player_id) not in state['team0'] and int(player_id) not in state['team1']:
                     print("No AI player found.")
                     break
                 if not state['started']:
@@ -50,7 +51,7 @@ def ai_listener(room_id, player_id):
                         pos[0] = (state['ball']['x'], state['ball']['y'])
                     else:
                         pos.append((state['ball']['x'], state['ball']['y']))
-                if (player_id in state['team0'] and state['dx'] == -1) or (player_id in state['team1'] and state['dx'] == 1):
+                if (int(player_id) in state['team0'] and state['dx'] == -1) or (int(player_id) in state['team1'] and state['dx'] == 1):
                     if state['started']:
                         pos.append((state['ball']['x'], state['ball']['y']))
                     if len(pos) > 1:

@@ -11,16 +11,16 @@ import requests
 
 from django.core.cache import cache
 from game.views import add_player_to_room
+from .game import remove_player
 
 @sync_to_async
 def ai_player(consumer):
+    try:
+        player = PlayersModel.objects.get(login='ai')
+    except PlayersModel.DoesNotExist:
+        print("Error: AI player not found.")
     if cache.get(consumer.k_ai) == True:
         cache.set(consumer.k_ai, False)
-        try:
-            player = PlayersModel.objects.get(login='ai')
-        except PlayersModel.DoesNotExist:
-            print("Error: AI player not found.")
-        
         print("AI player deleted.")
         with requests.post("http://ai:5000/ai/del",
             data = {
@@ -29,6 +29,8 @@ def ai_player(consumer):
             }) as response:
             if response.status_code != 200:
                 print("Request failed with status code:", response.status_code)
+        remove_player(consumer, player.id)
+        print("Delete ai_player", player.id, cache.get(consumer.k_server), type(player.id), player.id == cache.get(consumer.k_server))
         if player.id == cache.get(consumer.k_server):
             change_server(consumer)
         return

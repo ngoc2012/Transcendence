@@ -8,10 +8,11 @@ export class Pong
         this.room = r;
         this.connected = false;
         this.power_play = false;
-        // this.ai_player = false;
-        this.socket = -1;
+        this.socket = [-1];
         this.draw = new Draw(this);
         this.tournament = t;
+        this.keyboard_layout = [];
+        this.players = [this.room.player_id];
     }
 
 	init() {
@@ -55,6 +56,13 @@ export class Pong
         this.dom_toggle_display_board = document.getElementById('toggle_display_board');
         this.dom_display_board = document.getElementById('display_board');
 
+        this.dom_new_local_player = document.getElementById('new_local_player');
+        this.dom_local_player = document.getElementById('local_player');
+        this.dom_login_local = document.getElementById('login_local');
+        this.dom_password_local = document.getElementById('password_local');
+        this.dom_join_local = document.getElementById('join_local');
+        this.dom_close_local = document.getElementById('close_local');
+
         document.addEventListener('keydown', (event) => {
             switch (event.key) {
                 case 'ArrowUp':
@@ -72,19 +80,19 @@ export class Pong
                         this.set_state("right");
                     break;
                 // change side
-                case 's':
+                case 'Tab':
                     if (this.power_play)
                         this.set_state("side");
                     break;
-                case 'c':
+                case 'Control':
                     this.set_state("server");
                     break;
-                case ' ':
-                    this.start();
-                    break;
-                case 'q':
-                    this.quit();
-                    break;
+                // case ' ':
+                //     this.start();
+                //     break;
+                // case 'q':
+                //     this.quit();
+                //     break;
             }
         });
 
@@ -112,7 +120,15 @@ export class Pong
 		this.dom_light_x.addEventListener('input', this.draw.update_camera.bind(this.draw));
 		this.dom_light_y.addEventListener('input', this.draw.update_camera.bind(this.draw));
 		this.dom_light_z.addEventListener('input', this.draw.update_camera.bind(this.draw));
-
+        
+        this.dom_new_local_player.addEventListener('click', () => {
+            this.dom_local_player.style.display = 'block';
+            // this.dom_new_local_player.style.display = 'none';
+        });
+        this.dom_close_local.addEventListener('click', () => {
+            this.dom_local_player.style.display = 'none';
+            // this.dom_new_local_player.style.display = 'block';
+        });
 	}
 
     toggle_display() {
@@ -129,6 +145,42 @@ export class Pong
             this.dom_toggle_display_board.style.display = 'block';
             this.dom_toggle_display.innerHTML = "2D";
         }
+    }
+
+    local_player_login() {
+        if (this.dom_login_local.value === '' || this.dom_password_local.value === '')
+        {
+            this.main.set_status('Field must not be empty');
+            return;
+        }
+        $.ajax({
+            url: '/log_in/',
+            method: 'POST',
+            data: {
+                "login": this.dom_login.value,
+                "password": this.dom_password.value,
+            },
+            success: (info) => {
+                if (typeof info === 'string')
+                {
+                    this.main.set_status(info);
+                }
+                else
+                {
+                    console.log(info);
+                    // this.main.email = info.email;
+                    // this.main.login = info.login;
+                    // this.main.name = info.name;
+                }
+            },
+            error: (xhr, textStatus, errorThrown) => {
+                if (xhr.responseJSON && xhr.responseJSON.error) {
+                    this.main.set_status(xhr.responseJSON.error);
+                } else {
+                    this.main.set_status('An error occurred during the request.');
+                }
+            }
+        });
     }
 
     set_power_play(val) {
@@ -158,24 +210,24 @@ export class Pong
     }
 
     start() {
-        if (this.socket !== -1)
-            this.socket.send('start');
+        if (this.socket[0] !== -1)
+            this.socket[0].send('start');
     }
 
     quit() {
         this.set_state('quit');
-        if (this.socket !== -1)
+        if (this.socket[0] !== -1)
         {
-            this.socket.close();
-            this.socket = -1;
+            this.socket[0].close();
+            this.socket[0] = -1;
         }
         this.main.history_stack.push('/');
         window.history.pushState({}, '', '/');
         this.main.load('/lobby', () => this.lobby.events());
     }
 
-    connect() {
-        this.socket = new WebSocket(
+    connect(i) {
+        this.socket[i] = new WebSocket(
             'wss://'
             + window.location.host
             + '/ws/pong/'
