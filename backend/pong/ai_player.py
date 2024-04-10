@@ -10,6 +10,7 @@ import pyotp
 import requests
 
 from django.core.cache import cache
+from backend.game.views import add_player_to_room
 
 @sync_to_async
 def ai_player(consumer):
@@ -52,34 +53,7 @@ def ai_player(consumer):
             secret_2fa = mysecret
         )
         player.save()
-    
-    if (PlayerRoomModel.objects.filter(room=consumer.room.id, player=player.id).count() > 0):
-        print("Error: Player has been already in the game!")
-        return False
-    n0 = PlayerRoomModel.objects.filter(room=consumer.room, side=0).count()
-    n1 = PlayerRoomModel.objects.filter(room=consumer.room, side=1).count()
-    if n1 > n0:
-        side = 0
-        position = n0
-    else:
-        side = 1
-        position = n1
-    ai_player = PlayerRoomModel(
-        player=player,
-        room=consumer.room,
-        side=side,
-        position=position
-    )
-    #ai_player.x = position * pong_data['PADDLE_WIDTH'] + position * pong_data['PADDLE_DISTANCE']
-    #if side == 1:
-    #    ai_player.x = pong_data['WIDTH'] - ai_player.x - pong_data['PADDLE_WIDTH']
-    #ai_player.y = pong_data['HEIGHT'] / 2 - pong_data['PADDLE_HEIGHT'] / 2
-    ai_player.save()
-    cache.set(str(consumer.room_id) + "_" + str(ai_player.id) + "_x", position * pong_data['PADDLE_WIDTH'] + position * pong_data['PADDLE_DISTANCE'])
-    if side == 1:
-        cache.set(str(consumer.room_id) + "_" + str(ai_player.id) + "_x", pong_data['WIDTH'] - cache.get(str(consumer.room_id) + "_" + str(ai_player.id) + "_x") - pong_data['PADDLE_WIDTH'])
-    cache.set(str(consumer.room_id) + "_" + str(ai_player.id) + "_y", pong_data['HEIGHT'] / 2 - pong_data['PADDLE_HEIGHT'] / 2)
-    
+    add_player_to_room(consumer.room_id, 'ai')
 
     print("AI player created. Send request to AI server.")
     with requests.post("http://ai:5000/ai/new",

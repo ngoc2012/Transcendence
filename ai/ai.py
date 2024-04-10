@@ -40,7 +40,7 @@ def ai_listener(room_id, player_id):
                     print("Room does not exist.")
                     break
                 state = response.json()
-                if 'ai' not in state['x']:
+                if player_id not in state['team0'] and player_id not in state['team1']:
                     print("No AI player found.")
                     break
                 if not state['started']:
@@ -51,14 +51,13 @@ def ai_listener(room_id, player_id):
                     else:
                         pos.append((state['ball']['x'], state['ball']['y']))
                     
-                if (state['side']['ai'] == 0 and state['dx'] == -1) or (state['side']['ai'] == 1 and state['dx'] == 1):
+                if (player_id in state['team0'] and state['dx'] == -1) or (player_id in state['team1'] and state['dx'] == 1):
                     if state['started']:
                         pos.append((state['ball']['x'], state['ball']['y']))
                     if len(pos) > 1:
                         i = len(pos) - 1
-                        hits.append(hit_position(state['x']['ai'], pos[i - 1], pos[i]))
-                        # print("hit y: " + str(hits[len(hits) - 1]))
-                        if state['y']['ai'] + pong_data['PADDLE_HEIGHT'] / 2 < hits[len(hits) - 1]:
+                        hits.append(hit_position(state['x'], pos[i - 1], pos[i]))
+                        if state['y'] + pong_data['PADDLE_HEIGHT'] / 2 < hits[len(hits) - 1]:
                             com = 'down'
                         else:
                             com = 'up'
