@@ -39,36 +39,28 @@ def action(request, room_id, player_id, action):
             'started': started,
             'x': player_x,
             'y': player_y,
-            # 'players': [{
-            #     'id': i,
-            #     'x': cache.get(room_id + "_" + str(i) + "_x"),
-            #     'y': cache.get(room_id + "_" + str(i) + "_y")} for i in players]
         })
     
     if action == 'up':
         if player_y > 0:
             cache.set(k_player_y, player_y - pong_data['STEP'])
             if not started and server == player_id:
-                cache.set(k_y, player_y - pong_data['STEP'])
+                cache.set(k_y, y - pong_data['STEP'])
     elif action == 'down':
         if player_y < pong_data['HEIGHT'] - pong_data['PADDLE_HEIGHT']:
             cache.set(k_player_y, player_y + pong_data['STEP'])
             if not started and server == player_id:
-                cache.set(k_y, player_y + pong_data['STEP'])
+                cache.set(k_y, y + pong_data['STEP'])
     elif action == 'left':
-        
-        x = cache.get(k_player_x)
-        if (player_id in team0 and x > 0) \
-            or (player_id in team1 and x > 3 * pong_data['WIDTH'] / 4):
-            cache.set(k_player_x, x - pong_data['STEP_X'])
+        if (player_id in team0 and player_x > 0) \
+            or (player_id in team1 and player_x > 3 * pong_data['WIDTH'] / 4):
+            cache.set(k_player_x, player_x - pong_data['STEP_X'])
             if not started and server == player_id:
                 cache.set(k_x, x - pong_data['STEP_X'])
     elif action == 'right':
-        
-        x = cache.get(k_player_x)
-        if (player_id in team0 and x < pong_data['WIDTH'] / 4 - pong_data['PADDLE_WIDTH']) \
-            or (player_id in team1 and x < pong_data['WIDTH'] - pong_data['PADDLE_WIDTH']):
-            cache.set(k_player_x, x + pong_data['STEP_X'])
+        if (player_id in team0 and player_x < pong_data['WIDTH'] / 4 - pong_data['PADDLE_WIDTH']) \
+            or (player_id in team1 and player_x < pong_data['WIDTH'] - pong_data['PADDLE_WIDTH']):
+            cache.set(k_player_x, player_x + pong_data['STEP_X'])
             if not started and server == player_id:
                 cache.set(k_x, x + pong_data['STEP_X'])
     async_to_sync(channel_layer.group_send)(room_id, {'type': 'group_data'})

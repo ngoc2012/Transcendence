@@ -39,7 +39,6 @@ def ai_player(consumer):
         consumer.room.ai_player = True
         cache.set(consumer.k_ai, True)
         consumer.room.save()
-    # print("ai player")
     try:
         player = PlayersModel.objects.get(login='ai')
     except PlayersModel.DoesNotExist:

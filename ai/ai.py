@@ -95,6 +95,5 @@ def delete():
     print("AI process ended.")
     return "Deleted " + str(room_id) + "/" + str(player_id)
 
-# Run the application if this script is executed directly
 if __name__ == "__main__":
     app.run(debug=True)
