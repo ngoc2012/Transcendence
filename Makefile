@@ -6,7 +6,7 @@
 #    By: minh-ngu <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/09/28 10:56:09 by minh-ngu          #+#    #+#              #
-#    Updated: 2024/03/25 15:46:21 by minh-ngu         ###   ########.fr        #
+#    Updated: 2024/04/04 22:49:48 by ngoc             ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -45,7 +45,7 @@ clean:
 	-docker rmi -f $$(docker images -qa)
 	-docker volume rm $$(docker volume ls -q)
 	-docker network rm $$(docker network ls -q)
-#	sudo rm -rf blockchain/build
+
 	
 # gitf: git in final
 # gitd: git in developpement
@@ -57,7 +57,7 @@ clean:
 
 CLI:
 	pip3 install --user keyboard
-	clear && cd backend/CLI && python3 CLI.py
+	clear && cd backend/CLI && sudo python3 CLI.py 127.0.0.1 8080
 	#clear && cd backend/CLI && valgrind --leak-check=full python3 CLI.py
 	#cd backend/CLI && node CLI.js
 

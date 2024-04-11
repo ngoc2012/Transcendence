@@ -16,7 +16,10 @@ export class display_2fa {
     }
 
     proceed() {
+        window.history.pushState({}, '', '/');
         this.main.load('/lobby', () => this.main.lobby.events());
+        this.main.lobby.socket.send(JSON.stringify({ type: "authenticate", login: this.main.login }));
+
     }
 
     generateQRCode() {

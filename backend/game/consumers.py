@@ -3,7 +3,7 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
 from channels.layers import get_channel_layer
 from asgiref.sync import sync_to_async
-from .models import RoomsModel, TournamentModel, TournamentMatchModel, PlayerRoomModel
+from .models import RoomsModel, TournamentModel, TournamentMatchModel
 from accounts.models import PlayersModel
 from pong.data import pong_data
 from django.utils import timezone

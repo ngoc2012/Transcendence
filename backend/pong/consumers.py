@@ -8,27 +8,26 @@ import asyncio
 
 from .data import pong_data
 from .move import check_collision, update_ball, up, down, left, right
-from .game import get_info, get_room_data, get_teams_data, get_score_data, start_game, end_game, quit, change_side, check_player, get_win_data, change_server_async, set_power_play
+from .game import get_info, get_room_data, get_teams_data, get_score_data, end_game, quit, change_side, get_win_data, change_server_async, set_power_play, game_init
 from .ai_player import ai_player
-import random
+from django.core.cache import cache
 
 class PongConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.room_id = self.scope['url_route']['kwargs']['room_id']
-        self.player_id = self.scope['url_route']['kwargs']['player_id']
-        self.choices = [5, 10]
-        # self.dx = 1
-        # self.dy = 1
-        self.ddy = random.choice(self.choices)
+        self.player_id = int(self.scope['url_route']['kwargs']['player_id']) # 1, 2, 3 ...
+        self.choices = [1, 2, 5, 10]
         self.room = None
         self.player = None
-        self.server = None
-        self.players0 = None
-        self.players1 = None
+        for i in ['x', 'y', 'dx', 'dy', 'ddy', 'ai', 'pow', 'score0', 'score1', 'started', 'server', 'team0', 'team1', 'all']:
+            setattr(self, "k_" + i, str(self.room_id) + "_" + i)
+        for i in ['x', 'y']:
+            setattr(self, "k_player_" + i, str(self.room_id) + "_" + str(self.player_id) + "_" + i)
         
         check = await get_info(self)
         if not check:
             self.disconnect(1011)
+        await game_init(self)
         await self.channel_layer.group_add(
             self.room_id,
             self.channel_name
@@ -57,7 +56,7 @@ class PongConsumer(AsyncWebsocketConsumer):
     async def receive(self, text_data):
         if text_data == 'start':
             info = await get_info(self)
-            if info and not self.room.started:
+            if info and not cache.get(self.k_started):
                 asyncio.create_task(self.game_loop())
                 if self.room.tournamentRoom:
                     await self.send(text_data=json.dumps({
@@ -110,45 +109,37 @@ class PongConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=teams)
 
     async def score_data(self, event):
-        score = await get_score_data(self.room_id)
+        score = await get_score_data(self)
         if score is None:
             self.disconnect(1011)
             return
         await self.send(text_data=score)
 
     async def win_data(self, event):
-        win = await get_win_data(self.room_id)
+        win = await get_win_data(self)
         await self.send(text_data=win)
 
     async def game_loop(self):
         print("Game started.")
-        start = await start_game(self)
-        if not start:
-            self.disconnect(1011)
-            return
-        # dx = self.dx
-        # dy = self.dy
+        cache.set(self.k_started, True)
         while True:
             await asyncio.sleep(0.02)
-            check = await check_player(self)
-            if not check:
-                # print("Player not found.")
+            players = cache.get(self.k_all)
+            if players == None or len(players) == 0:
                 await quit(self)
                 await self.channel_layer.group_send(self.room_id, {'type': 'teams_data'})
                 return
-            # dy = await update_ball(self, dx, dy)
-            # dx = await check_collision(self, dx)
-            await update_ball(self)
-            await check_collision(self)
-            if self.room.x <= 0 or self.room.x >= pong_data['WIDTH']:
-                # print("Game ended.")
+            x = await update_ball(self)
+            if x <= 0 or x >= pong_data['WIDTH']:
                 await end_game(self)
                 await self.channel_layer.group_send(self.room_id, {'type': 'score_data'})
                 await self.channel_layer.group_send(self.room_id, {'type': 'group_data'})
                 # # Adding rules for tournament: first at 11 and win by 2 points:
                 # if self.room.tournamentRoom == True and (self.room.score1 >= 11 and self.room.score0 <= self.room.score1 - 2) or \
                 # (self.room.score0 >= 11 and self.room.score1 <= self.room.score0 - 2):
-                # if self.room.tournamentRoom == True and self.room.score0 == 1 or self.room.score1 == 1:
+                # # if self.room.tournamentRoom == True and self.room.score0 == 1 or self.room.score1 == 1:
+                if self.room.tournamentRoom == True and cache.get(self.k_score0) == 1 or cache.get(self.k_score1) == 1:
                 #     await self.channel_layer.group_send(self.room_id, {'type': 'win_data'})
-                return            
+                return
+            await check_collision(self)
             await self.channel_layer.group_send(self.room_id, {'type': 'group_data'})

@@ -134,6 +134,10 @@ export class Lobby
     }
 
     tournament_history_click() {
+        if (this.main.login === ''){
+			this.main.set_status('You must be logged to see the tournament history.');
+			return;
+		}
         this.main.load('/tournament_history', () => this.main.tournament_history.events());
     }
  
