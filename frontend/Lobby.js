@@ -286,6 +286,9 @@ export class Lobby
             else if (data.type === 'tournament_in_progress') {
                 this.displayTournamentBack(data.message);
             }
+            else if (data.type === 'tournament_local_progress') {
+                this.displayTournamentLocalBack(data.message);
+            }
             else if (data.type === 'tournament_owner_lobby') {
                 this.displayTournamentLobbyBack(data.message);
             }
@@ -426,6 +429,21 @@ export class Lobby
             newButton.addEventListener('click', () => {
                     this.tournament = new Tournament(this.main, tourID);
                     this.tournament.queryRoundList();
+            });
+            existingButton.parentNode.replaceChild(newButton, existingButton);
+        }
+    }
+
+    displayTournamentLocalBack(tourID) {
+        const existingButton = document.getElementById('tournament');
+
+        if (existingButton) {
+            const newButton = document.createElement('button');
+            newButton.textContent = 'Tournament';
+            newButton.id = 'tournament';
+            newButton.addEventListener('click', () => {
+                    this.tournament = new Tournament(this.main, tourID);
+                    this.tournament.localBack();
             });
             existingButton.parentNode.replaceChild(newButton, existingButton);
         }

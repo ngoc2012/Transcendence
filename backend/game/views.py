@@ -7,7 +7,11 @@ from django.utils import timezone
 import jwt
 from pong.data import pong_data
 import os
+import json, random
 from datetime import datetime, timedelta
+from django.contrib.auth import authenticate, login as auth_login, get_user_model, logout as auth_logout
+from django.views.decorators.http import require_POST
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 
 JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY')
 JWT_REFRESH_SECRET_KEY = os.environ.get('JWT_REFRESH_SECRET_KEY')
@@ -112,7 +116,6 @@ def join(request):
         }))
 
 
-#delete a room with a JWT check
 def delete(request):
     if 'game_id' not in request.POST:
         return JsonResponse({'error': 'No game id!'}, status=400)
@@ -136,56 +139,6 @@ def delete(request):
 
     if PlayerRoomModel.objects.filter(room=room.id).count() > 0:
         return JsonResponse({'error': "Someone is still playing"}, status=401)
-    
-    # #JWT token check
-    # if 'Authorization' not in request.headers:
-    #     return JsonResponse({'error': 'Authorization header missing'}, status=401)
-    # auth_header = request.headers['Authorization']
-    # try:
-    #     token_type, token = auth_header.split(' ')
-    #     if token_type != 'Bearer':
-    #         return JsonResponse({'error': 'Invalid token type'}, status=401)
-    # except ValueError:
-    #     return JsonResponse({'error': 'Malformed Authorization header'}, status=401)
-
-    # try:
-    #     payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=['HS256'])
-    #     player_id = payload['user_id']
-    #     if player_id != player.id:
-    #         return JsonResponse({'error': 'Invalid JWT token'}, status=401)
-
-    #     print("Valid JWT token used")
-    #     room.delete()
-    #     return JsonResponse({'message': s})
-
-    # #Token refresh handling
-    # except jwt.ExpiredSignatureError:
-    #     if 'refresh_token' not in request.COOKIES:
-    #         return JsonResponse({'error': 'JWT token expired and Refresh token missing'}, status=401)
-    #     refresh_token = request.COOKIES.get('refresh_token')
-    #     try:
-
-    #         payload = jwt.decode(refresh_token, JWT_REFRESH_SECRET_KEY, algorithms=['HS256'])
-
-    #         new_token = jwt.encode({
-    #             'user_id': player.id,
-    #             'exp': datetime.now(pytz.utc) + timedelta(hours=1)  # Access token expiration time
-    #         }, JWT_SECRET_KEY, algorithm='HS256')
-    #         print("JWT token expired but a new one has been created using the Refresh token")
-    #         room.delete()
-    #         return JsonResponse({'message': s, 'token': new_token})
-
-    #     except jwt.ExpiredSignatureError:
-    #         return JsonResponse({'error': 'JWT token expired and Refresh token expired, log in again'}, status=401)
-    #     except jwt.InvalidTokenError:
-    #         return JsonResponse({'error': 'JWT token expired and Invalid refresh token, log in again'}, status=401)
-    #     except Exception as e:
-    #         return JsonResponse({'error': str(e)}, status=400)
-
-    # except jwt.InvalidTokenError:
-    #     return JsonResponse({'error': 'Invalid token'}, status=401)
-    # except Exception as e:
-    #     return JsonResponse({'error': str(e)}, status=400)
 
 def tournament_join(request):
     if 'game_id' not in request.POST:
@@ -223,6 +176,159 @@ def tournament_join(request):
         'player_id': str(player_room),
         'data': get_data(room.game)
         }))
+
+@require_POST
+def tournament_local_join(request):
+    if 'game_id' not in request.POST:
+        return (HttpResponse("Error: No game id!"))
+    if not RoomsModel.objects.filter(id=request.POST['game_id']).exists():
+        return (HttpResponse("Error: Room with id " + request.POST['game_id'] + " does not exist!"))
+    room = RoomsModel.objects.get(id=request.POST['game_id'])
+    player = PlayersModel.objects.get(id=room.owner.id)
+    match = TournamentMatchModel.objects.filter(room=room).first()
+    # if not room.server:
+    #     room.server = player
+    #     room.save()
+    #     side = 0
+    #     position = 0
+    # else:
+    side = 0
+    position = 0
+    player_room = PlayerRoomModel.objects.create(
+    player=player,
+    room=room,
+    side=side,
+    position=position)
+    # player_room = PlayerRoomModel.objects.get(player=player)
+    if room.game == 'pong':
+        player_room.x = position * pong_data['PADDLE_WIDTH'] + position * pong_data['PADDLE_DISTANCE']
+        if side == 1:
+            player_room.x = pong_data['WIDTH'] - player_room.x - pong_data['PADDLE_WIDTH']
+        player_room.y = pong_data['HEIGHT'] / 2 - pong_data['PADDLE_HEIGHT'] / 2
+    player_room.save()
+    player.save()
+    return (JsonResponse({
+        'id': str(room),
+        'game': room.game,
+        'name': room.name,
+        'player_id': str(player_room),
+        'data': get_data(room.game)
+        }))
+
+def tournament_local_results(tournament):
+    return
+
+def tournament_local_get(request):
+    if request.method == 'POST':
+        try:
+            tour_id = request.POST["id"]
+            tournament = TournamentModel.objects.get(id=tour_id)
+            participants = tournament.participantsLocal
+
+            if len(participants) == 1:
+                tournament.terminated = True
+                return tournament_local_results(tournament)
+            elif len(participants) == 2:
+                tournament.final = True
+            elif len(participants) % 2 != 0:
+                random_participant = random.choice(participants)
+                tournament.participantsLocal.remove(random_participant)
+                tournament.waitlistLocal.add(random_participant)
+            tournament.save()
+
+            if tournament.localMatchIP:
+                last_match = TournamentMatchModel.objects.filter(tournament=tournament).order_by('-id').first()
+                return JsonResponse({
+                    'name': tournament.name,
+                    'round': tournament.round,
+                    'match': tournament.total_matches,
+                    'player1': last_match.player1Local,
+                    'player2': last_match.player2Local,
+                    'room_id': str(last_match.room_uuid),
+                })
+
+            random.shuffle(participants)
+            i = 0;
+            player1 = participants[i]
+            player2  = participants[i + 1]
+            room = RoomsModel.objects.create(
+                game=tournament.game,
+                name=f"{tournament.name} - Match {tournament.total_matches}",
+                owner=tournament.owner,
+                server=tournament.owner,
+                tournamentRoom=True
+            )
+            if room.game == 'pong':
+                room.x = pong_data['PADDLE_WIDTH'] + pong_data['RADIUS']
+                room.y = pong_data['HEIGHT'] / 2
+                room.save()
+            match = TournamentMatchModel.objects.create(
+                tournament=tournament,
+                room=room,
+                room_uuid=room.id,
+                player1Local=player1,
+                player2Local=player2,
+                start_time=timezone.now(),
+                round_number=tournament.round,
+                match_number=tournament.total_matches)
+            tournament.active_matches += 1
+            tournament.total_matches += 1 
+            tournament.localMatchIP = True
+            tournament.participantsLocal.remove(player1)
+            tournament.participantsLocal.remove(player2)
+            tournament.waitlistLocal.append(player1)
+            tournament.waitlistLocal.append(player2)
+            tournament.save()
+            if player1 and player2:
+                return JsonResponse({
+                    'name': tournament.name,
+                    'round': tournament.round,
+                    'match': tournament.total_matches,
+                    'player1': player1,
+                    'player2': player2,
+                    'room_id': str(room.id),
+                })
+        except:
+            return JsonResponse({'error'})
+    else:
+        return JsonResponse({'error': 'This endpoint only accepts POST requests.'}, status=405)
+    
+
+def tournament_local_verify(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            players = data.get('players')
+            if not players:
+                return JsonResponse({'error': 'Missing players'}, status=400)
+
+            User = get_user_model()
+            for player in players:
+                try:
+                    user = User.objects.get(username=player)
+                    return JsonResponse({'error': f'Player {player} already exists'}, status=400)
+                except User.DoesNotExist:
+                    continue
+
+            if not len(players) == len(set(players)):
+                return JsonResponse({'error': 'Players can not have the same name'}, status=400)
+                      
+            tour_id = data.get('id')
+            tournament = TournamentModel.objects.get(id=tour_id)
+            if tournament:
+                for player in players:
+                    tournament.participantsLocal.append(player)
+                tournament.save()
+            else:
+                return JsonResponse({'error': 'Tournament not found'}, status=400)       
+            
+        except json.JSONDecodeError as e:
+            return JsonResponse({'error': f'Error decoding JSON: {str(e)}'}, status=400)
+        except Exception as e:
+            return JsonResponse({'error': f'An error occurred: {str(e)}'}, status=500)
+        return JsonResponse({'message': 'Done'})
+    else:
+        return JsonResponse({'error': 'This endpoint only accepts POST requests.'}, status=405)
 
 # from channels.layers import get_channel_layer
 from backend.asgi import channel_layer

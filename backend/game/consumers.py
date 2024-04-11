@@ -526,7 +526,9 @@ class RoomsConsumer(AsyncWebsocketConsumer):
         user = await get_player_by_login(login)
         if user:
             tournament = await check_player_in_tournament(user)
-            if tournament and user == tournament.owner and tournament.active_matches == 0:
+            if tournament and tournament.local:
+                await self.send_message_to_user(self.user_id, 'tournament_local_progress', str(tournament.id))
+            elif tournament and user == tournament.owner and tournament.active_matches == 0:
                 await self.send_message_to_user(self.user_id, 'tournament_owner_lobby', str(tournament.id))
             elif tournament:
                 await self.send_message_to_user(self.user_id, 'tournament_in_progress', str(tournament.id))

@@ -3,6 +3,7 @@ from django.db import models
 from django.utils import timezone
 from accounts.models import PlayersModel
 from django.conf import settings
+from django.db.models import JSONField
 
 # class PlayersModel(models.Model):
 #     id = models.AutoField(primary_key=True)
@@ -62,6 +63,10 @@ class TournamentModel(models.Model):
     participants = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='participating')
     waitlist = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='waitlisted')
     eliminated = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='eliminated')
+    participantsLocal = JSONField(default=list)
+    waitlistLocal = JSONField(default=list)
+    eliminatedLocal = JSONField(default=list)
+    localMatchIP = models.BooleanField(default=False)
     round = models.IntegerField(default=1)
     active_matches = models.IntegerField(default=0)
     total_matches = models.IntegerField(default=0)
@@ -79,6 +84,8 @@ class TournamentMatchModel(models.Model):
     room_uuid = models.UUIDField(null=True, editable=False)
     player1 = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='tournament_player1')
     player2 = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='tournament_player2')
+    player1Local = models.CharField(max_length=255, default='')
+    player2Local = models.CharField(max_length=255, default='') 
     p1_score = models.IntegerField(default=0)
     p2_score = models.IntegerField(default=0)
     winner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='won_match_results')
@@ -87,5 +94,6 @@ class TournamentMatchModel(models.Model):
     status = models.CharField(max_length=255, default='Waiting for players to join')
     start_time = models.DateTimeField(null=True, blank=True)
     end_time = models.DateTimeField(null=True, blank=True)
+    local = models.BooleanField(default=False)
     def __str__(self):
         return f"{self.tournament.name} : {self.player1.name} vs {self.player2.name} - Winner: {self.winner.name if self.winner else 'TBD'}"

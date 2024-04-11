@@ -1,5 +1,6 @@
 import {Lobby} from './Lobby.js'
 import {Pong} from './Pong.js';
+import { localTournament } from './tournamentLocal.js';
 
 export class Tournament {
 
@@ -10,6 +11,7 @@ export class Tournament {
         this.game = null;
         this.ready = -1;
         this.final = 0;
+        this.localTournament = null;
     }
 
     events() {
@@ -34,11 +36,11 @@ export class Tournament {
     }
 
     eventsLocal() {
-        document.getElementById('playerCount').addEventListener('change', function() {
-            const numberOfPlayers = this.value;
+        document.getElementById('playerCount').addEventListener('change', (event) => {
+            const numberOfPlayers = event.target.value;
             const form = document.getElementById('playerForm');
             form.innerHTML = '';
-            
+    
             for (let i = 1; i <= numberOfPlayers; i++) {
                 const input = document.createElement('input');
                 input.type = 'text';
@@ -55,22 +57,50 @@ export class Tournament {
                 form.appendChild(submitButton);
             }
         });
-        
-        document.getElementById('playerForm').addEventListener('submit', function(event) {
-            const inputs = this.querySelectorAll('input[type="text"]');
+
+        document.getElementById('playerForm').addEventListener('submit', (event) => {
+            event.preventDefault();
+            const form = event.currentTarget;
+            const inputs = form.querySelectorAll('input[type="text"]');
             let allFilled = true;
+            let playerNicknames = [];
+        
             inputs.forEach(input => {
                 if (input.value === '') {
                     allFilled = false;
+                } else {
+                    playerNicknames.push(input.value);
                 }
             });
         
             if (!allFilled) {
                 event.preventDefault();
                 alert('Please fill out all player nicknames.');
+            } else {
+                var csrftoken = this.main.getCookie('csrftoken');
+                var formData;
+                formData = JSON.stringify({ players: playerNicknames, id: this.id});
+
+                if (csrftoken) {
+                    $.ajax({
+                        url: '/game/tournament/local/verify/',
+                        method: 'POST',
+                        data: formData,
+                        headers: {
+                            'X-CSRFToken': csrftoken,
+                        },
+                        success: (response) => {
+                            this.main.set_status = '';
+                            this.localTournament = new localTournament(this.main, playerNicknames, this.id, this);
+                            this.main.load('/tournament/local/start', () => this.localTournament.getMatch());
+                        },
+                        error: (xhr) => {
+                            this.main.set_status(xhr.responseJSON.error);
+                    }
+                    });
+                }
             }
         });
-        
     }
 
     eventsStart() {
@@ -114,12 +144,10 @@ export class Tournament {
                     'X-CSRFToken': csrftoken,
                 },
                 success: (response) => {
-                    console.log(response);
-                    if (response.local) {
-                        this.id = response.id;
+                    this.id = response.id;
+                    if (response.local === true) {
                         this.main.load('/tournament/local', () => this.eventsLocal());
                     } else {
-                        this.id = response.id;
                         this.main.load('/tournament/lobby', () => this.eventsLobby());
                         this.main.lobby.socket.send(JSON.stringify({type: 'add_to_group', id: this.id}));
                     }
@@ -134,7 +162,6 @@ export class Tournament {
             }
             });
         } else {
-            console.log('Login required')
             this.main.load('/pages/login', () => this.main.log_in.events());
         }
         
@@ -158,7 +185,6 @@ export class Tournament {
             acceptedList.appendChild(li);
         });
     }
-    
 
     createUserListItem(user) {
         const li = document.createElement('li');
@@ -400,30 +426,34 @@ export class Tournament {
                 error: () => this.main.set_status('Error: Can not join game')
             });
         } else {
-            console.log('Login required');
             this.main.load('/pages/login', () => this.main.log_in.events());
         }
     }
 
     quitTournament() {
-    const confirmQuit = confirm("Warning: Quitting the tournament will end tournament for every player. Are you sure?");
-    
-    if (confirmQuit) {
-            this.main.lobby.socket.send(JSON.stringify({
-                type: 'tournament-quit',
-                tour_id: this.id,
-            }));
-            this.id = -1;
-            this.game = null;
-            this.ready = -1;
-            this.final = 0;
-            this.lobby.tournament = null;
-            this.main.load('/lobby', () => this.main.lobby.events());
-        } 
+        const confirmQuit = confirm("Warning: Quitting the tournament will end tournament for every player. Are you sure?");
+        
+        if (confirmQuit) {
+                this.main.lobby.socket.send(JSON.stringify({
+                    type: 'tournament-quit',
+                    tour_id: this.id,
+                }));
+                this.id = -1;
+                this.game = null;
+                this.ready = -1;
+                this.final = 0;
+                this.lobby.tournament = null;
+                this.main.load('/lobby', () => this.main.lobby.events());
+            } 
     }
 
     backToLobby() {
         this.main.load('/lobby', () => this.main.lobby.events());
+    }
+
+    localBack() {
+        this.localTournament = new localTournament(this.main, null, this.id, this);
+        this.main.load('/tournament/local/start', () => this.localTournament.getMatch());
     }
 
     inSetup() {

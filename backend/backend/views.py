@@ -186,6 +186,9 @@ def tournament_lobby(request):
 def tournament_local(request):
     return (render(request, 'tournament_local.html'))
 
+def tournament_local_start(request):
+    return (render(request, 'tournament_local_start.html'))
+
 def tournament_start(request, tournament_id):
     #  if TournamentModel.objects.get(id=tournament_id).terminated:
     #     return (render(request, 'lobby.html'))
@@ -401,7 +404,7 @@ def new_tournament(request):
         response = requests.post(url, json=data)
         response.raise_for_status()
 
-        return JsonResponse({'message': 'Tournament created successfully', 'id': str(tournament.id), 'local': tournament.local}, status=200)
+        return JsonResponse({'message': 'Tournament created successfully', 'id': str(tournament.id), 'local': tournament.local, 'name': tournament.name}, status=200)
     except requests.exceptions.RequestException as e:
         print(f"Error calling add_tournament_route: {e}")
         return JsonResponse({'error': 'Failed to interact with blockchain'}, status=500)
