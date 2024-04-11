@@ -185,6 +185,7 @@ def new_player(request):
     }, JWT_REFRESH_SECRET_KEY, algorithm='HS256')
     response = JsonResponse({
         'access_token': access_token,
+        'id': new_player.id,
         'login': new_player.login,
         'name': new_player.name,
         'email': new_player.email,
@@ -224,6 +225,7 @@ def log_in(request):
 
                 response = JsonResponse({
                     'access_token': access_token,
+                    'id': player.id,
                     'login': player.login,
                     'name': player.name,
                     'email': player.email,

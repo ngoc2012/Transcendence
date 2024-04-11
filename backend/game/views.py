@@ -107,7 +107,12 @@ def join(request):
         return (HttpResponse("Error: No login!"))
     if 'game_id' not in request.POST:
         return (HttpResponse("Error: No game id!"))
-    
+    players = cache.get(str(request.POST['game_id']) + "_all")
+    if players == None:
+        players = []
+    player = PlayersModel.objects.get(login=request.POST['login'])
+    if player.id in players:
+        return (HttpResponse("Error: Player with login " + request.POST['login'] + " is already in the room!"))
     room, player = add_player_to_room(request.POST['game_id'], request.POST['login'])
     if room == None:
         return (HttpResponse("Error: Room with id " + request.POST['game_id'] + " does not exist!"))

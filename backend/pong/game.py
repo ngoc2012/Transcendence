@@ -51,6 +51,8 @@ def get_info(consumer):
 @sync_to_async
 def get_room_data(consumer):
     players = cache.get(consumer.k_all)
+    if players == None:
+        players = []
     return json.dumps({
         'ai_player': cache.get(consumer.k_ai),
         'power_play': cache.get(consumer.k_pow),
