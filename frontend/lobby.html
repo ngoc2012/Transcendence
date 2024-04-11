@@ -1,8 +1,36 @@
-<select id="rooms"></select>
-<button id="join" type="button">Join</button>
-<button id="pong" type="button">New Pong</button>
-<button id="pew" type="button">New Pew</button>
-<button id="chat" type="button">chat</button>
-<button id="tournament" type="button">New Tournament</button>
-<button id="tournament_history" type="button">Tournament History</button>
-<button id="delete" type="button">Delete</button>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Room Selection</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        .container {
+            margin-top: 50px;
+            text-align: center;
+        }
+        .button-group {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Room Selection</h1>
+        <select id="rooms" class="form-control"></select>
+        <div class="button-group">
+            <button id="join" class="btn btn-primary" type="button">Join</button>
+            <button id="pong" class="btn btn-success" type="button">New Pong</button>
+            <button id="pew" class="btn btn-warning" type="button">New Pew</button>
+            <button id="chat" class="btn btn-info" type="button">Chat</button>
+            <button id="tournament" class="btn btn-danger" type="button">New Tournament</button>
+            <button id="tournament_history" class="btn btn-secondary" type="button">Tournament History</button>
+            <button id="delete" class="btn btn-danger" type="button">Delete</button>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
