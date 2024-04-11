@@ -78,7 +78,6 @@ def left(consumer):
     team0 = cache.get(consumer.k_team0)
     if team0 == None:
         team0 = []
-    print(x, consumer.player_id, team0)
     if (consumer.player_id in team0 and x > 0) \
         or (consumer.player_id not in team0 and x > 3 * pong_data['WIDTH'] / 4):
         cache.set(consumer.k_player_x, x - pong_data['STEP_X'])

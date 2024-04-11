@@ -59,4 +59,3 @@ def ai_player(consumer):
         }) as response:
         if response.status_code != 200:
             print("Request failed with status code:", response.status_code)
-        print(response.text)

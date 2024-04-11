@@ -50,7 +50,6 @@ def add_player_to_room(game_id, login):
         position = n1
     players.append(player.id)
     cache.set(k_players, players)
-    print("test", cache.get(k_team0), cache.get(k_team1))
     if room.game == 'pong':
         k_player_x = str(room.id) + "_" + str(player.id) + "_x"
         k_player_y = str(room.id) + "_" + str(player.id) + "_y"

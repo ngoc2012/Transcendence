@@ -140,11 +140,9 @@ export class Pong
         
         this.dom_new_local_player.addEventListener('click', () => {
             this.dom_local_player.style.display = 'block';
-            // this.dom_new_local_player.style.display = 'none';
         });
         this.dom_close_local.addEventListener('click', () => {
             this.dom_local_player.style.display = 'none';
-            // this.dom_new_local_player.style.display = 'block';
         });
         this.dom_join_local.addEventListener('click', () => {
             this.local_player_login();
@@ -171,10 +169,15 @@ export class Pong
         for (let i = 0; i < searchString.length; i++) {
           const char = searchString[i];
           if (mainString.indexOf(char) >= 0) {
-            return true; // Character found, exit the loop
+            return true;
           }
         }
-        return false; // Character not found in the entire loop
+        return false;
+    }
+
+    isAlphabetic(str) {
+        const regex = /^[a-zA-Z]+$/;
+        return regex.test(str);
     }
 
     local_player_login() {
@@ -193,6 +196,11 @@ export class Pong
             this.main.set_status('Keyboard layout must not contain already used characters');
             return;
         }
+        if (this.isAlphabetic(this.dom_keyboard_layout.value) === false)
+        {
+            this.main.set_status('Keyboard layout must contain only alphabetic characters');
+            return;
+        }
         $.ajax({
             url: '/log_in/',
             method: 'POST',
@@ -202,13 +210,9 @@ export class Pong
             },
             success: (info) => {
                 if (typeof info === 'string')
-                {
                     this.main.set_status(info);
-                }
                 else
-                {
                     this.join_local_player(info);
-                }
             },
             error: (xhr, textStatus, errorThrown) => {
                 if (xhr.responseJSON && xhr.responseJSON.error) {
@@ -230,9 +234,7 @@ export class Pong
             },
             success: (info) => {
                 if (typeof info === 'string')
-                {
                     this.main.set_status(info);
-                }
                 else
                 {
                     this.players.push({
@@ -244,8 +246,7 @@ export class Pong
                     if (this.players[i].sk !== -1)
                     {
                         this.dom_local_player.style.display = 'none';
-                        // this.dom_new_local_player.style.display = 'none';
-                        this.keyboard_layout += this.dom_keyboard_layout.value;
+                        this.keyboard_layout += this.dom_keyboard_layout.value.toLowerCase();
                     }
                 }
             },
@@ -262,7 +263,6 @@ export class Pong
     }
 
     set_ai_player(val) {
-        // this.ai_player = val;
         if (val)
             this.dom_toggle_AI.innerHTML = "AI player off";
         else

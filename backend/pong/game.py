@@ -127,7 +127,6 @@ def remove_player(consumer, player_id):
 @sync_to_async
 def quit(consumer):
     players = cache.get(consumer.k_all)
-    print("quit", players)
     if players == None or len(players) == 0:
         return
     if len(players) == 1:
@@ -156,17 +155,19 @@ def change_side(consumer):
         team1 = []
     server = cache.get(consumer.k_server)
     started = cache.get(consumer.k_started)
-    x_server = cache.get(consumer.room_id + "_" + str(server) + "_x")
-    y_server = cache.get(consumer.room_id + "_" + str(server) + "_y")
+    # x_server = cache.get(consumer.room_id + "_" + str(server) + "_x")
+    # y_server = cache.get(consumer.room_id + "_" + str(server) + "_y")
     if consumer.player_id in team0:
         team0.remove(consumer.player_id)
         cache.set(consumer.k_team0, team0)
         team1.append(consumer.player_id)
         cache.set(consumer.k_team1, team1)
         cache.set(consumer.k_player_x, pong_data['WIDTH'] - cache.get(consumer.k_player_x) - pong_data['PADDLE_WIDTH'])
+        player_x = cache.get(consumer.k_player_x)
+        player_y = cache.get(consumer.k_player_y)
         if not started and consumer.player_id == server:
-            cache.set(consumer.k_x, x_server - pong_data['RADIUS'])
-            cache.set(consumer.k_y, y_server + pong_data['PADDLE_HEIGHT'] / 2)
+            cache.set(consumer.k_x, player_x - pong_data['RADIUS'])
+            cache.set(consumer.k_y, player_y + pong_data['PADDLE_HEIGHT'] / 2)
             cache.set(consumer.k_dx, -1)
             cache.set(consumer.k_dy, random.choice([1, -1]))
     elif consumer.player_id in team1:
@@ -175,9 +176,11 @@ def change_side(consumer):
         team0.append(consumer.player_id)
         cache.set(consumer.k_team0, team0)
         cache.set(consumer.k_player_x, pong_data['WIDTH'] - cache.get(consumer.k_player_x) - pong_data['PADDLE_WIDTH'])
+        player_x = cache.get(consumer.k_player_x)
+        player_y = cache.get(consumer.k_player_y)
         if not started and consumer.player_id == server:
-            cache.set(consumer.k_x, x_server + pong_data['PADDLE_WIDTH'] + pong_data['RADIUS'])
-            cache.set(consumer.k_y, y_server + pong_data['PADDLE_HEIGHT'] / 2)
+            cache.set(consumer.k_x, player_x + pong_data['PADDLE_WIDTH'] + pong_data['RADIUS'])
+            cache.set(consumer.k_y, player_y + pong_data['PADDLE_HEIGHT'] / 2)
             cache.set(consumer.k_dx, 1)
             cache.set(consumer.k_dy, random.choice([1, -1]))
 
