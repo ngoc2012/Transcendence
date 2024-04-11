@@ -3,15 +3,30 @@ import {Main} from './Main.js'
 export var main = new Main();
 
 //recupere la data obtenue du callback de l'auth 42 
-if (my42login !== null && my42login !== "" && my42email !== "" && my42JWT != "")
+if (my42login !== null && my42login !== "" && my42email !== "" && my42ws != "")
 {
     main.login = my42login;
     main.email = my42email;
-    sessionStorage.setItem('JWTToken', my42JWT);
-    my42JWT = ""
+    main.enable2fa = my42enable2fa
+    main.lobby.ws = my42ws
     main.name = my42name;
     main.dom_name.innerHTML = main.name;
     history.replaceState({}, '', 'https://127.0.0.1:8080');
+    var dom_log_in = document.getElementById('login');
+    if (dom_log_in) {
+        dom_log_in.style.display = "none";
+    }
+
+    var dom_signup = document.getElementById('signup');
+    if (dom_signup) {
+        dom_signup.style.display = "none";
+        dom_signup.insertAdjacentHTML('afterend', '<button id="logoutButton">Logout</button>');
+    }
+
+    var dom_logout = document.getElementById('logoutButton');
+    if (dom_logout) {
+        dom_logout.addEventListener('click', () => main.logout());
+    }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
