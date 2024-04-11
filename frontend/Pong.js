@@ -106,7 +106,8 @@ export class Pong
                 {
                     let i_player = Math.floor(index / 4) + 1;
                     index = index % 4;
-                    this.set_state(i_player, commands[index]);
+                    if (index < 2 || (index >= 2 && this.power_play))
+                        this.set_state(i_player, commands[index]);
                 }
                 
             }
