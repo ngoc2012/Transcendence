@@ -1,6 +1,6 @@
 from asgiref.sync import sync_to_async
 
-from game.models import PlayersModel, PlayerRoomModel
+from game.models import PlayersModel
 from pong.data import pong_data
 from .game import change_server
 
@@ -9,32 +9,33 @@ import pyotp
 
 import requests
 
+from django.core.cache import cache
+from game.views import add_player_to_room
+from .game import remove_player
+
 @sync_to_async
 def ai_player(consumer):
-    if consumer.room.ai_player:
-        consumer.room.ai_player = False
-        consumer.room.save()
-        try:
-            player = PlayersModel.objects.get(login='ai')
-        except PlayersModel.DoesNotExist:
-            print("Error: AI player not found.")
-        
+    try:
+        player = PlayersModel.objects.get(login='ai')
+    except PlayersModel.DoesNotExist:
+        print("Error: AI player not found.")
+    if cache.get(consumer.k_ai) == True:
+        cache.set(consumer.k_ai, False)
         print("AI player deleted.")
         with requests.post("http://ai:5000/ai/del",
             data = {
-                'room_id': consumer.room.id,
+                'room_id': consumer.room_id,
                 'player_id': player.id
             }) as response:
             if response.status_code != 200:
                 print("Request failed with status code:", response.status_code)
-        PlayerRoomModel.objects.get(room=consumer.room.id, player=player.id).delete()
-        if consumer.room.server == player:
+        remove_player(consumer, player.id)
+        print("Delete ai_player", player.id, cache.get(consumer.k_server), type(player.id), player.id == cache.get(consumer.k_server))
+        if player.id == cache.get(consumer.k_server):
             change_server(consumer)
         return
     else:
-        consumer.room.ai_player = True
-        consumer.room.save()
-    # print("ai player")
+        cache.set(consumer.k_ai, True)
     try:
         player = PlayersModel.objects.get(login='ai')
     except PlayersModel.DoesNotExist:
@@ -48,30 +49,7 @@ def ai_player(consumer):
             secret_2fa = mysecret
         )
         player.save()
-    
-    if (PlayerRoomModel.objects.filter(room=consumer.room.id, player=player.id).count() > 0):
-        print("Error: Player has been already in the game!")
-        return False
-    n0 = PlayerRoomModel.objects.filter(room=consumer.room, side=0).count()
-    n1 = PlayerRoomModel.objects.filter(room=consumer.room, side=1).count()
-    if n1 > n0:
-        side = 0
-        position = n0
-    else:
-        side = 1
-        position = n1
-    ai_player = PlayerRoomModel(
-        player=player,
-        room=consumer.room,
-        side=side,
-        position=position
-    )
-    ai_player.x = position * pong_data['PADDLE_WIDTH'] + position * pong_data['PADDLE_DISTANCE']
-    if side == 1:
-        ai_player.x = pong_data['WIDTH'] - ai_player.x - pong_data['PADDLE_WIDTH']
-    ai_player.y = pong_data['HEIGHT'] / 2 - pong_data['PADDLE_HEIGHT'] / 2
-    ai_player.save()
-    
+    add_player_to_room(consumer.room_id, 'ai')
 
     print("AI player created. Send request to AI server.")
     with requests.post("http://ai:5000/ai/new",

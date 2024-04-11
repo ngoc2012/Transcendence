@@ -26,5 +26,4 @@ COPY __init__.py /app
 
 WORKDIR /app
 
-
 CMD ["python3", "-m", "flask", "--app", "ai", "run", "--host=0.0.0.0", "--debug"]

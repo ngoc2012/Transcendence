@@ -8,10 +8,13 @@ export class Pong
         this.room = r;
         this.connected = false;
         this.power_play = false;
-        // this.ai_player = false;
-        this.socket = -1;
         this.draw = new Draw(this);
         this.tournament = t;
+        this.keyboard_layout = "";
+        this.players = [{
+            'id': this.room.player_id,
+            'sk': -1
+        }];
     }
 
 	init() {
@@ -55,44 +58,65 @@ export class Pong
         this.dom_toggle_display_board = document.getElementById('toggle_display_board');
         this.dom_display_board = document.getElementById('display_board');
 
+        this.dom_new_local_player = document.getElementById('new_local_player');
+        this.dom_local_player = document.getElementById('local_player');
+        this.dom_login_local = document.getElementById('login_local');
+        this.dom_password_local = document.getElementById('password_local');
+        this.dom_keyboard_layout = document.getElementById('keyboard_layout');
+        this.dom_join_local = document.getElementById('join_local');
+        this.dom_close_local = document.getElementById('close_local');
+
         document.addEventListener('keydown', (event) => {
             switch (event.key) {
                 case 'ArrowUp':
-                    this.set_state("up");
+                    this.set_state(0, "up");
                     break;
                 case 'ArrowDown':
-                    this.set_state("down");
+                    this.set_state(0, "down");
                     break;
                 case 'ArrowLeft':
                     if (this.power_play)
-                        this.set_state("left");
+                        this.set_state(0, "left");
                     break;
                 case 'ArrowRight':
                     if (this.power_play)
-                        this.set_state("right");
+                        this.set_state(0, "right");
                     break;
                 // change side
-                case 's':
+                case 'Tab':
                     if (this.power_play)
-                        this.set_state("side");
+                        this.set_state(0, "side");
                     break;
-                case 'c':
-                    this.set_state("server");
+                case 'Control':
+                    this.set_state(0, "server");
                     break;
-                case ' ':
-                    this.start();
-                    break;
-                case 'q':
-                    this.quit();
-                    break;
+                // case ' ':
+                //     this.start();
+                //     break;
+                // case 'q':
+                //     this.quit();
+                //     break;
+            }
+            
+            let commands = ['up', 'down', 'left', 'right'];
+            if (event.key && event.key.length === 1)
+            {
+                let index = this.keyboard_layout.indexOf(event.key);
+                if (index >= 0)
+                {
+                    let i_player = Math.floor(index / 4) + 1;
+                    index = index % 4;
+                    this.set_state(i_player, commands[index]);
+                }
+                
             }
         });
 
-        this.dom_toggle_AI.addEventListener('click', () => {this.set_state('ai_player')});
-        this.dom_power_play.addEventListener('click', () => {this.set_state('power')});
+        this.dom_toggle_AI.addEventListener('click', () => {this.set_state(0, 'ai_player')});
+        this.dom_power_play.addEventListener('click', () => {this.set_state(0, 'power')});
 		this.dom_toggle_display.addEventListener('click', () => {this.toggle_display()});
         this.dom_toggle_display_board.addEventListener('click', () => {this.toggle_display_board()});
-        this.connect();
+        this.connect(0);
 
         this.draw.init();
         this.draw.update_camera();
@@ -112,7 +136,18 @@ export class Pong
 		this.dom_light_x.addEventListener('input', this.draw.update_camera.bind(this.draw));
 		this.dom_light_y.addEventListener('input', this.draw.update_camera.bind(this.draw));
 		this.dom_light_z.addEventListener('input', this.draw.update_camera.bind(this.draw));
-
+        
+        this.dom_new_local_player.addEventListener('click', () => {
+            this.dom_local_player.style.display = 'block';
+            // this.dom_new_local_player.style.display = 'none';
+        });
+        this.dom_close_local.addEventListener('click', () => {
+            this.dom_local_player.style.display = 'none';
+            // this.dom_new_local_player.style.display = 'block';
+        });
+        this.dom_join_local.addEventListener('click', () => {
+            this.local_player_login();
+        });
 	}
 
     toggle_display() {
@@ -129,6 +164,92 @@ export class Pong
             this.dom_toggle_display_board.style.display = 'block';
             this.dom_toggle_display.innerHTML = "2D";
         }
+    }
+
+    charExists(searchString, mainString) {
+        for (let i = 0; i < searchString.length; i++) {
+          const char = searchString[i];
+          if (mainString.indexOf(char) >= 0) {
+            return true; // Character found, exit the loop
+          }
+        }
+        return false; // Character not found in the entire loop
+    }
+
+    local_player_login() {
+        if (this.dom_login_local.value === '' || this.dom_password_local.value === '')
+        {
+            this.main.set_status('Field must not be empty');
+            return;
+        }
+        if (this.dom_keyboard_layout.value.length !== 4)
+        {
+            this.main.set_status('Keyboard layout must be 4 characters');
+            return;
+        }
+        if (this.charExists(this.dom_keyboard_layout.value, this.keyboard_layout))
+        {
+            this.main.set_status('Keyboard layout must not contain already used characters');
+            return;
+        }
+        $.ajax({
+            url: '/log_in/',
+            method: 'POST',
+            data: {
+                "login": this.dom_login_local.value,
+                "password": this.dom_password_local.value,
+            },
+            success: (info) => {
+                if (typeof info === 'string')
+                {
+                    this.main.set_status(info);
+                }
+                else
+                {
+                    this.join_local_player(info);
+                }
+            },
+            error: (xhr, textStatus, errorThrown) => {
+                if (xhr.responseJSON && xhr.responseJSON.error) {
+                    this.main.set_status(xhr.responseJSON.error);
+                } else {
+                    this.main.set_status('An error occurred during the request.');
+                }
+            }
+        });
+    }
+
+    join_local_player(player) {
+        $.ajax({
+            url: '/game/join',
+            method: 'POST',
+            data: {
+                'login': player.login,
+                "game_id": this.room.id
+            },
+            success: (info) => {
+                if (typeof info === 'string')
+                {
+                    this.main.set_status(info);
+                }
+                else
+                {
+                    this.players.push({
+                        'id': player.id,
+                        'sk': -1
+                    });
+                    let i = this.players.length - 1;
+                    this.connect(i);
+                    if (this.players[i].sk !== -1)
+                    {
+                        this.dom_local_player.style.display = 'none';
+                        // this.dom_new_local_player.style.display = 'none';
+                        this.keyboard_layout += this.dom_keyboard_layout.value;
+                    }
+                }
+            },
+            error: () => this.main.set_status('Error: Can not join game')
+        });
     }
 
     set_power_play(val) {
@@ -158,44 +279,48 @@ export class Pong
     }
 
     start() {
-        if (this.socket !== -1)
-            this.socket.send('start');
+        if (this.players[0].sk !== -1)
+        this.players[0].sk.send('start');
     }
 
     quit() {
-        this.set_state('quit');
-        if (this.socket !== -1)
-        {
-            this.socket.close();
-            this.socket = -1;
-        }
+        this.players.forEach((p, i) => {
+            this.set_state(i, 'quit');
+            if (p.sk !== -1)
+            {
+                p.sk.close();
+                p.sk = -1;
+            }
+        });
+        
         this.main.history_stack.push('/');
         window.history.pushState({}, '', '/');
         this.main.load('/lobby', () => this.lobby.events());
     }
 
-    connect() {
-        this.socket = new WebSocket(
+    connect(i) {
+        this.players[i].sk = new WebSocket(
             'wss://'
             + window.location.host
             + '/ws/pong/'
             + this.room.id
             + '/'
-            + this.room.player_id
+            + this.players[i].id
             + '/'
         );
         
-        this.socket.onopen = (e) => {
+        if (i !== 0)
+            return;
+        
+        this.players[i].sk.onopen = (e) => {
             this.main.history_stack.push('/pong/' + this.room.id);
             window.history.pushState({}, '', '/pong/' + this.room.id);
         };
 
-        this.socket.onmessage = (e) => {
+        this.players[i].sk.onmessage = (e) => {
             if (!('data' in e))
                 return;
             let data = JSON.parse(e.data);
-            // console.log(data);
-            //console.log(data.score);
             if ('win' in data) {
                 this.winnerBox(data);
             }
@@ -234,15 +359,15 @@ export class Pong
                 this.draw.execute(data);
             }
         };
-
-        this.socket.onclose = (e) => {
+    
+        this.players[i].sk.onclose = (e) => {
             this.main.load('/lobby', () => this.lobby.events());
         };
     }
 
-    set_state(e) {
-        if (this.socket !== -1)
-            this.socket.send(e);
+    set_state(i, e) {
+        if (this.players[i].sk !== -1)
+            this.players[i].sk.send(e);
     }
 
     winnerBox(data) {
@@ -270,11 +395,12 @@ export class Pong
             document.body.removeChild(backdrop);
             document.body.removeChild(winBox);
             if (this.tournament) {
-                this.set_state('quit');
-                if (this.socket !== -1) {
-                    this.socket.close();
-                    this.socket = -1;
-                }
+                // this.set_state('quit');
+                // if (this.socket !== -1) {
+                //     this.socket.close();
+                //     this.socket = -1;
+                // }
+                this.quit();
                 this.tournament.endMatch(data);
             };     
         }   
