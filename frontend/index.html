@@ -25,40 +25,55 @@
       display: block;
       margin: 20px auto;
     }
-    
+
+    h {
+      margin-left:10px;
+    }
+
+    .navbar {
+      padding: 0.5rem 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    #name {
+      color: white;
+      font-family: Arial, sans-serif;
+      font-size: 18px;
+    }
+
   </style>
   <base href="/">
 </head>
 <body>
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <a class="navbar-brand" href="#">Transcendence</a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav ml-auto">
-        <li class="nav-item">
-          <a class="nav-link" href="#" id="home">Home</a>
-        </li>
-      </ul>
-    </div>
-  </nav>
+
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <a class="navbar-brand" href="#">Transcendence</a>
+  <div class="collapse navbar-collapse" id="navbarNav">
+    <ul class="navbar-nav ml-auto">
+    </ul>
+  </div>
+  <span id="name"></span>
+  <h><button id="login" class="btn btn-primary ml-lg-2">Login</button></h>
+  <button id="signup" class="btn btn-success ml-lg-2">Signup</button>
+</nav>
+
+  
+
+
+
+  
   <div class="container mt-5">
     <div class="row justify-content-center">
       <div class="col-md-6">
-        <div class="card">
-          <div class="card-body text-center">
-            <h5 class="card-title">Welcome</h5>
-            <p class="card-text">Hello <span id="name"></span></p>
-            <button id="login" class="btn btn-primary mr-2">Login</button>
-            <button id="signup" class="btn btn-success">Signup</button>
-          </div>
-        </div>
       </div>
     </div>
-    <div id="status" class="mt-3"></div>
     <div id="container" class="mt-3"></div>
+    <div id="status" class="mt-3"></div>
   </div>
+  
 
   <script>
 
@@ -67,12 +82,12 @@
         if (mutation.type === 'childList' && mutation.target.id === 'status') {
           console.log('Status changed:', mutation.target.innerText);
           $('#status').stop(true, true);
-          $('#status').fadeIn().delay(100).fadeOut(5000);
+          $('#status').fadeIn().delay(100).fadeOut(3000);
 
         }
       }
     }
-    
+
     const statusObserver = new MutationObserver(handleStatusChange);
     
     const observerConfig = { childList: true, subtree: true };
