@@ -1,7 +1,6 @@
 import json
 from asgiref.sync import sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
-# from game.models import RoomsModel, PlayerRoomModel
 from accounts.models import PlayersModel
 
 import asyncio
@@ -139,7 +138,7 @@ class PongConsumer(AsyncWebsocketConsumer):
                 # (self.room.score0 >= 11 and self.room.score1 <= self.room.score0 - 2):
                 # # if self.room.tournamentRoom == True and self.room.score0 == 1 or self.room.score1 == 1:
                 if self.room.tournamentRoom == True and cache.get(self.k_score0) == 1 or cache.get(self.k_score1) == 1:
-                #     await self.channel_layer.group_send(self.room_id, {'type': 'win_data'})
-                return
+                    await self.channel_layer.group_send(self.room_id, {'type': 'win_data'})
+                    return
             await check_collision(self)
             await self.channel_layer.group_send(self.room_id, {'type': 'group_data'})

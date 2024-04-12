@@ -1,8 +1,7 @@
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from .models import RoomsModel, TournamentMatchModel
+from .models import RoomsModel, TournamentMatchModel, TournamentModel
 from accounts.models import PlayersModel
-
 import jwt
 from pong.data import pong_data
 import os
@@ -11,8 +10,9 @@ from datetime import datetime, timedelta
 from django.contrib.auth import authenticate, login as auth_login, get_user_model, logout as auth_logout
 from django.views.decorators.http import require_POST
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
-
 from django.core.cache import cache
+from django.utils import timezone
+
 
 JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY')
 JWT_REFRESH_SECRET_KEY = os.environ.get('JWT_REFRESH_SECRET_KEY')
@@ -127,8 +127,6 @@ def join(request):
         'data': get_data(room.game)
         }))
 
-
-
 def delete(request):
     if 'game_id' not in request.POST:
         return JsonResponse({'error': 'No game id!'}, status=400)
@@ -181,28 +179,6 @@ def tournament_local_join(request):
     room = RoomsModel.objects.get(id=request.POST['game_id'])
     player = PlayersModel.objects.get(id=room.owner.id)
     match = TournamentMatchModel.objects.filter(room=room).first()
-    # if not room.server:
-    #     room.server = player
-    #     room.save()
-    #     side = 0
-    #     position = 0
-    # else:
-    # side = 0
-    # position = 0
-    # player_room = PlayerRoomModel.objects.create(
-    # player=player,
-    # room=room,
-    # side=side,
-    # position=position)
-    # # player_room = PlayerRoomModel.objects.get(player=player)
-    # if room.game == 'pong':
-    #     player_room.x = position * pong_data['PADDLE_WIDTH'] + position * pong_data['PADDLE_DISTANCE']
-    #     if side == 1:
-    #         player_room.x = pong_data['WIDTH'] - player_room.x - pong_data['PADDLE_WIDTH']
-    #     player_room.y = pong_data['HEIGHT'] / 2 - pong_data['PADDLE_HEIGHT'] / 2
-    # player_room.save()
-    # player.save()
-    
     return (JsonResponse({
         'id': str(room),
         'game': room.game,
@@ -247,17 +223,28 @@ def tournament_local_get(request):
             i = 0;
             player1 = participants[i]
             player2  = participants[i + 1]
+            # room = RoomsModel.objects.create(
+            #     game=tournament.game,
+            #     name=f"{tournament.name} - Match {tournament.total_matches}",
+            #     owner=tournament.owner,
+            #     server=tournament.owner,
+            #     tournamentRoom=True
+            # )
+            # if room.game == 'pong':
+            #     room.x = pong_data['PADDLE_WIDTH'] + pong_data['RADIUS']
+            #     room.y = pong_data['HEIGHT'] / 2
+            #     room.save()
             room = RoomsModel.objects.create(
                 game=tournament.game,
                 name=f"{tournament.name} - Match {tournament.total_matches}",
                 owner=tournament.owner,
-                server=tournament.owner,
+                # server=tournament.owner,
                 tournamentRoom=True
-            )
+            ) 
             if room.game == 'pong':
-                room.x = pong_data['PADDLE_WIDTH'] + pong_data['RADIUS']
-                room.y = pong_data['HEIGHT'] / 2
-                room.save()
+                cache.set(str(room.id) + "_x", pong_data['PADDLE_WIDTH'] + pong_data['RADIUS'])
+                cache.set(str(room.id) + "_y", pong_data['HEIGHT'] / 2)
+                room, player = add_player_to_room(room.id, tournament.owner.login)
             match = TournamentMatchModel.objects.create(
                 tournament=tournament,
                 room=room,

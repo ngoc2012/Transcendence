@@ -47,6 +47,7 @@ export class localTournament {
 
     joinMatch(roomId) {
         var csrftoken = this.main.getCookie('csrftoken');
+        this.dom_container = document.getElementById('match');
 
         if (csrftoken) {
             $.ajax({
@@ -61,18 +62,38 @@ export class localTournament {
                 success: (info) => {
                     switch (info.game) {
                         case 'pong':
-                            console.log('pooong')
+                            console.log('pooong');
                             this.game = new Pong(this.main, this.main.lobby, info, this);
-                            this.main.load('/pong', () => {
+                
+                            this.dom_container = document.getElementById('match');
+                            this.load('/pong', () => {
                                 this.game.init();
                             });
                             break;
-                    }
-                },
+                    }                
+                },                
                 error: () => this.main.set_status('Error: Can not join game')
             });
         } else {
             this.main.load('/pages/login', () => this.main.log_in.events());
         }
     }
+
+    load(page, callback) {
+        $.ajax({
+            url: page + '/',
+            method: 'GET',
+            success: (html) => {
+                this.dom_container.innerHTML = html;
+                if (callback && typeof callback === 'function') {
+                    callback();
+                }
+            },
+            error: (jqXHR, textStatus, errorThrown) => {
+                if (jqXHR.status === 401) {
+                    this.login_click();
+                }
+            }
+        });
+    }    
 }

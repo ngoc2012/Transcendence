@@ -1,7 +1,7 @@
 from django.core.exceptions import ObjectDoesNotExist
 import json
 from asgiref.sync import sync_to_async
-from game.models import RoomsModel, PlayerRoomModel
+from game.models import RoomsModel
 from accounts.models import PlayersModel
 
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist

@@ -22,8 +22,8 @@ class RoomsModel(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=255)
     game = models.CharField(max_length=20)
-    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='own')
-    server = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='serve', null=True)
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='own', null=True)
+    # server = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='serve', null=True)
     expires = models.DateTimeField(default=timezone.now() + timezone.timedelta(minutes=15))
     tournamentRoom = models.BooleanField(default=False)
     def __str__(self):
