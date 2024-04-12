@@ -3,7 +3,7 @@ from asgiref.sync import sync_to_async
 from game.models import RoomsModel
 
 from .data import pong_data
-import random
+import math
 
 from django.core.cache import cache
 
@@ -23,23 +23,20 @@ def check_collision(consumer):
             p_y = cache.get(consumer.room_id + "_" + str(p) + "_y")
             if x - pong_data['RADIUS'] == p_x + pong_data['PADDLE_WIDTH'] and y >= p_y and y <= p_y + pong_data['PADDLE_HEIGHT']:
                 cache.set(consumer.k_dx, 1)
-                cache.set(consumer.k_ddy, random.choice(consumer.choices))
-                if p_y + pong_data['PADDLE_HEIGHT'] / 2 > y:
-                    cache.set(consumer.k_dy, -1)
-                else:
-                    cache.set(consumer.k_dy, 1)
+                i = (y - p_y -pong_data['PADDLE_HEIGHT'] / 2) / ( pong_data['PADDLE_HEIGHT'] / len(consumer.choices))
+                cache.set(consumer.k_dy, math.copysign(1, i))
+                i = min(math.ceil(abs(i)) + 1, len(consumer.choices) - 1)
+                cache.set(consumer.k_ddy, consumer.choices[i])
     else:
         for p in team1:
             p_x = cache.get(consumer.room_id + "_" + str(p) + "_x")
             p_y = cache.get(consumer.room_id + "_" + str(p) + "_y")
             if x + pong_data['RADIUS'] == p_x and y >= p_y and y <= p_y + pong_data['PADDLE_HEIGHT']:
                 cache.set(consumer.k_dx, -1)
-                cache.set(consumer.k_ddy, random.choice(consumer.choices))
-                if p_y + pong_data['PADDLE_HEIGHT'] / 2 > y:
-                    cache.set(consumer.k_dy, -1)
-                else:
-                    cache.set(consumer.k_dy, 1)
-
+                i = (y - p_y - pong_data['PADDLE_HEIGHT'] / 2) / ( pong_data['PADDLE_HEIGHT'] / len(consumer.choices))
+                cache.set(consumer.k_dy, math.copysign(1, i))
+                i = min(math.ceil(abs(i)) + 1, len(consumer.choices) - 1)
+                cache.set(consumer.k_ddy, consumer.choices[i])
 @sync_to_async
 def update_ball(consumer):
     x = cache.get(consumer.k_x) + cache.get(consumer.k_dx) * pong_data['DX']
