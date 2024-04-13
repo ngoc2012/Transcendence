@@ -11,6 +11,9 @@ from django.core.cache import cache
 def index(request):
     return render(request, "pong.html")
 
+def index_local(request):
+    return render(request, "pong_local.html")
+
 from backend.asgi import channel_layer
 from asgiref.sync import async_to_sync
 def action(request, room_id, player_id, action):

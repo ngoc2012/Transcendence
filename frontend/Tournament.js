@@ -415,7 +415,7 @@ export class Tournament {
                     {
                         switch (info.game) {
                             case 'pong':
-                                this.game = new Pong(this.main, this.main.lobby, info, this);
+                                this.game = new Pong(this.main, this.main.lobby, info, this, false);
                                 this.main.load('/pong', () => {
                                     this.game.init();
                                 });

@@ -127,6 +127,31 @@ def join(request):
         'data': get_data(room.game)
         }))
 
+def tournament_local_join_setup(request):
+    print('in')
+    if 'game_id' not in request.POST:
+        print('no id')
+        return (HttpResponse("Error: No game id!"))
+    players = cache.get(str(request.POST['game_id']) + "_all")
+    if players == None:
+        players = []
+    player = PlayersModel.objects.get(login='localTournament')
+    print('player found')
+    if player.id in players:
+        return (HttpResponse("Error: Player with login " + request.POST['login'] + " is already in the room!"))
+    room, player = add_player_to_room(request.POST['game_id'], player.login)
+    if room == None:
+        return (HttpResponse("Error: Room with id " + request.POST['game_id'] + " does not exist!"))
+    if player == None:
+        return (HttpResponse("Error: Player with login " + request.POST['login'] + " does not exist!"))
+    return (JsonResponse({
+        'id': str(room),
+        'game': room.game,
+        'name': room.name,
+        'player_id': player.id,
+        'data': get_data(room.game)
+        }))
+
 def delete(request):
     if 'game_id' not in request.POST:
         return JsonResponse({'error': 'No game id!'}, status=400)
@@ -187,94 +212,120 @@ def tournament_local_join(request):
         'data': get_data(room.game)
         }))
 
-def tournament_local_results(tournament):
-    return
+@require_POST
+def tournament_local_result(request):
+    try:
+        room_id = request.POST.get("room")
+        score1 = request.POST.get("score1")
+        score2 = request.POST.get("score2")
 
+        print(room_id)
+        print(score1)
+        print(score2)
+
+        match = TournamentMatchModel.objects.get(room_uuid=room_id)
+
+        match.end_time = timezone.now()
+        match.p1_score = score1
+        match.p2_score = score2
+        match.winnerLocal = match.player1Local if match.p1_score > match.p2_score else match.player2Local
+        match.save()
+
+        tournament = match.tournament
+        winner_player = match.player1Local if match.p1_score > match.p2_score else match.player2Local
+        loser_player = match.player1Local if match.p1_score < match.p2_score else match.player2Local
+        print(winner_player)
+        print(loser_player)
+        tournament.waitlistLocal.remove(winner_player)
+        tournament.waitlistLocal.remove(loser_player)
+        tournament.participantsLocal.append(winner_player)
+        tournament.eliminatedLocal.append(loser_player)
+        tournament.localMatchIP = False
+        tournament.save()
+
+        return JsonResponse({'status': 'ok'})
+    except ValueError:
+        return JsonResponse({'error': 'Invalid input for scores. Please provide numeric values.'}, status=400)
+    except ObjectDoesNotExist:
+        return JsonResponse({'error': 'Room or match not found.'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': 'An unexpected error occurred: {}'.format(str(e))}, status=500)
+
+@require_POST
 def tournament_local_get(request):
-    if request.method == 'POST':
-        try:
-            tour_id = request.POST["id"]
-            tournament = TournamentModel.objects.get(id=tour_id)
-            participants = tournament.participantsLocal
+    try:
+        tour_id = request.POST["id"]
+        tournament = TournamentModel.objects.get(id=tour_id)
+        participants = tournament.participantsLocal
 
-            if len(participants) == 1:
-                tournament.terminated = True
-                return tournament_local_results(tournament)
-            elif len(participants) == 2:
-                tournament.final = True
-            elif len(participants) % 2 != 0:
-                random_participant = random.choice(participants)
-                tournament.participantsLocal.remove(random_participant)
-                tournament.waitlistLocal.add(random_participant)
-            tournament.save()
+        print('participants:')
+        print(participants)
 
-            if tournament.localMatchIP:
-                last_match = TournamentMatchModel.objects.filter(tournament=tournament).order_by('-id').first()
-                return JsonResponse({
-                    'name': tournament.name,
-                    'round': tournament.round,
-                    'match': tournament.total_matches,
-                    'player1': last_match.player1Local,
-                    'player2': last_match.player2Local,
-                    'room_id': str(last_match.room_uuid),
-                })
+        if len(participants) == 1:
+            tournament.terminated = True
+            return tournament_local_end(tournament)
+        elif len(participants) == 2:
+            tournament.final = True
+        elif len(participants) % 2 != 0:
+            random_participant = random.choice(participants)
+            tournament.participantsLocal.remove(random_participant)
+            tournament.waitlistLocal.add(random_participant)
+        tournament.save()
 
-            random.shuffle(participants)
-            i = 0;
-            player1 = participants[i]
-            player2  = participants[i + 1]
-            # room = RoomsModel.objects.create(
-            #     game=tournament.game,
-            #     name=f"{tournament.name} - Match {tournament.total_matches}",
-            #     owner=tournament.owner,
-            #     server=tournament.owner,
-            #     tournamentRoom=True
-            # )
-            # if room.game == 'pong':
-            #     room.x = pong_data['PADDLE_WIDTH'] + pong_data['RADIUS']
-            #     room.y = pong_data['HEIGHT'] / 2
-            #     room.save()
-            room = RoomsModel.objects.create(
-                game=tournament.game,
-                name=f"{tournament.name} - Match {tournament.total_matches}",
-                owner=tournament.owner,
-                # server=tournament.owner,
-                tournamentRoom=True
-            ) 
-            if room.game == 'pong':
-                cache.set(str(room.id) + "_x", pong_data['PADDLE_WIDTH'] + pong_data['RADIUS'])
-                cache.set(str(room.id) + "_y", pong_data['HEIGHT'] / 2)
-                room, player = add_player_to_room(room.id, tournament.owner.login)
-            match = TournamentMatchModel.objects.create(
-                tournament=tournament,
-                room=room,
-                room_uuid=room.id,
-                player1Local=player1,
-                player2Local=player2,
-                start_time=timezone.now(),
-                round_number=tournament.round,
-                match_number=tournament.total_matches)
-            tournament.active_matches += 1
-            tournament.total_matches += 1 
-            tournament.localMatchIP = True
-            tournament.participantsLocal.remove(player1)
-            tournament.participantsLocal.remove(player2)
-            tournament.waitlistLocal.append(player1)
-            tournament.waitlistLocal.append(player2)
-            tournament.save()
-            if player1 and player2:
-                return JsonResponse({
-                    'name': tournament.name,
-                    'round': tournament.round,
-                    'match': tournament.total_matches,
-                    'player1': player1,
-                    'player2': player2,
-                    'room_id': str(room.id),
-                })
-        except:
-            return JsonResponse({'error'})
-    else:
-        return JsonResponse({'error': 'This endpoint only accepts POST requests.'}, status=405)
+        if tournament.localMatchIP:
+            last_match = TournamentMatchModel.objects.filter(tournament=tournament).order_by('-id').first()
+            return JsonResponse({
+                'name': tournament.name,
+                'round': tournament.round,
+                'match': tournament.total_matches,
+                'player1': last_match.player1Local,
+                'player2': last_match.player2Local,
+                'room_id': str(last_match.room_uuid),
+            })
+
+        random.shuffle(participants)
+        i = 0;
+        player1 = participants[i]
+        player2  = participants[i + 1]
+        room = RoomsModel.objects.create(
+            game=tournament.game,
+            name=f"{tournament.name} - Match {tournament.total_matches}",
+            owner=tournament.owner,
+            # server=tournament.owner,
+            tournamentRoom=True
+        ) 
+        if room.game == 'pong':
+            cache.set(str(room.id) + "_x", pong_data['PADDLE_WIDTH'] + pong_data['RADIUS'])
+            cache.set(str(room.id) + "_y", pong_data['HEIGHT'] / 2)
+            room, player = add_player_to_room(room.id, tournament.owner.login)
+        match = TournamentMatchModel.objects.create(
+            tournament=tournament,
+            room=room,
+            room_uuid=room.id,
+            player1Local=player1,
+            player2Local=player2,
+            start_time=timezone.now(),
+            round_number=tournament.round,
+            match_number=tournament.total_matches)
+        tournament.active_matches += 1
+        tournament.total_matches += 1 
+        tournament.localMatchIP = True
+        tournament.participantsLocal.remove(player1)
+        tournament.participantsLocal.remove(player2)
+        tournament.waitlistLocal.append(player1)
+        tournament.waitlistLocal.append(player2)
+        tournament.save()
+        if player1 and player2:
+            return JsonResponse({
+                'name': tournament.name,
+                'round': tournament.round,
+                'match': tournament.total_matches,
+                'player1': player1,
+                'player2': player2,
+                'room_id': str(room.id),
+            })
+    except:
+        return JsonResponse({'error'})
     
 
 def tournament_local_verify(request):
@@ -312,6 +363,36 @@ def tournament_local_verify(request):
         return JsonResponse({'message': 'Done'})
     else:
         return JsonResponse({'error': 'This endpoint only accepts POST requests.'}, status=405)
+    
+def fetch_matches(tournament):
+    matches = TournamentMatchModel.objects.filter(tournament=tournament)
+
+    matches_info = []
+
+    for match in matches:
+        match_info = {
+            'player1': match.player1.username if match.local else match.player1Local,
+            'player2': match.player2.username if match.local else match.player2Local,
+            'p1_score': match.p1_score,
+            'p2_score': match.p2_score,
+            'winner': match.winner.username if match.local else match.winnerLocal,
+            'round_number': match.round_number,
+            'match_number': match.match_number,
+        }
+        matches_info.append(match_info)
+
+    return matches_info
+
+def tournament_local_end(tournament):
+    matches = fetch_matches(tournament)
+
+    return JsonResponse({
+        'name': tournament.name,
+        'round': 'Terminated',
+        'match': tournament.total_matches,
+        'tourwinner' : tournament.participantsLocal[0] if len(tournament.participantsLocal) == 1 else tournament.winner.login,
+        'results': matches
+    })
 
 # from channels.layers import get_channel_layer
 from backend.asgi import channel_layer

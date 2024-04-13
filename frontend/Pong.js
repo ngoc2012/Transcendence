@@ -2,7 +2,7 @@ import {Draw} from './Draw.js'
 
 export class Pong
 {
-    constructor(m, l, r, t = null) {
+    constructor(m, l, r, t = null, localTournament = null, localTour = false) {
         this.main = m;
         this.lobby = l;
         this.room = r;
@@ -10,11 +10,13 @@ export class Pong
         this.power_play = false;
         this.draw = new Draw(this);
         this.tournament = t;
+        this.localTournament = localTournament;
         this.keyboard_layout = "";
         this.players = [{
             'id': this.room.player_id,
             'sk': -1
         }];
+        this.localTour = localTour;
     }
 
 	init() {
@@ -32,10 +34,12 @@ export class Pong
 
         this.pongThreeJS = document.getElementById('pongThreeJS');
 
-        this.dom_start = document.getElementById("start");
-        this.dom_quit = document.getElementById("quit");
-        this.dom_start.addEventListener("click", () => this.start());
-        this.dom_quit.addEventListener("click", () => this.quit());
+        if (!this.localTour) {
+            this.dom_start = document.getElementById("start");
+            this.dom_start.addEventListener("click", () => this.start());
+            this.dom_quit = document.getElementById("quit");
+            this.dom_quit.addEventListener("click", () => this.quit());
+        }
 
 		this.dom_angle = document.getElementById("angle");
 		this.dom_ratio = document.getElementById("ratio");
@@ -52,20 +56,22 @@ export class Pong
 		this.dom_light_x = document.getElementById("light_x");
 		this.dom_light_y = document.getElementById("light_y");
 		this.dom_light_z = document.getElementById("light_z");
-        this.dom_toggle_AI = document.getElementById("toggle_AI");
-        this.dom_power_play = document.getElementById("power_play");
         this.dom_toggle_display = document.getElementById('toggle_display');
         this.dom_toggle_display_board = document.getElementById('toggle_display_board');
         this.dom_display_board = document.getElementById('display_board');
-
-        this.dom_new_local_player = document.getElementById('new_local_player');
-        this.dom_local_player = document.getElementById('local_player');
-        this.dom_login_local = document.getElementById('login_local');
-        this.dom_password_local = document.getElementById('password_local');
-        this.dom_keyboard_layout = document.getElementById('keyboard_layout');
-        this.dom_join_local = document.getElementById('join_local');
-        this.dom_close_local = document.getElementById('close_local');
-
+        
+        if (!this.localTour) {
+            this.dom_local_player = document.getElementById('local_player');
+            this.dom_toggle_AI = document.getElementById("toggle_AI");
+            this.dom_power_play = document.getElementById("power_play");
+            this.dom_new_local_player = document.getElementById('new_local_player');
+            this.dom_login_local = document.getElementById('login_local');
+            this.dom_password_local = document.getElementById('password_local');
+            this.dom_join_local = document.getElementById('join_local');
+            this.dom_close_local = document.getElementById('close_local');
+            this.dom_keyboard_layout = document.getElementById('keyboard_layout');
+        }
+        
         document.addEventListener('keydown', (event) => {
             switch (event.key) {
                 case 'ArrowUp':
@@ -113,10 +119,12 @@ export class Pong
             }
         });
 
-        this.dom_toggle_AI.addEventListener('click', () => {this.set_state(0, 'ai_player')});
-        this.dom_power_play.addEventListener('click', () => {this.set_state(0, 'power')});
-		this.dom_toggle_display.addEventListener('click', () => {this.toggle_display()});
-        this.dom_toggle_display_board.addEventListener('click', () => {this.toggle_display_board()});
+        if (!this.localTour) {
+            this.dom_toggle_AI.addEventListener('click', () => {this.set_state(0, 'ai_player')});
+            this.dom_power_play.addEventListener('click', () => {this.set_state(0, 'power')});
+            this.dom_toggle_display.addEventListener('click', () => {this.toggle_display()});
+            this.dom_toggle_display_board.addEventListener('click', () => {this.toggle_display_board()});
+        }
         this.connect(0);
 
         this.draw.init();
@@ -138,15 +146,50 @@ export class Pong
 		this.dom_light_y.addEventListener('input', this.draw.update_camera.bind(this.draw));
 		this.dom_light_z.addEventListener('input', this.draw.update_camera.bind(this.draw));
         
-        this.dom_new_local_player.addEventListener('click', () => {
-            this.dom_local_player.style.display = 'block';
-        });
-        this.dom_close_local.addEventListener('click', () => {
-            this.dom_local_player.style.display = 'none';
-        });
-        this.dom_join_local.addEventListener('click', () => {
-            this.local_player_login();
-        });
+        if (!this.localTour) {
+            this.dom_new_local_player.addEventListener('click', () => {
+                this.dom_local_player.style.display = 'block';
+            });
+            this.dom_close_local.addEventListener('click', () => {
+                this.dom_local_player.style.display = 'none';
+            });
+            this.dom_join_local.addEventListener('click', () => {
+                this.local_player_login();
+            });
+        }
+
+        if (this.localTour) {
+            var csrftoken = this.main.getCookie('csrftoken');
+            $.ajax({
+                url: '/game/tournament/local/join/setup/',
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrftoken,
+                },
+                data: {
+                    "game_id": this.room.id
+                },
+                success: (info) => {
+                    if (typeof info === 'string')
+                        this.main.set_status(info);
+                    else
+                    {
+                        this.players.push({
+                            'id': info.player_id,
+                            'sk': -1
+                        });
+                        let i = this.players.length - 1;
+                        this.connect(i);
+                        if (this.players[i].sk !== -1)
+                        {
+                            this.keyboard_layout = 'olkp';
+                        }
+                        this.preMatchBox(this.tournament.player1, this.tournament.player2);
+                    }
+                },
+                error: () => this.main.set_status('Error: Can not join game')
+            });
+        }
 	}
 
     toggle_display() {
@@ -193,7 +236,7 @@ export class Pong
         }
         if (this.charExists(this.dom_keyboard_layout.value, this.keyboard_layout))
         {
-            this.main.set_status('Keyboard layout must not contain already used characters');
+            this.main.set_status('Keyboard layout must not contain already used1` characters');
             return;
         }
         if (this.isAlphabetic(this.dom_keyboard_layout.value) === false)
@@ -293,10 +336,11 @@ export class Pong
                 p.sk = -1;
             }
         });
-        
-        this.main.history_stack.push('/');
-        window.history.pushState({}, '', '/');
-        this.main.load('/lobby', () => this.lobby.events());
+        if (!this.localTour) {
+            this.main.history_stack.push('/');
+            window.history.pushState({}, '', '/');
+            this.main.load('/lobby', () => this.lobby.events());
+        }
     }
 
     connect(i) {
@@ -352,10 +396,12 @@ export class Pong
             }
             else
             {
-                if ('power_play' in data)
-                    this.set_power_play(data.power_play);
-                if ('ai_player' in data)
-                    this.set_ai_player(data.ai_player);
+                if (!this.localTour) {
+                    if ('power_play' in data)
+                        this.set_power_play(data.power_play);
+                    if ('ai_player' in data)
+                        this.set_ai_player(data.ai_player);
+                }
                 this.draw.update(data);
                 this.draw.execute(data);
             }
@@ -369,6 +415,37 @@ export class Pong
     set_state(i, e) {
         if (this.players[i].sk !== -1)
             this.players[i].sk.send(e);
+    }
+
+    preMatchBox(player1, player2) {
+        let backdrop = document.createElement('div');
+        backdrop.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); z-index: 99;';
+        document.body.appendChild(backdrop);
+        document.getElementById('pongCanvas').style.filter = 'blur(8px)';
+
+        let matchBox = document.createElement('div');
+        matchBox.setAttribute('id', 'matchBox');
+        matchBox.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); padding: 20px; background-color: #fff; border: 2px solid #000; text-align: center; z-index: 100;';
+
+        let matchText = document.createElement('p');
+        matchText.textContent = `Match can start whenever you are ready!`;
+        matchBox.appendChild(matchText);
+
+        let instruct = document.createElement('p');
+        instruct.textContent = `${player1} must use [keyboards] and ${player2} 'o' to go high, 'l' to go low`;
+        matchBox.appendChild(instruct);
+
+        let startButton = document.createElement('button');
+        startButton.textContent = 'Start';
+        startButton.onclick = () => {
+            document.getElementById('pongCanvas').style.filter = '';
+            document.body.removeChild(backdrop);
+            document.body.removeChild(matchBox);
+            this.start()
+        }   
+        matchBox.appendChild(startButton);
+
+        document.body.appendChild(matchBox);
     }
 
     winnerBox(data) {
@@ -390,20 +467,17 @@ export class Pong
         winBox.appendChild(scoreText);
 
         let backButton = document.createElement('button');
-        backButton.textContent = 'Back to Lobby';
+        backButton.textContent = 'Back to lobby';
         backButton.onclick = () => {
             document.getElementById('pongCanvas').style.filter = '';
             document.body.removeChild(backdrop);
             document.body.removeChild(winBox);
-            if (this.tournament) {
-                // this.set_state('quit');
-                // if (this.socket !== -1) {
-                //     this.socket.close();
-                //     this.socket = -1;
-                // }
-                this.quit();
+            if (!this.localTour && this.tournament) {
                 this.tournament.endMatch(data);
-            };     
+            } else {
+                this.localTournament.sendResult(data.score[0], data.score[1], this.room.id);
+            }  
+            this.quit();
         }   
         winBox.appendChild(backButton);
 
