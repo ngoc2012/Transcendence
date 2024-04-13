@@ -4,19 +4,28 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create Tournament - Transcendence</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-    <h3>Create a New Tournament</h3>
-    <form id="tournamentForm" method="post">
-        {% csrf_token %}
-        <label for="name">Tournament Name:</label>
-        <input type="text" id="tname" name="name" required><br><br>
-        <label for="game">Game:</label>
-        <select id="game" name="game" required>
-            <option value="">Select Game</option>
-            <option value="pong">Pong</option>
-        </select><br><br>
-        <button type="submit">Create Tournament</button>
-    </form>
+    <div class="container mt-5">
+        <h3>Create a New Tournament</h3>
+        <form id="tournamentForm" method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="name">Tournament Name:</label>
+                <input type="text" id="tname" name="name" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="game">Game:</label>
+                <select id="game" name="game" class="form-control" required>
+                    <option value="">Select Game</option>
+                    <option value="pong">Pong</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Create Tournament</button>
+        </form>
+    </div>
+
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>

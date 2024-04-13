@@ -1,10 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Two-Factor Authentication - Transcendence</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        #email_sent_message {
+            margin-bottom: 20px;
+        }
+        #status_message {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-md-6 offset-md-3">
+                <div id="email_sent_message" class="alert alert-info" role="alert">
+                    Enter your 2FA code here
+                </div>
+                <form id="2faForm">
+                    <div class="form-group">
+                        <label for="code">Code:</label>
+                        <input type="text" class="form-control" id="code" name="code" required>
+                    </div>
+                    <button id="confirm" class="btn btn-primary" type="button">Confirm</button>
+                    <button id="cancel0" class="btn btn-secondary" type="button">Cancel</button>
+                </form>
+                <div id="status_message"></div>
+            </div>
+        </div>
+    </div>
 
-<div id="email_sent_message">
-    Enter here your 2fa code
-</div>
-<label for="code">Code:</label>
-<input type="code" name="code" id="code0" />
-<button id="confirm" type="button">Confirm</button>
-<button id="cancel0" type="button">Cancel</button>
-<!-- mieux gerer le status message -->
-<div id="status_message"></div> 
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
