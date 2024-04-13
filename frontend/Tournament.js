@@ -40,8 +40,17 @@ export class Tournament {
             const numberOfPlayers = event.target.value;
             const form = document.getElementById('playerForm');
             form.innerHTML = '';
+
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.name = 'player' + 1;
+            input.placeholder = `${this.main.login}`;
+            input.readOnly = true;
+            input.classList.add('ignore');
+            form.appendChild(input);
+            form.appendChild(document.createElement('br'));            
     
-            for (let i = 1; i <= numberOfPlayers; i++) {
+            for (let i = 2; i <= numberOfPlayers; i++) {
                 const input = document.createElement('input');
                 input.type = 'text';
                 input.name = 'player' + i;
@@ -61,7 +70,7 @@ export class Tournament {
         document.getElementById('playerForm').addEventListener('submit', (event) => {
             event.preventDefault();
             const form = event.currentTarget;
-            const inputs = form.querySelectorAll('input[type="text"]');
+            const inputs = form.querySelectorAll('input[type="text"]:not(.ignore)');
             let allFilled = true;
             let playerNicknames = [];
         
@@ -124,14 +133,10 @@ export class Tournament {
 
         let formData = {
             name: document.getElementById('tname').value,
-            game: document.getElementById('game').value,
+            game: 'pong',
             login: this.main.login,
-            local: 'false'
+            local: 'true'
         };
-        
-        if (document.getElementById('local').checked) {
-            formData.local = 'true';
-        }
 
         var csrftoken = this.main.getCookie('csrftoken');
 

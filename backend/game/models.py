@@ -62,5 +62,7 @@ class TournamentMatchModel(models.Model):
     start_time = models.DateTimeField(null=True, blank=True)
     end_time = models.DateTimeField(null=True, blank=True)
     local = models.BooleanField(default=False)
+    player1isLocal = models.BooleanField(default=False)
+    player2isLocal = models.BooleanField(default=False)
     def __str__(self):
-        return f"{self.tournament.name} : {self.player1.name} vs {self.player2.name} - Winner: {self.winner.name if self.winner else 'TBD'}"
+        return self.id
