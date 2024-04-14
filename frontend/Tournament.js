@@ -40,25 +40,51 @@ export class Tournament {
             const numberOfPlayers = event.target.value;
             const form = document.getElementById('playerForm');
             form.innerHTML = '';
-
-            const input = document.createElement('input');
-            input.type = 'text';
-            input.name = 'player' + 1;
-            input.placeholder = `${this.main.login}`;
-            input.readOnly = true;
-            input.classList.add('ignore');
-            form.appendChild(input);
-            form.appendChild(document.createElement('br'));            
-    
+        
+            // First player input, always visible and not editable
+            const mainPlayerInput = document.createElement('input');
+            mainPlayerInput.type = 'text';
+            mainPlayerInput.name = 'player1';
+            mainPlayerInput.placeholder = `${this.main.login}`;
+            mainPlayerInput.readOnly = true;
+            mainPlayerInput.classList.add('ignore');
+            form.appendChild(mainPlayerInput);
+            form.appendChild(document.createElement('br'));
+        
+            // Create inputs, checkboxes, and password fields for other players
             for (let i = 2; i <= numberOfPlayers; i++) {
                 const input = document.createElement('input');
                 input.type = 'text';
                 input.name = 'player' + i;
                 input.placeholder = 'Player ' + i + ' Nickname';
+        
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+        
+                const loginLabel = document.createElement('label');
+                loginLabel.textContent = 'Log in';
+                loginLabel.style.marginLeft = '5px';
+                loginLabel.appendChild(checkbox);
+        
+                const passwordInput = document.createElement('input');
+                passwordInput.type = 'password';
+                passwordInput.name = 'password' + i;
+                passwordInput.placeholder = 'Password for Player ' + i;
+                passwordInput.style.display = 'none';
+                passwordInput.style.marginLeft = '5px';
+        
+                // Display password field when checkbox is checked
+                checkbox.addEventListener('change', function () {
+                    passwordInput.style.display = this.checked ? 'inline' : 'none';
+                });
+        
                 form.appendChild(input);
+                form.appendChild(loginLabel);
+                form.appendChild(passwordInput);
                 form.appendChild(document.createElement('br'));
             }
-            
+        
+            // Submit button
             if (numberOfPlayers > 0) {
                 const submitButton = document.createElement('button');
                 submitButton.type = 'submit';
@@ -66,30 +92,35 @@ export class Tournament {
                 form.appendChild(submitButton);
             }
         });
-
+        
         document.getElementById('playerForm').addEventListener('submit', (event) => {
             event.preventDefault();
             const form = event.currentTarget;
             const inputs = form.querySelectorAll('input[type="text"]:not(.ignore)');
+            const checkboxes = form.querySelectorAll('input[type="checkbox"]');
             let allFilled = true;
-            let playerNicknames = [];
+            let playerCredentials = [];
         
-            inputs.forEach(input => {
+            inputs.forEach((input, index) => {
                 if (input.value === '') {
                     allFilled = false;
                 } else {
-                    playerNicknames.push(input.value);
+                    const checkbox = checkboxes[index];
+                    if (checkbox && checkbox.checked) {
+                        const password = form.querySelector(`input[name="password${index + 2}"]`).value;
+                        playerCredentials.push({ nickname: input.value, password: password });
+                    } else {
+                        playerCredentials.push({ nickname: input.value });
+                    }
                 }
             });
         
             if (!allFilled) {
-                event.preventDefault();
                 alert('Please fill out all player nicknames.');
             } else {
                 var csrftoken = this.main.getCookie('csrftoken');
-                var formData;
-                formData = JSON.stringify({ players: playerNicknames, id: this.id});
-
+                var formData = JSON.stringify({ players: playerCredentials, id: this.id });
+        
                 if (csrftoken) {
                     $.ajax({
                         url: '/game/tournament/local/verify/',
@@ -100,16 +131,16 @@ export class Tournament {
                         },
                         success: (response) => {
                             this.main.set_status = '';
-                            this.localTournament = new localTournament(this.main, playerNicknames, this.id, this);
+                            this.localTournament = new localTournament(this.main, playerCredentials.map(p => p.nickname), this.id, this);
                             this.main.load('/tournament/local/start', () => this.localTournament.getMatch());
                         },
                         error: (xhr) => {
                             this.main.set_status(xhr.responseJSON.error);
-                    }
+                        }
                     });
                 }
             }
-        });
+        });              
     }
 
     eventsStart() {
@@ -132,7 +163,6 @@ export class Tournament {
         event.preventDefault();
 
         let formData = {
-            
             name: document.getElementById('tname').value,
             game: 'pong',
             login: this.main.login,
@@ -169,8 +199,7 @@ export class Tournament {
             });
         } else {
             this.main.load('/pages/login', () => this.main.log_in.events());
-        }
-        
+        }        
     }
     
     alreadyIn(users) {

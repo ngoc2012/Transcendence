@@ -435,41 +435,68 @@ def move_player_to_waitlist(tournament, player_login):
         except User.DoesNotExist:
             print(f"User with login {player_login} not found.")
 
+@require_POST
 def tournament_local_verify(request):
-    if request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-            players = data.get('players')
-            if not players:
-                return JsonResponse({'error': 'Missing players'}, status=400)
+    try:
+        data = json.loads(request.body)
+        players = data.get('players')
+        if not players:
+            return JsonResponse({'error': 'Missing players'}, status=400)
 
-            User = get_user_model()
-            for player in players:
+        User = get_user_model()
+        logins = set()
+        tournament_id = data.get('id')
+        tournament = TournamentModel.objects.get(id=tournament_id)
+        
+        for player in players:
+            nickname = player.get('nickname')
+            provided_password = player.get('password')
+
+            if nickname in logins:
+                return JsonResponse({'error': f'Player {nickname} is a duplicate'}, status=400)
+            logins.add(nickname)
+
+            if not provided_password:
                 try:
-                    user = User.objects.get(username=player)
+                    user = User.objects.get(username=nickname)
                     return JsonResponse({'error': f'Player {player} already exists'}, status=400)
                 except User.DoesNotExist:
+                    tournament.participantsLocal.append(nickname)
                     continue
-
-            if not len(players) == len(set(players)):
-                return JsonResponse({'error': 'Players can not have the same name'}, status=400)
-                      
-            tour_id = data.get('id')
-            tournament = TournamentModel.objects.get(id=tour_id)
-            if tournament:
-                for player in players:
-                    tournament.participantsLocal.append(player)
-                tournament.save()
             else:
-                return JsonResponse({'error': 'Tournament not found'}, status=400)       
-            
-        except json.JSONDecodeError as e:
-            return JsonResponse({'error': f'Error decoding JSON: {str(e)}'}, status=400)
-        except Exception as e:
-            return JsonResponse({'error': f'An error occurred: {str(e)}'}, status=500)
-        return JsonResponse({'message': 'Done'})
-    else:
-        return JsonResponse({'error': 'This endpoint only accepts POST requests.'}, status=405)
+                try:
+                    user = User.objects.get(username=nickname)
+                    if not user.check_password(provided_password):
+                        return JsonResponse({'error': f'Player {nickname} password is incorrect'}, status=400)
+                    tournament.participants.add(user)
+                except User.DoesNotExist:
+                    return JsonResponse({'error': f'Player {nickname} not found'}, status=404)
+
+        tournament.save()
+        
+    except json.JSONDecodeError as e:
+        return JsonResponse({'error': f'Error decoding JSON: {str(e)}'}, status=400)
+    except TournamentModel.DoesNotExist:
+        return JsonResponse({'error': 'Tournament not found'}, status=400)
+    except Exception as e:
+        return JsonResponse({'error': f'An error occurred: {str(e)}'}, status=500)
+    
+    return JsonResponse({'message': 'Done'})
+                    
+    #     # tour_id = data.get('id')
+    #     # tournament = TournamentModel.objects.get(id=tour_id)
+    #     # if tournament:
+    #     #     for player in players:
+    #     #         tournament.participantsLocal.append(player)
+    #     #     tournament.save()
+    #     # else:
+    #     #     return JsonResponse({'error': 'Tournament not found'}, status=400)       
+        
+    # except json.JSONDecodeError as e:
+    #     return JsonResponse({'error': f'Error decoding JSON: {str(e)}'}, status=400)
+    # except Exception as e:
+    #     return JsonResponse({'error': f'An error occurred: {str(e)}'}, status=500)
+    # return JsonResponse({'message': 'Done'})
     
 def fetch_matches(tournament):
     matches = TournamentMatchModel.objects.filter(tournament=tournament)
