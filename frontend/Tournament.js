@@ -132,6 +132,7 @@ export class Tournament {
         event.preventDefault();
 
         let formData = {
+            
             name: document.getElementById('tname').value,
             game: 'pong',
             login: this.main.login,

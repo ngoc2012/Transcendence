@@ -167,7 +167,8 @@ export class Pong
                     'X-CSRFToken': csrftoken,
                 },
                 data: {
-                    "game_id": this.room.id
+                    "game_id": this.room.id,
+                    "player2": this.localTournament.player2
                 },
                 success: (info) => {
                     if (typeof info === 'string')
@@ -184,7 +185,7 @@ export class Pong
                         {
                             this.keyboard_layout = 'olkp';
                         }
-                        this.preMatchBox(this.tournament.player1, this.tournament.player2);
+                        this.preMatchBox(this.localTournament.player1, this.localTournament.player2);
                     }
                 },
                 error: () => this.main.set_status('Error: Can not join game')

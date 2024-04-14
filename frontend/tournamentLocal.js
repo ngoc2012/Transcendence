@@ -91,7 +91,7 @@ export class localTournament {
                     'X-CSRFToken': csrftoken,
                 },
                 data: {
-                    "game_id": roomId
+                    "game_id": roomId,
                 },
                 success: (info) => {
                     switch (info.game) {

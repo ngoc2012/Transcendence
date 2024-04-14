@@ -10,7 +10,8 @@ def create_user(sender, **kwargs):
 
     if not User.objects.filter(username='localTournament').exists():
         try:
-            User.objects.create_user('localTournament', 'localTournament@localTournament.com', 'lctrpswrd42')
+            User.objects.create_user('localTournament1', 'localTournament1@localTournament.com', 'lctrpswrd42')
+            User.objects.create_user('localTournament2', 'localTournament2@localTournament.com', 'lctrpswrd42')
             print("User created successfully.")
         except IntegrityError as e:
             print(f"Failed to create user: {e}")

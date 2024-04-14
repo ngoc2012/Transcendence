@@ -33,6 +33,7 @@ class TournamentModel(models.Model):
     waitlistLocal = JSONField(default=list)
     eliminatedLocal = JSONField(default=list)
     localMatchIP = models.BooleanField(default=False)
+    newRound = models.BooleanField(default=False)
     round = models.IntegerField(default=1)
     active_matches = models.IntegerField(default=0)
     total_matches = models.IntegerField(default=0)
@@ -65,4 +66,4 @@ class TournamentMatchModel(models.Model):
     player1isLocal = models.BooleanField(default=False)
     player2isLocal = models.BooleanField(default=False)
     def __str__(self):
-        return self.id
+        return f"{self.tournament.name}"

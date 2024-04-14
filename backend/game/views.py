@@ -132,12 +132,17 @@ def join(request):
 def tournament_local_join_setup(request):
     if 'game_id' not in request.POST:
         return (HttpResponse("Error: No game id!"))
+    if 'player2' not in request.POST:
+        return (HttpResponse("Error: No player id!"))
+    player2 = request.POST["player2"]
     players = cache.get(str(request.POST['game_id']) + "_all")
     if players == None:
         players = []
     match = TournamentMatchModel.objects.get(room_uuid=request.POST["game_id"])
-    player = PlayersModel.objects.get(login='localTournament')
-    if player.id in players:
+    player = PlayersModel.objects.get(login=player2)
+    if not player:
+        player = PlayersModel.objects.get(login='localTournament2')
+    if player and player.id in players:
         return (HttpResponse("Error: Player with login " + request.POST['login'] + " is already in the room!"))
     room, player = add_player_to_room(request.POST['game_id'], player.login)
     if room == None:
@@ -276,6 +281,7 @@ def tournament_local_result(request):
         tournament.active_matches -= 1
         if tournament.active_matches == 0:
             tournament.round += 1
+            tournament.newRound = True
             refresh_participants(tournament)
         tournament.save()
 
@@ -316,22 +322,23 @@ def tournament_local_get(request):
             return tournament_local_end(tournament)
         elif len(all_participants) == 2 and not all_waitlist:
             tournament.final = True
-        # elif len(participants) % 2 != 0:
-        #     random_participant = random.choice(participants)
-        #     tournament.participantsLocal.remove(random_participant)
-        #     tournament.waitlistLocal.append(random_participant)
+        elif tournament.newRound:
+            if len(all_participants) % 2 != 0:
+                random_participant = random.choice(all_participants)
+                move_player_to_waitlist(tournament, random_participant)
+            tournament.newRound = False
         tournament.save()
 
-        # if tournament.localMatchIP:
-        #     last_match = TournamentMatchModel.objects.filter(tournament=tournament).order_by('-id').first()
-        #     return JsonResponse({
-        #         'name': tournament.name,
-        #         'round': tournament.round if tournament.final == False else 'final',
-        #         'match': tournament.total_matches,
-        #         'player1': last_match.player1Local,
-        #         'player2': last_match.player2Local,
-        #         'room_id': str(last_match.room_uuid),
-        #     })
+        if tournament.localMatchIP:
+            last_match = TournamentMatchModel.objects.filter(tournament=tournament).order_by('-id').first()
+            return JsonResponse({
+                'name': tournament.name,
+                'round': tournament.round if tournament.final == False else 'final',
+                'match': tournament.total_matches,
+                'player1': last_match.player1Local if last_match.player1isLocal else last_match.player1.username,
+                'player2': last_match.player2Local if last_match.player2isLocal else last_match.player2.username,
+                'room_id': str(last_match.room_uuid),
+            })
 
         tournament.total_matches += 1
         tournament.active_matches += 1
@@ -350,7 +357,10 @@ def tournament_local_get(request):
         if room.game == 'pong':
             cache.set(str(room.id) + "_x", pong_data['PADDLE_WIDTH'] + pong_data['RADIUS'])
             cache.set(str(room.id) + "_y", pong_data['HEIGHT'] / 2)
-            room, player = add_player_to_room(room.id, tournament.owner.login)
+            if player1 in tournament.participantsLocal:
+                room, player = add_player_to_room(room.id, User.objects.get(login='localTournament1'))
+            else:
+                room, player = add_player_to_room(room.id, User.objects.get(login=player1))
 
         if player1 in tournament.participantsLocal and player2 in tournament.participantsLocal:
             match = TournamentMatchModel.objects.create(
@@ -471,11 +481,11 @@ def fetch_matches(tournament):
 
     for match in matches:
         match_info = {
-            'player1': match.player1.username if match.local else match.player1Local,
-            'player2': match.player2.username if match.local else match.player2Local,
+            'player1': match.player1Local if match.player1isLocal else match.player1.username,
+            'player2': match.player2Local if match.player2isLocal else match.player2.username,
             'p1_score': match.p1_score,
             'p2_score': match.p2_score,
-            'winner': match.winner.username if match.local else match.winnerLocal,
+            'winner': match.winnerLocal if match.winnerLocal else match.winner.username,
             'round_number': match.round_number,
             'match_number': match.match_number,
         }
