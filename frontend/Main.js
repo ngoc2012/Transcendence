@@ -44,15 +44,15 @@ export class Main
 
         this.dom_signup.addEventListener("click", () => this.signup_click());
         this.dom_login.addEventListener("click", () => this.login_click());
-        this.dom_home.addEventListener("click", () => {
-            if (this.lobby.game && this.lobby.game !== undefined)
-            {
-                this.lobby.game.quit();
-                this.lobby.game = undefined;
-            }
-            window.history.pushState({}, '', '/');
-            this.load('/lobby', () => this.lobby.events());
-        });
+        // this.dom_home.addEventListener("click", () => {
+        //     if (this.lobby.game && this.lobby.game !== undefined)
+        //     {
+        //         this.lobby.game.quit();
+        //         this.lobby.game = undefined;
+        //     }
+        //     window.history.pushState({}, '', '/');
+        //     this.load('/lobby', () => this.lobby.events());
+        // });
     }
 
     load(page, callback) {

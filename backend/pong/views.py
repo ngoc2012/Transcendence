@@ -21,7 +21,6 @@ def action(request, room_id, player_id, action):
     k_y = room_id + "_y"
     k_player_x = room_id + "_" + player_id + "_x"
     k_player_y = room_id + "_" + player_id + "_y"
-
     started = cache.get(room_id + "_started")
     team0 = cache.get(room_id + "_team0")
     if team0 == None:
@@ -72,7 +71,21 @@ def action(request, room_id, player_id, action):
             if not started and server == player_id:
                 cache.set(k_x, x + pong_data['STEP_X'])
     async_to_sync(channel_layer.group_send)(room_id, {'type': 'group_data'})
-    return HttpResponse("done")
+    x = cache.get(k_x)
+    y = cache.get(k_y)
+    player_x = cache.get(k_player_x)
+    player_y = cache.get(k_player_y)
+    return JsonResponse({
+        'ai_player': cache.get(room_id + "_ai"),
+        'power_play': cache.get(room_id + "_pow"),
+        'ball': {'x': x, 'y':y},
+        'team0': team0,
+        'team1': team1,
+        'dx': cache.get(room_id + "_dx"),
+        'started': started,
+        'x': player_x,
+        'y': player_y,
+    })
 
 from backend.asgi import channel_layer
 from asgiref.sync import async_to_sync

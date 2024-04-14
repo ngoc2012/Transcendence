@@ -4,13 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tournament Lobby - Transcendence</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-    <div id="no-invite"></div>
-    <button id="Lobby">Lobby</button>
-    <button id="quit-tournament">Quit</button>
-    <div id="tournament-infos"></div>
-    <div id="winnerNameDisplay"></div>
-    <div id="tournament-matches"></div>
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col">
+                <div id="no-invite" class="alert alert-info mb-3" role="alert"></div>
+                <button id="Lobby" class="btn btn-primary mb-3">Lobby</button>
+                <button id="quit-tournament">Quit</button>
+    <div id="tournament-infos" class="mb-3"></div>
+                <div id="winnerNameDisplay" class="mb-3"></div>
+                <div id="tournament-matches"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>
