@@ -1,7 +1,6 @@
 from asgiref.sync import sync_to_async
 
 from game.models import PlayersModel
-from pong.data import pong_data
 from .game import change_server
 
 from django.contrib.auth.hashers import make_password
