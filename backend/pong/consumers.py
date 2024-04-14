@@ -53,6 +53,9 @@ class PongConsumer(AsyncWebsocketConsumer):
 
     async def receive(self, text_data):
         if text_data == 'start':
+            players = cache.get(self.k_all)
+            if players == None or len(players) < 2:
+                return
             info = await get_info(self)
             if info and not cache.get(self.k_started):
                 asyncio.create_task(self.game_loop())
@@ -118,7 +121,7 @@ class PongConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=win)
 
     async def game_loop(self):
-        print("Game started.")
+        print("Game in room {self.room_id} started.")
         cache.set(self.k_started, True)
         while True:
             await asyncio.sleep(0.02)
@@ -136,7 +139,9 @@ class PongConsumer(AsyncWebsocketConsumer):
                 # if self.room.tournamentRoom == True and (self.room.score1 >= 11 and self.room.score0 <= self.room.score1 - 2) or \
                 # (self.room.score0 >= 11 and self.room.score1 <= self.room.score0 - 2):
                 # if self.room.tournamentRoom == True and self.room.score0 == 1 or self.room.score1 == 1:
-                if self.room.tournamentRoom == True and cache.get(self.k_score0) == 1 or cache.get(self.k_score1) == 1:
+                score0 = cache.get(self.k_score0)
+                score1 = cache.get(self.k_score1)
+                if abs(score0 - score1) > 1 and (score0 >= 11 or score1 >= 11) :
                     await self.channel_layer.group_send(self.room_id, {'type': 'win_data'})
                 return
             await check_collision(self)
