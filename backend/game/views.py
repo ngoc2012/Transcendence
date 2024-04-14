@@ -139,8 +139,9 @@ def tournament_local_join_setup(request):
     if players == None:
         players = []
     match = TournamentMatchModel.objects.get(room_uuid=request.POST["game_id"])
-    player = PlayersModel.objects.get(login=player2)
-    if not player:
+    try:
+        player = PlayersModel.objects.get(login=player2)
+    except:
         player = PlayersModel.objects.get(login='localTournament2')
     if player and player.id in players:
         return (HttpResponse("Error: Player with login " + request.POST['login'] + " is already in the room!"))
@@ -250,10 +251,6 @@ def tournament_local_result(request):
                 match.winnerLocal = match.player1Local 
             else:
                 match.winner = match.player1
-            if match.player2isLocal:
-                match.winnerLocal = match.player2Local
-            else:
-                match.winner = match.player2
         else:
             if match.player2isLocal:
                 match.winnerLocal = match.player2Local
