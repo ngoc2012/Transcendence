@@ -12,9 +12,8 @@ Your login: {{ login }}<br>
 {% if context != '' %}
 Your alias: {{ alias }} <br>
 {% endif %}
-Your match history: {% if history == null %} No recent matches {% else %} {% for i in history %} {{ i }} {% endfor %} {% endif %} <br>
+Your match history: {% if history == None %} No recent matches {% else %} {% for i in history %} {% if i == 'W' %} Win {% else %} Lose {% endif %} {% endfor %} {% endif %} <br>
 Your email: {{ email }} <br>
 Your ranking {{ elo }}<br>
 Your friends: {% for i in friends %} {{ i.login }} {% endfor %}<br>
-Test = {% for i in history_date %} {{ i }} {% endfor %}<br>
 Test2 = {% for i in history_score %} {{ i }} {% endfor %}<br>

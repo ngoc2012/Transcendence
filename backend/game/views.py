@@ -47,6 +47,8 @@ def new_game(request):
         player_room.x = 0
         player_room.y = pong_data['HEIGHT'] / 2 - pong_data['PADDLE_HEIGHT'] / 2
     player_room.save()
+    new_room.player0 = player_room.player
+    new_room.save()
     return (JsonResponse({
         'id': str(new_room),
         'game': new_room.game,
@@ -103,7 +105,10 @@ def join(request):
         if side == 1:
             player_room.x = pong_data['WIDTH'] - player_room.x - pong_data['PADDLE_WIDTH']
         player_room.y = pong_data['HEIGHT'] / 2 - pong_data['PADDLE_HEIGHT'] / 2
+    
     player_room.save()
+    room.player1 = player_room.player
+    room.save()
     # player.save()
     return (JsonResponse({
         'id': str(room),

@@ -5,6 +5,7 @@ from game.models import RoomsModel, PlayerRoomModel, PlayersModel
 
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 from django.db.models import Q
+from django.utils import timezone
 
 from .data import pong_data
 import random
@@ -93,35 +94,20 @@ def get_score_data(room_id):
 def get_win_data(room_id):
     room = RoomsModel.objects.get(id=room_id)
     players = PlayerRoomModel.objects.filter(room=room.id)
+    player0 = players.get(side=0).player
+    player1 = players.get(side=1).player
     winner = ''
     winning_score = 0
     if room.score0 > room.score1:
         winner = 'player0'
         winning_score = room.score0
-        print(players.get(side=0))
-        print(players.get(side=1))
-        players.get(side=0).player.history += 'W'
-        players.get(side=1).player.history += 'L'
-        players.get(side=0).player.score_history += str(room.score0) + '-' + str(room.score1)
-        players.get(side=1).player.score_history += str(room.score0) + '-' + str(room.score1)
-        players.get(side=0).player.date_history += room.expires
-        players.get(side=1).player.date_history += room.expires
-        players.get(side=0).save()
-        players.get(side=1).save()
+        print("user history login = " + player0.history)
+        print("user history login = " + player1.history)
     elif room.score1 > room.score0:
         winner = 'player1'
         winning_score = room.score1
-        print(players.get(side=0))
-        print(players.get(side=1))
-        players.get(side=0).player.history += 'L'
-        players.get(side=1).player.history += 'W'
-        players.get(side=0).player.score_history += str(room.score0) + '-' + str(room.score1)
-        players.get(side=1).player.score_history += str(room.score0) + '-' + str(room.score1)
-        players.get(side=0).player.date_history += room.expires
-        players.get(side=1).player.date_history += room.expires
-        players.get(side=0).save()
-        players.get(side=1).save()
-    print('on entre la dedans ?')
+        print("user history login = " + player0.history)
+        print("user history login = " + player1.history)
     return json.dumps({
         'win': winner,
         'score': [room.score0, room.score1],

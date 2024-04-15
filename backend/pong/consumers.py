@@ -1,7 +1,7 @@
 import json
 from asgiref.sync import sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
-# from game.models import RoomsModel, PlayerRoomModel, PlayersModel
+from game.models import RoomsModel, PlayerRoomModel, PlayersModel
 
 import asyncio
 
@@ -19,11 +19,13 @@ class PongConsumer(AsyncWebsocketConsumer):
         # self.dx = 1
         # self.dy = 1
         self.ddy = random.choice(self.choices)
-        self.room = None
-        self.player = None
-        self.server = None
-        self.players0 = None
-        self.players1 = None
+        self.room = RoomsModel.objects.get(id=self.room_id)
+        self.player = self.room.owner
+        self.server = self.room.server
+        self.player0 = self.room.player0
+        self.player1 = None
+        if self.room.player1 != None:
+            self.player1 = self.room.player1
         
         check = await get_info(self)
         if not check:
@@ -32,6 +34,10 @@ class PongConsumer(AsyncWebsocketConsumer):
             self.room_id,
             self.channel_name
         )
+        if self.player0 != None:
+            self.player0.online_status = 'In-game'
+        if self.player1 != None:
+            self.player1.online_status = 'In-game'
         await self.accept()
         await self.channel_layer.group_send(self.room_id, {'type': 'teams_data'})
         await self.channel_layer.group_send(self.room_id, {'type': 'score_data'})
@@ -148,7 +154,23 @@ class PongConsumer(AsyncWebsocketConsumer):
                 # # Adding rules for tournament: first at 11 and win by 2 points:
                 # if self.room.tournamentRoom == True and (self.room.score1 >= 11 and self.room.score0 <= self.room.score1 - 2) or \
                 # (self.room.score0 >= 11 and self.room.score1 <= self.room.score0 - 2):
-                if self.room.tournamentRoom == True and self.room.score0 == 1 or self.room.score1 == 1:
+                print("tournamentroom = true ? " + str(self.room.tournamentRoom))
+                print("Player 0 score : " + str(self.room.score0))
+                print("Player 1 score : " + str(self.room.score1))
+                if self.room.tournamentRoom == True and (self.room.score0 == 11 or self.room.score1 == 11):
+                    await self.channel_layer.group_send(self.room_id, {'type': 'win_data'})
+                elif self.room.tournamentRoom == False and (self.room.score0 == 1 or self.room.score1 == 1):
+                    print("game end debug")
+                    if self.room.score0 > self.room.score1:
+                        self.player0.history += 'W'
+                        self.player1.history += 'L'
+                        self.player0.save()
+                        self.player1.save()
+                    else:
+                        self.player0.history += 'L'
+                        self.player1.history += 'W'
+                        self.player0.save()
+                        self.player1.save()
                     await self.channel_layer.group_send(self.room_id, {'type': 'win_data'})
                 return            
             await self.channel_layer.group_send(self.room_id, {'type': 'group_data'})

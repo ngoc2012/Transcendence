@@ -161,3 +161,4 @@ SECURE_BROWSER_XSS_FILTER = True
 GOOGLELOG = 'templog'
 GOOGLENAME = 'tempname'
 CODE = ''
+os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
