@@ -6,6 +6,7 @@ export class Chat_signup{
 	}
 
 	events(){
+		this.main.checkcsrf();
 		this.dom_roomname = document.querySelector("#room-name-input");
 		this.dom_submit = document.querySelector("#room-name-submit");
 		this.dom_submit.addEventListener("click", () => this.start_chat());

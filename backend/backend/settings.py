@@ -49,19 +49,23 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    # 'accounts',
+    'accounts.apps.AccountsConfig',
     'game',
     'pong',
-    'transchat',
+    'transchat'
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'backend.customMiddleware.JWTMiddleware',
+    'backend.customMiddleware.TokenRefreshResponseMiddleware',
 ]
 
 ROOT_URLCONF = 'backend.urls'
@@ -98,7 +102,7 @@ CHANNEL_LAYERS = {
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'transcendence',
+        'NAME': 'transdb',
         'USER': 'admin',
         'PASSWORD': 'admin',
         'HOST': 'db',
@@ -161,6 +165,17 @@ SECURE_BROWSER_XSS_FILTER = True
 GOOGLELOG = 'templog'
 GOOGLENAME = 'tempname'
 CODE = ''
+
+# AUTH USER CONFIG
+AUTH_USER_MODEL = "accounts.PlayersModel"
+
+SESSION_COOKIE_SECURE = True
+SESSION_COOKIE_HTTPONLY = True
+
+LOGIN_URL = '/pages/login/'
+
+JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY')
+JWT_REFRESH_SECRET_KEY = os.environ.get('JWT_REFRESH_SECRET_KEY')
 
 # settings.py
 

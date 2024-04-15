@@ -1,11 +1,13 @@
 from asgiref.sync import sync_to_async
 
-from game.models import PlayersModel
+from accounts.models import PlayersModel
 from pong.data import pong_data
 from .game import change_server
 
 from django.contrib.auth.hashers import make_password
 import pyotp
+
+from django.contrib.auth import get_user_model
 
 import requests
 
@@ -26,7 +28,8 @@ def ai_player(consumer):
             data = {
                 'room_id': consumer.room_id,
                 'player_id': player.id
-            }) as response:
+            },
+            headers={'X-Internal-Request': 'true'}) as response:
             if response.status_code != 200:
                 print("Request failed with status code:", response.status_code)
         remove_player(consumer, player.id)
@@ -41,14 +44,22 @@ def ai_player(consumer):
     except PlayersModel.DoesNotExist:
         hashed_password = make_password('password_ai')
         mysecret = pyotp.random_base32()
-        player = PlayersModel(
-            login='ai',
+        # player = PlayersModel(
+        #     login='ai',
+        #     password=hashed_password,
+        #     name='AI player',
+        #     email='',
+        #     secret_2fa = mysecret
+        # )
+        # player.save()
+        User = get_user_model()
+        player = User.objects.create_user(
+            username='ai',
+            email='',
             password=hashed_password,
             name='AI player',
-            email='',
             secret_2fa = mysecret
         )
-        player.save()
     add_player_to_room(consumer.room_id, 'ai')
 
     print("AI player created. Send request to AI server.")
@@ -56,6 +67,7 @@ def ai_player(consumer):
         data = {
             'room_id': consumer.room.id,
             'player_id': player.id
-        }) as response:
+        },
+        headers={'X-Internal-Request': 'true'}) as response:
         if response.status_code != 200:
             print("Request failed with status code:", response.status_code)

@@ -6,7 +6,6 @@ import {code_2fa} from './code_2fa.js'
 import {qrcode_2fa} from './qrcode_2fa.js'
 import {display_2fa} from './display_2fa.js'
 import {tournament_history} from './tournament_history.js'
-
 import {Tournament} from './Tournament.js'
 
 export class Main
@@ -19,6 +18,7 @@ export class Main
     status = '';
     secret_2fa = '';
     history_stack = [];
+    csrftoken = '';
 
     constructor()
     {
@@ -67,8 +67,10 @@ export class Main
                 }
                 // callback();  // fait erreur "callback is not a function"
             },
-            error: function(error) {
-                console.error('Error: pong GET fail', error.message);
+            error: (jqXHR, textStatus, errorThrown) => {
+                if (jqXHR.status === 401) {
+                    this.login_click();
+                }
             }
         });
     }
@@ -77,7 +79,7 @@ export class Main
         $.ajax({
             url: page + '/',
             method: 'GET',
-			data : data,
+            data : data,
             success: (html) => {
                 this.dom_container.innerHTML = html;
                 //pas oublier de changer ca
@@ -86,8 +88,10 @@ export class Main
                 }
                 // callback();  // fait erreur "callback is not a function"
             },
-            error: function(error) {
-                console.error('Error: pong GET fail', error.message);
+            error: (jqXHR, textStatus, errorThrown) => {
+                if (jqXHR.status === 401) {
+                    this.login_click();
+                }
             }
         });
     }
@@ -105,4 +109,82 @@ export class Main
         this.load('/pages/signup', () => this.signup.events());
     }
 
+    getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    checkcsrf() {
+        if (!this.csrftoken) {
+            fetch('/get-csrf/')
+            .then(response => response.json())
+            .then(data => {
+                this.csrftoken = data.csrfToken;
+            });
+        }
+    }
+
+    logout() {
+        $.ajax({
+            url: 'logout/',
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': this.csrftoken,
+            },   
+            success: (info) => {
+                if (typeof info === 'string')
+                {
+                    this.set_status(info);
+                }
+                else
+                {
+                    this.lobby.quit()
+
+                    this.email = '';
+                    this.login = '';
+                    this.name = '';
+                    this.dom_name.innerHTML = 'Anonyme';
+                    this.lobby.ws = '';
+
+                    this.history_stack.push('/');
+                    window.history.pushState({}, '', '/');
+                    this.load('/lobby', () => this.lobby.events());
+
+                    var dom_log_in = document.getElementById('login');
+                    if (dom_log_in) {
+                        dom_log_in.style.display = "block";
+                        dom_log_in.addEventListener("click", () => this.login_click());
+                    }
+
+                    var dom_signup = document.getElementById('signup');
+                    if (dom_signup) {
+                        dom_signup.style.display = "block";
+                        dom_signup.addEventListener("click", () => this.signup_click());
+                    }
+
+                    var dom_logout = document.getElementById('logoutButton');
+                    if (dom_logout) {
+                        dom_logout.style.display = "none";
+                    }
+                }
+            },
+            error: (xhr, textStatus, errorThrown) => {
+                if (xhr.responseJSON && xhr.responseJSON.error) {
+                    this.set_status(xhr.responseJSON.error);
+                } else {
+                    this.set_status('An error occurred during the request.');
+                }
+            }
+        });
+    }
 }

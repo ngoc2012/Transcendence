@@ -18,17 +18,19 @@ from django.contrib import admin
 from django.urls import path
 from . import views
 from django.urls import include, path, re_path
-from .views import callback
+from .views import callback, csrf
 
 
 urlpatterns = [
     path('', views.index, name='index'),
+    path('get-csrf/', csrf, name='get-csrf'),
     path("game/", include("game.urls")),
     path('admin/', admin.site.urls),
     path('lobby/', views.lobby, name='lobby'),
     path('pages/signup/', views.signup, name='signup'),
     path('pages/login/', views.login, name='login'),
     path('log_in/', views.log_in, name='log_in'),
+    path('logout/', views.logout, name='logout'),
     path('new_player/', views.new_player, name='new_player'),
     path('pong/', include("pong.urls", namespace='pong')),
     path('callback/', callback, name='callback'),
@@ -45,10 +47,11 @@ urlpatterns = [
     path('get_tournament_data/', views.get_tournament_data, name='get_tournament_data'),
     path('tournament/new/', views.new_tournament, name='new_tournament'),
     path('tournament/lobby/', views.tournament_lobby, name='tournament_lobby'),
+    path('tournament/local/', views.tournament_local, name='tournament_local'),
+    path('tournament/local/start/', views.tournament_local_start, name='tournament_local_start'),
     path('tournament/<uuid:tournament_id>/', views.tournament_start, name='tournament_start'),
+    path('validate-session/', views.validate_session, name='validate_session'),
     re_path(r'^.*$', views.redirect, name='redirect'),
-    # path('tournament/<uuid:tournament_id>/', views.tournament_round, name="list_users")
-
 ]
 
 

@@ -5,6 +5,7 @@ export class Signup
     }
 
     events() {
+        this.main.checkcsrf();
         this.main.set_status('');
         this.dom_login = document.querySelector("#login1");
         this.dom_password = document.querySelector("#password1");
@@ -24,70 +25,80 @@ export class Signup
     }
 
     signup() {
-        if (this.dom_login.value === '' || this.dom_password.value === '' || this.dom_name.value === '' || this.dom_email.value === '')
-        {
+        if (this.dom_login.value === '' || this.dom_password.value === '' || this.dom_name.value === '' || this.dom_email.value === '') {
             this.main.set_status('Field must not be empty');
             return;
         }
-        let checkbox = this.dom_enable2fa.checked;
-        // console.log("Sending AJAX request with data:", {
-        //     "login": this.dom_login.value,
-        //     "password": this.dom_password.value,
-        //     "name": this.dom_name.value,
-        //     "email": this.dom_email.value,
-        //     "enable2fa": checkbox
-        // });
 
+        let checkbox = this.dom_enable2fa.checked;
+        let csrftoken = this.main.getCookie('csrftoken');
+        
         $.ajax({
             url: '/new_player/',
             method: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken,
+            },
             data: {
                 "login": this.dom_login.value,
                 "password": this.dom_password.value,
                 "name": this.dom_name.value,
                 "email": this.dom_email.value,
-                "enable2fa": checkbox
+                "enable2fa": checkbox ? 'true' : 'false'
             },
             success: (info) => {
-                if (typeof info === 'string')
-                {
-                    this.main.set_status(info);
-                }
-                else
-                {
-                    sessionStorage.setItem('JWTToken', info.access_token);
-                    document.cookie = `refresh_token=${info.refresh_token}; path=/; secure; HttpOnly`;
+                if (info.error) {
+                    this.main.set_status(info.error);
+                } else {
+                    // sessionStorage.setItem('JWTToken', info.access_token);
                     this.main.email = info.email;
                     this.main.login = info.login;
                     this.main.name = info.name;
                     this.main.dom_name.innerHTML = info.name;
-                    if (checkbox)
-                    {
-                        $.ajax({
-                            url: '/display_2fa/',
-                            method: 'POST',
-                            data: {
-                                "email": this.main.email,
-                                "secret": info.secret
-                            },
-                            success: (html) => {
-                                    this.main.dom_container.innerHTML = html;
-                                    this.main.display_2fa.events();
-                            },
-                            error: function(error) {
-                                console.error('Error: pong POST fail', error.message);
-                            }
-                        });
-                    }
-                    else {
-                        window.history.pushState({}, '', '/');
+                    this.main.lobby.ws = info.ws;
+                    if (checkbox) {
+                        this.display2FASetup(info.secret);
+                    } else {
+                        window.history.pushState({}, '', '/lobby');
                         this.main.load('/lobby', () => this.main.lobby.events());
-                        this.main.lobby.socket.send(JSON.stringify({ type: "authenticate", login: this.main.login }));
                     }
                 }
             },
-            error: (data) => this.main.set_status(data.error)
+            error: (jqXHR, textStatus, errorThrown) => {
+                this.main.set_status('Registration failed: ' + errorThrown);
+            }
         });
+    }
+    
+    display2FASetup(secret) {
+        let csrftoken = this.main.getCookie('csrftoken');
+
+        if (csrftoken) {
+            $.ajax({
+                url: '/display_2fa/',
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrftoken,
+                },
+                data: {
+                    "email": this.main.email,
+                    "secret": secret
+                },
+                success: (html) => {
+                    this.main.dom_container.innerHTML = html;
+                    if (this.main.display_2fa && typeof this.main.display_2fa.events === 'function') {
+                        this.main.display_2fa.events();
+                    }
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    console.error('Error setting up 2FA: ', errorThrown);
+                    this.main.set_status('Error setting up 2FA: ' + errorThrown);
+                }
+            });
+        } else {
+            console.log('Login required');
+            this.main.load('/pages/login', () => this.main.log_in.events());
+        }
     }
 
     handle_key_press(event)

@@ -27,28 +27,38 @@ export class qrcode_2fa
             this.main.set_status('Field must not be empty');
             return;
         }
-        $.ajax({
-            url: '/verify_qrcode/',
-            method: 'POST',
-            data: {
-                "input_code": this.dom_code.value,
-                'login': this.main.login
-            },
-            success: (info) => {
-                if (typeof info === 'string')
-                {
-                    this.main.set_status(info);
-                }
-                else
-                {
-                    if (info.result == '1')
-                        this.main.load('/lobby', () => this.main.lobby.events());
+        var csrftoken = this.main.getCookie('csrftoken');
+
+        if (csrftoken) {
+            $.ajax({
+                url: '/verify_qrcode/',
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrftoken,
+                },
+                data: {
+                    "input_code": this.dom_code.value,
+                    'login': this.main.login
+                },
+                success: (info) => {
+                    if (typeof info === 'string')
+                    {
+                        this.main.set_status(info);
+                    }
                     else
-                        this.main.set_status('Wrong code, please try again');
-                }
-            },
-            error: (data) => this.main.set_status(data.error)
-        });
+                    {
+                        if (info.result == '1')
+                            this.main.load('/lobby', () => this.main.lobby.events());
+                        else
+                            this.main.set_status('Wrong code, please try again');
+                    }
+                },
+                error: (data) => this.main.set_status(data.error)
+            });
+        } else {
+            console.log('Login required');
+            this.main.load('/pages/login', () => this.main.log_in.events());
+        }
     }
 
 
