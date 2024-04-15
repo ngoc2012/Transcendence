@@ -1,5 +1,5 @@
-import { TextGeometry } from './TextGeometry.js';
-import { OrbitControls } from './OrbitControls.js';
+// import { TextGeometry } from './TextGeometry.js';
+// import { OrbitControls } from './OrbitControls.js';
 
 export class Draw
 {
@@ -202,6 +202,36 @@ export class Draw
 	execute(data) {
 		// Clear the canvas
 		this.pong.ctx.clearRect(0, 0, this.pong.room.data.WIDTH, this.pong.room.data.HEIGHT);
+        // Draw table
+        this.pong.ctx.fillStyle = '#0077FF';
+        this.pong.ctx.fillRect(0, 0, this.pong.room.data.WIDTH, this.pong.room.data.HEIGHT);
+        
+        // Draw limites
+        this.pong.ctx.strokeStyle = '#A9A9A9';
+        this.pong.ctx.lineWidth = 1;
+        this.pong.ctx.setLineDash([10, 15]);
+        this.pong.ctx.beginPath();
+        this.pong.ctx.moveTo(this.pong.room.data.WIDTH / 4 + this.pong.room.data.PADDLE_WIDTH, 0);
+        this.pong.ctx.lineTo(this.pong.room.data.WIDTH / 4 + this.pong.room.data.PADDLE_WIDTH, this.pong.room.data.HEIGHT);
+        this.pong.ctx.stroke();
+
+        this.pong.ctx.strokeStyle = '#A9A9A9';
+        this.pong.ctx.lineWidth = 1;
+        this.pong.ctx.setLineDash([10, 15]);
+        this.pong.ctx.beginPath();
+        this.pong.ctx.moveTo(this.pong.room.data.WIDTH / 4 * 3 - this.pong.room.data.PADDLE_WIDTH, 0);
+        this.pong.ctx.lineTo(this.pong.room.data.WIDTH / 4 * 3 - this.pong.room.data.PADDLE_WIDTH, this.pong.room.data.HEIGHT);
+        this.pong.ctx.stroke();
+
+        this.pong.ctx.setLineDash([]);
+
+        // Draw barriers
+        this.pong.ctx.strokeStyle = '#262626';
+        this.pong.ctx.lineWidth = 3;
+        this.pong.ctx.beginPath();
+        this.pong.ctx.moveTo(this.pong.room.data.WIDTH / 2, 0);
+        this.pong.ctx.lineTo(this.pong.room.data.WIDTH / 2, this.pong.room.data.HEIGHT);
+        this.pong.ctx.stroke();
 
 		// Draw paddles
 		this.pong.ctx.fillStyle = '#8b3a62';
@@ -216,7 +246,7 @@ export class Draw
 		// Draw this.pong.ball
 		this.pong.ctx.beginPath();
 		this.pong.ctx.arc(data.ball.x, data.ball.y, this.pong.room.data.RADIUS, 0, Math.PI * 2);
-		this.pong.ctx.fillStyle = '#00ffcc';
+		this.pong.ctx.fillStyle = '#FFA500';
 		this.pong.ctx.fill();
 		this.pong.ctx.closePath();
 	}

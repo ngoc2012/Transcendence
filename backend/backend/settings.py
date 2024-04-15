@@ -135,6 +135,7 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 
 USE_TZ = True
+os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
 
 
 # Static files (CSS, JavaScript, Images)
@@ -161,4 +162,17 @@ SECURE_BROWSER_XSS_FILTER = True
 GOOGLELOG = 'templog'
 GOOGLENAME = 'tempname'
 CODE = ''
-os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
+
+# settings.py
+
+CACHES = {
+    "default": {
+        # "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": "redis://redis:6379",
+        "BACKEND": "django_redis.cache.RedisCache",
+        # "LOCATION": "redis://redis:6379/1",
+        # "OPTIONS": {
+        #     "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        # }
+    }
+}

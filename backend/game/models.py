@@ -25,38 +25,13 @@ class RoomsModel(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=255)
     game = models.CharField(max_length=20)
-    owner = models.ForeignKey(PlayersModel, on_delete=models.CASCADE, related_name='own')
-    server = models.ForeignKey(PlayersModel, on_delete=models.CASCADE, related_name='serve', null=True)
     expires = models.DateTimeField(default=timezone.now() + timezone.timedelta(minutes=15))
-    started = models.BooleanField(default=False)
-    power = models.BooleanField(default=False)
-    ai_player = models.BooleanField(default=False)
-    x = models.IntegerField(blank=True, null=True)
-    y = models.IntegerField(blank=True, null=True)
-    dx = models.IntegerField(default=1)
-    dy = models.IntegerField(default=1)
-    player0 = models.ForeignKey(PlayersModel, on_delete=models.CASCADE, related_name='player0', null=True)
-    player1 = models.ForeignKey(PlayersModel, on_delete=models.CASCADE, related_name='player1', null=True)
-    # ddy = models.IntegerField(blank=True, null=True)
-    score0 = models.IntegerField(default=0)
-    score1 = models.IntegerField(default=0)
     tournamentRoom = models.BooleanField(default=False)
     def __str__(self):
         return str(self.id)
     def check_expired(self):
         if self.expires and self.expires < timezone.now():
             self.delete()   
-
-class PlayerRoomModel(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    player = models.ForeignKey(PlayersModel, on_delete=models.CASCADE)
-    room = models.ForeignKey(RoomsModel, on_delete=models.CASCADE)
-    side = models.IntegerField(blank=True, null=True)
-    position = models.IntegerField(blank=True, null=True)
-    x = models.IntegerField(blank=True, null=True)
-    y = models.IntegerField(blank=True, null=True)
-    def __str__(self):
-        return str(self.id)
     
 # Tournament classes
     

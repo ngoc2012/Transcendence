@@ -22,7 +22,8 @@ RUN apt-get update \
 RUN pip3 install --upgrade pip \
     && pip3 install Django && \
     pip3 install channels daphne \
-    && pip3 install requests
+    && pip3 install requests \
+    && pip install django-redis
     
 RUN     pip3 install pyjwt
 
