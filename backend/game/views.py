@@ -29,7 +29,9 @@ def add_player_to_room(game_id, login):
     k_team0 = str(room.id) + "_team0"
     k_team1 = str(room.id) + "_team1"
     k_players = str(room.id) + "_all"
+    room.player1 = player
     team0 = cache.get(k_team0)
+    room.save()
     if team0 == None:
         team0 = []
     team1 = cache.get(k_team1)
@@ -74,6 +76,7 @@ def new_game(request):
         game=request.POST['game'],
         name=request.POST['name'],
     )
+    room.player0 = PlayersModel.objects.get(login=request.POST['login'])
     room.save()
     if room.game == 'pong':
         cache.set(str(room.id) + "_x", pong_data['PADDLE_WIDTH'] + pong_data['RADIUS'])

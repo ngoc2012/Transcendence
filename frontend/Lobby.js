@@ -27,7 +27,7 @@ export class Lobby
         this.dom_delete.addEventListener("click", () => this.delete_game());
         this.dom_join.addEventListener("click", () => this.join());
 		this.dom_chat.addEventListener("click", () => this.start_chat());
-        this.dom_profile.addEventListener("click", () => this.profile());
+        // this.dom_profile.addEventListener("click", () => this.profile());
         this.dom_tournament.addEventListener("click", () => this.tournament_click());
         this.dom_tournament_history.addEventListener("click", () => this.tournament_history_click());
         this.rooms_update();
@@ -199,6 +199,7 @@ export class Lobby
     }
 
     rooms_update() {
+        console.log('romms_update');
         // console.log('rooms_update');
         if (this.socket === -1) {
             this.main.set_status('');
@@ -317,6 +318,12 @@ export class Lobby
             };
         }
 
+        if (this.socket.readyState === 1){
+            this.socket.send(JSON.stringify({
+                'type': 'status',
+                'login': this.main.login
+            }));
+        }
         this.socket.onclose = (e) => {
             // console.error('Error: Socket Closed');
         };

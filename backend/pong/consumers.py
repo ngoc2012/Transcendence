@@ -1,26 +1,25 @@
 import json
+from channels.db import database_sync_to_async
 from asgiref.sync import sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
-<<<<<<< HEAD
-from game.models import RoomsModel, PlayerRoomModel, PlayersModel
-=======
->>>>>>> de2eabeaa5911c96154a7e39e80fe67d878909d4
 
 import asyncio
-
+from game.models import PlayersModel
 from .data import pong_data
 from .move import check_collision, update_ball, up, down, left, right
 from .game import get_info, get_room_data, get_teams_data, get_score_data, end_game, quit, change_side, get_win_data, change_server_async, set_power_play, game_init
 from .ai_player import ai_player
 from django.core.cache import cache
 
+
 class PongConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.room_id = self.scope['url_route']['kwargs']['room_id']
         self.player_id = int(self.scope['url_route']['kwargs']['player_id']) # 1, 2, 3 ...
+        print("player id = " + str(self.player_id))
         self.choices = [1, 2, 5, 10]
         self.room = None
-        self.player = None
+        self.player = get_player_by_id(self.player_id)
         for i in ['x', 'y', 'dx', 'dy', 'ddy', 'ai', 'pow', 'score0', 'score1', 'started', 'server', 'team0', 'team1', 'all']:
             setattr(self, "k_" + i, str(self.room_id) + "_" + i)
         for i in ['x', 'y']:
@@ -34,10 +33,7 @@ class PongConsumer(AsyncWebsocketConsumer):
             self.room_id,
             self.channel_name
         )
-        if self.player0 != None:
-            self.player0.online_status = 'In-game'
-        if self.player1 != None:
-            self.player1.online_status = 'In-game'
+        self.player.online_status = 'In-game'
         await self.accept()
         await self.channel_layer.group_send(self.room_id, {'type': 'teams_data'})
         await self.channel_layer.group_send(self.room_id, {'type': 'score_data'})
@@ -150,7 +146,13 @@ class PongConsumer(AsyncWebsocketConsumer):
                 score0 = cache.get(self.k_score0)
                 score1 = cache.get(self.k_score1)
                 if abs(score0 - score1) > 1 and (score0 >= 11 or score1 >= 11) :
+                    # if score0 > score1:
+                    #     self.player.history += 'W'
                     await self.channel_layer.group_send(self.room_id, {'type': 'win_data'})
                 return
             await check_collision(self)
             await self.channel_layer.group_send(self.room_id, {'type': 'group_data'})
+
+@database_sync_to_async
+def get_player_by_id(id):
+    return PlayersModel.objects.filter(id=id).first()

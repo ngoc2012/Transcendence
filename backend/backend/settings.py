@@ -135,7 +135,6 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 
 USE_TZ = True
-os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
 
 
 # Static files (CSS, JavaScript, Images)

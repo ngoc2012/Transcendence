@@ -188,6 +188,8 @@ class RoomsConsumer(AsyncWebsocketConsumer):
                 'type': 'group_room_list'
             }
         )
+        print("login = " + self.login)
+        print('on entre')
 
     async def disconnect(self, close_code):
         await self.channel_layer.group_discard(
@@ -201,9 +203,11 @@ class RoomsConsumer(AsyncWebsocketConsumer):
         if user_id in RoomsConsumer.connected_users:
             RoomsConsumer.connected_users.remove(user_id)
             await self.broadcast_user_list()
-        PlayersModel.objects.get(login=self.login).online_status = 'Offline'
+        user = await get_player_by_login(self.login)
+        user.online_status = 'Offline'
 
     async def receive(self, text_data):
+        print(json.loads(text_data))
         if not text_data:
             await self.channel_layer.group_send(
                 self.group_name,
@@ -245,7 +249,7 @@ class RoomsConsumer(AsyncWebsocketConsumer):
                     self.user_id = player.id  # store the authenticated user's database ID in the instance of the consumer class
                     unique_group_name = f"user_{self.user_id}"
                     self.login = login
-                    PlayersModel.objects.get(login=self.login).online_status = 'Online'
+                    player.online_status = 'Online'
                     await self.channel_layer.group_add(unique_group_name, self.channel_name)  # add user to unique group for one-o-one communication
                     RoomsConsumer.connected_users.add(self.user_id) # class level
                     await self.broadcast_user_list()
@@ -285,6 +289,10 @@ class RoomsConsumer(AsyncWebsocketConsumer):
                 await self.add_owner_to_group(data)
             elif data.get('type') == 'get_login':
                 self.login = data.get('login')
+            elif data.get('type') == 'status':
+                self.login = data.get('login')
+                user = await get_player_by_login(self.login)
+                user.online_status = 'Online'
     
     async def add_owner_to_group(self, data):
         id = data.get('id')
@@ -518,6 +526,7 @@ class RoomsConsumer(AsyncWebsocketConsumer):
     async def handle_tournament_registered(self, data):
         login = data.get('login')
         user = await get_player_by_login(login)
+        self.login = login
         if user:
             tournament = await check_player_in_tournament(user)
             if tournament and user == tournament.owner and tournament.active_matches == 0:

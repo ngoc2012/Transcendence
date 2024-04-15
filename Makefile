@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: minh-ngu <marvin@42.fr>                    +#+  +:+       +#+         #
+#    By: dcyprien <dcyprien@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/09/28 10:56:09 by minh-ngu          #+#    #+#              #
-#    Updated: 2024/04/04 22:49:48 by ngoc             ###   ########.fr        #
+#    Updated: 2024/04/15 12:22:53 by dcyprien         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -37,7 +37,7 @@ re:
 	@make up
 
 clean:
-	docker exec -it blockchain rm -rf app/blockchain/build
+	# docker exec -it blockchain rm -rf app/blockchain/build
 	-docker stop $$(docker ps -qa)
 	-docker rm $$(docker ps -qa)
 	-docker rmi -f $$(docker images -qa)

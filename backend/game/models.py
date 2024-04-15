@@ -25,6 +25,8 @@ class RoomsModel(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=255)
     game = models.CharField(max_length=20)
+    player0 = models.ForeignKey('PlayersModel', on_delete=models.CASCADE, related_name='Player0', null=True)
+    player1 = models.ForeignKey('PlayersModel', on_delete=models.CASCADE, related_name='Player1', null=True)
     expires = models.DateTimeField(default=timezone.now() + timezone.timedelta(minutes=15))
     tournamentRoom = models.BooleanField(default=False)
     def __str__(self):
