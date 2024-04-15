@@ -29,7 +29,7 @@ export class Lobby
         this.dom_delete.addEventListener("click", () => this.delete_game());
         this.dom_join.addEventListener("click", () => this.join());
 		this.dom_chat.addEventListener("click", () => this.start_chat());
-        // this.dom_profile.addEventListener("click", () => this.profile());
+        this.dom_profile.addEventListener("click", () => this.profile());
         this.dom_tournament.addEventListener("click", () => this.tournament_click());
         this.dom_tournament_history.addEventListener("click", () => this.tournament_history_click());
         if (this.main.login != '') {

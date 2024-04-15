@@ -42,6 +42,10 @@ def get_player_by_login(login):
     return PlayersModel.objects.filter(login=login).first()
 
 @database_sync_to_async
+def get_player_by_id(id):
+    return PlayersModel.objects.filter(id=id).first()
+
+@database_sync_to_async
 def get_room_by_id(roomId):
     return RoomsModel.objects.filter(id=roomId).first()
 
@@ -200,8 +204,6 @@ class RoomsConsumer(AsyncWebsocketConsumer):
                 'type': 'group_room_list'
             }
         )
-        print("login = " + self.login)
-        print('on entre')
 
     async def disconnect(self, close_code):
         await self.channel_layer.group_discard(
@@ -215,7 +217,8 @@ class RoomsConsumer(AsyncWebsocketConsumer):
         if user_id in RoomsConsumer.connected_users:
             RoomsConsumer.connected_users.remove(user_id)
             await self.broadcast_user_list()
-        user = await get_player_by_login(self.login)
+        print(user_id)
+        user = await get_player_by_id(user_id)
         user.online_status = 'Offline'
 
     async def receive(self, text_data):
@@ -530,7 +533,6 @@ class RoomsConsumer(AsyncWebsocketConsumer):
     async def handle_tournament_registered(self, data):
         login = self.user.login
         user = await get_player_by_login(login)
-        self.login = login
         if user:
             tournament = await check_player_in_tournament(user)
             if tournament and tournament.local:

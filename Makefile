@@ -6,7 +6,7 @@
 #    By: dcyprien <dcyprien@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/09/28 10:56:09 by minh-ngu          #+#    #+#              #
-#    Updated: 2024/04/15 12:22:53 by dcyprien         ###   ########.fr        #
+#    Updated: 2024/04/15 13:09:28 by dcyprien         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -39,11 +39,7 @@ re:
 	@make up
 
 clean:
-<<<<<<< HEAD
-	# docker exec -it blockchain rm -rf app/blockchain/build
-=======
 	-docker exec -it blockchain rm -rf app/blockchain/build
->>>>>>> 1c409f62cfc4a457c36cf4833a3dc27e9fc99d9b
 	-docker stop $$(docker ps -qa)
 	-docker rm $$(docker ps -qa)
 	-docker rmi -f $$(docker images -qa)

@@ -8,17 +8,7 @@ from django.utils import timezone
 from transchat.models import Room
 from django.shortcuts import redirect
 from django.conf import settings
-<<<<<<< HEAD
-import requests
-import secrets
-import os
-import pyotp
-import random
-import jwt
-import json
-=======
 import requests, pyotp, secrets, os, random, jwt, string, pytz
->>>>>>> 1c409f62cfc4a457c36cf4833a3dc27e9fc99d9b
 from datetime import datetime, timedelta
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
@@ -426,6 +416,7 @@ def profile(request, username):
         'history_score': user.score_history,
         'friends': user.friends.all()
     }
+    print(user)
     return render(request, 'profile.html', context)
 
 @csrf_exempt
