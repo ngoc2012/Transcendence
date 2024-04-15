@@ -8,7 +8,8 @@ import requests, pyotp, secrets, os, random, jwt, string, pytz
 
 class JWTMiddleware(MiddlewareMixin):
     def process_request(self, request):
-        # print(request.META)
+        if request.headers.get('X-Internal-Request') == 'true':
+            return None
         if '/admin/' in request.path or 'callback' in request.path or request.path in self.get_unauthenticated_paths():
             return None
 

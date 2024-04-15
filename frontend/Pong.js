@@ -159,6 +159,8 @@ export class Pong
         }
 
         if (this.localTour) {
+            this.player1 = this.localTournament.player1;
+            this.player2 = this.localTournament.player2;
             var csrftoken = this.main.getCookie('csrftoken');
             $.ajax({
                 url: '/game/tournament/local/join/setup/',
@@ -168,7 +170,7 @@ export class Pong
                 },
                 data: {
                     "game_id": this.room.id,
-                    "player2": this.localTournament.player2
+                    "player2": this.player2
                 },
                 success: (info) => {
                     if (typeof info === 'string')
@@ -245,9 +247,13 @@ export class Pong
             this.main.set_status('Keyboard layout must contain only alphabetic characters');
             return;
         }
+        let csrftoken = this.main.getCookie('csrftoken');
         $.ajax({
             url: '/log_in/',
             method: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken,
+            },
             data: {
                 "login": this.dom_login_local.value,
                 "password": this.dom_password_local.value,
@@ -269,9 +275,13 @@ export class Pong
     }
 
     join_local_player(player) {
+        let csrftoken = this.main.getCookie('csrftoken');
         $.ajax({
             url: '/game/join',
             method: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken,
+            },
             data: {
                 'login': player.login,
                 "game_id": this.room.id
@@ -307,8 +317,10 @@ export class Pong
     }
 
     set_ai_player(val) {
-        if (val)
+        if (val) {
             this.dom_toggle_AI.innerHTML = "AI player off";
+            this.player2 = 'ai'
+        }
         else
             this.dom_toggle_AI.innerHTML = "AI player on";
     }
@@ -387,12 +399,14 @@ export class Pong
                     let new_p = document.createElement("li");
                     new_p.textContent = p;
                     this.dom_team0.appendChild(new_p);
+                    this.player1 = p;
                 });
                 this.dom_team1.innerHTML = "";
                 data.team1.forEach((p) => {
                     let new_p = document.createElement("li");
                     new_p.textContent = p;
                     this.dom_team0.appendChild(new_p);
+                    this.player2 = p;
                 });
             }
             else
@@ -460,11 +474,14 @@ export class Pong
         winBox.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); padding: 20px; background-color: #fff; border: 2px solid #000; text-align: center; z-index: 100;';
 
         let winnerText = document.createElement('p');
-        winnerText.textContent = `Winner: ${data.win}`;
+        if (data.win === 'player0')
+            winnerText.textContent = `Winner: ${this.player1}`;
+        else
+            winnerText.textContent = `Winner: ${this.player2}`;
         winBox.appendChild(winnerText);
 
         let scoreText = document.createElement('p');
-        scoreText.textContent = `Score - Player0: ${data.score[0]}, Player1: ${data.score[1]}`;
+        scoreText.textContent = `Score - ${this.player1}: ${data.score[0]}, ${this.player2}: ${data.score[1]}`;
         winBox.appendChild(scoreText);
 
         let backButton = document.createElement('button');
@@ -473,7 +490,10 @@ export class Pong
             document.getElementById('pongCanvas').style.filter = '';
             document.body.removeChild(backdrop);
             document.body.removeChild(winBox);
-            if (!this.localTour && this.tournament) {
+            if (!this.localTour && !this.tournament) {
+                this.main.load('/lobby', () => this.main.lobby.events());
+            }
+            else if (!this.localTour && this.tournament) {
                 this.tournament.endMatch(data);
             } else {
                 this.localTournament.sendResult(data.score[0], data.score[1], this.room.id);

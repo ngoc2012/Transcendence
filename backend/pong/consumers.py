@@ -142,7 +142,7 @@ class PongConsumer(AsyncWebsocketConsumer):
                 # if self.room.tournamentRoom == True and self.room.score0 == 1 or self.room.score1 == 1:
                 score0 = cache.get(self.k_score0)
                 score1 = cache.get(self.k_score1)
-                if abs(score0 - score1) > 1 and (score0 >= 11 or score1 >= 11) :
+                if abs(score0 - score1) > 1 and (score0 >= 1 or score1 >= 1) :
                     await self.channel_layer.group_send(self.room_id, {'type': 'win_data'})
                     return
             await check_collision(self)
