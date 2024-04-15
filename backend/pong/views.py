@@ -1,11 +1,18 @@
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from game.models import RoomsModel
+from accounts.models import PlayersModel
+from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 
 from .data import pong_data
 from django.core.cache import cache
 
 def index(request):
     return render(request, "pong.html")
+
+def index_local(request):
+    return render(request, "pong_local.html")
 
 from backend.asgi import channel_layer
 from asgiref.sync import async_to_sync

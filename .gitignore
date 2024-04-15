@@ -11,3 +11,4 @@ backend/CLI/*.key
 backend/venv
 backend/db.sqlite3
 to_do.txt
+blockchain/build/contracts/TournamentRegistry.json

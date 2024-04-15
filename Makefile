@@ -32,12 +32,18 @@ remove_images:
 
 re:
 	gio trash -f backend/game/migrations/[!__init__.py]*
-	gio trash -f backend/db.sqlite3
+	gio trash -f backend/accounts/migrations/[!__init__.py]*
+	gio trash -f backend/pong/migrations/[!__init__.py]*
+	gio trash -f backend/transchat/migrations/[!__init__.py]*
 	@make down
 	@make up
 
 clean:
+<<<<<<< HEAD
 	# docker exec -it blockchain rm -rf app/blockchain/build
+=======
+	-docker exec -it blockchain rm -rf app/blockchain/build
+>>>>>>> 1c409f62cfc4a457c36cf4833a3dc27e9fc99d9b
 	-docker stop $$(docker ps -qa)
 	-docker rm $$(docker ps -qa)
 	-docker rmi -f $$(docker images -qa)

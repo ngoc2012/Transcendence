@@ -10,9 +10,11 @@ export class Lobby
         this.socket = -1;
         this.game = null;
         this.tournament = null;
+        this.ws = null;
     }
 
     events() {
+        this.main.checkcsrf();
         this.dom_rooms = document.getElementById("rooms");
         this.dom_tournament = document.getElementById("tournament");
         this.dom_tournament_history = document.getElementById("tournament_history");
@@ -30,8 +32,10 @@ export class Lobby
         // this.dom_profile.addEventListener("click", () => this.profile());
         this.dom_tournament.addEventListener("click", () => this.tournament_click());
         this.dom_tournament_history.addEventListener("click", () => this.tournament_history_click());
-        this.rooms_update();
-        this.queryTournament();        
+        if (this.main.login != '') {
+            this.rooms_update();
+            this.queryTournament();
+        }
     }
 
 	start_chat(){
@@ -68,30 +72,38 @@ export class Lobby
     join() {
         if (this.dom_rooms.selectedIndex === -1)
             return;
-        $.ajax({
-            url: '/game/join',
-            method: 'POST',
-            data: {
-                'login': this.main.login,
-                "game_id": this.dom_rooms.options[this.dom_rooms.selectedIndex].value
-            },
-            success: (info) => {
-                if (typeof info === 'string')
-                {
-                    this.main.set_status(info);
-                    this.rooms_update();
-                }
-                else
-                {
-                    switch (info.game) {
-                        case 'pong':
-                            this.pong_game(info);
-                            break;
+
+        var csrftoken = this.main.getCookie('csrftoken');
+
+        if (csrftoken) {
+            $.ajax({
+                url: '/game/join',
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrftoken,
+                },        
+                data: {
+                    'login': this.main.login,
+                    "game_id": this.dom_rooms.options[this.dom_rooms.selectedIndex].value
+                },
+                success: (info) => {
+                    if (typeof info === 'string') {
+                        this.main.set_status(info);
+                        this.rooms_update();
+                    } else {
+                        switch (info.game) {
+                            case 'pong':
+                                this.pong_game(info);
+                                break;
+                        }
                     }
-                }
-            },
-            error: () => this.main.set_status('Error: Can not join game')
-        });
+                },
+                error: () => this.main.set_status('Error: Can not join game')
+            });
+        } else {
+            console.log('Login required');
+            this.main.load('/pages/login', () => this.main.log_in.events());
+        }
     }
 
     new_game(game) {
@@ -101,36 +113,46 @@ export class Lobby
             this.main.set_status('Please login or sign up');
             return;
         }
-        $.ajax({
-            url: '/game/new',
-            method: 'POST',
-            data: {
-                'name': 'Stars war',
-                'game': game,
-                'login': this.main.login
-            },
-            success: (info) => {
-                if (this.socket !== -1)
-                    this.socket.send(JSON.stringify({
-                        type: 'update'
-                    }));
-                if (typeof info === 'string')
-                {
-                    this.main.set_status(info);
-                    this.rooms_update();
-                }
-                else
-                {
-                    //this.main.set_status('Game ' + info.name + ' created.');
-                    switch (info.game) {
-                        case 'pong':
-                            this.pong_game(info);
-                            break;
+        
+        var csrftoken = this.main.getCookie('csrftoken');
+
+        if (csrftoken) {
+            $.ajax({
+                url: '/game/new',
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrftoken,
+                },
+                data: {
+                    'name': 'Stars war',
+                    'game': game,
+                    'login': this.main.login
+                },
+                success: (info) => {
+                    if (this.socket !== -1)
+                        this.socket.send(JSON.stringify({
+                            type: 'update'
+                        }));
+                    if (typeof info === 'string')
+                    {
+                        this.main.set_status(info);
+                        this.rooms_update();
                     }
-                }
-            },
-            error: () => this.main.set_status('Error: Can not create game')
-        });
+                    else
+                    {
+                        switch (info.game) {
+                            case 'pong':
+                                this.pong_game(info);
+                                break;
+                        }
+                    }
+                },
+                error: () => this.main.set_status('Error: Can not create game')
+            });
+        } else {
+            console.log('Login required');
+            this.main.load('/pages/login', () => this.main.log_in.events());
+        }
     }
 
     tournament_history_click() {
@@ -140,7 +162,7 @@ export class Lobby
 		}
         this.main.load('/tournament_history', () => this.main.tournament_history.events());
     }
-    
+ 
     delete_game() {
         this.main.set_status('');
         if (this.main.login === '') {
@@ -151,45 +173,54 @@ export class Lobby
             this.main.set_status('Select a game');
             return;
         }
-        $.ajax({
-            url: '/game/delete',
-            method: 'POST',
-            data: {
-                'game_id': this.dom_rooms.options[this.dom_rooms.selectedIndex].value,
-                'login': this.main.login,
-            },
-            headers: {
-                'Authorization': `Bearer ${sessionStorage.JWTToken}`
-            },
-            success: (response) => {
-                if (response.token) {
-                    sessionStorage.setItem('JWTToken', response.token);
-                }
-                if (response.error) {
-                    const message = response.message;
-                    this.main.set_status('Error: ' + message);
-                } else if (response.message) {
-                    const message = response.message;
-                    this.main.set_status(message);
+
+        var csrftoken = this.main.getCookie('csrftoken');
+
+        if (csrftoken) {
+            $.ajax({
+                url: '/game/delete',
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrftoken,
+                },
+                data: {
+                    'game_id': this.dom_rooms.options[this.dom_rooms.selectedIndex].value,
+                    'login': this.main.login,
+                },
+                success: (response) => {
+                    if (response.token) {
+                        sessionStorage.setItem('JWTToken', response.token);
+                    }
+                    if (response.error) {
+                        const message = response.message;
+                        this.main.set_status('Error: ' + message);
+                    } else if (response.message) {
+                        const message = response.message;
+                        this.main.set_status(message);
+                        if (this.socket !== -1) {
+                            this.socket.send(JSON.stringify({
+                            type: 'update'
+                        }));
+                        }
+                    }
                     if (this.socket !== -1) {
                         this.socket.send(JSON.stringify({
-                        type: 'update'
-                    }));
+                            type: 'update'
+                        }));
                     }
+                },
+                error: (xhr, textStatus, errorThrown) => {
+                    let errorMessage = "Error: Can not delete game";
+                    if (xhr.responseJSON && xhr.responseJSON.error) {
+                        errorMessage = xhr.responseJSON.error;
+                    }
+                    this.main.set_status(errorMessage);
                 }
-                if (this.socket !== -1)
-                    this.socket.send(JSON.stringify({
-                        type: 'update'
-                    }));
-            },
-            error: (xhr, textStatus, errorThrown) => {
-            let errorMessage = "Error: Can not delete game";
-            if (xhr.responseJSON && xhr.responseJSON.error) {
-                errorMessage = xhr.responseJSON.error;
-            }
-            this.main.set_status(errorMessage);
-            }
-        });
+            });
+        } else {
+            console.log('Login required');
+            this.main.load('/pages/login', () => this.main.log_in.events());
+        }
     }
 
     pong_game(info) {
@@ -199,8 +230,6 @@ export class Lobby
     }
 
     rooms_update() {
-        console.log('romms_update');
-        // console.log('rooms_update');
         if (this.socket === -1) {
             this.main.set_status('');
             this.socket = new WebSocket(
@@ -209,16 +238,21 @@ export class Lobby
                 + '/ws/game/rooms/'
             );
         }
-        // else {
-        //     console.log('socket already open');
-        // }
+
+        this.socket.onopen = () => {
+            this.socket.send(JSON.stringify({
+                type: "authenticate",
+                token: this.ws,
+            }));
+            this.socket.send(JSON.stringify({
+                type: 'tournament_registered',
+            }));
+        };
         
         $.ajax({
             url: '/game/update',
             method: 'GET',
             success: (rooms) => {
-                // console.log(rooms);
-                // const rooms = JSON.parse(e.data);
                 var options_rooms = this.dom_rooms && this.dom_rooms.options;
                 this.dom_rooms.innerHTML = "";
                 if (options_rooms && rooms && rooms.length > 0) {
@@ -232,9 +266,6 @@ export class Lobby
             },
             error: () => this.main.set_status('Error: Can not update rooms')
         });
-        // this.socket.on = (e) => {
-        //     if (!('data' in e))
-        //         return;
 
         this.socket.onmessage = (e) => {
             if (!('data' in e))
@@ -281,6 +312,9 @@ export class Lobby
             else if (data.type === 'tournament_in_progress') {
                 this.displayTournamentBack(data.message);
             }
+            else if (data.type === 'tournament_local_progress') {
+                this.displayTournamentLocalBack(data.message);
+            }
             else if (data.type === 'tournament_owner_lobby') {
                 this.displayTournamentLobbyBack(data.message);
             }
@@ -302,6 +336,9 @@ export class Lobby
             else if (data.type === 'tournament_winner') {
                 if (this.tournament)
                     this.tournament.winnerDisplay(data);
+            }
+            else if (data.type === 'error_nf') {
+                this.main.load('/tournament/lobby', () => this.eventsLobby());
             }
             else {
                 const rooms = JSON.parse(e.data);
@@ -325,7 +362,7 @@ export class Lobby
             }));
         }
         this.socket.onclose = (e) => {
-            // console.error('Error: Socket Closed');
+
         };
     }
 
@@ -337,7 +374,6 @@ export class Lobby
         }
         this.socket.send(JSON.stringify({
             type: 'tournament_creation_request',
-            login: this.main.login
         }));
     }
     
@@ -385,6 +421,8 @@ export class Lobby
             inviteContainer.id = 'inviteContainer';
             document.addEventListener('DOMContentLoaded', () => document.body.appendChild(inviteContainer));
         }
+        else
+            return;
     
         const inviteNotification = document.createElement('div');
         inviteNotification.classList.add('event-invite-notification');
@@ -428,6 +466,21 @@ export class Lobby
         }
     }
 
+    displayTournamentLocalBack(tourID) {
+        const existingButton = document.getElementById('tournament');
+
+        if (existingButton) {
+            const newButton = document.createElement('button');
+            newButton.textContent = 'Tournament';
+            newButton.id = 'tournament';
+            newButton.addEventListener('click', () => {
+                    this.tournament = new Tournament(this.main, tourID);
+                    this.tournament.localBack();
+            });
+            existingButton.parentNode.replaceChild(newButton, existingButton);
+        }
+    }
+
     displayTournamentLobbyBack(tourID) {
         const existingButton = document.getElementById('tournament');
 
@@ -462,11 +515,19 @@ export class Lobby
     }
 
     queryTournament() {
-        if (this.main.login !== '')
-            this.socket.send(JSON.stringify({
-                type: 'tournament_registered',
-                login: this.main.login
-        }));
+        if (this.socket !== -1) {
+            if (this.socket.readyState === WebSocket.OPEN) {
+                this.socket.send(JSON.stringify({
+                    type: 'tournament_registered',
+                }));
+            }
+        }
+    }
+
+    checkLogin() {
+        if (this.main.login != '') {
+            this.dom_l
+        }
     }
 
     quit() {

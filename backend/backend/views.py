@@ -1,11 +1,14 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from game.models import PlayersModel, TournamentModel, TournamentMatchModel, RoomsModel
+from django.views.decorators.http import require_POST
+from game.models import TournamentModel, TournamentMatchModel, RoomsModel
+from accounts.models import PlayersModel
 from django.utils import timezone
 from transchat.models import Room
 from django.shortcuts import redirect
 from django.conf import settings
+<<<<<<< HEAD
 import requests
 import secrets
 import os
@@ -13,11 +16,17 @@ import pyotp
 import random
 import jwt
 import json
+=======
+import requests, pyotp, secrets, os, random, jwt, string, pytz
+>>>>>>> 1c409f62cfc4a457c36cf4833a3dc27e9fc99d9b
 from datetime import datetime, timedelta
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 from django.contrib.auth.hashers import make_password, check_password
-import random, string
+from django.db import IntegrityError
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.middleware.csrf import get_token
+from django.contrib.auth import authenticate, login as auth_login, get_user_model, logout as auth_logout
 
 API_PUBLIC = os.environ.get('API_PUBLIC')
 API_SECRET = os.environ.get('API_SECRET')
@@ -49,6 +58,49 @@ def twofa(request):
 
 def code_2fa(request):
     return (render(request, 'code_2fa.html'))
+
+def csrf(request):
+    return JsonResponse({'csrfToken': get_token(request)})
+
+def validate_session(request):
+    refresh_token = request.COOKIES.get('refresh_token')
+    if refresh_token:
+        try:
+            decoded_refresh = jwt.decode(refresh_token, settings.JWT_REFRESH_SECRET_KEY, algorithms=["HS256"])
+            user_id = decoded_refresh.get('user_id')
+            User = get_user_model()
+            user = User.objects.get(id=user_id)
+            if user and jwt.decode(user.ref, settings.JWT_REFRESH_SECRET_KEY, algorithms=["HS256"]) == decoded_refresh:
+                access_token, refresh_token = generate_jwt_tokens(user.id)
+                user.acc = access_token
+                user.ref = refresh_token
+
+                ws_token = user.generate_ws_token()
+                enable2fa = request.POST.get('enable2fa', 'false') == 'true'
+                user.secret_2fa = pyotp.random_base32() if enable2fa else ''
+                user.save()
+
+                response_data = {
+                    "validSession": True,
+                    'login': user.username,
+                    'name': user.name,
+                    'email': user.email,
+                    'enable2fa': enable2fa,
+                    'ws': ws_token
+                }
+                response = JsonResponse(response_data)
+                response.set_cookie('refresh_token', refresh_token, httponly=True, samesite='Lax', secure=True)
+                response.set_cookie('access_token', access_token, httponly=True, samesite='Lax', secure=True)
+                return response
+        except jwt.ExpiredSignatureError:
+            return JsonResponse({"validSession": False, "message": "Token expired."}, status=200)
+        except (jwt.InvalidTokenError, User.DoesNotExist):
+            return JsonResponse({"validSession": False, "message": "Invalid session."}, status=200)
+        except Exception as e:
+            return JsonResponse({"validSession": False, "message": str(e)}, status=200)
+        return JsonResponse({"validSession": False, "message": "Invalid or mismatched token."}, status=200)
+    else:
+        return JsonResponse({"validSession": False, "message": "No Authorization token provided."}, status=200)
 
 
 def tournament_history(request):
@@ -98,7 +150,6 @@ def display_2fa(request):
 def qrcode_2fa(request):
 	return (render(request, 'qrcode_2fa.html'))
 
-
 # use sendgrid API to send an email to the user containing the code used for the 2fa
 @csrf_exempt
 def mail_2fa(request):
@@ -136,110 +187,118 @@ def verify(request):
 
 # create a new player in the database and his 2fa key used for authenticator
 
-
 def tournament(request):
-     return (render(request, 'tournament.html'))
+    return (render(request, 'tournament.html'))
 
 def tournament_lobby(request):
      return (render(request, 'tournament_lobby.html'))
 
+def tournament_local(request):
+    return (render(request, 'tournament_local.html'))
+
+def tournament_local_start(request):
+    return (render(request, 'tournament_local_start.html'))
+
 def tournament_start(request, tournament_id):
-     return (render(request, 'tournament_start.html'))
+    #  if TournamentModel.objects.get(id=tournament_id).terminated:
+    #     return (render(request, 'lobby.html'))
+    return (render(request, 'tournament_start.html'))
 
-@csrf_exempt
-def new_player(request):
-    if 'login' not in request.POST or request.POST['login'] == "":
-        return HttpResponse("Error: No login!")
-    if 'email' not in request.POST or request.POST['email'] == "":
-        return HttpResponse("Error: No email!")
-    if 'password' not in request.POST or request.POST['password'] == "":
-        return HttpResponse("Error: No password!")
-    if 'name' not in request.POST or request.POST['name'] == "":
-        return HttpResponse("Error: No name!")
-    if PlayersModel.objects.filter(login=request.POST['login']).exists():
-        return HttpResponse("Error: Login '" + request.POST['login'] + "' exist.")
-    bool = request.POST['enable2fa']
-    if (bool == 'true'):
-        mysecret = pyotp.random_base32()
-    else:
-        mysecret = ''
-
-    hashed_password = make_password(request.POST['password'])
-
-    new_player = PlayersModel(
-        login=request.POST['login'],
-        password=hashed_password,
-        name=request.POST['name'],
-        email=request.POST['email'],
-        secret_2fa = mysecret
-    )
-    new_player.save()
-
-    #JWT handling
+def generate_jwt_tokens(user_id):
     access_token = jwt.encode({
-        'user_id': new_player.id,
-        'exp': datetime.utcnow() + timedelta(hours=1)
+        'user_id': user_id,
+        'exp': datetime.now(pytz.utc) + timedelta(minutes=1)
     }, JWT_SECRET_KEY, algorithm='HS256')
 
     refresh_token = jwt.encode({
-        'user_id': new_player.id
+        'user_id': user_id,
+        'exp': datetime.now(pytz.utc) + timedelta(days=7)
     }, JWT_REFRESH_SECRET_KEY, algorithm='HS256')
-    response = JsonResponse({
-        'access_token': access_token,
-        'id': new_player.id,
-        'login': new_player.login,
-        'name': new_player.name,
-        'email': new_player.email,
-        'secret': new_player.secret_2fa
-    })
-    response.set_cookie('refresh_token', refresh_token, httponly=True)
-    return response
 
-# Login an user and set JWT token
-@csrf_exempt
-def log_in(request):
-    if request.method == 'POST':
-        if 'login' not in request.POST:
-            return JsonResponse({'error': 'No login!'}, status=400)
-        if 'password' not in request.POST:
-            return JsonResponse({'error': 'No password!'}, status=400)
+    return access_token, refresh_token  
 
-        login = request.POST['login']
-        password = request.POST['password']
-
-        try:
-            player = PlayersModel.objects.get(login=login)
-            if (player.secret_2fa != ''):
-                enable2fa = 'true'
-            else:
-                enable2fa = 'false'
-
-            # JWT handling
-            if check_password(password, player.password):
-                access_token = jwt.encode({
-                    'user_id': player.id,
-                    'exp': datetime.utcnow() + timedelta(hours=1)
-                }, JWT_SECRET_KEY, algorithm='HS256')
-                refresh_token = jwt.encode({
-                    'user_id': player.id
-                }, JWT_REFRESH_SECRET_KEY, algorithm='HS256')
-
-                response = JsonResponse({
-                    'access_token': access_token,
-                    'id': player.id,
-                    'login': player.login,
-                    'name': player.name,
-                    'email': player.email,
-                    'enable2fa': enable2fa
-                })
-                response.set_cookie('refresh_token', refresh_token, httponly=True)
-                return response
-            else:
-                return JsonResponse({'error': 'Password not correct!'}, status=401)
-        except PlayersModel.DoesNotExist:
-            return JsonResponse({'error': 'Login does not exist!'}, status=404)
-    else:
+def new_player(request):
+    if request.method != 'POST':
         return JsonResponse({'error': 'Only POST requests are allowed'}, status=405)
+
+    required_fields = ['login', 'email', 'password', 'name']
+    missing_fields = [field for field in required_fields if field not in request.POST or not request.POST[field]]
+    if missing_fields:
+        return JsonResponse({'error': f'Error: Missing field(s): {", ".join(missing_fields)}'}, status=400)
+
+    try:
+        User = get_user_model()
+
+        user = User.objects.create_user(
+            username=request.POST['login'],
+            email=request.POST['email'],
+            password=request.POST['password'],
+            name=request.POST.get('name'),
+        )
+
+        access_token, refresh_token = generate_jwt_tokens(user.id)
+        user.acc = access_token
+        user.ref = refresh_token
+
+        ws_token = user.generate_ws_token()
+        enable2fa = request.POST.get('enable2fa', 'false') == 'true'
+        user.secret_2fa = pyotp.random_base32() if enable2fa else ''
+        user.save()
+        
+        response_data = {
+            'login': user.username,
+            'name': user.name,
+            'email': user.email,
+            'secret': user.secret_2fa if enable2fa else None,
+            'ws': ws_token
+        }
+        response = JsonResponse(response_data)
+        response.set_cookie('refresh_token', refresh_token, httponly=True, samesite='Lax', secure=True)
+        response.set_cookie('access_token', access_token, httponly=True, samesite='Lax', secure=True)
+        return response
+
+    except IntegrityError:
+        return JsonResponse({'error': 'Error: Login or email not available.'}, status=409)
+    except Exception as e:
+        return JsonResponse({'error': f'Unexpected error: {str(e)}'}, status=500)
+
+def log_in(request):
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Only POST requests are allowed'}, status=405)
+
+    username = request.POST.get('login')
+    password = request.POST.get('password')
+    
+    if not username or not password:
+        return JsonResponse({'error': 'No login or password provided!'}, status=400)
+
+    user = authenticate(request, username=username, password=password)
+
+    if user is not None:
+        enable2fa = 'true' if getattr(user, 'secret_2fa', '') else 'false'
+
+        access_token, refresh_token = generate_jwt_tokens(user.id)
+
+        user.acc = access_token
+        user.ref = refresh_token
+        user.save()
+
+        ws_token = user.generate_ws_token()
+
+        response_data = {
+            'login': user.username,
+            'name': user.name,
+            'email': user.email,
+            'enable2fa': enable2fa,
+            'ws': ws_token
+        }
+        response = JsonResponse(response_data)
+        response.set_cookie('refresh_token', refresh_token, httponly=True, samesite='Lax', secure=True)
+        response.set_cookie('access_token', access_token, httponly=True, samesite='Lax', secure=True)
+        return response
+
+    else:
+        return JsonResponse({'error': 'Invalid login credentials!'}, status=401)
 
 
 # callback function used to get the info from the 42 API
@@ -256,6 +315,7 @@ def callback(request):
         })
 
         token_data = token_response.json()
+        print(token_data)
         access_token = token_data['access_token']
 
         user_response = requests.get('https://api.intra.42.fr/v2/me', headers={
@@ -263,44 +323,82 @@ def callback(request):
         })
 
         user_data = user_response.json()
-        hashed_password = make_password('password')
-        if not PlayersModel.objects.filter(login=user_data['login']).exists():
-            new_player = PlayersModel(
-                login=user_data['login'],
-                password=hashed_password,
-                name=user_data['usual_full_name'],
-                email=user_data['email'],
-                secret_2fa=''
-            )
-            new_player.save()
 
-        player = PlayersModel.objects.get(login=user_data['login'])
+#       essayer de connecter sinon creer : 
+        user = authenticate(username=user_data['login'], password='')
 
-        # JWT handling
-        access_token_jwt = jwt.encode({
-            'user_id': player.id,
-            'exp': datetime.utcnow() + timedelta(hours=1)
-        }, JWT_SECRET_KEY, algorithm='HS256')
+        if user is not None:
+            enable2fa = 'true' if getattr(user, 'secret_2fa', '') else 'false'
 
-        refresh_token_jwt = jwt.encode({
-            'user_id': player.id
-        }, JWT_REFRESH_SECRET_KEY, algorithm='HS256')
+            access_token, refresh_token = generate_jwt_tokens(user.id)
 
-        response = render(request, 'index.html', {
-            'my42login': user_data['login'],
-            'my42name': user_data['usual_full_name'],
-            'my42email': user_data['email'],
-            'my42JWT': access_token_jwt
-        })
-        response.set_cookie('refresh_token', refresh_token_jwt, httponly=True)
+            user.acc = access_token
+            user.ref = refresh_token
+            user.save()
+
+            ws_token = user.generate_ws_token()
+
+            response = {
+                'my42login': user.username,
+                'my42name': user.name,
+                'my42email': user.email,
+                'my42enable2fa': enable2fa,
+                'my42ws': ws_token
+            }
+
+            response = render(request, 'index.html', response)
+            response.set_cookie('refresh_token', refresh_token, httponly=True, samesite='Lax', secure=True)
+            response.set_cookie('access_token', access_token, httponly=True, samesite='Lax', secure=True)
+
+            return response
+
+        User = get_user_model()
+        user = User.objects.create_user(
+            username=user_data['login'],
+            email=user_data['email'],
+            password='',
+            name=user_data['usual_full_name'],
+        )
+
+        access_token, refresh_token = generate_jwt_tokens(user.id)
+        user.acc = access_token
+        user.ref = refresh_token
+
+        ws_token = user.generate_ws_token()
+        enable2fa = 'false'
+        user.secret_2fa = pyotp.random_base32() if enable2fa else ''
+        user.save()
+        
+        response = {
+            'my42login': user.username,
+            'my42name': user.name,
+            'my42email': user.email,
+            'my42enable2fa': enable2fa,
+            'my42ws': ws_token
+        }
+
+        response = render(request, 'index.html', response)
+        response.set_cookie('refresh_token', refresh_token, httponly=True, samesite='Lax', secure=True)
+        response.set_cookie('access_token', access_token, httponly=True, samesite='Lax', secure=True)
 
         return response
-
     except Exception as e:
         print(f"An error occurred: {e}")
         return HttpResponse("An error occurred.")
 
-@csrf_exempt
+
+def logout(request):
+    user = request.user
+    user.acc = ''
+    user.ref = ''
+    user.save()
+
+    response = JsonResponse({'logout': 'success'})
+    response.delete_cookie('access_token')
+    response.delete_cookie('refresh_token')
+    return response
+
+
 def verify_qrcode(request):
     input_code = request.POST.get('input_code')
 
@@ -421,39 +519,50 @@ def name(request, username):
     return render(request, 'change_name.html')
 
 @csrf_exempt
+@require_POST
 def new_tournament(request):
-    if request.method == 'POST':
-        name = request.POST.get('name')
-        game = request.POST.get('game')
-        login = request.POST.get('login')
-        owner = PlayersModel.objects.get(login=request.POST['login'])
-        try:
-            if TournamentModel.objects.filter(name=name).exists():
-                return JsonResponse({'error': 'A tournament with the same name already exists'}, status=400)
+    name = request.POST.get('name')
+    game = request.POST.get('game')
+    local = request.POST.get('local')
+    try:
+        if TournamentModel.objects.filter(name=name).exists():
+            return JsonResponse({'error': 'A tournament with the same name already exists'}, status=400)
 
-            tournament = TournamentModel.objects.create(name=name, game=game, owner=owner)
-            player = PlayersModel.objects.get(login=login)
-            tournament.participants.add(player)
+        owner = PlayersModel.objects.get(username=request.user.username)
+        tournament = TournamentModel.objects.create(name=name, game=game, owner=owner)
+        tournament.participants.add(owner)
+        tournament.save()
 
-            url = f"http://blockchain:9000/add_tournament/{name}"
-            response = requests.post(url)
-            response.raise_for_status()
+        if local == 'true':
+            tournament.local = True
+            tournament.save()
 
-            player_data = {
-                'id': player.id,
-                'login': player.login,
-                'elo': player.elo,
-            }
-            url = f"http://blockchain:9000/add_player/"
-            data = {"name": name, "player": player_data}
-            response = requests.post(url, json=data)
-            response.raise_for_status()
+        url = f"http://blockchain:9000/add_tournament/{name}"
+        response = requests.post(url)
+        response.raise_for_status()
 
-            return JsonResponse({'message': 'Tournament created successfully', 'id': str(tournament.id)}, status=200)
-        except requests.exceptions.RequestException as e:
-            print(f"Error calling add_tournament_route: {e}")
-            return JsonResponse({'error': 'Failed to interact with blockchain'}, status=500)
-        except Exception as e:
-            return JsonResponse({'error': str(e)}, status=400)
-    else:
-         return JsonResponse({'error': 'Invalid request'}, status=405)
+        player_data = {
+            'id': owner.id,
+            'login': owner.login,
+            'elo': owner.elo,
+        }
+        url = f"http://blockchain:9000/add_player/"
+        data = {"name": name, "player": player_data}
+        response = requests.post(url, json=data)
+        response.raise_for_status()
+
+        return JsonResponse({'message': 'Tournament created successfully', 'id': str(tournament.id), 'local': tournament.local, 'name': tournament.name}, status=200)
+    except requests.exceptions.RequestException as e:
+        print(f"Error calling add_tournament_route: {e}")
+        return JsonResponse({'error': 'Failed to interact with blockchain'}, status=500)
+    except ObjectDoesNotExist:
+        return JsonResponse({'error': 'Owner not found'}, status=404)
+    except IntegrityError as e:
+        return JsonResponse({'error': 'Tournament could not be created'}, status=409)
+    except ValidationError as e:
+        return JsonResponse({'error': str(e)}, status=400)
+    except Exception as e:
+        return JsonResponse({'error': 'An unexpected error occurred'}, status=500)
+
+    
+

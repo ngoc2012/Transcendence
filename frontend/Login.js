@@ -1,8 +1,5 @@
-
-
-// Give the user the different way of login in our app (normal or through 42),
-// then in case of a normal connection start the 2fa verification process
-
+// // Give the user the different way of login in our app (normal or through 42),
+// // then in case of a normal connection start the 2fa verification process
 
 export class Login
 {
@@ -11,6 +8,7 @@ export class Login
     }
 
     events() {
+        this.main.checkcsrf();
         this.main.set_status('');
         this.dom_login = document.querySelector("#login0");
         this.dom_password = document.querySelector("#password0");
@@ -32,9 +30,15 @@ export class Login
             this.main.set_status('Field must not be empty');
             return;
         }
+
+        var csrftoken = this.main.getCookie('csrftoken');
+
         $.ajax({
-            url: '/log_in/',
+            url: 'log_in/',
             method: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken,
+            },   
             data: {
                 "login": this.dom_login.value,
                 "password": this.dom_password.value,
@@ -46,12 +50,12 @@ export class Login
                 }
                 else
                 {
-                    sessionStorage.setItem('JWTToken', info.access_token);
-                    document.cookie = `refresh_token=${info.refresh_token}; path=/; secure; HttpOnly`;
                     this.main.email = info.email;
                     this.main.login = info.login;
                     this.main.name = info.name;
                     this.main.dom_name.innerHTML = info.name;
+                    this.main.lobby.ws = info.ws;
+                    console.log(info.ws)
                     if (info.enable2fa == 'true')
                         this.main.load('/twofa', () => this.main.twofa.events());
                     else
@@ -60,8 +64,22 @@ export class Login
                         window.history.pushState({}, '', '/');
                         this.main.load('/lobby', () => this.main.lobby.events());
                     }
-                    if (this.main.lobby.socket.readyState !== 1)
-                        this.main.lobby.socket.send(JSON.stringify({ type: "authenticate", login: this.main.login }));
+                   
+                    var dom_log_in = document.getElementById('login');
+                    if (dom_log_in) {
+                        dom_log_in.style.display = "none";
+                    }
+
+                    var dom_signup = document.getElementById('signup');
+                    if (dom_signup) {
+                        dom_signup.style.display = "none";
+                        dom_signup.insertAdjacentHTML('afterend', '<button id="logoutButton">Logout</button>');
+                    }
+
+                    var dom_logout = document.getElementById('logoutButton');
+                    if (dom_logout) {
+                        dom_logout.addEventListener('click', () => this.main.logout());
+                    }
                 }
             },
             error: (xhr, textStatus, errorThrown) => {

@@ -31,16 +31,12 @@ def rebound(pos):
             for j in range(max_rebound):
                 x = [k[0] for k in pos]
                 y = [pos[0][1], mirror(sign * i, pos[1][1]), mirror(sign * (i + j), pos[2][1])]
-                # print(pos, i * sign, sign * (i + j))
-                # print(x, y)
                 if y[2] == y[1]:
                     return 0
                 if x[2] - x[0] == 0:
                     return -100
                 n = (x[2] - x[1]) * (y[2] - y[0]) / ( (x[2] - x[0]) * (y[2] - y[1]) )
-                # print((x[2] - x[1]) * (y[2] - y[0]), (x[2] - x[0]) * (y[2] - y[1]), n)
                 if n >= 0.98 and n <= 1.02:
-                # if n == 1.0:
                     return sign * i
     return -100
 
@@ -48,7 +44,6 @@ def hit_position(x, p0, p1):
     if p0[0] == p1[0]:
         return -1
     y = (x - p0[0]) / (p1[0] - p0[0]) * (p1[1] - p0[1]) + p0[1]
-    # print("hit y: " + str(y) + " x: " + str(x) + " p0: " + str(p0) + " p1: " + str(p1), unmirror(y))
     return unmirror(y)
 
 import requests
@@ -56,12 +51,15 @@ import requests
 def ai_listener(room_id, player_id):
     print(f"AI process started for room {room_id} and player {player_id}.")
     pos = []
-    # hits = []
     delay = 0.03
     max_steps = 10
+    headers = {
+        'X-Internal-Request': 'true'
+    }
     while True:
         n = 0
-        with requests.get("http://django:8000/pong/" + room_id + '/' + player_id + '/state', verify=False) as response:
+        url = "http://django:8000/pong/" + room_id + '/' + player_id + '/state'
+        with requests.get(url, headers=headers, verify=False) as response:
             if response.status_code != 200:
                 print("Request failed with status code:", response.status_code)
                 break
@@ -84,16 +82,15 @@ def ai_listener(room_id, player_id):
                     pos.append((state['ball']['x'], state['ball']['y'] - pong_data['RADIUS']))
                 if len(pos) > 2:
                     rebound_value = rebound(pos[-3:])
-                    # print("Rebound value: " + str(rebound_value))
                     if rebound_value != -100:
                         hit = hit_position(state['x'], pos[-3], (pos[-2][0], mirror(rebound_value, pos[-2][1]))) + pong_data['RADIUS']
-                        # print(hit, state)
                         while n < max_steps and (hit <= state['y'] or hit >= state['y'] + pong_data['PADDLE_HEIGHT']):
                             if state['y'] + pong_data['PADDLE_HEIGHT'] / 2 < hit:
                                 com = 'down'
                             else:
                                 com = 'up'
-                            with requests.get("http://django:8000/pong/" + room_id + '/' + player_id + '/' + com,verify=False) as response:
+                            url = "http://django:8000/pong/" + room_id + '/' + player_id + '/' + com
+                            with requests.get(url, headers=headers, verify=False) as response:
                                 if response.status_code != 200:
                                     print("Request failed with status code:", response.status_code)
                                     break
@@ -101,7 +98,6 @@ def ai_listener(room_id, player_id):
                                     print("Room does not exist.")
                                     break
                                 state = response.json()
-                            # print(com, state['y'])
                             time.sleep(delay)
                             n += 1
             else:
@@ -111,7 +107,8 @@ def ai_listener(room_id, player_id):
                         com = 'down'
                     else:
                         com = 'up'
-                    with requests.get("http://django:8000/pong/" + room_id + '/' +player_id + '/' + com,verify=False) as response:
+                    url = "http://django:8000/pong/" + room_id + '/' + player_id + '/' + com
+                    with requests.get(url, headers=headers, verify=False) as response:
                         if response.status_code != 200:
                             print("Request failed with status code:", response.status_code)
                             break
@@ -119,7 +116,6 @@ def ai_listener(room_id, player_id):
                             print("Room does not exist.")
                             break
                         state = response.json()
-                    # print(com, state['y'])
                     time.sleep(delay)
                     n += 1
         if not state['ai_player']:

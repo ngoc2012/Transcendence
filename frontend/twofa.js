@@ -9,6 +9,7 @@ export class twofa
     }
     
     events() {
+        this.main.checkcsrf();
         this.main.set_status('');
 
         this.dom_log_in_qrcode = document.querySelector("#log_in_with_qrcode");
@@ -22,9 +23,14 @@ export class twofa
     }
 
     loginWithemail() {
+        var csrftoken = this.main.getCookie('csrftoken');
+
         $.ajax({
             url: '/mail_2fa/',
             method: 'GET',
+            headers: {
+                'X-CSRFToken': csrftoken,
+            },
             data: {
                 "login": this.main.login,
                 "name": this.main.name,
