@@ -102,7 +102,7 @@ export class Lobby
                     'X-CSRFToken': csrftoken,
                 },
                 data: {
-                    'name': 'Stars war',
+                    'name': 'Star wars',
                     'game': game,
                     'login': this.main.login
                 },
