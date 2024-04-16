@@ -13,7 +13,6 @@ export class Lobby
     }
 
     events() {
-        console.log(this.socket);
         this.main.checkcsrf();
         this.dom_rooms = document.getElementById("rooms");
         this.dom_tournament = document.getElementById("tournament");
@@ -210,7 +209,6 @@ export class Lobby
 
     rooms_update() {
         if (this.socket === -1) {
-            console.log('new socket')
             this.main.set_status('');
             this.socket = new WebSocket(
                 'wss://'
@@ -251,74 +249,11 @@ export class Lobby
             if (!('data' in e))
                 return;
             const data = JSON.parse(e.data);
-            if (data.type === 'users_list' ) {
-                if (this.tournament)
-                    this.tournament.userList(data.users);
-            }
-            if (data.type === 'already_in') {
-                if (this.tournament)
-                    this.tournament.alreadyIn(data.users)
-            }
-            else if (data.type == 'tournament_invite') {
-                this.displayTournamentInvite(data.message.message, data.message.tour_id);
-            }
-            else if (data.type === 'tournament_invite_accepted') {
-                if (this.tournament)
-                    this.tournament.tournamentInviteAccepted(data.message);
-            }
-            else if (data.type === 'tournament_ready') {
-                if (this.tournament)
-                    this.tournament.tournamentReady();
-            }
-            else if (data.type === 'tournament_infos') {
-                if (this.tournament)
-                    this.tournament.tournamentInfos(data.name, data.round)
-            }
-            else if (data.type === 'tournament_matches' || data.type === 'match_update') {
-                if (this.tournament)
-                    this.tournament.displayTournamentMatches(data.matches);
-            }
-            else if (data.type === 'tournament_join') {
-                if (this.tournament)
-                    this.tournament.displayPlayerAction(data.message);
-            }
-            else if (data.type === 'tournament_join_valid') {
-                if (this.tournament)
-                    this.tournament.joinMatch(data);
-            }
-            else if (data.type === 'tournament_event_invite') {
-                this.displayEventInvite(data.message);
-            }
-            else if (data.type === 'tournament_in_progress') {
-                this.displayTournamentBack(data.message);
-            }
-            else if (data.type === 'tournament_local_progress') {
+            if (data.type === 'tournament_local_progress') {
                 this.displayTournamentLocalBack(data.message);
             }
-            else if (data.type === 'tournament_owner_lobby') {
-                this.displayTournamentLobbyBack(data.message);
-            }
-            else if (data.type === 'tournament_creation_OK') {
-                this.tournamentLaunch();
-            }
-            else if (data.type === 'already_in_tournament') {
-                // this.alreadyInTournament(data.message);
-                // WHEN ACTION IS NOT POSSIBLE -> MESSAGE BOX ?
-            }
-            else if (data.type === 'tournament_in_setup') {
-                if (this.tournament)
-                    this.tournament.inSetup();
-            }
-            else if (data.type === 'match_status_update') {
-                if (this.tournament)
-                    this.tournament.updateMatchStatus(data);
-            }
-            else if (data.type === 'tournament_winner') {
-                if (this.tournament)
-                    this.tournament.winnerDisplay(data);
-            }
             else if (data.type === 'error_nf') {
-                this.main.load('/tournament/lobby', () => this.eventsLobby());
+                // this.main.load('/tournament/lobby', () => this.eventsLobby());
             }
             else {
                 const rooms = JSON.parse(e.data);
@@ -346,98 +281,8 @@ export class Lobby
             this.main.set_status('Please login or sign up');
             return;
         }
-        this.socket.send(JSON.stringify({
-            type: 'tournament_creation_request',
-        }));
-    }
-    
-    tournamentLaunch() {
         this.tournament = new Tournament(this.main);
         this.main.load('/tournament', () => this.tournament.events());
-    }
-
-    displayTournamentInvite(message, tourId) {
-        let inviteContainer = document.getElementById('inviteContainer');
-        if (!inviteContainer) {
-            inviteContainer = document.createElement('div');
-            inviteContainer.id = 'inviteContainer';
-            document.body.appendChild(inviteContainer);
-        }
-
-        const inviteNotification = document.createElement('div');
-        inviteNotification.classList.add('invite-notification');
-        inviteNotification.innerHTML = `
-            <p>${message}</p>
-            <button id="acceptInviteBtn">Accept</button>
-            <button id="declineInviteBtn">Decline</button>
-        `;
-
-        inviteContainer.appendChild(inviteNotification);
-
-        document.getElementById('acceptInviteBtn').addEventListener('click', () => {
-            this.tournamentInviteResponse('accept', tourId);
-            inviteContainer.removeChild(inviteNotification);
-        });
-        document.getElementById('declineInviteBtn').addEventListener('click', () => {
-            this.tournamentInviteResponse('decline', tourId);
-            inviteContainer.removeChild(inviteNotification);
-        });
-    }
-
-    displayEventInvite(tourID) {
-        let noInviteContainer = document.getElementById('no-invite');
-        if (noInviteContainer)
-            return;
-    
-        let inviteContainer = document.getElementById('inviteContainer');
-        if (!inviteContainer) {
-            inviteContainer = document.createElement('div');
-            inviteContainer.id = 'inviteContainer';
-            document.addEventListener('DOMContentLoaded', () => document.body.appendChild(inviteContainer));
-        }
-        else
-            return;
-    
-        const inviteNotification = document.createElement('div');
-        inviteNotification.classList.add('event-invite-notification');
-        inviteNotification.innerHTML = `
-            <p>Tournament is ready! Join?</p>
-            <button id="acceptInviteBtn">Accept</button>
-            <button id="declineInviteBtn">Decline</button>`;
-    
-        const appendInvite = () => {
-            if(document.body.contains(inviteContainer)) {
-                inviteContainer.appendChild(inviteNotification);
-    
-                document.getElementById('acceptInviteBtn').addEventListener('click', () => {
-                    inviteContainer.removeChild(inviteNotification);
-                    this.tournament = new Tournament(this.main, tourID);
-                    this.tournament.queryRoundList();
-                });
-                document.getElementById('declineInviteBtn').addEventListener('click', () => {
-                    inviteContainer.removeChild(inviteNotification);
-                });
-            } else {
-                document.addEventListener('DOMContentLoaded', appendInvite);
-            }
-        };
-    
-        appendInvite();
-    }    
-
-    displayTournamentBack(tourID) {
-        const existingButton = document.getElementById('tournament');
-
-        if (existingButton) {
-            const newButton = document.createElement('button');
-            newButton.textContent = 'Tournament';
-            newButton.id = 'tournament';
-            newButton.addEventListener('click', () => {
-                    this.tournament = new Tournament(this.main, tourID);
-                    this.tournament.queryRoundList();
-            });
-            existingButton.parentNode.replaceChild(newButton, existingButton);
-        }
     }
 
     displayTournamentLocalBack(tourID) {
@@ -452,39 +297,6 @@ export class Lobby
                     this.tournament.localBack();
             });
             existingButton.parentNode.replaceChild(newButton, existingButton);
-        }
-    }
-
-    displayTournamentLobbyBack(tourID) {
-        const existingButton = document.getElementById('tournament');
-
-        if (existingButton) {
-            const newButton = document.createElement('button');
-            newButton.textContent = 'Tournament';
-            newButton.id = 'tournament';
-            newButton.addEventListener('click', () => {
-                    this.tournament = new Tournament(this.main, tourID);
-                    this.main.load('/tournament/lobby', () => this.tournament.eventsLobby());
-            });
-            existingButton.parentNode.replaceChild(newButton, existingButton);
-        }
-    }
-
-    tournamentInviteResponse(response, tourId) {
-        if (response === 'accept') {
-            this.socket.send(JSON.stringify({
-                type: 'tournament_invite_resp',
-                response: 'accept',
-                id: tourId,
-                login: this.main.login
-            }));
-        } else {
-            this.socket.send(JSON.stringify({
-                type: 'tournament_invite_resp',
-                response: 'decline',
-                id: tourId,
-                login: this.main.login
-            }));
         }
     }
 
