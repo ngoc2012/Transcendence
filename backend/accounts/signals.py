@@ -8,10 +8,17 @@ from django.db.utils import IntegrityError
 def create_user(sender, **kwargs):
     User = get_user_model()
 
-    if not User.objects.filter(username='localTournament').exists():
+    if not User.objects.filter(username='localTournament1').exists():
         try:
-            User.objects.create_user('localTournament1', 'localTournament1@localTournament.com', 'lctrpswrd42')
-            User.objects.create_user('localTournament2', 'localTournament2@localTournament.com', 'lctrpswrd42')
+            User.objects.create_user('localTournament1', '', 'lctrpswrd42')
+            print("User created successfully.")
+        except IntegrityError as e:
+            print(f"Failed to create user: {e}")
+        except Exception as e:
+            print(f"An error occurred: {e}")
+    if not User.objects.filter(username='localTournament2').exists():
+        try:
+            User.objects.create_user('localTournament2', '', 'lctrpswrd42')
             print("User created successfully.")
         except IntegrityError as e:
             print(f"Failed to create user: {e}")

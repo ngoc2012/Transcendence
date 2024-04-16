@@ -101,6 +101,7 @@ export class Main
         window.history.pushState({page: '/login'}, '', '/login');
         this.load('/pages/login', () => this.log_in.events());
     }
+    
     set_status(s) {this.dom_status.innerHTML = s;}
 
     signup_click() {

@@ -490,12 +490,9 @@ export class Pong
             document.getElementById('pongCanvas').style.filter = '';
             document.body.removeChild(backdrop);
             document.body.removeChild(winBox);
-            if (!this.localTour && !this.tournament) {
-                this.main.load('/lobby', () => this.main.lobby.events());
-            }
-            else if (!this.localTour && this.tournament) {
+            if (!this.localTour && this.tournament) {
                 this.tournament.endMatch(data);
-            } else {
+            } else if (this.localTournament) {
                 this.localTournament.sendResult(data.score[0], data.score[1], this.room.id);
             }  
             this.quit();

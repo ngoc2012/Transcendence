@@ -290,6 +290,7 @@ class RoomsConsumer(AsyncWebsocketConsumer):
             await self.channel_layer.group_add(unique_group_name, self.channel_name)
             RoomsConsumer.connected_users.add(self.user_id)
             await self.broadcast_user_list()
+            print('auth ok') 
         else:
             await self.close(code=4001)
     

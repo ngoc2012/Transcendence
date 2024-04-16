@@ -13,6 +13,7 @@ export class Lobby
     }
 
     events() {
+        console.log(this.socket);
         this.main.checkcsrf();
         this.dom_rooms = document.getElementById("rooms");
         this.dom_tournament = document.getElementById("tournament");
@@ -209,6 +210,7 @@ export class Lobby
 
     rooms_update() {
         if (this.socket === -1) {
+            console.log('new socket')
             this.main.set_status('');
             this.socket = new WebSocket(
                 'wss://'

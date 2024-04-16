@@ -17,6 +17,7 @@ from django.db import IntegrityError
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.middleware.csrf import get_token
 from django.contrib.auth import authenticate, login as auth_login, get_user_model, logout as auth_logout
+from django.core.cache import cache
 
 API_PUBLIC = os.environ.get('API_PUBLIC')
 API_SECRET = os.environ.get('API_SECRET')
@@ -69,6 +70,7 @@ def validate_session(request):
                 enable2fa = request.POST.get('enable2fa', 'false') == 'true'
                 user.secret_2fa = pyotp.random_base32() if enable2fa else ''
                 user.save()
+                cache.delete(f'user_{user.id}')
 
                 response_data = {
                     "validSession": True,
@@ -197,7 +199,7 @@ def tournament_start(request, tournament_id):
 def generate_jwt_tokens(user_id):
     access_token = jwt.encode({
         'user_id': user_id,
-        'exp': datetime.now(pytz.utc) + timedelta(minutes=1)
+        'exp': datetime.now(pytz.utc) + timedelta(minutes=5)
     }, JWT_SECRET_KEY, algorithm='HS256')
 
     refresh_token = jwt.encode({
@@ -378,10 +380,12 @@ def callback(request):
 
 
 def logout(request):
+    print(request)
     user = request.user
     user.acc = ''
     user.ref = ''
     user.save()
+    cache.delete(f'user_{user.id}')
 
     response = JsonResponse({'logout': 'success'})
     response.delete_cookie('access_token')

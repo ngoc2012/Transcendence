@@ -13,10 +13,6 @@ from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.cache import cache
 from django.utils import timezone
 
-
-JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY')
-JWT_REFRESH_SECRET_KEY = os.environ.get('JWT_REFRESH_SECRET_KEY')
-
 User = get_user_model()
 
 def get_data(game):
