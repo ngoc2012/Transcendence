@@ -56,7 +56,6 @@ export class Login
                     this.main.name = info.name;
                     this.main.dom_name.innerHTML = info.name;
                     this.main.lobby.ws = info.ws;
-                    console.log(info.ws)
                     if (info.enable2fa == 'true')
                         this.main.load('/twofa', () => this.main.twofa.events());
                     else

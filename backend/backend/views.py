@@ -182,19 +182,11 @@ def verify(request):
 def tournament(request):
     return (render(request, 'tournament.html'))
 
-def tournament_lobby(request):
-     return (render(request, 'tournament_lobby.html'))
-
 def tournament_local(request):
     return (render(request, 'tournament_local.html'))
 
 def tournament_local_start(request):
     return (render(request, 'tournament_local_start.html'))
-
-def tournament_start(request, tournament_id):
-    #  if TournamentModel.objects.get(id=tournament_id).terminated:
-    #     return (render(request, 'lobby.html'))
-    return (render(request, 'tournament_start.html'))
 
 def generate_jwt_tokens(user_id):
     access_token = jwt.encode({
