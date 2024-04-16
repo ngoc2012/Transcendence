@@ -120,7 +120,10 @@ export class Pong
         });
 
         if (!this.localTour) {
-            this.dom_toggle_AI.addEventListener('click', () => {this.set_state(0, 'ai_player')});
+            this.dom_toggle_AI.addEventListener('click', () => {
+                this.set_state(0, 'ai_player');
+                this.players[0].sk.send('teams');
+            });
             this.dom_power_play.addEventListener('click', () => {this.set_state(0, 'power')});
             this.dom_toggle_display.addEventListener('click', () => {this.toggle_display()});
             this.dom_toggle_display_board.addEventListener('click', () => {this.toggle_display_board()});
