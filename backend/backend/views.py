@@ -289,9 +289,11 @@ def log_in(request):
 @csrf_exempt
 def callback(request):
     code = request.GET.get('code')
+    standard_headers = {'X-Internal-Request': 'true'}
     try:
         token_response = requests.post('https://api.intra.42.fr/oauth/token', data={
             'grant_type': 'authorization_code',
+            'headers': standard_headers,
             'client_id': API_PUBLIC,
             'client_secret': API_SECRET,
             'code': code,
