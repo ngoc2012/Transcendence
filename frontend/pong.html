@@ -1,6 +1,3 @@
-
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,18 +7,18 @@
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
   <style>
   
-  #team1-container {
+  #team0-container {
     position: absolute;
-    right: 20%;
-    top: 10%;
+    left: 22%;
+    top: 8%;
     margin-top: 0;
     padding-top: 0;
   }
 
-  #team0-container {
+  #team1-container {
     position: absolute;
-    left: 20%;
-    top: 10%;
+    right: 22%;
+    top: 8%;
     margin-top: 0;
     padding-top: 0;
   }
@@ -30,6 +27,8 @@
     font-family: 'Courier New', Courier, monospace;
     font-size: 48px;
     color: #333;
+    text-align: center;
+
   }
 
   #team1-container h4,
@@ -47,25 +46,29 @@
   .button-container {
     text-align: center;
   }
+
   </style>
 </head>
 <body>
   <div class="container">
     <h3 class="text-center" id="game_name"></h3>
-    
+
+    <div id="team0-container">
+      <h4 id="team0">salut</h4>
+      <div class="score" id="score0">0</div>
+    </div>     
+
     <div id="team1-container">
-      <h4 id="team1">team1</h4>
+      <h4 id="team1">coucou</h4>  
       <div class="score" id="score1">0</div>
     </div>
 
-    <div id="team0-container">
-      <h4 id="team0">team0</h4>
-      <div class="score" id="score0">0</div>
-    </div> 
 
-    <div id="pongThreeJS" style="display: none;"></div>
-    <canvas id="pongCanvas" class="mt-3"></canvas>
-    <div class="button-container">
+    <div class="container d-flex justify-content-center">
+      <div id="pongThreeJS" style="display: none;"></div>
+      <canvas id="pongCanvas" class="mt-3"></canvas>
+    </div>
+        <div class="button-container">
       <button id="start" type="button" class="btn btn-primary mt-3">Start</button>
       <button id="quit" type="button" class="btn btn-danger mt-3">Quit</button>
       <button id="toggle_AI" type="button" class="btn btn-secondary mt-3">AI</button>
@@ -106,7 +109,6 @@
           <div>z: <input type="range" min="0.0" max="1.0" step="0.1" value="0.5" id="light_z"></div>
         </div>
       </div>
-
     </div>
   </div>
 
