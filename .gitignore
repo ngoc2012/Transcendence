@@ -8,6 +8,7 @@ backend/game/migrations/*.py
 backend/transchat/migrations/*.py
 backend/CLI/*.crt
 backend/CLI/*.key
+backend/transchat/migrations/*.py
 backend/venv
 backend/db.sqlite3
 to_do.txt
