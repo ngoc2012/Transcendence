@@ -10,7 +10,7 @@ User = get_user_model()
 
 class JWTMiddleware(MiddlewareMixin):
     def process_request(self, request):
-        if request.headers.get('X-Internal-Request') == 'true' or request.path in self.get_unauthenticated_paths() or '/callback/' in request.path:
+        if request.headers.get('X-Internal-Request') == 'true' or request.path in self.get_unauthenticated_paths() or '/callback/' in request.path or '/admin/' in request.path:
             return None
 
         access_token = request.COOKIES.get('access_token')

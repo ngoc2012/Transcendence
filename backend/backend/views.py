@@ -289,11 +289,9 @@ def log_in(request):
 @csrf_exempt
 def callback(request):
     code = request.GET.get('code')
-    standard_headers = {'X-Internal-Request': 'true'}
     try:
         token_response = requests.post('https://api.intra.42.fr/oauth/token', data={
             'grant_type': 'authorization_code',
-            'headers': standard_headers,
             'client_id': API_PUBLIC,
             'client_secret': API_SECRET,
             'code': code,
@@ -301,7 +299,6 @@ def callback(request):
         })
 
         token_data = token_response.json()
-        print(token_data)
         access_token = token_data['access_token']
 
         user_response = requests.get('https://api.intra.42.fr/v2/me', headers={
@@ -335,7 +332,7 @@ def callback(request):
             response = render(request, 'index.html', response)
             response.set_cookie('refresh_token', refresh_token, httponly=True, samesite='Lax', secure=True)
             response.set_cookie('access_token', access_token, httponly=True, samesite='Lax', secure=True)
-
+            cache.delete(f'user_{user.id}')
             return response
 
         User = get_user_model()
@@ -362,7 +359,7 @@ def callback(request):
             'my42enable2fa': enable2fa,
             'my42ws': ws_token
         }
-
+        cache.delete(f'user_{user.id}')
         response = render(request, 'index.html', response)
         response.set_cookie('refresh_token', refresh_token, httponly=True, samesite='Lax', secure=True)
         response.set_cookie('access_token', access_token, httponly=True, samesite='Lax', secure=True)
@@ -374,7 +371,6 @@ def callback(request):
 
 
 def logout(request):
-    print(request)
     user = request.user
     user.acc = ''
     user.ref = ''
@@ -561,13 +557,11 @@ def new_tournament(request):
             return JsonResponse({'error': 'A tournament with the same name already exists'}, status=400)
 
         owner = PlayersModel.objects.get(username=request.user.username)
-        tournament = TournamentModel.objects.create(name=name, game=game, owner=owner)
+        tournament = TournamentModel.objects.create(name=name, game=game, owner=owner, newRound=True)
         tournament.participants.add(owner)
-        tournament.save()
-
         if local == 'true':
             tournament.local = True
-            tournament.save()
+        tournament.save()
 
         url = f"http://blockchain:9000/add_tournament/{name}"
         response = requests.post(url)

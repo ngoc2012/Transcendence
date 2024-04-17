@@ -9,13 +9,13 @@ export class Pong
         this.connected = false;
         this.power_play = false;
         this.draw = new Draw(this);
-        this.tournament = t;
-        this.localTournament = localTournament;
         this.keyboard_layout = "";
         this.players = [{
             'id': this.room.player_id,
             'sk': -1
         }];
+        this.tournament = t;
+        this.localTournament = localTournament;
         this.localTour = localTour;
     }
 
@@ -71,53 +71,80 @@ export class Pong
             this.dom_close_local = document.getElementById('close_local');
             this.dom_keyboard_layout = document.getElementById('keyboard_layout');
         }
-        
-        document.addEventListener('keydown', (event) => {
-            switch (event.key) {
-                case 'ArrowUp':
-                    this.set_state(0, "up");
-                    break;
-                case 'ArrowDown':
-                    this.set_state(0, "down");
-                    break;
-                case 'ArrowLeft':
-                    if (this.power_play)
-                        this.set_state(0, "left");
-                    break;
-                case 'ArrowRight':
-                    if (this.power_play)
-                        this.set_state(0, "right");
-                    break;
-                // change side
-                case 'Tab':
-                    if (this.power_play)
-                        this.set_state(0, "side");
-                    break;
-                case 'Control':
-                    this.set_state(0, "server");
-                    break;
-                // case ' ':
-                //     this.start();
-                //     break;
-                // case 'q':
-                //     this.quit();
-                //     break;
-            }
-            
-            let commands = ['up', 'down', 'left', 'right'];
-            if (event.key && event.key.length === 1)
-            {
-                let index = this.keyboard_layout.indexOf(event.key);
-                if (index >= 0)
-                {
-                    let i_player = Math.floor(index / 4) + 1;
-                    index = index % 4;
-                    if (index < 2 || (index >= 2 && this.power_play))
-                        this.set_state(i_player, commands[index]);
+
+        if (!this.localTour) {
+            document.addEventListener('keydown', (event) => {
+                switch (event.key) {
+                    case 'ArrowUp':
+                        this.set_state(0, "up");
+                        break;
+                    case 'ArrowDown':
+                        this.set_state(0, "down");
+                        break;
+                    case 'ArrowLeft':
+                        if (this.power_play)
+                            this.set_state(0, "left");
+                        break;
+                    case 'ArrowRight':
+                        if (this.power_play)
+                            this.set_state(0, "right");
+                        break;
+                    // change side
+                    case 'Tab':
+                        if (this.power_play)
+                            this.set_state(0, "side");
+                        break;
+                    case 'Control':
+                        this.set_state(0, "server");
+                        break;
+                    // case ' ':
+                    //     this.start();
+                    //     break;
+                    // case 'q':
+                    //     this.quit();
+                    //     break;
                 }
                 
-            }
-        });
+                let commands = ['up', 'down', 'left', 'right'];
+                if (event.key && event.key.length === 1)
+                {
+                    let index = this.keyboard_layout.indexOf(event.key);
+                    if (index >= 0)
+                    {
+                        let i_player = Math.floor(index / 4) + 1;
+                        index = index % 4;
+                        if (index < 2 || (index >= 2 && this.power_play))
+                            this.set_state(i_player, commands[index]);
+                    }
+                    
+                }
+            });
+        } else {
+            document.addEventListener('keydown', (event) => {
+                switch (event.key) {
+                    case 'q':
+                        this.set_state(0, "up");
+                        break;
+                    case 'a':
+                        this.set_state(0, "down");
+                        break;
+                }
+                
+                let commands = ['up', 'down', 'left', 'right'];
+                if (event.key && event.key.length === 1)
+                {
+                    let index = this.keyboard_layout.indexOf(event.key);
+                    if (index >= 0)
+                    {
+                        let i_player = Math.floor(index / 4) + 1;
+                        index = index % 4;
+                        if (index < 2)
+                            this.set_state(i_player, commands[index]);
+                    }
+                    
+                }
+            });
+        }
 
         if (!this.localTour) {
             this.dom_toggle_AI.addEventListener('click', () => {
@@ -188,7 +215,7 @@ export class Pong
                         this.connect(i);
                         if (this.players[i].sk !== -1)
                         {
-                            this.keyboard_layout = 'olkp';
+                            this.keyboard_layout += 'olpk';
                         }
                         this.preMatchBox(this.localTournament.player1, this.localTournament.player2);
                     }
@@ -385,11 +412,6 @@ export class Pong
             if ('win' in data) {
                 this.winnerBox(data);
             }
-            else if (data.start === "tour_match_start") {
-                if (this.tournament) {
-                    this.main.lobby.socket.send(JSON.stringify({type: 'match_start', roomId: this.room.id}));
-                }
-            }
             else if ('score' in data)
             {
                 this.dom_score0.innerHTML = data.score[0];
@@ -399,15 +421,26 @@ export class Pong
             {
                 this.dom_team0.innerHTML = "";
                 data.team0.forEach((p) => {
-                    let new_p = document.createTextNode(p);
-                    this.dom_team0.appendChild(new_p);
-                    this.player1 = p;
+                    if (this.localTour) {
+                        let new_p = document.createTextNode(this.player1);
+                        this.dom_team0.appendChild(new_p);
+                    } else {
+                        this.dom_team0.appendChild(new_p);
+                        let new_p = document.createTextNode(p);
+                    }
+                    // this.player1 = p;
                 });
                 this.dom_team1.innerHTML = "";
                 data.team1.forEach((p) => {
                     let new_p = document.createTextNode(p);
-                    this.dom_team1.appendChild(new_p);
-                    this.player2 = p;
+                    if (this.localTour) {
+                        let new_p = document.createTextNode(this.player2);
+                        this.dom_team1.appendChild(new_p);
+                    } else {
+                        let new_p = document.createTextNode(p);
+                        this.dom_team1.appendChild(new_p);
+                    }
+                    // this.player2 = p;
                 });
             }
             else
@@ -447,9 +480,12 @@ export class Pong
         matchText.textContent = `Match can start whenever you are ready!`;
         matchBox.appendChild(matchText);
 
-        let instruct = document.createElement('p');
-        instruct.textContent = `${player1} must use [keyboards] and ${player2} 'o' to go high, 'l' to go low`;
-        matchBox.appendChild(instruct);
+        let instruct1 = document.createElement('p');
+        instruct1.textContent = `${player1} controls: 'q' = up, 'a' = down`;
+        matchBox.appendChild(instruct1);
+        let instruct2 = document.createElement('p');
+        instruct2.textContent = `${player2} controls: 'o' = up, 'l' = down`;
+        matchBox.appendChild(instruct2);
 
         let startButton = document.createElement('button');
         startButton.textContent = 'Start';
