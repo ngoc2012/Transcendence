@@ -147,7 +147,10 @@ export class Pong
         }
 
         if (!this.localTour) {
-            this.dom_toggle_AI.addEventListener('click', () => {this.set_state(0, 'ai_player')});
+            this.dom_toggle_AI.addEventListener('click', () => {
+                this.set_state(0, 'ai_player');
+                this.players[0].sk.send('teams');
+            });
             this.dom_power_play.addEventListener('click', () => {this.set_state(0, 'power')});
             this.dom_toggle_display.addEventListener('click', () => {this.toggle_display()});
             this.dom_toggle_display_board.addEventListener('click', () => {this.toggle_display_board()});
@@ -418,16 +421,14 @@ export class Pong
             {
                 this.dom_team0.innerHTML = "";
                 data.team0.forEach((p) => {
-                    let new_p = document.createElement("li");
-                    new_p.textContent = p;
+                    let new_p = document.createTextNode(p);
                     this.dom_team0.appendChild(new_p);
                     this.player1 = p;
                 });
                 this.dom_team1.innerHTML = "";
                 data.team1.forEach((p) => {
-                    let new_p = document.createElement("li");
-                    new_p.textContent = p;
-                    this.dom_team0.appendChild(new_p);
+                    let new_p = document.createTextNode(p);
+                    this.dom_team1.appendChild(new_p);
                     this.player2 = p;
                 });
             }
