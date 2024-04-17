@@ -19,9 +19,14 @@ def lobby(request):
                 return render(request, 'chat_signup.html', {"username": username})
     if request.method == 'POST':
         if 'username' in request.POST:
-            username = request.POST['username']
-            new_user = User(username=username)
-            new_user.save()
+            try:
+                get_user = User.objects.filter(username=request.POST['username']).get()
+                request.session['user'] = request.POST['username']
+            except User.DoesNotExist:
+                username = request.POST['username']
+                new_user = User(username=username)
+                new_user.save()
+                request.session['user'] = username
             return HttpResponse("New user created.")
 
 @csrf_exempt

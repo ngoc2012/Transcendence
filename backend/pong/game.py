@@ -12,7 +12,6 @@ from asgiref.sync import sync_to_async
 import random
 import json
 
-from game.models import RoomsModel, PlayersModel
 from .data import pong_data
 
 @sync_to_async
@@ -25,7 +24,7 @@ def set_power_play(consumer):
 @sync_to_async
 def game_init(consumer):
     if cache.get(consumer.k_started) == None:
-        cache.set(consumer.k_server, consumer.player.id)
+        cache.set(consumer.k_server, consumer.player_id)
         cache.set(consumer.k_started, False)
         cache.set(consumer.k_dx, 1)
         cache.set(consumer.k_ddy, random.choice(consumer.choices))

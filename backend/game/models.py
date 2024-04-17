@@ -1,14 +1,33 @@
 import uuid
 from django.db import models
 from django.utils import timezone
+from django.contrib.postgres.fields import ArrayField
 from accounts.models import PlayersModel
 from django.conf import settings
 from django.db.models import JSONField
+
+class PlayersModel(models.Model):
+    id = models.AutoField(primary_key=True)
+    login = models.CharField(max_length=255)
+    password = models.CharField(max_length=255)
+    name = models.CharField(max_length=255)
+    tourn_alias = models.CharField(max_length=255)
+    secret_2fa = models.TextField(default='')
+    friends = models.ManyToManyField("self", blank=True)
+    email = models.EmailField(default='')  # gerer si mauvais email
+    session_id = models.CharField(max_length=40, null=True)
+    expires = models.DateTimeField(null=True)
+    elo = models.IntegerField(default=1500)
+    online_status = models.TextField(default='Offline')
+    def __str__(self):
+        return str(self.id)
 
 class RoomsModel(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=255)
     game = models.CharField(max_length=20)
+    player0 = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='Player0', null=True)
+    player1 = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='Player1', null=True)
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='own', null=True)
     # server = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='serve', null=True)
     expires = models.DateTimeField(default=timezone.now() + timezone.timedelta(minutes=15))

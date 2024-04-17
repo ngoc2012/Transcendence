@@ -20,7 +20,6 @@ from . import views
 from django.urls import include, path, re_path
 from .views import callback, csrf
 
-
 urlpatterns = [
     path('', views.index, name='index'),
     path('get-csrf/', csrf, name='get-csrf'),
@@ -42,6 +41,13 @@ urlpatterns = [
     path('code_2fa/', views.code_2fa, name='code_2fa'),
     path('verify/', views.verify, name='verify'),
     path('verify_qrcode/', views.verify_qrcode, name='verify_qrcode'),
+    path('profile/<str:username>/', views.profile, name='profile'),
+    path('profile/<str:username>/alias/', views.alias, name='alias'),
+    path('profile/<str:username>/change_password/', views.password, name='password'),
+    path('profile/<str:username>/change_email/', views.email, name="email"),
+    path('profile/<str:username>/change_login/', views.change_login, name="change_login"),
+    path('profile/<str:username>/change_name/', views.name, name="name"),
+    path('profile/<str:username>/add_friend/', views.friend, name="friend"),
     path('tournament/', views.tournament, name='tournament'),
     path('tournament_history/', views.tournament_history, name='tournament_history'),
     path('get_tournament_data/', views.get_tournament_data, name='get_tournament_data'),

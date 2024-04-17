@@ -1,5 +1,6 @@
 import {Pong} from './Pong.js'
-import { Chat_signup } from './Chat_signup.js'
+import { Chat } from './Chat.js'
+import { Profile } from './Profile.js'
 import {Tournament} from './Tournament.js';
 
 export class Lobby
@@ -22,11 +23,13 @@ export class Lobby
         this.dom_pew = document.querySelector("#pew");
         this.dom_chat = document.querySelector("#chat");
         this.dom_delete = document.querySelector("#delete");
+        this.dom_profile = document.querySelector('#profile');
         this.dom_pong.addEventListener("click", () => this.new_game("pong"));
         this.dom_pew.addEventListener("click", () => this.new_game("pew"));
         this.dom_delete.addEventListener("click", () => this.delete_game());
         this.dom_join.addEventListener("click", () => this.join());
-		this.dom_chat.addEventListener("click", () => this.chat());
+		this.dom_chat.addEventListener("click", () => this.start_chat());
+        this.dom_profile.addEventListener("click", () => this.profile());
         this.dom_tournament.addEventListener("click", () => this.tournament_click());
         this.dom_tournament_history.addEventListener("click", () => this.tournament_history_click());
         if (this.main.login != '') {
@@ -35,17 +38,35 @@ export class Lobby
         }
     }
 
-	chat(){
+	start_chat(){
 		this.main.set_status('')
 		if (this.main.login === ''){
 			this.main.set_status('You must be logged in to chat.');
 			return;
 		}
-		this.chat_signup = new Chat_signup(this.main);
-        this.main.load_with_data('transchat/chat_lobby', () => this.chat_signup.events(this.main), {
-            'username': this.main.login
-        });
+        $.ajax({
+			url: '/transchat/chat_lobby/',
+			method: 'POST',
+			data:{
+				'username': this.main.login
+			}
+		});
+		this.main.chat = new Chat(this.main);
+        this.main.history_stack.push('/transchat/general_chat/');
+        window.history.pushState({}, '', '/transchat/general_chat/');
+        this.main.load('transchat/general_chat', () => this.main.chat.init());
 	}
+
+    profile(){
+        this.main.set_status('');
+        if (this.main.login === ''){
+            this.main.set_status('You must be logged in to see your profile');
+            return ;
+        }
+        this.main.history_stack.push('/profile/' + this.main.login);
+        window.history.pushState({}, '', '/profile/' + this.main.login);
+        this.main.load('/profile/' + this.main.login, () => this.main.profile.init());
+    }
 
     join() {
         if (this.dom_rooms.selectedIndex === -1)
@@ -226,7 +247,8 @@ export class Lobby
                 type: 'tournament_registered',
             }));
         };
-        
+        console.log("socket dans main ?" + this.main.socket);
+        console.log("ou dans lobby ?" + this.main.lobby.socket);
         $.ajax({
             url: '/game/update',
             method: 'GET',
@@ -246,6 +268,7 @@ export class Lobby
         });
 
         this.socket.onmessage = (e) => {
+            console.log(e.data)
             if (!('data' in e))
                 return;
             const data = JSON.parse(e.data);
@@ -254,6 +277,14 @@ export class Lobby
             }
             else if (data.type === 'error_nf') {
                 // this.main.load('/tournament/lobby', () => this.eventsLobby());
+            }
+            else if (data.type === 'friend_request_send'){
+                this.main.profile.send_request(data);
+            }
+            else if (data.type === 'friend_request_receive'){
+                if (data.receiver === this.main.login){
+                    this.main.profile.receive_request(data)
+                }
             }
             else {
                 const rooms = JSON.parse(e.data);
@@ -270,6 +301,12 @@ export class Lobby
             };
         }
 
+        if (this.socket.readyState === 1){
+            this.socket.send(JSON.stringify({
+                'type': 'status',
+                'login': this.main.login
+            }));
+        }
         this.socket.onclose = (e) => {
 
         };

@@ -395,6 +395,158 @@ def verify_qrcode(request):
         return JsonResponse({'result': '1'})
     return JsonResponse({'result': '0'})
 
+@csrf_exempt
+def profile(request, username):
+    user = PlayersModel.objects.filter(login=username).get(login=username)
+    context = {
+        'id': user.id,
+        'login': user.login,
+        'password': user.password,
+        'name': user.name,
+        'alias': user.tourn_alias,
+        'history': user.history,
+        'email': user.email,
+        'elo': user.elo,
+        'history_score': user.score_history,
+        'friends': user.friends.all()
+    }
+    print(user.online_status)
+    return render(request, 'profile.html', context)
+
+@csrf_exempt
+def alias(request, username):
+    user = PlayersModel.objects.filter(login=username).get(login=username)
+    if request.method == 'GET':
+        return(render(request, 'alias.html'))
+    if request.method == 'POST':
+        if 'alias' in request.POST:
+            try:
+                check_alias = PlayersModel.objects.get(tourn_alias=request.POST['alias'])
+            except PlayersModel.DoesNotExist:
+                user.tourn_alias = request.POST['alias']
+                user.save()
+                return HttpResponse('Tournament alias succesfully changed')
+            response = HttpResponse('Alias already in use')
+            response.status_code = 401
+            return response
+        
+@csrf_exempt
+def password(request, username):
+    user= PlayersModel.objects.filter(login=username).get(login=username)
+    if request.method == 'POST':
+        if 'oldpwd' in request.POST and 'newpwd' in request.POST:
+            oldpwd = request.POST['oldpwd']
+            newpwd = request.POST['newpwd']
+            if check_password(oldpwd, user.password) == True:
+                new = make_password(newpwd)
+                user.password = new
+                user.save()
+                response = HttpResponse('Password changed succesfully')
+                response.status_code = 200
+                return response
+            else:
+                response = HttpResponse('Incorrect password')
+                response.status_code = 401
+                return response
+    return render(request, 'change_password.html')
+
+@csrf_exempt
+def email(request, username):
+    user = PlayersModel.objects.filter(login=username).get(login=username)
+    if request.method == 'POST':
+        if 'password' in request.POST:
+            if check_password(request.POST['password'], user.password) == False:
+                response = HttpResponse('Invalid password')
+                response.status_code = 401
+                return response
+            else:
+                user.email = request.POST['email']
+                user.save()
+                response = HttpResponse('Email changed succesfully')
+                response.status_code = 200
+                return response
+    return render(request, 'change_email.html')
+
+@csrf_exempt
+def change_login(request, username):
+    user = PlayersModel.objects.filter(login=username).get(login=username)
+    if request.method == 'POST':
+        if check_password(request.POST['password'], user.password) == False:
+            response = HttpResponse('Invalid password.')
+            response.status_code = 401
+            return response
+        try:
+            check_login = PlayersModel.objects.get(login=request.POST['new_login'])
+        except PlayersModel.DoesNotExist:
+            user.login = request.POST['new_login']
+            user.save()
+            response = HttpResponse('Login changed succesfully')
+            response.status_code = 200
+            return response
+        response = HttpResponse('Login not available')
+        response.status_code = 401
+        return response
+    return render(request, 'change_login.html')
+
+@csrf_exempt
+def name(request, username):
+    user = PlayersModel.objects.get(login=username)
+    if request.method == 'POST':
+        if check_password(request.POST['password'], user.password) == False:
+            response = HttpResponse('Invalid password')
+            response.status_code = 401
+            return response
+        user.name = request.POST['name']
+        user.save()
+        response = HttpResponse('Name changed succesfully')
+        response.status_code = 200
+        return response
+    return render(request, 'change_name.html')
+
+@csrf_exempt
+def friend(request, username):
+    user = PlayersModel.objects.get(login=username)
+    if request.method == 'POST':
+        if request.POST['type'] == 'send':
+            if request.POST['friend'] == username:
+                response = HttpResponse('You cannnot be friend with yourself')
+                response.status_code = 403
+                return response
+            try:
+                new_friend = PlayersModel.objects.get(login=request.POST['friend'])
+            except PlayersModel.DoesNotExist:
+                response = HttpResponse(request.POST['friend'] + ' does not exist')
+                response.status_code = 404
+                return response
+            try:
+                friend_exist = user.friends.get(login=request.POST['friend'])
+            except PlayersModel.DoesNotExist:
+                response = HttpResponse('Friend request sent to ' + request.POST['friend'])
+                response.status_code = 200
+                return response
+            response = HttpResponse('You are already friend with ' + request.POST['friend'])
+            response.status_code = 401
+            return response
+        if request.POST['type'] == 'receive':
+            if request.POST['response'] == 'accept':
+                sender = PlayersModel.objects.get(login=request.POST['sender'])
+                if request.POST['friend']:
+                    friend = PlayersModel.objects.get(login=request.POST['friend'])
+                sender.friends.add(friend)
+                friend.friends.add(sender)
+                sender.save()
+                friend.save()
+                response = HttpResponse('You accepted ' + request.POST['sender'] + ' friend request. You are now friends.')
+                response.status_code = 200
+                return response
+            if request.POST['response'] == 'decline':
+                sender = PlayersModel.objects.get(login=request.POST['sender'])
+                response = HttpResponse('You declined ' + request.POST['sender'] + ' friend request.')
+                response.status_code = 200
+                return response
+    return render(request, 'add_friend.html')
+
+@csrf_exempt
 @require_POST
 def new_tournament(request):
     name = request.POST.get('name')

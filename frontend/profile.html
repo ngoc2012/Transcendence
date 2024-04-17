@@ -1,0 +1,20 @@
+{% load static %}
+<!-- {{ context|json_script:"user" }} -->
+<!-- {% csrf_token %} -->
+<button id="add_friend" type="button">Add a friend</button>
+<button id="log_in" type="button">Change your login</button>
+<button id="new_name" type="button">Change your name</button>
+<button id="alias" type="button">Change your tournament name</button>
+<button id="password" type="button">Change your password</button>
+<button id="email" type="button">Change your email</button>
+<button id="back" type="button">Back to lobby</button><br>
+Your name: {{ name }}<br>
+Your login: {{ login }}<br>
+{% if context != '' %}
+Your alias: {% if alias %} {{ alias }} {% endif %}<br>
+{% endif %}
+Your match history: {% if history %}{% for i in history %} {% if i == 'W' %} Win {% else %} Lose {% endif %} {% endfor %} {% else %} No recent matches {% endif %} <br>
+Your score history: {% for i in history_score %} {{ i }} {% endfor %}<br>
+Your email: {{ email }} <br>
+Your ranking {{ elo }}<br>
+Your friends: <br> {% for i in friends %} {{ i.login }} - {{ i.online_status }} <br> {% endfor %}<br>

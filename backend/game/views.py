@@ -76,7 +76,9 @@ def new_game(request):
         game=request.POST['game'],
         name=request.POST['name'],
     )
+    room.player0 = PlayersModel.objects.get(login=request.POST['login'])
     room.save()
+    print("new_game player0 debug = " + room.player0.login)
     if room.game == 'pong':
         cache.set(str(room.id) + "_x", pong_data['PADDLE_WIDTH'] + pong_data['RADIUS'])
         cache.set(str(room.id) + "_y", pong_data['HEIGHT'] / 2)
@@ -109,6 +111,10 @@ def join(request):
     if players == None:
         players = []
     player = PlayersModel.objects.get(login=request.POST['login'])
+    room = RoomsModel.objects.get(id=request.POST['game_id'])
+    room.player1 = player
+    room.save()
+    print("debug join = " + str(room.player1))
     if player.id in players:
         return (HttpResponse("Error: Player with login " + request.POST['login'] + " is already in the room!"))
     room, player = add_player_to_room(request.POST['game_id'], request.POST['login'])

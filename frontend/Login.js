@@ -5,7 +5,6 @@ export class Login
 {
     constructor(m) {
         this.main = m;
-		this.blocked_users = [];
     }
 
     events() {
@@ -90,6 +89,13 @@ export class Login
                 }
             }
         });
+        $.ajax({
+            url: '/transchat/chat_lobby/',
+            method: 'POST',
+            data: {
+                'username': this.dom_login.value
+            }
+        })
     }
 
     handle_key_press(event)
