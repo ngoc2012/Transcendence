@@ -17,6 +17,7 @@ from django.db import IntegrityError
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.middleware.csrf import get_token
 from django.contrib.auth import authenticate, login as auth_login, get_user_model, logout as auth_logout
+from django.core.cache import cache
 
 API_PUBLIC = os.environ.get('API_PUBLIC')
 API_SECRET = os.environ.get('API_SECRET')
@@ -69,6 +70,7 @@ def validate_session(request):
                 enable2fa = request.POST.get('enable2fa', 'false') == 'true'
                 user.secret_2fa = pyotp.random_base32() if enable2fa else ''
                 user.save()
+                cache.delete(f'user_{user.id}')
 
                 response_data = {
                     "validSession": True,
@@ -180,24 +182,16 @@ def verify(request):
 def tournament(request):
     return (render(request, 'tournament.html'))
 
-def tournament_lobby(request):
-     return (render(request, 'tournament_lobby.html'))
-
 def tournament_local(request):
     return (render(request, 'tournament_local.html'))
 
 def tournament_local_start(request):
     return (render(request, 'tournament_local_start.html'))
 
-def tournament_start(request, tournament_id):
-    #  if TournamentModel.objects.get(id=tournament_id).terminated:
-    #     return (render(request, 'lobby.html'))
-    return (render(request, 'tournament_start.html'))
-
 def generate_jwt_tokens(user_id):
     access_token = jwt.encode({
         'user_id': user_id,
-        'exp': datetime.now(pytz.utc) + timedelta(minutes=1)
+        'exp': datetime.now(pytz.utc) + timedelta(minutes=5)
     }, JWT_SECRET_KEY, algorithm='HS256')
 
     refresh_token = jwt.encode({
@@ -295,9 +289,11 @@ def log_in(request):
 @csrf_exempt
 def callback(request):
     code = request.GET.get('code')
+    standard_headers = {'X-Internal-Request': 'true'}
     try:
         token_response = requests.post('https://api.intra.42.fr/oauth/token', data={
             'grant_type': 'authorization_code',
+            'headers': standard_headers,
             'client_id': API_PUBLIC,
             'client_secret': API_SECRET,
             'code': code,
@@ -378,10 +374,12 @@ def callback(request):
 
 
 def logout(request):
+    print(request)
     user = request.user
     user.acc = ''
     user.ref = ''
     user.save()
+    cache.delete(f'user_{user.id}')
 
     response = JsonResponse({'logout': 'success'})
     response.delete_cookie('access_token')

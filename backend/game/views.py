@@ -13,10 +13,6 @@ from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.cache import cache
 from django.utils import timezone
 
-
-JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY')
-JWT_REFRESH_SECRET_KEY = os.environ.get('JWT_REFRESH_SECRET_KEY')
-
 User = get_user_model()
 
 def get_data(game):
@@ -102,7 +98,6 @@ def update(request):
             "name": i.name
         } for i in RoomsModel.objects.all()
     ]
-    # print(data)
     return JsonResponse(data, safe=False)
 
 def join(request):
@@ -188,25 +183,6 @@ def delete(request):
     # if PlayerRoomModel.objects.filter(room=room.id).count() > 0:
     #     return JsonResponse({'error': "Someone is still playing"}, status=401)
 
-def tournament_join(request):
-    if 'game_id' not in request.POST:
-        return (HttpResponse("Error: No game id!"))
-    if not RoomsModel.objects.filter(id=request.POST['game_id']).exists():
-        return (HttpResponse("Error: Room with id " + request.POST['game_id'] + " does not exist!"))
-    room, player = add_player_to_room(request.POST['game_id'], request.POST['login'])
-    if room == None:
-        return (HttpResponse("Error: Room with id " + request.POST['game_id'] + " does not exist!"))
-    if player == None:
-        return (HttpResponse("Error: Player with id " + request.user.id + " does not exist!"))
-    match = TournamentMatchModel.objects.filter(room=room).first()
-    return (JsonResponse({
-        'id': str(room),
-        'game': room.game,
-        'name': room.name,
-        'player_id': player.id,
-        'data': get_data(room.game)
-        }))
-
 @require_POST
 def tournament_local_join(request):
     if 'game_id' not in request.POST:
@@ -241,10 +217,6 @@ def tournament_local_result(request):
         room_id = request.POST.get("room")
         score1 = request.POST.get("score1")
         score2 = request.POST.get("score2")
-
-        print(room_id)
-        print(score1)
-        print(score2)
 
         match = TournamentMatchModel.objects.get(room_uuid=room_id)
 
@@ -313,11 +285,6 @@ def tournament_local_get(request):
 
         all_participants = list(set(all_participants))
         all_waitlist = list(set(all_waitlist))
-        
-        print('participants:', participants)
-        print('waitlist:', waitlist)
-        print('all participants:', all_participants)
-        print('all waitlist:', all_waitlist)
 
         if len(all_participants) == 1 and not all_waitlist:
             tournament.terminated = True
@@ -349,8 +316,6 @@ def tournament_local_get(request):
         player1 = all_participants[0]
         player2  = all_participants[1]
 
-        print(player1)
-        print(player2)
         room = RoomsModel.objects.create(
             game=tournament.game,
             name=f"{tournament.name} - Match {tournament.total_matches}",
@@ -488,21 +453,6 @@ def tournament_local_verify(request):
         return JsonResponse({'error': f'An error occurred: {str(e)}'}, status=500)
     
     return JsonResponse({'message': 'Done'})
-                    
-    #     # tour_id = data.get('id')
-    #     # tournament = TournamentModel.objects.get(id=tour_id)
-    #     # if tournament:
-    #     #     for player in players:
-    #     #         tournament.participantsLocal.append(player)
-    #     #     tournament.save()
-    #     # else:
-    #     #     return JsonResponse({'error': 'Tournament not found'}, status=400)       
-        
-    # except json.JSONDecodeError as e:
-    #     return JsonResponse({'error': f'Error decoding JSON: {str(e)}'}, status=400)
-    # except Exception as e:
-    #     return JsonResponse({'error': f'An error occurred: {str(e)}'}, status=500)
-    # return JsonResponse({'message': 'Done'})
     
 def fetch_matches(tournament):
     matches = TournamentMatchModel.objects.filter(tournament=tournament)
@@ -525,6 +475,8 @@ def fetch_matches(tournament):
 
 def tournament_local_end(tournament):
     matches = fetch_matches(tournament)
+    tournament.terminated = True
+    tournament.save()
 
     return JsonResponse({
         'name': tournament.name,

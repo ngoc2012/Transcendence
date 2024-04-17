@@ -134,6 +134,13 @@ def quit(consumer):
     players = cache.get(consumer.k_all)
     if players == None or len(players) == 0:
         return
+    
+    # score0 = cache.get(consumer.k_score0)
+    # score1 = cache.get(consumer.k_score1) 
+    # if consumer.room.tournamentRoom and score0 is None or score1 is None or score0 < 11 and score1 < 11:
+    #     remove_player(consumer, consumer.player_id)
+    #     return
+
     if len(players) == 1:
         for i in ['x', 'y', 'dx', 'dy', 'ddy', 'ai', 'pow', 'score0', 'score1', 'started', 'server', 'team0', 'team1', 'all']:
             cache.delete(getattr(consumer, "k_" + i))

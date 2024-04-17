@@ -55,30 +55,29 @@ export class Login
                     this.main.name = info.name;
                     this.main.dom_name.innerHTML = info.name;
                     this.main.lobby.ws = info.ws;
-                    console.log(info.ws)
                     if (info.enable2fa == 'true')
                         this.main.load('/twofa', () => this.main.twofa.events());
                     else
                     {
+                        var dom_log_in = document.getElementById('login');
+                        if (dom_log_in) {
+                            dom_log_in.style.display = "none";
+                        }
+    
+                        var dom_signup = document.getElementById('signup');
+                        if (dom_signup) {
+                            dom_signup.style.display = "none";
+                            dom_signup.insertAdjacentHTML('afterend', '<button id="logoutButton" class="btn btn-danger">Logout</button>');
+                        }
+    
+                        var dom_logout = document.getElementById('logoutButton');
+                        if (dom_logout) {
+                            dom_logout.addEventListener('click', () => this.main.logout());
+                        }
+                        
                         this.main.history_stack.push('/');
                         window.history.pushState({}, '', '/');
                         this.main.load('/lobby', () => this.main.lobby.events());
-                    }
-                   
-                    var dom_log_in = document.getElementById('login');
-                    if (dom_log_in) {
-                        dom_log_in.style.display = "none";
-                    }
-
-                    var dom_signup = document.getElementById('signup');
-                    if (dom_signup) {
-                        dom_signup.style.display = "none";
-                        dom_signup.insertAdjacentHTML('afterend', '<button id="logoutButton">Logout</button>');
-                    }
-
-                    var dom_logout = document.getElementById('logoutButton');
-                    if (dom_logout) {
-                        dom_logout.addEventListener('click', () => this.main.logout());
                     }
                 }
             },

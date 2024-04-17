@@ -94,6 +94,8 @@ class PongConsumer(AsyncWebsocketConsumer):
         elif text_data == 'side':
             await change_side(self)
             await self.channel_layer.group_send(self.room_id, {'type': 'teams_data'})
+        elif text_data == 'teams':
+            await self.channel_layer.group_send(self.room_id, {'type': 'teams_data'})
         elif text_data == 'server':
             await change_server_async(self)
         await self.channel_layer.group_send(self.room_id, {'type': 'group_data'})

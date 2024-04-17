@@ -1,66 +1,73 @@
 from django.http import JsonResponse
 from django.utils.deprecation import MiddlewareMixin
-import jwt, os
 from django.conf import settings
-from django.contrib.auth import authenticate, login, get_user_model, logout
+from django.contrib.auth import get_user_model
 from datetime import datetime, timedelta
-import requests, pyotp, secrets, os, random, jwt, string, pytz
+import jwt, pytz
+from django.core.cache import cache
+
+User = get_user_model()
 
 class JWTMiddleware(MiddlewareMixin):
     def process_request(self, request):
-        if request.headers.get('X-Internal-Request') == 'true':
-            return None
-        if '/admin/' in request.path or 'callback' in request.path or request.path in self.get_unauthenticated_paths():
+        if request.headers.get('X-Internal-Request') == 'true' or request.path in self.get_unauthenticated_paths() or '/callback/' in request.path:
             return None
 
         access_token = request.COOKIES.get('access_token')
-        if access_token:
-            print('access token enter')
-            try:
-                decoded = jwt.decode(access_token, settings.JWT_SECRET_KEY, algorithms=["HS256"])
-                jwtid = decoded.get('user_id')
-                if jwtid:
-                    User = get_user_model()
-                    user = User.objects.get(id=jwtid)
-                    if decoded == jwt.decode(user.acc, settings.JWT_SECRET_KEY, algorithms=["HS256"]):
-                        request.user = user
-                    else:
-                        print('key not the same as in db')
-                else:
-                    return JsonResponse({'error': 'User not found'}, status=404)
-            except jwt.ExpiredSignatureError:
-                refresh_token = request.COOKIES.get('refresh_token')
-                if refresh_token:
-                    print('refresh token enter')
-                    try:
-                        decoded = jwt.decode(refresh_token, settings.JWT_REFRESH_SECRET_KEY, algorithms=["HS256"])
-                        new_accces_token, new_refresh_token = self.generate_jwt_tokens(decoded.get('user_id'))
-                        request.new_access_token = new_accces_token
-                        request.new_refresh_token = new_refresh_token
-                        User = get_user_model()
-                        user = User.objects.get(id=decoded.get('user_id'))
-                        request.user = user
-                        user.acc = new_accces_token
-                        user.ref = new_refresh_token
-                        user.save()
-                        return None
-                    except jwt.ExpiredSignatureError:
-                        return JsonResponse({'error': 'Refresh token expired'}, status=401)
-                    except jwt.InvalidTokenError:
-                        return JsonResponse({'error': 'Invalid refresh token'}, status=401)
-                else:
-                    return JsonResponse({'error': 'Authentication credentials were not provided or are expired.'}, status=401)
-            except jwt.InvalidTokenError:
-                return JsonResponse({'error': 'Invalid token'}, status=401)
-        else:
+        if not access_token:
             return JsonResponse({'error': 'Authorization header is missing or invalid'}, status=401)
 
-        return None
+        try:
+            decoded = jwt.decode(access_token, settings.JWT_SECRET_KEY, algorithms=["HS256"])
+            user = self.get_user(decoded.get('user_id'))
+            if not user:
+                return JsonResponse({'error': 'User not found'}, status=404)
+
+            if decoded == jwt.decode(user.acc, settings.JWT_SECRET_KEY, algorithms=["HS256"]):
+                request.user = user
+                return None
+        except jwt.ExpiredSignatureError:
+            return self.handle_refresh_token(request)
+        except jwt.InvalidTokenError:
+            return JsonResponse({'error': 'Invalid token'}, status=401)
+
+    def get_user(self, user_id):
+        user = cache.get(f'user_{user_id}')
+        if not user:
+            user = User.objects.get(id=user_id)
+            cache.set(f'user_{user_id}', user, 300)
+        return user
+
+    def handle_refresh_token(self, request):
+        refresh_token = request.COOKIES.get('refresh_token')
+        if not refresh_token:
+            return JsonResponse({'error': 'Authentication credentials were not provided or are expired.'}, status=401)
+        
+        try:
+            decoded = jwt.decode(refresh_token, settings.JWT_REFRESH_SECRET_KEY, algorithms=["HS256"])
+            user = self.get_user(decoded.get('user_id'))
+            if user:
+                user = User.objects.get(id=decoded.get('user_id'))
+                cache.set(f'user_{user.id}', user, 300)
+                new_access_token, new_refresh_token = self.generate_jwt_tokens(decoded.get('user_id'))
+                user.acc = new_access_token
+                user.ref = new_refresh_token
+                user.save()
+                request.new_access_token = new_access_token
+                request.new_refresh_token = new_refresh_token
+                request.user = user
+                return None
+            else:
+                return JsonResponse({'error': 'User not found'}, status=404)
+        except jwt.ExpiredSignatureError:
+            return JsonResponse({'error': 'Refresh token expired'}, status=401)
+        except jwt.InvalidTokenError:
+            return JsonResponse({'error': 'Invalid refresh token'}, status=401)
 
     def generate_jwt_tokens(self, user_id):
         access_token = jwt.encode({
             'user_id': user_id,
-            'exp': datetime.now(pytz.utc) + timedelta(minutes=1)
+            'exp': datetime.now(pytz.utc) + timedelta(minutes=5)
         }, settings.JWT_SECRET_KEY, algorithm='HS256')
 
         refresh_token = jwt.encode({
@@ -71,25 +78,25 @@ class JWTMiddleware(MiddlewareMixin):
         return access_token, refresh_token
     
     def get_unauthenticated_paths(self):
-            return [
-                '/',
-                '/favicon.ico',
-                '/get-csrf/',
-                'pages/signup/',
-                '/pages/signup/',
-                '/new_player/',
-                'pages/login/',
-                '/pages/login/',
-                '/login',
-                '/login/',
-                '/log_in/',
-                '/lobby/',
-                '/lobby',
-                '/admin/',
-                '/admin/login/',
-                '/game/update',
-                '/validate-session/',
-            ]
+        return [
+            '/',
+            '/favicon.ico',
+            '/get-csrf/',
+            'pages/signup/',
+            '/pages/signup/',
+            '/new_player/',
+            'pages/login/',
+            '/pages/login/',
+            '/login',
+            '/login/',
+            '/log_in/',
+            '/lobby/',
+            '/lobby',
+            '/admin/',
+            '/admin/login/',
+            '/game/update',
+            '/validate-session/',
+        ]
     
 class TokenRefreshResponseMiddleware:
     def __init__(self, get_response):

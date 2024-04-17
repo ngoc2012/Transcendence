@@ -120,7 +120,10 @@ export class Pong
         });
 
         if (!this.localTour) {
-            this.dom_toggle_AI.addEventListener('click', () => {this.set_state(0, 'ai_player')});
+            this.dom_toggle_AI.addEventListener('click', () => {
+                this.set_state(0, 'ai_player');
+                this.players[0].sk.send('teams');
+            });
             this.dom_power_play.addEventListener('click', () => {this.set_state(0, 'power')});
             this.dom_toggle_display.addEventListener('click', () => {this.toggle_display()});
             this.dom_toggle_display_board.addEventListener('click', () => {this.toggle_display_board()});
@@ -396,16 +399,14 @@ export class Pong
             {
                 this.dom_team0.innerHTML = "";
                 data.team0.forEach((p) => {
-                    let new_p = document.createElement("li");
-                    new_p.textContent = p;
+                    let new_p = document.createTextNode(p);
                     this.dom_team0.appendChild(new_p);
                     this.player1 = p;
                 });
                 this.dom_team1.innerHTML = "";
                 data.team1.forEach((p) => {
-                    let new_p = document.createElement("li");
-                    new_p.textContent = p;
-                    this.dom_team0.appendChild(new_p);
+                    let new_p = document.createTextNode(p);
+                    this.dom_team1.appendChild(new_p);
                     this.player2 = p;
                 });
             }
@@ -471,37 +472,51 @@ export class Pong
 
         let winBox = document.createElement('div');
         winBox.setAttribute('id', 'winBox');
-        winBox.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); padding: 20px; background-color: #fff; border: 2px solid #000; text-align: center; z-index: 100;';
+        winBox.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 500px; height: 300px; padding: 20px; background-color: #fff; border: 2px solid #000; text-align: center; z-index: 100;';
+
+        let scoreTitle = document.createElement('h2');
+        scoreTitle.textContent = 'SCOREBOARD';
+        scoreTitle.style.fontFamily = 'Stencil Std, fantasy	';
+        scoreTitle.style.fontSize = '30px';
+        scoreTitle.style.marginBottom = '20px';
+        scoreTitle.style.textAlign = 'center';
+        winBox.appendChild(scoreTitle);
+
+        let scoreContainer = document.createElement('div');
+        scoreContainer.classList.add('text-center', 'mb-4');
+        let scoreText = document.createElement('p');
+        scoreText.textContent = `${this.player1}   ${data.score[0]}  -  ${data.score[1]}   ${this.player2}`;
+        scoreText.style.fontFamily = 'Stencil Std, fantasy	'; 
+        scoreText.style.fontSize = '20px';
+        scoreContainer.appendChild(scoreText);
+        winBox.appendChild(scoreContainer);
+
 
         let winnerText = document.createElement('p');
-        if (data.win === 'player0')
-            winnerText.textContent = `Winner: ${this.player1}`;
-        else
-            winnerText.textContent = `Winner: ${this.player2}`;
+        winnerText.textContent = `${data.win === 'player0' ? this.player1 : this.player2} wins!`;
+        winnerText.style.fontFamily = 'Stencil Std, fantasy	';
+        winnerText.style.fontSize = '20px';
+        winnerText.style.fontWeight = 'bold';
+        winnerText.style.color = '#4CAF50';
+        winnerText.style.textAlign = 'center';
         winBox.appendChild(winnerText);
-
-        let scoreText = document.createElement('p');
-        scoreText.textContent = `Score - ${this.player1}: ${data.score[0]}, ${this.player2}: ${data.score[1]}`;
-        winBox.appendChild(scoreText);
 
         let backButton = document.createElement('button');
         backButton.textContent = 'Back to lobby';
+        backButton.classList.add('btn', 'btn-primary');
+
         backButton.onclick = () => {
             document.getElementById('pongCanvas').style.filter = '';
             document.body.removeChild(backdrop);
             document.body.removeChild(winBox);
-            if (!this.localTour && !this.tournament) {
-                this.main.load('/lobby', () => this.main.lobby.events());
-            }
-            else if (!this.localTour && this.tournament) {
+            if (!this.localTour && this.tournament) {
                 this.tournament.endMatch(data);
-            } else {
+            } else if (this.localTournament) {
                 this.localTournament.sendResult(data.score[0], data.score[1], this.room.id);
             }  
             this.quit();
         }   
         winBox.appendChild(backButton);
-
         document.body.appendChild(winBox);
     }
 }

@@ -50,7 +50,6 @@ export class Signup
                 if (info.error) {
                     this.main.set_status(info.error);
                 } else {
-                    // sessionStorage.setItem('JWTToken', info.access_token);
                     this.main.email = info.email;
                     this.main.login = info.login;
                     this.main.name = info.name;
@@ -59,6 +58,22 @@ export class Signup
                     if (checkbox) {
                         this.display2FASetup(info.secret);
                     } else {
+                        var dom_log_in = document.getElementById('login');
+                        if (dom_log_in) {
+                            dom_log_in.style.display = "none";
+                        }
+    
+                        var dom_signup = document.getElementById('signup');
+                        if (dom_signup) {
+                            dom_signup.style.display = "none";
+                            dom_signup.insertAdjacentHTML('afterend', '<button id="logoutButton" class="btn btn-danger">Logout</button>');
+                        }
+    
+                        var dom_logout = document.getElementById('logoutButton');
+                        if (dom_logout) {
+                            dom_logout.addEventListener('click', () => this.main.logout());
+                        }
+
                         window.history.pushState({}, '', '/lobby');
                         this.main.load('/lobby', () => this.main.lobby.events());
                     }
