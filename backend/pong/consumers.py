@@ -30,10 +30,13 @@ class PongConsumer(AsyncWebsocketConsumer):
         
         check = await get_info(self)
         if self.player0:
+            print('on entre online_status')
             self.player0.online_status = 'In-game'
+            self.player0.save()
         if self.player1:
             print("player1 exist")
             self.player1.online_status = 'In-game'
+            self.player1.save()
         if not check:
             self.disconnect(1011)
         await game_init(self)
@@ -158,27 +161,28 @@ class PongConsumer(AsyncWebsocketConsumer):
                 print(score1)
                 if abs(score0 - score1) > 1 and (score0 >= 1 or score1 >= 1) :
                     await self.channel_layer.group_send(self.room_id, {'type': 'win_data'})
-                    if score0 > score1:
-                        self.player0.history += 'W'
-                        self.player1.history += 'L'
-                        self.player0.score_history += str(score0) + '-' + str(score1)
-                        self.player1.score_history += str(score0) + '-' + str(score1)
-                        self.player0.save()
-                        self.player1.save()
-                        print("history test player1 = " + self.player1.history)
-                        print("history test player0 = " + self.player0.history)
-                    else:
-                        print("player0 = " + str(self.player0))
-                        print("player1 = " + str(self.player1))
-                        self.player0.history += 'L'
-                        self.player1.history += 'W'
-                        self.player0.score_history += str(score0) + '-' + str(score1)
-                        self.player1.score_history += str(score0) + '-' + str(score1)
-                        self.player0.save()
-                        self.player1.save()
-                        print("history test player0 = " + self.player0.history)
-                        print("history test player1 = " + self.player1.history)
-                    return
+                    if self.room.tournamentRoom == False:
+                        if score0 > score1:
+                            self.player0.history += 'W'
+                            self.player1.history += 'L'
+                            self.player0.score_history += str(score0) + '-' + str(score1)
+                            self.player1.score_history += str(score0) + '-' + str(score1)
+                            self.player0.save()
+                            self.player1.save()
+                            print("history test player1 = " + self.player1.history)
+                            print("history test player0 = " + self.player0.history)
+                        else:
+                            print("player0 = " + str(self.player0))
+                            print("player1 = " + str(self.player1))
+                            self.player0.history += 'L'
+                            self.player1.history += 'W'
+                            self.player0.score_history += str(score0) + '-' + str(score1)
+                            self.player1.score_history += str(score0) + '-' + str(score1)
+                            self.player0.save()
+                            self.player1.save()
+                            print("history test player0 = " + self.player0.history)
+                            print("history test player1 = " + self.player1.history)
+                        return
             await check_collision(self)
             await self.channel_layer.group_send(self.room_id, {'type': 'group_data'})
 

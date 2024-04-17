@@ -63,7 +63,6 @@ export class Lobby
             this.main.set_status('You must be logged in to see your profile');
             return ;
         }
-        this.main.profile = new Profile(this.main);
         this.main.history_stack.push('/profile/' + this.main.login);
         window.history.pushState({}, '', '/profile/' + this.main.login);
         this.main.load('/profile/' + this.main.login, () => this.main.profile.init());
@@ -248,7 +247,8 @@ export class Lobby
                 type: 'tournament_registered',
             }));
         };
-        
+        console.log("socket dans main ?" + this.main.socket);
+        console.log("ou dans lobby ?" + this.main.lobby.socket);
         $.ajax({
             url: '/game/update',
             method: 'GET',
@@ -268,6 +268,7 @@ export class Lobby
         });
 
         this.socket.onmessage = (e) => {
+            console.log(e.data)
             if (!('data' in e))
                 return;
             const data = JSON.parse(e.data);
@@ -339,6 +340,14 @@ export class Lobby
             }
             else if (data.type === 'error_nf') {
                 this.main.load('/tournament/lobby', () => this.eventsLobby());
+            }
+            else if (data.type === 'friend_request_send'){
+                this.main.profile.send_request(data);
+            }
+            else if (data.type === 'friend_request_receive'){
+                if (data.receiver === this.main.login){
+                    this.main.profile.receive_request(data)
+                }
             }
             else {
                 const rooms = JSON.parse(e.data);

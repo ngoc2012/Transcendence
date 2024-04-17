@@ -416,7 +416,7 @@ def profile(request, username):
         'history_score': user.score_history,
         'friends': user.friends.all()
     }
-    print(user)
+    print(user.online_status)
     return render(request, 'profile.html', context)
 
 @csrf_exempt
@@ -508,6 +508,49 @@ def name(request, username):
         response.status_code = 200
         return response
     return render(request, 'change_name.html')
+
+@csrf_exempt
+def friend(request, username):
+    user = PlayersModel.objects.get(login=username)
+    if request.method == 'POST':
+        if request.POST['type'] == 'send':
+            if request.POST['friend'] == username:
+                response = HttpResponse('You cannnot be friend with yourself')
+                response.status_code = 403
+                return response
+            try:
+                new_friend = PlayersModel.objects.get(login=request.POST['friend'])
+            except PlayersModel.DoesNotExist:
+                response = HttpResponse(request.POST['friend'] + ' does not exist')
+                response.status_code = 404
+                return response
+            try:
+                friend_exist = user.friends.get(login=request.POST['friend'])
+            except PlayersModel.DoesNotExist:
+                response = HttpResponse('Friend request sent to ' + request.POST['friend'])
+                response.status_code = 200
+                return response
+            response = HttpResponse('You are already friend with ' + request.POST['friend'])
+            response.status_code = 401
+            return response
+        if request.POST['type'] == 'receive':
+            if request.POST['response'] == 'accept':
+                sender = PlayersModel.objects.get(login=request.POST['sender'])
+                if request.POST['friend']:
+                    friend = PlayersModel.objects.get(login=request.POST['friend'])
+                sender.friends.add(friend)
+                friend.friends.add(sender)
+                sender.save()
+                friend.save()
+                response = HttpResponse('You accepted ' + request.POST['sender'] + ' friend request. You are now friends.')
+                response.status_code = 200
+                return response
+            if request.POST['response'] == 'decline':
+                sender = PlayersModel.objects.get(login=request.POST['sender'])
+                response = HttpResponse('You declined ' + request.POST['sender'] + ' friend request.')
+                response.status_code = 200
+                return response
+    return render(request, 'add_friend.html')
 
 @csrf_exempt
 @require_POST

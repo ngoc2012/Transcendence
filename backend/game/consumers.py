@@ -14,6 +14,14 @@ from django.contrib.auth import get_user_model
 from django.conf import settings
 
 @database_sync_to_async
+def get_user_from_login(login):
+    try:
+        user = get_user_model().objects.get(login=login)
+        return user
+    except(get_user_model().DoesNotExist) as e:
+        return None
+
+@database_sync_to_async
 def get_user_from_token(token):
     try:
         user = get_user_model().objects.get(ws_token=token)
@@ -217,12 +225,11 @@ class RoomsConsumer(AsyncWebsocketConsumer):
         if user_id in RoomsConsumer.connected_users:
             RoomsConsumer.connected_users.remove(user_id)
             await self.broadcast_user_list()
-        print(user_id)
         user = await get_player_by_id(user_id)
         user.online_status = 'Offline'
+        user.save()
 
     async def receive(self, text_data):
-        print(json.loads(text_data))
         if not text_data:
             await self.channel_layer.group_send(
                 self.group_name,
@@ -289,12 +296,36 @@ class RoomsConsumer(AsyncWebsocketConsumer):
                 await self.quit_tournament(data)
             elif data.get('type') == 'add_to_group':
                 await self.add_owner_to_group(data)
+            elif data.get('type') == 'status':
+                await self.update_online_status(data)
+            elif data.get('type') == 'friend_request_send':
+                await self.send_friend_request(data)
+            elif data.get('type') == 'friend_request_receive':
+                await self.friend_request_receive(data)
+
+    async def send_friend_request(self, data):
+        await self.channel_layer.group_send(self.group_name,{'type': 'friend_request_receive', "sender": data.get('sender'), 'receiver': data.get('friend')})
+
+    async def friend_request_receive(self, data):
+        if self.login == data.get('receiver'):
+            await self.send(text_data=json.dumps({'type': 'friend_request_receive', 'sender': data.get('sender'), 'receiver': data.get('receiver')}))
+
+
+    async def update_online_status(self, data):
+        user = await get_user_from_login(data.get('login'))
+        if user:
+            self.user = user
+            self.user.online_status = 'Online'
+            self.user.save()
 
     async def authenticate(self, token):
         user = await get_user_from_token(token)
         if user:
             self.user = user
             self.user_id = user.id
+            self.login = user.login
+            self.user.online_status = 'Online'
+            self.user.save()
             unique_group_name = f"user_{self.user_id}"
             await self.channel_layer.group_add(unique_group_name, self.channel_name)
             RoomsConsumer.connected_users.add(self.user_id)

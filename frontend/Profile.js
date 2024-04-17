@@ -12,12 +12,14 @@ export class Profile{
 
     events(){
         this.dom_alias = document.getElementById("alias");
+        this.dom_friend = document.getElementById("add_friend");
         this.dom_password = document.getElementById("password");
         this.dom_email = document.getElementById("email");
         this.dom_login = document.getElementById("log_in");
         this.dom_name = document.getElementById("new_name");
         this.dom_cancel = document.getElementById("back");
         this.dom_alias.addEventListener("click", () => this.change_alias());
+        this.dom_friend.addEventListener("click", () => this.add_friend());
         this.dom_password.addEventListener("click", () => this.change_password());
         this.dom_email.addEventListener("click", () => this.change_email());
         this.dom_login.addEventListener("click", ()=> this.change_login());
@@ -27,8 +29,8 @@ export class Profile{
 
     backtolobby(){
         this.main.set_status('');
-        this.main.history_stack.push('/lobby/');
-        window.history.pushState({}, '', '/lobby/');
+        this.main.history_stack.push('/');
+        window.history.pushState({}, '', '/');
         this.main.load('/lobby', () => this.main.lobby.events());
     }
 
@@ -289,5 +291,143 @@ export class Profile{
         this.main.history_stack.push('/profile/' + this.login + '/');
         window.history.pushState({}, '', '/profile/' + this.login);
         this.main.load('/profile' + this.login, () => this.main.profile.events());
+    }
+
+    add_friend(){
+        this.main.history_stack.push('/profile/' + this.login + '/add_friend/');
+        window.history.pushState({}, '', '/profile/' + this.login + '/add_friend/');
+        this.main.load('/profile/' + this.login + '/add_friend', () => this.friend_events());
+    }
+
+    friend_events(){
+        this.dom_friend_name = document.querySelector("#friend");
+        this.dom_af_confirm = document.querySelector("#confirm");
+        this.dom_af_cancel = document.querySelector("#cancel");
+        this.dom_af_confirm.addEventListener("click", () => this.af_confirm());
+        this.dom_af_cancel.addEventListener("click", () => this.af_cancel());
+    }
+
+    af_confirm(){
+        if (this.dom_friend_name.value === ''){
+            this.main.set_status('All fields are required');
+            return;
+        }
+        $.ajax({
+            url: '/profile/' + this.main.login + '/add_friend/',
+            method: 'POST',
+            data:{
+                'sender': this.main.login,
+                'friend': this.dom_friend_name.value,
+                'type': 'send'
+            },
+            success: (info)=>{
+                this.main.lobby.socket.send(JSON.stringify({
+                    'sender': this.main.login,
+                    'friend': this.dom_friend_name.value,
+                    'type': 'friend_request_send'
+                }));
+                this.main.set_status(info);
+                this.main.history_stack.push('/profile/' + this.login);
+                window.history.pushState({}, '', '/profile/' + this.login);
+                this.main.load('/profile/' + this.login, () => this.friend_events());
+            },
+            error: (info)=>{
+                this.main.set_status(info.responseText);
+            }
+        });
+    }
+
+    send_request(data){
+        $.ajax({
+            url: '/profile/' + data.sender + '/add_friend/',
+            method: 'POST',
+            data:{
+                'sender': data.sender,
+                'friend': data.friend,
+                'type': 'send'
+            },
+            success: (info)=>{
+                this.main.set_status(info);
+                this.main.history_stack.push('/profile/' + this.login + '/');
+                window.history.pushState({}, '', '/profile/' + this.login +'/');
+                this.main.load('/profile/' + this.login, () => this.main.profile.events());            
+            },
+            error: (info) =>{
+                this.main.set_status(info.responseText);
+            }
+        })
+    }
+
+    receive_request(data){
+        let inviteContainer = document.getElementById('inviteContainer');
+        if (!inviteContainer) {
+            inviteContainer = document.createElement('div');
+            inviteContainer.id = 'inviteContainer';
+            document.body.appendChild(inviteContainer);
+        }
+
+        const inviteNotification = document.createElement('div');
+        inviteNotification.classList.add('invite-notification');
+        inviteNotification.innerHTML = `
+            <p>${data.sender} sent you a friend request !</p>
+            <button id="acceptInviteBtn">Accept</button>
+            <button id="declineInviteBtn">Decline</button>
+        `;
+
+        inviteContainer.appendChild(inviteNotification);
+
+        document.getElementById('acceptInviteBtn').addEventListener('click', () => {
+            this.accept_request(data);
+            inviteContainer.removeChild(inviteNotification);
+        });
+        document.getElementById('declineInviteBtn').addEventListener('click', () => {
+            this.decline_request(data);
+            inviteContainer.removeChild(inviteNotification);
+        });
+    }
+
+    accept_request(data){
+        console.log('on accepte pour ' + this.login);
+        $.ajax({
+            url: '/profile/' + data.sender + '/add_friend/',
+            method: 'POST',
+            data:{
+                'type': 'receive',
+                'sender': data.sender,
+                'response': 'accept',
+                'friend': this.main.login
+            },
+            success: (info)=>{
+                this.main.set_status(info);
+            },
+            error: (info)=>{
+                this.main.set_status(info.responseText);
+            }
+        })
+    }
+
+    decline_request(data){
+        $.ajax({
+            url: '/profile/' + data.sender +'/add_friend/',
+            method: 'POST',
+            data:{
+                'type': 'receive',
+                'sender': data.sender,
+                'response': 'decline'
+            },
+            success: (info)=>{
+                this.main.set_status(info);
+            },
+            error: (info) => {
+                this.main.set_status(info.responseText);
+            }
+        })
+    }
+
+    af_cancel(){
+        this.main.set_status('');
+        this.main.history_stack.push('/profile/' + this.login + '/');
+        window.history.pushState({}, '', '/profile/' + this.login);
+        this.main.load('/profile/' + this.login, () => this.main.profile.events());
     }
 }

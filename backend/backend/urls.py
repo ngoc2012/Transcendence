@@ -47,6 +47,7 @@ urlpatterns = [
     path('profile/<str:username>/change_email/', views.email, name="email"),
     path('profile/<str:username>/change_login/', views.change_login, name="change_login"),
     path('profile/<str:username>/change_name/', views.name, name="name"),
+    path('profile/<str:username>/add_friend/', views.friend, name="friend"),
     path('tournament/', views.tournament, name='tournament'),
     path('tournament_history/', views.tournament_history, name='tournament_history'),
     path('get_tournament_data/', views.get_tournament_data, name='get_tournament_data'),

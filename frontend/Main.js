@@ -1,6 +1,7 @@
 import {Lobby} from './Lobby.js'
 import {Signup} from './Signup.js'
 import {Login} from './Login.js'
+import {Profile} from './Profile.js'
 import {twofa} from './twofa.js'
 import {code_2fa} from './code_2fa.js'
 import {qrcode_2fa} from './qrcode_2fa.js'
@@ -30,6 +31,7 @@ export class Main
         this.qrcode_2fa = new qrcode_2fa(this);
         this.display_2fa = new display_2fa(this);
         this.tournament_history = new tournament_history(this);
+        this.profile = new Profile(this);
 
         this.dom_home = document.getElementById("home");
         this.dom_login = document.getElementById("login");

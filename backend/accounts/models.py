@@ -12,7 +12,7 @@ class PlayersModel(AbstractUser):
     elo = models.IntegerField(default=1500)
     history = models.CharField(max_length=10)
     score_history = models.CharField(max_length=70)
-    online_status = models.CharField(max_length=8)
+    online_status = models.CharField(max_length=8, default='Offline')
     tourn_alias = models.CharField(max_length=255)
     friends = models.ManyToManyField("self", blank=True)
     acc = models.CharField(max_length=255)
