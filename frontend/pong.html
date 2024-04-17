@@ -5,61 +5,65 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pong Game</title>
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  
   <style>
   
-  #team0-container {
-    position: absolute;
-    left: 22%;
-    top: 8%;
-    margin-top: 0;
-    padding-top: 0;
-  }
+    #team0-container {
+      position: absolute;
+      left: 20%;
+      transform: translateX(-20%);
+      top: 8%;
+      margin-top: 0;
+      padding-top: 0;
+      width: 50%;
+      text-align: center;
 
-  #team1-container {
-    position: absolute;
-    right: 22%;
-    top: 8%;
-    margin-top: 0;
-    padding-top: 0;
-  }
+    }
+  
+    #team1-container {
+      position: absolute;
+      right: 20%;
+      transform: translateX(20%);
+      top: 8%;
+      margin-top: 0;
+      padding-top: 0;
+      width: 50%;
+      text-align: center;
 
-  .score {
-    font-family: 'Courier New', Courier, monospace;
-    font-size: 48px;
-    color: #333;
-    text-align: center;
+    }
 
-  }
-
-  #team1-container h4,
-  #team0-container h4 {
-    text-align: center;
-  }
-
-  #game_name::before,
-  #game_name::after {
-    content: "\2605";
-    color: gold;
-    font-size: 24px;
-  }
-
-  .button-container {
-    text-align: center;
-  }
-
+    .score {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 48px;
+      color: #333;
+      text-align: center;
+    }
+  
+    #game_name::before,
+    #game_name::after {
+      content: "\2605";
+      color: gold;
+      font-size: 24px;
+    }
+  
+    .button-container {
+      text-align: center;
+    }
+  
   </style>
+  
 </head>
 <body>
   <div class="container">
     <h3 class="text-center" id="game_name"></h3>
 
     <div id="team0-container">
-      <h4 id="team0">salut</h4>
+      <h4 id="team0">team0</h4>
       <div class="score" id="score0">0</div>
     </div>     
 
     <div id="team1-container">
-      <h4 id="team1">coucou</h4>  
+      <h4 id="team1">team1</h4>
       <div class="score" id="score1">0</div>
     </div>
 

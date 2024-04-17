@@ -425,18 +425,22 @@ export class Pong
                         let new_p = document.createTextNode(this.player1);
                         this.dom_team0.appendChild(new_p);
                     } else {
-                        this.dom_team0.appendChild(new_p);
                         let new_p = document.createTextNode(p);
+                        this.dom_team0.appendChild(new_p);
                     }
                     // this.player1 = p;
                 });
                 this.dom_team1.innerHTML = "";
+                let new_p1 = document.createTextNode("Waiting for opponent");
+                this.dom_team1.appendChild(new_p1);
                 data.team1.forEach((p) => {
                     let new_p = document.createTextNode(p);
                     if (this.localTour) {
+                        this.dom_team1.innerHTML = "";
                         let new_p = document.createTextNode(this.player2);
                         this.dom_team1.appendChild(new_p);
                     } else {
+                        this.dom_team1.innerHTML = "";
                         let new_p = document.createTextNode(p);
                         this.dom_team1.appendChild(new_p);
                     }
