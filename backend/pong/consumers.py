@@ -17,7 +17,6 @@ class PongConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.room_id = self.scope['url_route']['kwargs']['room_id']
         self.player_id = int(self.scope['url_route']['kwargs']['player_id']) # 1, 2, 3 ...
-        print("player id = " + str(self.player_id))
         self.choices = [1, 2, 5, 10]
         self.room = await get_room_by_id(self.room_id)
         self.player = await get_user_by_id(self.player_id)
@@ -30,11 +29,9 @@ class PongConsumer(AsyncWebsocketConsumer):
         
         check = await get_info(self)
         if self.player0:
-            print('on entre online_status')
             self.player0.online_status = 'In-game'
             self.player0.save()
         if self.player1:
-            print("player1 exist")
             self.player1.online_status = 'In-game'
             self.player1.save()
         if not check:
@@ -136,8 +133,6 @@ class PongConsumer(AsyncWebsocketConsumer):
         print("Game in room {self.room_id} started.")
         cache.set(self.k_started, True)
         while True:
-            print("player0 = " + str(self.player0))
-            print("player1 = " + str(self.player1))
             await asyncio.sleep(0.02)
             players = cache.get(self.k_all)
             if players == None or len(players) == 0:
@@ -155,8 +150,6 @@ class PongConsumer(AsyncWebsocketConsumer):
                 # if self.room.tournamentRoom == True and self.room.score0 == 1 or self.room.score1 == 1:
                 score0 = cache.get(self.k_score0)
                 score1 = cache.get(self.k_score1)
-                print(score0)
-                print(score1)
                 if abs(score0 - score1) > 1 and (score0 >= 1 or score1 >= 1) :
                     await self.channel_layer.group_send(self.room_id, {'type': 'win_data'})
                     if self.room.tournamentRoom == False:
@@ -167,27 +160,19 @@ class PongConsumer(AsyncWebsocketConsumer):
                             self.player1.score_history += str(score0) + '-' + str(score1)
                             self.player0.save()
                             self.player1.save()
-                            print("history test player1 = " + self.player1.history)
-                            print("history test player0 = " + self.player0.history)
                         else:
-                            print("player0 = " + str(self.player0))
-                            print("player1 = " + str(self.player1))
                             self.player0.history += 'L'
                             self.player1.history += 'W'
                             self.player0.score_history += str(score0) + '-' + str(score1)
                             self.player1.score_history += str(score0) + '-' + str(score1)
                             self.player0.save()
                             self.player1.save()
-                            print("history test player0 = " + self.player0.history)
-                            print("history test player1 = " + self.player1.history)
                         return
             await check_collision(self)
             await self.channel_layer.group_send(self.room_id, {'type': 'group_data'})
 
 @database_sync_to_async
 def get_room_by_id(id) -> RoomsModel:
-    print("player0 debug = " + str(RoomsModel.objects.get(id=id).player0))
-    print("player1 debug = " + str(RoomsModel.objects.get(id=id).player1))
     return RoomsModel.objects.get(id=id)
 
 @database_sync_to_async
