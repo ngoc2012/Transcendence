@@ -60,10 +60,6 @@ class PongConsumer(AsyncWebsocketConsumer):
             info = await get_info(self)
             if info and not cache.get(self.k_started):
                 asyncio.create_task(self.game_loop())
-                if self.room.tournamentRoom:
-                    await self.send(text_data=json.dumps({
-                        text_data: "tour_match_start"
-                    }))
         elif text_data == 'left':
             await left(self)
         elif text_data == 'right':

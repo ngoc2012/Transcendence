@@ -153,6 +153,25 @@ def tournament_local_join_setup(request):
         'data': get_data(room.game)
         }))
 
+@require_POST
+def tournament_local_join(request):
+    if 'game_id' not in request.POST:
+        return (HttpResponse("Error: No game id!"))
+    if not RoomsModel.objects.filter(id=request.POST['game_id']).exists():
+        return (HttpResponse("Error: Room with id " + request.POST['game_id'] + " does not exist!"))
+    room = RoomsModel.objects.get(id=request.POST['game_id'])
+    owner = PlayersModel.objects.get(id=room.owner.id)
+    match = TournamentMatchModel.objects.filter(room=room).first()
+    player1 = match.player1 if not match.player1isLocal else User.objects.get(login='localTournament1')
+    room, player = add_player_to_room(room.id, player1.login)
+    return (JsonResponse({
+        'id': str(room),
+        'game': room.game,
+        'name': room.name,
+        'player_id': player.id,
+        'data': get_data(room.game)
+        }))
+
 def delete(request):
     if 'game_id' not in request.POST:
         return JsonResponse({'error': 'No game id!'}, status=400)
@@ -177,23 +196,6 @@ def delete(request):
     # if PlayerRoomModel.objects.filter(room=room.id).count() > 0:
     #     return JsonResponse({'error': "Someone is still playing"}, status=401)
 
-@require_POST
-def tournament_local_join(request):
-    if 'game_id' not in request.POST:
-        return (HttpResponse("Error: No game id!"))
-    if not RoomsModel.objects.filter(id=request.POST['game_id']).exists():
-        return (HttpResponse("Error: Room with id " + request.POST['game_id'] + " does not exist!"))
-    room = RoomsModel.objects.get(id=request.POST['game_id'])
-    player = PlayersModel.objects.get(id=room.owner.id)
-    match = TournamentMatchModel.objects.filter(room=room).first()
-    return (JsonResponse({
-        'id': str(room),
-        'game': room.game,
-        'name': room.name,
-        'player_id': player.id,
-        'data': get_data(room.game)
-        }))
-
 def refresh_participants(tournament):
     tournament.participants.add(*list(tournament.waitlist.all()))
     tournament.waitlist.clear()
@@ -203,7 +205,6 @@ def refresh_participants(tournament):
         tournament.waitlistLocal = []
 
     tournament.save()
-
 
 @require_POST
 def tournament_local_result(request):
@@ -286,7 +287,8 @@ def tournament_local_get(request):
             return tournament_local_end(tournament)
         elif len(all_participants) == 2 and not all_waitlist:
             tournament.final = True
-        elif tournament.newRound:
+
+        if tournament.newRound:
             if len(all_participants) % 2 != 0:
                 random_participant = random.choice(all_participants)
                 move_player_to_waitlist(tournament, random_participant)
@@ -308,7 +310,7 @@ def tournament_local_get(request):
         tournament.active_matches += 1
         random.shuffle(all_participants)
         player1 = all_participants[0]
-        player2  = all_participants[1]
+        player2 = all_participants[1]
 
         room = RoomsModel.objects.create(
             game=tournament.game,
@@ -319,10 +321,10 @@ def tournament_local_get(request):
         if room.game == 'pong':
             cache.set(str(room.id) + "_x", pong_data['PADDLE_WIDTH'] + pong_data['RADIUS'])
             cache.set(str(room.id) + "_y", pong_data['HEIGHT'] / 2)
-            if player1 in tournament.participantsLocal:
-                room, player = add_player_to_room(room.id, User.objects.get(login='localTournament1'))
-            else:
-                room, player = add_player_to_room(room.id, User.objects.get(login=player1))
+        #     if player1 in tournament.participantsLocal:
+        #         room, player = add_player_to_room(room.id, User.objects.get(login='localTournament1'))
+        #     else:
+        #         room, player = add_player_to_room(room.id, User.objects.get(login=player1))
 
         if player1 in tournament.participantsLocal and player2 in tournament.participantsLocal:
             match = TournamentMatchModel.objects.create(
