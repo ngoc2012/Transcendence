@@ -66,9 +66,14 @@ export class Lobby
     }
 
     join() {
-        if (this.dom_rooms.selectedIndex === -1)
+        if (this.main.login === '') {
+            this.main.set_status('Please login or sign up');
             return;
-
+        }
+        if (this.dom_rooms.selectedIndex === -1) {
+            this.main.set_status('Please select a room to join');
+            return;
+        }
         var csrftoken = this.main.getCookie('csrftoken');
 
         if (csrftoken) {
