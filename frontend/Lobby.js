@@ -20,12 +20,10 @@ export class Lobby
         this.dom_tournament_history = document.getElementById("tournament_history");
         this.dom_join = document.querySelector("#join");
         this.dom_pong = document.querySelector("#pong");
-        this.dom_pew = document.querySelector("#pew");
         this.dom_chat = document.querySelector("#chat");
         this.dom_delete = document.querySelector("#delete");
         this.dom_profile = document.querySelector('#profile');
         this.dom_pong.addEventListener("click", () => this.new_game("pong"));
-        this.dom_pew.addEventListener("click", () => this.new_game("pew"));
         this.dom_delete.addEventListener("click", () => this.delete_game());
         this.dom_join.addEventListener("click", () => this.join());
 		this.dom_chat.addEventListener("click", () => this.start_chat());
@@ -69,9 +67,14 @@ export class Lobby
     }
 
     join() {
-        if (this.dom_rooms.selectedIndex === -1)
+        if (this.main.login === '') {
+            this.main.set_status('Please login or sign up');
             return;
-
+        }
+        if (this.dom_rooms.selectedIndex === -1) {
+            this.main.set_status('Please select a room to join');
+            return;
+        }
         var csrftoken = this.main.getCookie('csrftoken');
 
         if (csrftoken) {
