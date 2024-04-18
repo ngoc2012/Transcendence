@@ -5,12 +5,46 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 from accounts.models import PlayersModel
 
 import asyncio
-from game.models import RoomsModel
+from game.models import RoomsModel, TournamentMatchModel, TournamentModel
 from .data import pong_data
 from .move import check_collision, update_ball, up, down, left, right
 from .game import get_info, get_room_data, get_teams_data, get_score_data, end_game, quit, change_side, get_win_data, change_server_async, set_power_play, game_init
 from .ai_player import ai_player
 from django.core.cache import cache
+
+@database_sync_to_async
+def rematch(consumer):
+    try:
+        room = consumer.room
+        match = TournamentMatchModel.objects.get(room_uuid=room.id)
+        tournament = match.tournament
+
+        if tournament.rematchIP:
+            return
+        
+        new_room =  RoomsModel.objects.create(
+            game=tournament.game,
+            name=f"{tournament.name} - Match {tournament.total_matches}",
+            owner=tournament.owner,
+            tournamentRoom=True
+        )
+        cache.set(str(new_room.id) + "_x", pong_data['PADDLE_WIDTH'] + pong_data['RADIUS'])
+        cache.set(str(new_room.id) + "_y", pong_data['HEIGHT'] / 2)
+
+        match_data = {field.name: getattr(match, field.name) for field in match._meta.fields if field.name != 'id' and field.name != 'room' and field.name != 'room_uuid'}
+        match_data['room'] = new_room
+        match_data['room_uuid'] = new_room.id
+
+        new_match = TournamentMatchModel.objects.create(**match_data)
+        match.delete()
+        tournament.rematchIP = True
+        tournament.save()
+
+        return new_match
+    except TournamentMatchModel.DoesNotExist:
+        print("Match not found")
+    except Exception as e:
+        print(f"An error occurred: {e}")
 
 
 class PongConsumer(AsyncWebsocketConsumer):
@@ -54,6 +88,10 @@ class PongConsumer(AsyncWebsocketConsumer):
         # 1008: Policy violation.
         # 1011: Internal error.
         print(f"Player {self.player_id} disconnected with code {close_code}.")
+        score0 = cache.get(self.k_score0)
+        score1 = cache.get(self.k_score1)
+        if self.room.tournamentRoom and score0 is None or score1 is None or score0 < 11 and score1 < 11:
+            await rematch(self)
         await quit(self)
         await self.channel_layer.group_send(self.room_id, {'type': 'teams_data'})
         await self.channel_layer.group_send(self.room_id, {'type': 'group_data'})
@@ -150,7 +188,8 @@ class PongConsumer(AsyncWebsocketConsumer):
                 # if self.room.tournamentRoom == True and self.room.score0 == 1 or self.room.score1 == 1:
                 score0 = cache.get(self.k_score0)
                 score1 = cache.get(self.k_score1)
-                if abs(score0 - score1) > 1 and (score0 >= 1 or score1 >= 1) :
+                # if abs(score0 - score1) > 1 and (score0 >= 1 or score1 >= 1) :
+                if (score0 >= 1 or score1 >= 1) :
                     await self.channel_layer.group_send(self.room_id, {'type': 'win_data'})
                     if self.room.tournamentRoom == False:
                         if score0 > score1:

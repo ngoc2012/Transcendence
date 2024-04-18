@@ -367,7 +367,7 @@ export class Pong
 
     start() {
         if (this.players[0].sk !== -1)
-        this.players[0].sk.send('start');
+            this.players[0].sk.send('start');
     }
 
     quit() {
@@ -379,11 +379,20 @@ export class Pong
                 p.sk = -1;
             }
         });
-        if (!this.localTour) {
-            this.main.history_stack.push('/');
-            window.history.pushState({}, '', '/');
-            this.main.load('/lobby', () => this.lobby.events());
-        }
+        this.main.history_stack.push('/');
+        window.history.pushState({}, '', '/');
+        this.main.load('/lobby', () => this.lobby.events());
+    }
+
+    stop() {
+        this.players.forEach((p, i) => {
+            this.set_state(i, 'quit');
+            if (p.sk !== -1)
+            {
+                p.sk.close();
+                p.sk = -1;
+            }
+        });
     }
 
     connect(i) {
@@ -410,6 +419,8 @@ export class Pong
                 return;
             let data = JSON.parse(e.data);
             if ('win' in data) {
+                if (this.localTournament)
+                    this.stop();
                 this.winnerBox(data);
             }
             else if ('score' in data)
@@ -461,7 +472,8 @@ export class Pong
         };
     
         this.players[i].sk.onclose = (e) => {
-            this.main.load('/lobby', () => this.lobby.events());
+            if (!this.localTournament)
+                this.main.load('/lobby', () => this.lobby.events());
         };
     }
 
@@ -508,55 +520,60 @@ export class Pong
         let backdrop = document.createElement('div');
         backdrop.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); z-index: 99;';
         document.body.appendChild(backdrop);
-        document.getElementById('pongCanvas').style.filter = 'blur(8px)';
-
+    
+        let canvas = document.getElementById('pongCanvas');
+        if (canvas)
+            canvas.style.filter = 'blur(8px)';
+    
         let winBox = document.createElement('div');
         winBox.setAttribute('id', 'winBox');
         winBox.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 500px; height: 300px; padding: 20px; background-color: #fff; border: 2px solid #000; text-align: center; z-index: 100;';
-
+        
         let scoreTitle = document.createElement('h2');
         scoreTitle.textContent = 'SCOREBOARD';
-        scoreTitle.style.fontFamily = 'Stencil Std, fantasy	';
+        scoreTitle.style.fontFamily = 'Stencil Std, fantasy';
         scoreTitle.style.fontSize = '30px';
         scoreTitle.style.marginBottom = '20px';
         scoreTitle.style.textAlign = 'center';
         winBox.appendChild(scoreTitle);
-
+    
         let scoreContainer = document.createElement('div');
         scoreContainer.classList.add('text-center', 'mb-4');
         let scoreText = document.createElement('p');
         scoreText.textContent = `${this.player1}   ${data.score[0]}  -  ${data.score[1]}   ${this.player2}`;
-        scoreText.style.fontFamily = 'Stencil Std, fantasy	'; 
+        scoreText.style.fontFamily = 'Stencil Std, fantasy'; 
         scoreText.style.fontSize = '20px';
         scoreContainer.appendChild(scoreText);
         winBox.appendChild(scoreContainer);
-
-
+    
         let winnerText = document.createElement('p');
         winnerText.textContent = `${data.win === 'player0' ? this.player1 : this.player2} wins!`;
-        winnerText.style.fontFamily = 'Stencil Std, fantasy	';
+        winnerText.style.fontFamily = 'Stencil Std, fantasy';
         winnerText.style.fontSize = '20px';
         winnerText.style.fontWeight = 'bold';
         winnerText.style.color = '#4CAF50';
         winnerText.style.textAlign = 'center';
         winBox.appendChild(winnerText);
-
+    
         let backButton = document.createElement('button');
         backButton.textContent = 'Back to lobby';
         backButton.classList.add('btn', 'btn-primary');
-
         backButton.onclick = () => {
-            document.getElementById('pongCanvas').style.filter = '';
-            document.body.removeChild(backdrop);
-            document.body.removeChild(winBox);
-            if (!this.localTour && this.tournament) {
-                this.tournament.endMatch(data);
-            } else if (this.localTournament) {
-                this.localTournament.sendResult(data.score[0], data.score[1], this.room.id);
-            }  
-            this.quit();
-        }   
+                if (canvas) {
+                    canvas.style.filter = '';
+                }
+                if (backdrop && backdrop.parentNode) {
+                    backdrop.parentNode.removeChild(backdrop);
+                }
+                if (winBox && winBox.parentNode) {
+                    winBox.parentNode.removeChild(winBox);
+                }
+                if (this.localTournament)
+                    this.localTournament.sendResult(data.score[0], data.score[1], this.room.id);
+                else
+                    this.quit();
+        };
         winBox.appendChild(backButton);
         document.body.appendChild(winBox);
-    }
+    }    
 }

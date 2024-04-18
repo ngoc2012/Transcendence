@@ -2,7 +2,7 @@ from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from .models import RoomsModel, TournamentMatchModel, TournamentModel
 from accounts.models import PlayersModel
-import jwt
+import jwt, requests
 from pong.data import pong_data
 import os
 import json, random
@@ -12,6 +12,7 @@ from django.views.decorators.http import require_POST
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.cache import cache
 from django.utils import timezone
+from django.db import IntegrityError
 
 User = get_user_model()
 
@@ -274,6 +275,21 @@ def tournament_local_get(request):
     try:
         tour_id = request.POST["id"]
         tournament = TournamentModel.objects.get(id=tour_id)
+
+        if tournament.localMatchIP:
+            last_match = TournamentMatchModel.objects.filter(tournament=tournament).order_by('-id').first()
+            print('get match IP found')
+            tournament.rematchIP = False
+            tournament.save()
+            return JsonResponse({
+                'name': tournament.name,
+                'round': tournament.round if tournament.final == False else 'final',
+                'match': tournament.total_matches,
+                'player1': last_match.player1Local if last_match.player1isLocal else last_match.player1.username,
+                'player2': last_match.player2Local if last_match.player2isLocal else last_match.player2.username,
+                'room_id': str(last_match.room_uuid),
+            })
+    
         participants = list(tournament.participants.all())
         waitlist = list(tournament.waitlist.all())
         all_participants = tournament.participantsLocal
@@ -301,17 +317,6 @@ def tournament_local_get(request):
             tournament.newRound = False
         tournament.save()
 
-        if tournament.localMatchIP:
-            last_match = TournamentMatchModel.objects.filter(tournament=tournament).order_by('-id').first()
-            return JsonResponse({
-                'name': tournament.name,
-                'round': tournament.round if tournament.final == False else 'final',
-                'match': tournament.total_matches,
-                'player1': last_match.player1Local if last_match.player1isLocal else last_match.player1.username,
-                'player2': last_match.player2Local if last_match.player2isLocal else last_match.player2.username,
-                'room_id': str(last_match.room_uuid),
-            })
-
         tournament.total_matches += 1
         tournament.active_matches += 1
         random.shuffle(all_participants)
@@ -327,10 +332,6 @@ def tournament_local_get(request):
         if room.game == 'pong':
             cache.set(str(room.id) + "_x", pong_data['PADDLE_WIDTH'] + pong_data['RADIUS'])
             cache.set(str(room.id) + "_y", pong_data['HEIGHT'] / 2)
-        #     if player1 in tournament.participantsLocal:
-        #         room, player = add_player_to_room(room.id, User.objects.get(login='localTournament1'))
-        #     else:
-        #         room, player = add_player_to_room(room.id, User.objects.get(login=player1))
 
         if player1 in tournament.participantsLocal and player2 in tournament.participantsLocal:
             match = TournamentMatchModel.objects.create(
@@ -413,13 +414,34 @@ def tournament_local_verify(request):
     try:
         data = json.loads(request.body)
         players = data.get('players')
+        name = data.get('name')
         if not players:
             return JsonResponse({'error': 'Missing players'}, status=400)
+        if not name:
+            return JsonResponse({'error': 'Missing name'}, status=400)
+        
+        owner = PlayersModel.objects.get(username=request.user.username)
+        tournament = TournamentModel.objects.create(name=name, game='pong', owner=owner, newRound=True)
+        tournament.participants.add(owner)
+        tournament.local = True
+        tournament.save()
+
+        url = f"http://blockchain:9000/add_tournament/{name}"
+        response = requests.post(url)
+        response.raise_for_status()
+
+        player_data = {
+            'id': owner.id,
+            'login': owner.login,
+            'elo': owner.elo,
+        }
+        url = f"http://blockchain:9000/add_player/"
+        data = {"name": name, "player": player_data}
+        response = requests.post(url, json=data)
+        response.raise_for_status()
 
         User = get_user_model()
         logins = set()
-        tournament_id = data.get('id')
-        tournament = TournamentModel.objects.get(id=tournament_id)
         
         for player in players:
             nickname = player.get('nickname')
@@ -451,10 +473,19 @@ def tournament_local_verify(request):
         return JsonResponse({'error': f'Error decoding JSON: {str(e)}'}, status=400)
     except TournamentModel.DoesNotExist:
         return JsonResponse({'error': 'Tournament not found'}, status=400)
+    except requests.exceptions.RequestException as e:
+        print(f"Error calling add_tournament_route: {e}")
+        return JsonResponse({'error': 'Failed to interact with blockchain'}, status=500)
+    except ObjectDoesNotExist:
+        return JsonResponse({'error': 'Owner not found'}, status=404)
+    except IntegrityError as e:
+        return JsonResponse({'error': 'Tournament could not be created'}, status=409)
+    except ValidationError as e:
+        return JsonResponse({'error': str(e)}, status=400)
     except Exception as e:
-        return JsonResponse({'error': f'An error occurred: {str(e)}'}, status=500)
+        return JsonResponse({'error': 'An unexpected error occurred'}, status=500)
     
-    return JsonResponse({'message': 'Done'})
+    return JsonResponse({'message': 'Done', 'id': tournament.id})
     
 def fetch_matches(tournament):
     matches = TournamentMatchModel.objects.filter(tournament=tournament)

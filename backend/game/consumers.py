@@ -160,6 +160,8 @@ class RoomsConsumer(AsyncWebsocketConsumer):
             )
             elif data.get('type') == 'authenticate':
                 await self.authenticate(data['token'])
+            elif data.get('type') == 'tournament_registered':
+                await self.tournament_registered()
             elif data.get('type') == 'tournament-quit':
                 await self.quit_tournament(data)
             elif data.get('type') == 'add_to_group':
@@ -170,6 +172,12 @@ class RoomsConsumer(AsyncWebsocketConsumer):
                 await self.send_friend_request(data)
             elif data.get('type') == 'friend_request_receive':
                 await self.friend_request_receive(data)
+    
+    async def tournament_registered(self):
+        tournament = TournamentModel.objects.filter(owner=self.user, terminated=False).first()
+
+        if tournament is not None:
+            await self.send(text_data=json.dumps({'type': 'tournament_local_found', 'id': str(tournament.id)}))
 
     async def send_friend_request(self, data):
         await self.channel_layer.group_send(self.group_name,{'type': 'friend_request_receive', "sender": data.get('sender'), 'receiver': data.get('friend')})

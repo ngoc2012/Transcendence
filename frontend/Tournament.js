@@ -105,7 +105,7 @@ export class Tournament {
                 alert('Please fill out all player nicknames.');
             } else {
                 var csrftoken = this.main.getCookie('csrftoken');
-                var formData = JSON.stringify({ players: playerCredentials, id: this.id });
+                var formData = JSON.stringify({ players: playerCredentials, name: this.name});
         
                 if (csrftoken) {
                     $.ajax({
@@ -116,6 +116,7 @@ export class Tournament {
                             'X-CSRFToken': csrftoken,
                         },
                         success: (response) => {
+                            this.id = response.id;
                             this.main.set_status = '';
                             this.localTournament = new localTournament(this.main, playerCredentials.map(p => p.nickname), this.id, this);
                             this.main.load('/tournament/local/start', () => this.localTournament.getMatch());
@@ -150,7 +151,7 @@ export class Tournament {
                     'X-CSRFToken': csrftoken,
                 },
                 success: (response) => {
-                    this.id = response.id;
+                    this.name = response.name;
                         this.main.load('/tournament/local', () => this.eventsLocal());
                 },
                 error: (xhr, textStatus, errorThrown) => {

@@ -20,12 +20,10 @@ export class Lobby
         this.dom_tournament_history = document.getElementById("tournament_history");
         this.dom_join = document.querySelector("#join");
         this.dom_pong = document.querySelector("#pong");
-        this.dom_pew = document.querySelector("#pew");
         this.dom_chat = document.querySelector("#chat");
         this.dom_delete = document.querySelector("#delete");
         this.dom_profile = document.querySelector('#profile');
         this.dom_pong.addEventListener("click", () => this.new_game("pong"));
-        this.dom_pew.addEventListener("click", () => this.new_game("pew"));
         this.dom_delete.addEventListener("click", () => this.delete_game());
         this.dom_join.addEventListener("click", () => this.join());
 		this.dom_chat.addEventListener("click", () => this.start_chat());
@@ -34,7 +32,6 @@ export class Lobby
         this.dom_tournament_history.addEventListener("click", () => this.tournament_history_click());
         if (this.main.login != '') {
             this.rooms_update();
-            this.queryTournament();
         }
     }
 
@@ -272,8 +269,8 @@ export class Lobby
             if (!('data' in e))
                 return;
             const data = JSON.parse(e.data);
-            if (data.type === 'tournament_local_progress') {
-                this.displayTournamentLocalBack(data.message);
+            if (data.type === 'tournament_local_found') {
+                this.displayTournamentLocalBack(data.id);
             }
             else if (data.type === 'error_nf') {
                 // this.main.load('/tournament/lobby', () => this.eventsLobby());
@@ -324,28 +321,19 @@ export class Lobby
 
     displayTournamentLocalBack(tourID) {
         const existingButton = document.getElementById('tournament');
-
+    
         if (existingButton) {
-            const newButton = document.createElement('button');
-            newButton.textContent = 'Tournament';
-            newButton.id = 'tournament';
-            newButton.addEventListener('click', () => {
-                    this.tournament = new Tournament(this.main, tourID);
-                    this.tournament.localBack();
+            const clonedButton = existingButton.cloneNode(true);
+            clonedButton.textContent = 'Tournament';
+    
+            clonedButton.addEventListener('click', () => {
+                this.tournament = new Tournament(this.main, tourID);
+                this.tournament.localBack();
             });
-            existingButton.parentNode.replaceChild(newButton, existingButton);
+    
+            existingButton.replaceWith(clonedButton);
         }
-    }
-
-    queryTournament() {
-        if (this.socket !== -1) {
-            if (this.socket.readyState === WebSocket.OPEN) {
-                this.socket.send(JSON.stringify({
-                    type: 'tournament_registered',
-                }));
-            }
-        }
-    }
+    }    
 
     checkLogin() {
         if (this.main.login != '') {

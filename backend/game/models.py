@@ -6,22 +6,6 @@ from accounts.models import PlayersModel
 from django.conf import settings
 from django.db.models import JSONField
 
-class PlayersModel(models.Model):
-    id = models.AutoField(primary_key=True)
-    login = models.CharField(max_length=255)
-    password = models.CharField(max_length=255)
-    name = models.CharField(max_length=255)
-    tourn_alias = models.CharField(max_length=255)
-    secret_2fa = models.TextField(default='')
-    friends = models.ManyToManyField("self", blank=True)
-    email = models.EmailField(default='')  # gerer si mauvais email
-    session_id = models.CharField(max_length=40, null=True)
-    expires = models.DateTimeField(null=True)
-    elo = models.IntegerField(default=1500)
-    online_status = models.TextField(default='Offline')
-    def __str__(self):
-        return str(self.id)
-
 class RoomsModel(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=255)
@@ -60,6 +44,7 @@ class TournamentModel(models.Model):
     terminated = models.BooleanField(default=False)
     winner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='won_tournament', null=True, blank=True)
     local = models.BooleanField(default=False)
+    rematchIP = models.BooleanField(default=False)
     def __str__(self):
         return self.name
 
