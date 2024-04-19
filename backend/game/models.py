@@ -45,6 +45,7 @@ class TournamentModel(models.Model):
     winner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='won_tournament', null=True, blank=True)
     local = models.BooleanField(default=False)
     rematchIP = models.BooleanField(default=False)
+    ready = models.BooleanField(default=False)
     def __str__(self):
         return self.name
 

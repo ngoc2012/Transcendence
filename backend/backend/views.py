@@ -554,8 +554,13 @@ def new_tournament(request):
     try:
         if TournamentModel.objects.filter(name=name).exists():
             return JsonResponse({'error': 'A tournament with the same name already exists'}, status=400)
+        else:
+            owner = request.user
+            tournament = TournamentModel.objects.create(name=name, game='pong', owner=owner, newRound=True, local=True)
+            tournament.participants.add(owner)
+            tournament.save()
 
-        return JsonResponse({'message': 'Tournament OK', 'local': True, 'name': name}, status=200)
+        return JsonResponse({'message': 'Tournament OK', 'local': True, 'name': name, 'id':tournament.id}, status=200)
     except IntegrityError as e:
         return JsonResponse({'error': 'Tournament could not be created'}, status=409)
     except ValidationError as e:

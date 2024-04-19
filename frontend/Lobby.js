@@ -102,7 +102,6 @@ export class Lobby
                 error: () => this.main.set_status('Error: Can not join game')
             });
         } else {
-            console.log('Login required');
             this.main.load('/pages/login', () => this.main.log_in.events());
         }
     }
@@ -151,7 +150,6 @@ export class Lobby
                 error: () => this.main.set_status('Error: Can not create game')
             });
         } else {
-            console.log('Login required');
             this.main.load('/pages/login', () => this.main.log_in.events());
         }
     }
@@ -219,7 +217,6 @@ export class Lobby
                 }
             });
         } else {
-            console.log('Login required');
             this.main.load('/pages/login', () => this.main.log_in.events());
         }
     }
@@ -249,8 +246,6 @@ export class Lobby
                 type: 'tournament_registered',
             }));
         };
-        console.log("socket dans main ?" + this.main.socket);
-        console.log("ou dans lobby ?" + this.main.lobby.socket);
         $.ajax({
             url: '/game/update',
             method: 'GET',
@@ -270,7 +265,6 @@ export class Lobby
         });
 
         this.socket.onmessage = (e) => {
-            console.log(e.data)
             if (!('data' in e))
                 return;
             const data = JSON.parse(e.data);

@@ -4,17 +4,31 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Local Tournament - Transcendence</title>
+    <style>
+        #playerForm { display: none; }
+        #passwordField { display: none; }
+    </style>
 </head>
 <body>
     <div id="no-invite"></div>
-    <label for="playerCount">Select number of players:</label>
-    <select id="playerCount">
-        <option value="0">Choose...</option>
-        <option value="2">2</option>
-        <option value="3">3</option>
-        <option value="4">4</option>
-        <option value="5">5</option>
-    </select>
-    <form id="playerForm"></form>
+    <div id="player-stack"></div>
+    <button id="addPlayer">Add Player</button>
+    
+    <form id="playerForm">
+        <label for="loginName">Login:</label>
+        <input type="text" id="loginTour" name="login"><br>
+        
+        <input type="checkbox" id="loginCheckbox" name="loginCheckbox">
+        <label for="loginCheckbox">User Login</label><br>
+
+        <div id="passwordField">
+            <label for="password">Password:</label>
+            <input type="password" id="passwordTour" name="password"><br>
+        </div>
+        
+        <input id="submitBtn" type="submit" value="Submit">
+        <button id="login42Tour" type="button">Login with 42</button>
+    </form>
+    <button id="startTour">Start</button>
 </body>
 </html>

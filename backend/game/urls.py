@@ -15,4 +15,5 @@ urlpatterns = [
     path('tournament/local/verify/', views.tournament_local_verify, name='tournament_local_verify'),
     path('tournament/local/get/', views.tournament_local_get, name='tournament_local_get'),
     path('tournament/local/result/', views.tournament_local_result, name='tournament_local_result'),
+    path('tournament/local/adduser/', views.tournament_add_user, name='tournament_add_user')
 ]

@@ -90,7 +90,7 @@ class PongConsumer(AsyncWebsocketConsumer):
         print(f"Player {self.player_id} disconnected with code {close_code}.")
         score0 = cache.get(self.k_score0)
         score1 = cache.get(self.k_score1)
-        if self.room.tournamentRoom and score0 is None or score1 is None or score0 < 11 and score1 < 11:
+        if self.room.tournamentRoom and score0 is None or score1 is None or score0 < 1 and score1 < 1:
             await rematch(self)
         await quit(self)
         await self.channel_layer.group_send(self.room_id, {'type': 'teams_data'})

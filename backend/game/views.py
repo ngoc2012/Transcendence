@@ -95,9 +95,9 @@ def new_game(request):
 def update(request):
     data = [
         {
-            "id": str(i),
-            "name": i.name
-        } for i in RoomsModel.objects.all()
+            "id": str(room.id),
+            "name": room.name
+        } for room in RoomsModel.objects.filter(tournamentRoom=False)
     ]
     return JsonResponse(data, safe=False)
 
@@ -410,64 +410,69 @@ def move_player_to_waitlist(tournament, player_login):
             print(f"User with login {player_login} not found.")
 
 @require_POST
+def tournament_add_user(request):
+    try:
+        data = json.loads(request.body)
+        login = data.get('login')
+        password = data.get('password')
+        userLogin = data.get('userLogin')
+        id = data.get('id')
+        owner = request.user
+        tournament = TournamentModel.objects.get(id=id)
+
+        if userLogin == 'false':
+            try:
+                user = User.objects.get(login=login)
+                if login in tournament.participantsLocal:
+                    return JsonResponse({'error': f'Player {login} already added to the tournament'}, status=400)
+                return JsonResponse({'error': f'Player {login} already exists'}, status=400)
+            except User.DoesNotExist:
+                if login not in tournament.participantsLocal:
+                    tournament.participantsLocal.append(login)
+                    tournament.save()
+                return JsonResponse({'success': True, 'login': login, 'local': True})
+        else:
+            try:
+                user = User.objects.get(login=login)
+                if not user.check_password(password):
+                    return JsonResponse({'error': f'Player {login} password is incorrect'}, status=400)
+                if user in tournament.participants.all():
+                    return JsonResponse({'error': f'Player {login} already added to the tournament'}, status=400)
+                tournament.participants.add(user)
+                tournament.save()
+                return JsonResponse({'success': True, 'login': login, 'local': False})
+            except User.DoesNotExist:
+                return JsonResponse({'error': f'Player {login} not found'}, status=400)
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+
+@require_POST
 def tournament_local_verify(request):
     try:
         data = json.loads(request.body)
-        players = data.get('players')
-        name = data.get('name')
-        if not players:
-            return JsonResponse({'error': 'Missing players'}, status=400)
-        if not name:
-            return JsonResponse({'error': 'Missing name'}, status=400)
+        id = data.get('id')
+
+        if not id:
+            return JsonResponse({'error': 'Missing id'}, status=400)
         
-        owner = PlayersModel.objects.get(username=request.user.username)
-        tournament = TournamentModel.objects.create(name=name, game='pong', owner=owner, newRound=True)
-        tournament.participants.add(owner)
-        tournament.local = True
+        owner = request.user
+        tournament = TournamentModel.objects.get(id=id)
+        tournament.ready = True
         tournament.save()
 
-        url = f"http://blockchain:9000/add_tournament/{name}"
-        response = requests.post(url)
-        response.raise_for_status()
+        # url = f"http://blockchain:9000/add_tournament/{name}"
+        # response = requests.post(url)
+        # response.raise_for_status()
 
-        player_data = {
-            'id': owner.id,
-            'login': owner.login,
-            'elo': owner.elo,
-        }
-        url = f"http://blockchain:9000/add_player/"
-        data = {"name": name, "player": player_data}
-        response = requests.post(url, json=data)
-        response.raise_for_status()
-
-        User = get_user_model()
-        logins = set()
-        
-        for player in players:
-            nickname = player.get('nickname')
-            provided_password = player.get('password')
-
-            if nickname in logins:
-                return JsonResponse({'error': f'Player {nickname} is a duplicate'}, status=400)
-            logins.add(nickname)
-
-            if not provided_password:
-                try:
-                    user = User.objects.get(username=nickname)
-                    return JsonResponse({'error': f'Player {player} already exists'}, status=400)
-                except User.DoesNotExist:
-                    tournament.participantsLocal.append(nickname)
-                    continue
-            else:
-                try:
-                    user = User.objects.get(username=nickname)
-                    if not user.check_password(provided_password):
-                        return JsonResponse({'error': f'Player {nickname} password is incorrect'}, status=400)
-                    tournament.participants.add(user)
-                except User.DoesNotExist:
-                    return JsonResponse({'error': f'Player {nickname} not found'}, status=404)
-
-        tournament.save()
+        # player_data = {
+        #     'id': owner.id,
+        #     'login': owner.login,
+        #     'elo': owner.elo,
+        # }
+        # url = f"http://blockchain:9000/add_player/"
+        # data = {"name": name, "player": player_data}
+        # response = requests.post(url, json=data)
+        # response.raise_for_status()
         
     except json.JSONDecodeError as e:
         return JsonResponse({'error': f'Error decoding JSON: {str(e)}'}, status=400)

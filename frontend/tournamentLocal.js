@@ -1,11 +1,10 @@
 import {Pong} from './Pong.js';
 
 export class localTournament {
-    constructor(main, playersNicknames, id = null, tournament) {
+    constructor(main, id = null, tournament) {
         this.main = main;
         this.lobby = main.lobby;
         this.id = id;
-        this.playersNicknames = playersNicknames;
         this.tournament = tournament;
         this.player1 = '';
         this.player2 = '';
