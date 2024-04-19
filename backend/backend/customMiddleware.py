@@ -96,6 +96,13 @@ class JWTMiddleware(MiddlewareMixin):
             '/admin/login/',
             '/game/update',
             '/validate-session/',
+            '/auth_view/',
+            '/twofa/',
+            '/qrcode_2fa/',
+            '/code_2fa/',
+            '/mail_2fa/',
+            '/verify_qrcode/',
+            '/verify/'
         ]
     
 class TokenRefreshResponseMiddleware:

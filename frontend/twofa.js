@@ -52,6 +52,8 @@ export class twofa
 
     cancel() {
         this.main.set_status('');
-        this.main.load('/login', () => this.main.log_in.events());
+        this.main.history_stack.push('/');
+        window.history.pushState({}, '', '/');
+        this.main.load('/lobby', () => this.lobby.events());
     }
 }

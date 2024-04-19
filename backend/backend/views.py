@@ -225,7 +225,9 @@ def new_player(request):
         user.ref = refresh_token
 
         ws_token = user.generate_ws_token()
-        enable2fa = request.POST.get('enable2fa', 'false') == 'true'
+        enable2fa = request.POST.get('enable2fa')
+        if (enable2fa == 'false'):
+            enable2fa = ''
         user.secret_2fa = pyotp.random_base32() if enable2fa else ''
         user.save()
         
@@ -563,5 +565,30 @@ def new_tournament(request):
     except Exception as e:
         return JsonResponse({'error': 'An unexpected error occurred'}, status=500)
 
+
+def auth_view(request):
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Only POST requests are allowed'}, status=405)
+
+    username = request.POST.get('login')
+    password = request.POST.get('password')
     
+    if not username or not password:
+        return JsonResponse({'error': 'No login or password provided!'}, status=400)
+
+    user = authenticate(request, username=username, password=password)
+
+    if user is not None:
+        enable2fa = 'true' if getattr(user, 'secret_2fa', '') else 'false'
+
+        response_data = {
+            'login': user.username,
+            'name': user.name,
+            'email': user.email,
+            'enable2fa': enable2fa,
+        }
+        response = JsonResponse(response_data)
+        return response
+    else:
+        return JsonResponse({'error': 'Invalid login credentials!'}, status=401)
 

@@ -19,11 +19,9 @@ export class display_2fa {
         window.history.pushState({}, '', '/');
         this.main.load('/lobby', () => this.main.lobby.events());
         this.main.lobby.socket.send(JSON.stringify({ type: "authenticate", login: this.main.login }));
-
     }
 
     generateQRCode() {
-
         const secretKeyElement = document.getElementById("secretKey");
         const secretKey = secretKeyElement.dataset.secret;
         const login = this.main.login;

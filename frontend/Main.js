@@ -159,6 +159,8 @@ export class Main
                     this.name = '';
                     this.dom_name.innerHTML = 'Anonyme';
                     this.lobby.ws = '';
+                    // this.twofat = '';
+                    this.secret_2fa = '';
 
                     this.history_stack.push('/');
                     window.history.pushState({}, '', '/');
