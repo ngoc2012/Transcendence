@@ -29,6 +29,8 @@ export class Tournament {
         
             // First player input, always visible and not editable
             const mainPlayerInput = document.createElement('input');
+            mainPlayerInput.classList.add("form-control");
+            mainPlayerInput.style.width = '100%'
             mainPlayerInput.type = 'text';
             mainPlayerInput.name = 'player1';
             mainPlayerInput.placeholder = `${this.main.login}`;
@@ -40,42 +42,55 @@ export class Tournament {
             // Create inputs, checkboxes, and password fields for other players
             for (let i = 2; i <= numberOfPlayers; i++) {
                 const input = document.createElement('input');
+                input.classList.add('form-control');
+                input.style.width = '100%';
+                input.style.marginBottom = '1%';
                 input.type = 'text';
                 input.name = 'player' + i;
                 input.placeholder = 'Player ' + i + ' Nickname';
-        
+            
                 const checkbox = document.createElement('input');
                 checkbox.type = 'checkbox';
-        
+                checkbox.classList.add('form-check-input');
+                checkbox.style.marginLeft = '20px';
+            
                 const loginLabel = document.createElement('label');
                 loginLabel.textContent = 'Log in';
-                loginLabel.style.marginLeft = '5px';
+                loginLabel.style.marginLeft = '1%';
                 loginLabel.appendChild(checkbox);
-        
+            
                 const passwordInput = document.createElement('input');
+                passwordInput.classList.add('form-control');
+                passwordInput.style.width = '90%';
                 passwordInput.type = 'password';
                 passwordInput.name = 'password' + i;
                 passwordInput.placeholder = 'Password for Player ' + i;
                 passwordInput.style.display = 'none';
-                passwordInput.style.marginLeft = '5px';
-        
-                // Display password field when checkbox is checked
+                passwordInput.style.marginLeft = '5%';
+                passwordInput.style.marginBottom = '1%';
+            
                 checkbox.addEventListener('change', function () {
                     passwordInput.style.display = this.checked ? 'inline' : 'none';
                 });
-        
+            
                 form.appendChild(input);
                 form.appendChild(loginLabel);
                 form.appendChild(passwordInput);
                 form.appendChild(document.createElement('br'));
             }
+            
         
             // Submit button
             if (numberOfPlayers > 0) {
                 const submitButton = document.createElement('button');
                 submitButton.type = 'submit';
                 submitButton.textContent = 'Submit';
-                form.appendChild(submitButton);
+                submitButton.classList.add('btn', 'btn-primary');
+                
+                const buttonWrapper = document.createElement('div');
+                buttonWrapper.classList.add('text-center', 'mt-3');
+                buttonWrapper.appendChild(submitButton);
+                form.appendChild(buttonWrapper);
             }
         });
         
