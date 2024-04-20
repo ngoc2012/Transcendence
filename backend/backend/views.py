@@ -201,6 +201,8 @@ def generate_jwt_tokens(user_id):
 
     return access_token, refresh_token  
 
+# callback function used to get the info from the 42 API
+@csrf_exempt
 def new_player(request):
     if request.method != 'POST':
         return JsonResponse({'error': 'Only POST requests are allowed'}, status=405)
@@ -248,6 +250,8 @@ def new_player(request):
     except Exception as e:
         return JsonResponse({'error': f'Unexpected error: {str(e)}'}, status=500)
 
+# callback function used to get the info from the 42 API
+@csrf_exempt
 def log_in(request):
     if request.method != 'POST':
         return JsonResponse({'error': 'Only POST requests are allowed'}, status=405)

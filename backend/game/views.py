@@ -64,6 +64,8 @@ def add_player_to_room(game_id, login):
         cache.set(k_player_y, pong_data['HEIGHT'] / 2 - pong_data['PADDLE_HEIGHT'] / 2)
     return room, player
 
+# callback function used to get the info from the 42 API
+@csrf_exempt
 def new_game(request):
     if 'game' not in request.POST:
         return (HttpResponse("Error: No game!"))
@@ -92,6 +94,8 @@ def new_game(request):
         'data': get_data(room.game)
         }))
 
+# callback function used to get the info from the 42 API
+@csrf_exempt
 def update(request):
     data = [
         {
@@ -101,6 +105,8 @@ def update(request):
     ]
     return JsonResponse(data, safe=False)
 
+# callback function used to get the info from the 42 API
+@csrf_exempt
 def join(request):
     if 'game_id' not in request.POST:
         return (HttpResponse("Error: No game id!"))
@@ -522,6 +528,9 @@ def tournament_local_end(tournament):
 # from channels.layers import get_channel_layer
 from backend.asgi import channel_layer
 from asgiref.sync import async_to_sync
+
+# callback function used to get the info from the 42 API
+@csrf_exempt
 def close_connection(request, login_id):
     async_to_sync(channel_layer.group_send)(
         "rooms",
@@ -532,6 +541,8 @@ def close_connection(request, login_id):
     )
     return HttpResponse("done")
 
+# callback function used to get the info from the 42 API
+@csrf_exempt
 def need_update(request):
     async_to_sync(channel_layer.group_send)(
         "rooms",

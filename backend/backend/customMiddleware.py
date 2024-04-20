@@ -10,7 +10,7 @@ User = get_user_model()
 
 class JWTMiddleware(MiddlewareMixin):
     def process_request(self, request):
-        if request.headers.get('X-Internal-Request') == 'true' or request.path in self.get_unauthenticated_paths() or '/callback/' in request.path or '/admin/' in request.path:
+        if request.headers.get('X-Internal-Request') == 'true' or request.path in self.get_unauthenticated_paths() or '/game/close/' in request.path or '/callback/' in request.path or '/admin/' in request.path:
             return None
 
         access_token = request.COOKIES.get('access_token')
@@ -95,6 +95,8 @@ class JWTMiddleware(MiddlewareMixin):
             '/admin/',
             '/admin/login/',
             '/game/update',
+            '/game/need_update',
+            '/game/join',
             '/validate-session/',
             '/auth_view/',
             '/twofa/',
