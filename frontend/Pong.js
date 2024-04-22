@@ -438,8 +438,8 @@ export class Pong
                     } else {
                         let new_p = document.createTextNode(p);
                         this.dom_team0.appendChild(new_p);
+                        this.player1 = p;
                     }
-                    // this.player1 = p;
                 });
                 this.dom_team1.innerHTML = "";
                 let new_p1 = document.createTextNode("Waiting for opponent");
@@ -454,8 +454,8 @@ export class Pong
                         this.dom_team1.innerHTML = "";
                         let new_p = document.createTextNode(p);
                         this.dom_team1.appendChild(new_p);
+                        this.player2 = p;
                     }
-                    // this.player2 = p;
                 });
             }
             else
