@@ -556,7 +556,10 @@ export class Pong
         winBox.appendChild(winnerText);
     
         let backButton = document.createElement('button');
-        backButton.textContent = 'Back to lobby';
+        if (this.tournament)
+        backButton.textContent = 'Next Match';
+        else
+            backButton.textContent = 'Back to lobby';
         backButton.classList.add('btn', 'btn-primary');
         backButton.onclick = () => {
                 if (canvas) {

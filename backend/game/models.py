@@ -38,7 +38,6 @@ class TournamentModel(models.Model):
     localMatchIP = models.BooleanField(default=False)
     newRound = models.BooleanField(default=False)
     round = models.IntegerField(default=1)
-    active_matches = models.IntegerField(default=0)
     total_matches = models.IntegerField(default=0)
     final = models.BooleanField(default=False)
     terminated = models.BooleanField(default=False)

@@ -261,8 +261,10 @@ def tournament_local_result(request):
                 tournament.waitlist.remove(match.player1)
 
         tournament.localMatchIP = False
-        tournament.active_matches -= 1
-        if tournament.active_matches == 0:
+        db_participants = tournament.participants.all().values_list('login', flat=True)
+        local_participants = getattr(tournament, 'participantsLocal', [])
+        all_participants = list(db_participants) + local_participants
+        if len(all_participants) == 0:
             tournament.round += 1
             tournament.newRound = True
             refresh_participants(tournament)
@@ -323,7 +325,6 @@ def tournament_local_get(request):
         tournament.save()
 
         tournament.total_matches += 1
-        tournament.active_matches += 1
         random.shuffle(all_participants)
         player1 = all_participants[0]
         player2 = all_participants[1]

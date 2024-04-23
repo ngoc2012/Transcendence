@@ -5,6 +5,7 @@ from django.contrib.auth import get_user_model
 from datetime import datetime, timedelta
 import jwt, pytz
 from django.core.cache import cache
+from django.http import HttpResponseRedirect
 
 User = get_user_model()
 
@@ -18,13 +19,13 @@ class JWTMiddleware(MiddlewareMixin):
 
         access_token = request.COOKIES.get('access_token')
         if not access_token:
-            return JsonResponse({'error': 'Authorization header is missing or invalid'}, status=401)
+            return HttpResponseRedirect('/login')
 
         try:
             decoded = jwt.decode(access_token, settings.JWT_SECRET_KEY, algorithms=["HS256"])
             user = self.get_user(decoded.get('user_id'))
             if not user:
-                return JsonResponse({'error': 'User not found'}, status=404)
+                return HttpResponseRedirect('/login/')
 
             if decoded == jwt.decode(user.acc, settings.JWT_SECRET_KEY, algorithms=["HS256"]):
                 request.user = user
@@ -32,7 +33,7 @@ class JWTMiddleware(MiddlewareMixin):
         except jwt.ExpiredSignatureError:
             return self.handle_refresh_token(request)
         except jwt.InvalidTokenError:
-            return JsonResponse({'error': 'Invalid token'}, status=401)
+            return HttpResponseRedirect('/login/')
 
     def get_user(self, user_id):
         user = cache.get(f'user_{user_id}')
@@ -61,11 +62,11 @@ class JWTMiddleware(MiddlewareMixin):
                 request.user = user
                 return None
             else:
-                return JsonResponse({'error': 'User not found'}, status=404)
+                return HttpResponseRedirect('/login/')
         except jwt.ExpiredSignatureError:
-            return JsonResponse({'error': 'Refresh token expired'}, status=401)
+            return HttpResponseRedirect('/login/')
         except jwt.InvalidTokenError:
-            return JsonResponse({'error': 'Invalid refresh token'}, status=401)
+            return HttpResponseRedirect('/login/')
 
     def generate_jwt_tokens(self, user_id):
         access_token = jwt.encode({

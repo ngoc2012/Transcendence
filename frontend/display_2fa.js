@@ -33,7 +33,6 @@ export class display_2fa {
             dom_logout.addEventListener('click', () => this.main.logout());
         }
         this.main.load('/lobby', () => this.main.lobby.events());
-        this.main.lobby.socket.send(JSON.stringify({ type: "authenticate", login: this.main.login }));
     }
 
     generateQRCode() {

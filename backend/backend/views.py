@@ -77,7 +77,7 @@ def validate_session(request):
                 user.ref = refresh_token
 
                 ws_token = user.generate_ws_token()
-                # enable2fa = request.POST.get('enable2fa', 'false') == 'true'
+                enable2fa = request.POST.get('enable2fa', 'false') == 'true'
                 # user.secret_2fa = pyotp.random_base32() if enable2fa else ''
                 user.save()
                 cache.delete(f'user_{user.id}')
@@ -87,7 +87,7 @@ def validate_session(request):
                     'login': user.username,
                     'name': user.name,
                     'email': user.email,
-                    # 'enable2fa': enable2fa,
+                    'enable2fa': enable2fa,
                     'ws': ws_token
                 }
                 response = JsonResponse(response_data)
@@ -411,6 +411,7 @@ def verify_qrcode(request):
     totp = pyotp.TOTP(player.secret_2fa)
     if totp.verify(input_code):
         return JsonResponse({'result': '1'})
+    print('fail')
     return JsonResponse({'result': '0'})
 
 @csrf_exempt
