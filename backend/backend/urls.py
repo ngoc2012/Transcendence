@@ -29,6 +29,7 @@ urlpatterns = [
     path('pages/signup/', views.signup, name='signup'),
     path('pages/login/', views.login, name='login'),
     path('log_in/', views.log_in, name='log_in'),
+    path('auth_view/', views.auth_view, name='auth_view'),
     path('logout/', views.logout, name='logout'),
     path('new_player/', views.new_player, name='new_player'),
     path('pong/', include("pong.urls", namespace='pong')),
