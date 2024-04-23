@@ -15,5 +15,9 @@ urlpatterns = [
     path('tournament/local/verify/', views.tournament_local_verify, name='tournament_local_verify'),
     path('tournament/local/get/', views.tournament_local_get, name='tournament_local_get'),
     path('tournament/local/result/', views.tournament_local_result, name='tournament_local_result'),
-    path('tournament/local/adduser/', views.tournament_add_user, name='tournament_add_user')
+    path('tournament/local/adduser/', views.tournament_add_user, name='tournament_add_user'),
+    path('tournament/local/login42', views.tournament_login42, name='tournament_add_user'),
+    path('tournament/local/login42', views.tournament_login42, name='tournament_add_user'),
+    path('tournament/local/callback42', views.tournament_callback42, name='tournament_callback42'),
+    path('tournament/local/2FAback', views.tournament_2FAback, name='tournament_2FAback'),
 ]

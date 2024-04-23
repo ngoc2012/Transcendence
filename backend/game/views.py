@@ -1,11 +1,9 @@
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
 from django.views.decorators.csrf import csrf_exempt
 from .models import RoomsModel, TournamentMatchModel, TournamentModel
 from accounts.models import PlayersModel
-import jwt, requests
 from pong.data import pong_data
-import os
-import json, random
+import os, uuid, json, random, jwt, requests
 from datetime import datetime, timedelta
 from django.contrib.auth import authenticate, login as auth_login, get_user_model, logout as auth_logout
 from django.views.decorators.http import require_POST
@@ -13,6 +11,8 @@ from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.cache import cache
 from django.utils import timezone
 from django.db import IntegrityError
+from urllib.parse import quote
+from django.shortcuts import render
 
 User = get_user_model()
 
@@ -278,7 +278,6 @@ def tournament_local_get(request):
 
         if tournament.localMatchIP:
             last_match = TournamentMatchModel.objects.filter(tournament=tournament).order_by('-id').first()
-            print('get match IP found')
             tournament.rematchIP = False
             tournament.save()
             return JsonResponse({
@@ -393,7 +392,7 @@ def tournament_local_get(request):
                 'room_id': str(room.id),
             })
     except:
-        return JsonResponse({'error'})
+        return JsonResponse({'error': 'Could not setup tournament'}, status=400)
     
 def move_player_to_waitlist(tournament, player_login):
     if player_login in tournament.participantsLocal:
@@ -434,17 +433,96 @@ def tournament_add_user(request):
         else:
             try:
                 user = User.objects.get(login=login)
+                print(user.login)
+                print(user.secret_2fa)
                 if not user.check_password(password):
                     return JsonResponse({'error': f'Player {login} password is incorrect'}, status=400)
                 if user in tournament.participants.all():
                     return JsonResponse({'error': f'Player {login} already added to the tournament'}, status=400)
-                tournament.participants.add(user)
-                tournament.save()
+                print(user.secret_2fa)
+                if user.secret_2fa:
+                    print(user.secret_2fa)
+                    request.session['tourID'] = str(tournament.id)
+                    request.session['login2FA'] = user.login
+                    return JsonResponse({'success': 'twofa', 'login': login, 'name': user.name, 'email': user.email})
+                else:
+                    print('no2FA')
+                    tournament.participants.add(user)
+                    tournament.save()
                 return JsonResponse({'success': True, 'login': login, 'local': False})
             except User.DoesNotExist:
                 return JsonResponse({'error': f'Player {login} not found'}, status=400)
     except json.JSONDecodeError:
         return JsonResponse({'error': 'Invalid JSON'}, status=400)
+
+@require_POST
+def tournament_login42(request):
+    id = request.POST["id"]
+    state = uuid.uuid4().hex
+    request.session['oauth_state_tournament'] = state
+    request.session['tour_id'] = id
+
+    client_id = 'u-s4t2ud-bda043967d92d434d1d6c24cf1d236ce0c6cc9c718a9198973efd9c5236038ed'
+    redirect_uri = quote('https://127.0.0.1:8080/callback/')
+    scope = 'public'
+    authorize_url = f'https://api.intra.42.fr/oauth/authorize?client_id={client_id}&redirect_uri={redirect_uri}&response_type=code&scope={scope}&state={state}'
+
+    return JsonResponse({'url': authorize_url})
+
+@require_POST
+def tournament_callback42(request):
+    try:
+        tournament = TournamentModel.objects.filter(owner=request.user).order_by('-id').first()
+    except ObjectDoesNotExist:
+        return JsonResponse({'error': 'Tournament not found'}, status=404)
+
+    # tournament.callback = False
+    tournament.save()
+    db_participants = tournament.participants.all().values_list('login', flat=True)
+    local_participants = getattr(tournament, 'participantsLocal', [])
+    all_participants = list(db_participants) + local_participants
+
+    participants_data = [{'login': login} for login in all_participants]
+    return  JsonResponse({'participants': participants_data, 'id': tournament.id})
+
+
+def tournament_add_user42(user_data, request):
+    try:
+        user = User.objects.get(login=user_data['login'])
+    except ObjectDoesNotExist:
+        user = User.objects.create_user(
+            username=user_data['login'],
+            email=user_data['email'],
+            password='',
+            name=user_data['usual_full_name'],
+        )
+
+    try:
+        tournament = TournamentModel.objects.get(id=request.session['tour_id'])
+        tournament.participants.add(user)
+        tournament.callback = True
+        tournament.save()
+    except ObjectDoesNotExist:
+        return JsonResponse({'error': 'Tournament not found'}, status=404)
+    
+    return render(request, 'index.html', {'from_add_user': 'true'})
+
+
+def tournament_2FAback(request):
+    id = request.session.get('tourID', None)
+    login = request.session.get('login2FA', None)
+    if id and login:
+        if login == request.POST.get("login"):
+            tournament = TournamentModel.objects.get(id=id)
+            user = User.objects.get(login=login)
+            tournament.participants.add(user)
+            tournament.save()
+            db_participants = tournament.participants.all().values_list('login', flat=True)
+            local_participants = getattr(tournament, 'participantsLocal', [])
+            all_participants = list(db_participants) + local_participants
+
+            participants_data = [{'login': login} for login in all_participants]
+        return  JsonResponse({'participants': participants_data, 'id': tournament.id})
 
 @require_POST
 def tournament_local_verify(request):
@@ -455,24 +533,29 @@ def tournament_local_verify(request):
         if not id:
             return JsonResponse({'error': 'Missing id'}, status=400)
         
-        owner = request.user
+
         tournament = TournamentModel.objects.get(id=id)
         tournament.ready = True
         tournament.save()
 
-        # url = f"http://blockchain:9000/add_tournament/{name}"
-        # response = requests.post(url)
-        # response.raise_for_status()
+        if not tournament.owner == request.user:
+            return JsonResponse({'error': 'Owner not found'}, status=404)
+        
+        name = tournament.name
+        owner = tournament.owner
+        url = f"http://blockchain:9000/add_tournament/{name}"
+        response = requests.post(url)
+        response.raise_for_status()
 
-        # player_data = {
-        #     'id': owner.id,
-        #     'login': owner.login,
-        #     'elo': owner.elo,
-        # }
-        # url = f"http://blockchain:9000/add_player/"
-        # data = {"name": name, "player": player_data}
-        # response = requests.post(url, json=data)
-        # response.raise_for_status()
+        player_data = {
+            'id': owner.id,
+            'login': owner.login,
+            'elo': owner.elo,
+        }
+        url = f"http://blockchain:9000/add_player/"
+        data = {"name": name, "player": player_data}
+        response = requests.post(url, json=data)
+        response.raise_for_status()
         
     except json.JSONDecodeError as e:
         return JsonResponse({'error': f'Error decoding JSON: {str(e)}'}, status=400)

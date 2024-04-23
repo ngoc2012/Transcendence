@@ -17,13 +17,26 @@ export class display_2fa {
 
     proceed() {
         window.history.pushState({}, '', '/');
+        var dom_log_in = document.getElementById('login');
+        if (dom_log_in) {
+            dom_log_in.style.display = "none";
+        }
+
+        var dom_signup = document.getElementById('signup');
+        if (dom_signup) {
+            dom_signup.style.display = "none";
+            dom_signup.insertAdjacentHTML('afterend', '<button id="logoutButton" class="btn btn-danger">Logout</button>');
+        }
+
+        var dom_logout = document.getElementById('logoutButton');
+        if (dom_logout) {
+            dom_logout.addEventListener('click', () => this.main.logout());
+        }
         this.main.load('/lobby', () => this.main.lobby.events());
         this.main.lobby.socket.send(JSON.stringify({ type: "authenticate", login: this.main.login }));
-
     }
 
     generateQRCode() {
-
         const secretKeyElement = document.getElementById("secretKey");
         const secretKey = secretKeyElement.dataset.secret;
         const login = this.main.login;

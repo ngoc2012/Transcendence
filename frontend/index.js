@@ -29,8 +29,7 @@ if (my42login !== null && my42login !== "" && my42email !== "" && my42ws != "")
     }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    
+document.addEventListener('DOMContentLoaded', () => { 
     if (!main.csrftoken) {
         fetch('/get-csrf/')
         .then(response => response.json())
@@ -55,7 +54,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else {
                     main.history_stack.push('/');
                     window.history.pushState({}, '', '/');
-                    main.load('/lobby', () => main.lobby.events());
+                    if (fromAddUser) {
+                        main.load('/lobby', () => main.lobby.eventsCallback());
+                    } else {
+                        main.load('/lobby', () => main.lobby.events());
+                    }
 
                     var dom_log_in = document.getElementById('login');
                     if (dom_log_in) {

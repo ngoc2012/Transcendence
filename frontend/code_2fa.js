@@ -21,6 +21,11 @@ export class code_2fa
         this.dom_cancel.addEventListener("click", () => this.cancel());
     }
 
+    eventsTour(login) {
+        this.tournament = true;
+        this.login = login;
+        this.events();
+    }
 
     confirm() {
         if (this.dom_code.value === '')
@@ -45,17 +50,32 @@ export class code_2fa
                     if (typeof info === 'string') {
                         this.main.set_status(info);
                     } else if (info.result === '1') {
-                        this.main.load('/lobby', () => this.main.lobby.events());
+                        var dom_log_in = document.getElementById('login');
+                        if (dom_log_in) {
+                            dom_log_in.style.display = "none";
+                        }
+    
+                        var dom_signup = document.getElementById('signup');
+                        if (dom_signup) {
+                            dom_signup.style.display = "none";
+                            dom_signup.insertAdjacentHTML('afterend', '<button id="logoutButton" class="btn btn-danger">Logout</button>');
+                        }
+    
+                        var dom_logout = document.getElementById('logoutButton');
+                        if (dom_logout) {
+                            dom_logout.addEventListener('click', () => this.main.logout());
+                        }
+                        if (!this.tournament) {
+                            this.main.load('/lobby', () => this.main.lobby.events());
+                        } else {
+                            this.main.load('/tournament/local', () => this.main.lobby.tournament.eventsTwoFA(this.login));
+                        }
                     } else {
                         this.main.set_status('Wrong code, please try again');
                     }
                 },
                 error: (data) => this.main.set_status(data.error)
             });
-        }
-        else {
-            console.log('Login required');
-            this.main.load('/pages/login', () => this.main.log_in.events());
         }
     }
 

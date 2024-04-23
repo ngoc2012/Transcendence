@@ -46,6 +46,7 @@ class TournamentModel(models.Model):
     local = models.BooleanField(default=False)
     rematchIP = models.BooleanField(default=False)
     ready = models.BooleanField(default=False)
+    callback = models.BooleanField(default=False)
     def __str__(self):
         return self.name
 

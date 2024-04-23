@@ -13,12 +13,12 @@
   <script src="{% static 'qrcode.min.js' %}"></script>
   <script src="{% static 'three.min.js' %}"></script>
   <script>
+    var fromAddUser = {{ from_add_user|default:"false" }};
     var my42login = '{{ my42login }}';
     var my42name = '{{ my42name }}';
     var my42email = '{{ my42email }}';
     var my42ws = '{{ my42ws }}';
     var my42enable2fa = '{{ my42enable2fa }}';
-
   </script>
   
   <style>

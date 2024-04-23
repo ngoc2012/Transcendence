@@ -19,11 +19,33 @@ export class twofa
         this.dom_log_in_qrcode.addEventListener("click", () => this.loginwithqrcode());
         this.dom_cancel.addEventListener("click", () => this.cancel());
         this.dom_log_in_email.addEventListener("click", () => this.loginWithemail());
+    }
 
+    eventsTour(login, name, email) {
+        this.tournament = true;
+        this.tourLogin = login;
+        this.tourName = name;
+        this.tourEmail = email;
+        this.events()
     }
 
     loginWithemail() {
         var csrftoken = this.main.getCookie('csrftoken');
+        let data;
+
+        if (!this.tournament) {
+            data = {
+                "login": this.main.login,
+                "name": this.main.name,
+                "email": this.main.email
+            }
+        } else {
+            data = {
+                "login": this.tourLogin,
+                "name": this.tourName,
+                "email": this.tourEmail
+            }
+        }
 
         $.ajax({
             url: '/mail_2fa/',
@@ -31,13 +53,13 @@ export class twofa
             headers: {
                 'X-CSRFToken': csrftoken,
             },
-            data: {
-                "login": this.main.login,
-                "name": this.main.name,
-                "email": this.main.email
-            },
+            data: data,
             success: (response) => {
-                this.main.load('/code_2fa', () => this.main.code_2fa.events());
+                if (!this.tournament) {
+                    this.main.load('/code_2fa', () => this.main.code_2fa.events());
+                } else {
+                    this.main.load('/code_2fa', () => this.main.code_2fa.eventsTour(this.tourLogin));
+                }
             },
             error: (xhr, status, error) => {
                 console.error('Error:', error);
@@ -47,7 +69,11 @@ export class twofa
 
 
     loginwithqrcode() {
-        this.main.load('/qrcode_2fa', () => this.main.qrcode_2fa.events());
+        if (!this.tournament) {
+            this.main.load('/qrcode_2fa', () => this.main.qrcode_2fa.events());
+        } else {
+            this.main.load('/qrcode_2fa', () => this.main.qrcode_2fa.eventsTour(this.tourLogin));
+        }
     }
 
     cancel() {

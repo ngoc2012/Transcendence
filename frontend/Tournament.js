@@ -7,13 +7,11 @@ export class Tournament {
     constructor(m, id = null) {
         this.main = m;
         this.lobby = m.lobby;
+        this.name = ''
         this.id = id;
         this.game = null;
-        this.ready = -1;
-        this.final = 0;
         this.localTournament = null;
         this.userAdded = []
-        this.name = ''
     }
 
     events() {
@@ -21,6 +19,55 @@ export class Tournament {
         this.dom_tournamentForm = document.getElementById('tournamentForm');
         if (this.dom_tournamentForm)
             this.dom_tournamentForm.addEventListener('submit', (e) => this.tournamentSubmit(e));
+    }
+
+    eventsCallback() {
+        const csrftoken = this.main.getCookie('csrftoken');
+    
+        if (csrftoken) {
+            $.ajax({
+                url: '/game/tournament/local/callback42',
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrftoken,
+                },
+                success: (response) => {
+                    this.id = response.id;
+                    const participants = response.participants;
+                    participants.forEach(participant => {this.userAdded.push(participant.login)})
+                    this.main.load('/tournament/local', () => this.eventsLocal());
+                },
+                error: (xhr) => {
+                    this.main.set_status(xhr.responseJSON.error);
+                }
+            });
+        }
+    }
+
+    eventsTwoFA(login) {
+        const csrftoken = this.main.getCookie('csrftoken');
+    
+        if (csrftoken) {
+            $.ajax({
+                url: '/game/tournament/local/2FAback',
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrftoken,
+                },
+                data: {
+                    'login': login
+                },
+                success: (response) => {
+                    this.id = response.id;
+                    const participants = response.participants;
+                    participants.forEach(participant => {this.userAdded.push(participant.login)})
+                    this.main.load('/tournament/local', () => this.eventsLocal());
+                },
+                error: (xhr) => {
+                    this.main.set_status(xhr.responseJSON.error);
+                }
+            });
+        }
     }
 
     eventsLocal() {
@@ -67,7 +114,7 @@ export class Tournament {
     
         const login42Btn = document.getElementById('login42Tour');
         login42Btn.addEventListener('click', () => {
-            window.location.href = 'https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-bda043967d92d434d1d6c24cf1d236ce0c6cc9c718a9198973efd9c5236038ed&redirect_uri=https%3A%2F%2F127.0.0.1%3A8080%2Fcallback%2F&response_type=code';
+            this.logWith42();
         });
     }
     
@@ -90,8 +137,12 @@ export class Tournament {
                     'X-CSRFToken': csrftoken,
                 },
                 success: (response) => {
-                    this.userAdded.push(response);
-                    this.main.load('/tournament/local', () => this.eventsLocal());
+                    if (response.success == 'twofa') {
+                        this.main.load('/twofa', () => this.main.twofa.eventsTour(response.login, response.name, response.email));
+                    } else {
+                        this.userAdded.push(response.login);
+                        this.main.load('/tournament/local', () => this.eventsLocal());
+                    }
                 },
                 error: (xhr) => {
                     this.main.set_status(xhr.responseJSON.error);
@@ -102,12 +153,13 @@ export class Tournament {
 
     checkAdded() {
         const playerStack = document.getElementById('player-stack');
+        console.log(this.userAdded)
         if (playerStack && this.userAdded.length > 0) {
             playerStack.innerHTML = '<h3>Current Players</h3>';
     
             this.userAdded.forEach(user => {
                 let playerEntry = document.createElement('div');
-                playerEntry.textContent = user.login;
+                playerEntry.textContent = user;
                 playerStack.appendChild(playerEntry);
             });
     
@@ -197,8 +249,6 @@ export class Tournament {
             }));
             this.id = -1;
             this.game = null;
-            this.ready = -1;
-            this.final = 0;
             this.lobby.tournament = null;
             this.main.load('/lobby', () => this.main.lobby.events());
         } else {
@@ -210,8 +260,6 @@ export class Tournament {
                     }));
                     this.id = -1;
                     this.game = null;
-                    this.ready = -1;
-                    this.final = 0;
                     this.lobby.tournament = null;
                     this.main.load('/lobby', () => this.main.lobby.events());
             }
@@ -225,5 +273,30 @@ export class Tournament {
     localBack() {
         this.localTournament = new localTournament(this.main, this.id, this);
         this.main.load('/tournament/local/start', () => this.localTournament.getMatch());
+    }
+
+    logWith42() {
+        var csrftoken = this.main.getCookie('csrftoken');
+
+        if (csrftoken) {
+            $.ajax({
+                url: '/game/tournament/local/login42',
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrftoken,
+                },
+                data: {
+                    'id': this.id
+                },
+                success: (response) => {
+                    window.location.href = response.url;
+                },
+                error: (xhr, textStatus, errorThrown) => {
+                    this.main.set_status('Error');
+                }
+            })
+        } else {
+            this.main.load('/pages/login', () => this.main.log_in.events());
+        }
     }
 }

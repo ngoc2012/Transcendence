@@ -10,7 +10,10 @@ User = get_user_model()
 
 class JWTMiddleware(MiddlewareMixin):
     def process_request(self, request):
-        if request.headers.get('X-Internal-Request') == 'true' or request.path in self.get_unauthenticated_paths() or '/callback/' in request.path or '/admin/' in request.path:
+        if '/callback/' in request.path:
+            return self.process_callback(request)
+
+        if request.headers.get('X-Internal-Request') == 'true' or request.path in self.get_unauthenticated_paths() or '/admin/' in request.path:
             return None
 
         access_token = request.COOKIES.get('access_token')
@@ -97,6 +100,12 @@ class JWTMiddleware(MiddlewareMixin):
             '/game/update',
             '/validate-session/',
         ]
+    
+    def process_callback(self, request):
+        state = request.GET.get('state', None)
+        if state and state == request.session['oauth_state_tournament']:
+            request.tournamentLogin = True
+        return None
     
 class TokenRefreshResponseMiddleware:
     def __init__(self, get_response):
