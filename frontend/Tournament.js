@@ -21,7 +21,7 @@ export class Tournament {
             this.dom_tournamentForm.addEventListener('submit', (e) => this.tournamentSubmit(e));
     }
 
-    eventsCallback() {
+    eventsCallback(tourid) {
         const csrftoken = this.main.getCookie('csrftoken');
     
         if (csrftoken) {
@@ -29,10 +29,12 @@ export class Tournament {
                 url: '/game/tournament/local/callback42',
                 method: 'POST',
                 headers: {
-                    'X-CSRFToken': csrftoken,
+                    'X-CSRFToken': csrftoken
+                },
+                data: {
+                    'tourid': tourid
                 },
                 success: (response) => {
-                    this.id = response.id;
                     const participants = response.participants;
                     participants.forEach(participant => {this.userAdded.push(participant.login)})
                     this.main.load('/tournament/local', () => this.eventsLocal());
@@ -138,7 +140,7 @@ export class Tournament {
                 },
                 success: (response) => {
                     if (response.success == 'twofa') {
-                        this.main.load('/twofa', () => this.main.twofa.eventsTour(response.login, response.name, response.email));
+                        this.main.load('/twofa', () => this.main.twofa.eventsTour(this.id, response.login, response.name, response.email));
                     } else {
                         this.userAdded.push(response.login);
                         this.main.load('/tournament/local', () => this.eventsLocal());
@@ -153,7 +155,6 @@ export class Tournament {
 
     checkAdded() {
         const playerStack = document.getElementById('player-stack');
-        console.log(this.userAdded)
         if (playerStack && this.userAdded.length > 0) {
             playerStack.innerHTML = '<h3>Current Players</h3>';
     
@@ -222,7 +223,6 @@ export class Tournament {
                     'X-CSRFToken': csrftoken,
                 },
                 success: (response) => {
-                    console.log(response);
                     this.name = response.name;
                     this.id = response.id;
                     this.main.load('/tournament/local', () => this.eventsLocal(response.name));

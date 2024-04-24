@@ -14,6 +14,7 @@
   <script src="{% static 'three.min.js' %}"></script>
   <script>
     var fromAddUser = {{ from_add_user|default:"false" }};
+    var tourid = "{{ id|default:'-1' }}";
     var my42login = '{{ my42login }}';
     var my42name = '{{ my42name }}';
     var my42email = '{{ my42email }}';

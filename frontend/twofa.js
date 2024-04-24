@@ -21,8 +21,9 @@ export class twofa
         this.dom_log_in_email.addEventListener("click", () => this.loginWithemail());
     }
 
-    eventsTour(login, name, email) {
+    eventsTour(id, login, name, email) {
         this.tournament = true;
+        this.id = id;
         this.tourLogin = login;
         this.tourName = name;
         this.tourEmail = email;
@@ -77,9 +78,15 @@ export class twofa
     }
 
     cancel() {
+        if (this.tournament) {
+            this.main.lobby.socket.send(JSON.stringify({
+                type: 'tournament-quit',
+                tour_id: this.id,
+            }));
+        }
         this.main.set_status('');
         this.main.history_stack.push('/');
         window.history.pushState({}, '', '/');
-        this.main.load('/lobby', () => this.lobby.events());
+        this.main.load('/lobby', () => this.main.lobby.events());
     }
 }

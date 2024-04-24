@@ -35,9 +35,10 @@ export class Lobby
         }
     }
 
-    eventsCallback() {
-        this.tournament = new Tournament(this.main);
-        this.main.load('/tournament', () => this.tournament.eventsCallback());
+    eventsCallback(tourid) {
+        console.log(tourid)
+        this.tournament = new Tournament(this.main, tourid);
+        this.main.load('/tournament', () => this.tournament.eventsCallback(tourid));
     }
 
 	start_chat(){

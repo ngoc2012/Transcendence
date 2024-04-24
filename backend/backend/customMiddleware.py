@@ -117,12 +117,6 @@ class JWTMiddleware(MiddlewareMixin):
             request.tournamentLogin = True
         return None
     
-    def process_callback(self, request):
-        state = request.GET.get('state', None)
-        if state and state == request.session['oauth_state_tournament']:
-            request.tournamentLogin = True
-        return None
-    
 class TokenRefreshResponseMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response

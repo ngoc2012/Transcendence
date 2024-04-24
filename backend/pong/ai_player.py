@@ -2,7 +2,7 @@ from asgiref.sync import sync_to_async
 
 from accounts.models import PlayersModel
 from pong.data import pong_data
-from .game import change_server
+from pong.game import change_server
 
 from django.contrib.auth.hashers import make_password
 import pyotp
@@ -12,11 +12,11 @@ from django.contrib.auth import get_user_model
 import requests
 
 from django.core.cache import cache
-from game.views import add_player_to_room
-from .game import remove_player
+from pong.game import remove_player
 
 @sync_to_async
 def ai_player(consumer):
+    from game.views import add_player_to_room
     try:
         player = PlayersModel.objects.get(login='ai')
     except PlayersModel.DoesNotExist:

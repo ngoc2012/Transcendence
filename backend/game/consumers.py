@@ -175,9 +175,9 @@ class RoomsConsumer(AsyncWebsocketConsumer):
     
     async def tournament_registered(self):
         tournament = TournamentModel.objects.filter(owner=self.user, terminated=False).first()
-        if tournament and not tournament.ready and not tournament.callback:
-            await database_sync_to_async(tournament.delete)()
-            return
+        # if tournament and not tournament.ready and not tournament.callback:
+        #     await database_sync_to_async(tournament.delete)()
+        #     return
         if tournament is not None:
             await self.send(text_data=json.dumps({'type': 'tournament_local_found', 'id': str(tournament.id)}))
 

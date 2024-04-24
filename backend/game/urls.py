@@ -2,6 +2,7 @@
 from django.urls import path, re_path
 
 from . import views
+from . import tournament
 
 urlpatterns = [
     path("new", views.new_game, name="new_game"),
@@ -10,14 +11,14 @@ urlpatterns = [
     path("update", views.update, name="update"),
     path("need_update", views.need_update, name="need_update"),
     re_path(r'^close/(?P<login_id>.+)$', views.close_connection, name='close_connection'),
-    path("tournament/local/join/", views.tournament_local_join, name="tournament_join"),
-    path("tournament/local/join/setup/", views.tournament_local_join_setup, name="tournament_local_join_setup"),
-    path('tournament/local/verify/', views.tournament_local_verify, name='tournament_local_verify'),
-    path('tournament/local/get/', views.tournament_local_get, name='tournament_local_get'),
-    path('tournament/local/result/', views.tournament_local_result, name='tournament_local_result'),
-    path('tournament/local/adduser/', views.tournament_add_user, name='tournament_add_user'),
-    path('tournament/local/login42', views.tournament_login42, name='tournament_add_user'),
-    path('tournament/local/login42', views.tournament_login42, name='tournament_add_user'),
-    path('tournament/local/callback42', views.tournament_callback42, name='tournament_callback42'),
-    path('tournament/local/2FAback', views.tournament_2FAback, name='tournament_2FAback'),
+    path("tournament/local/join/", tournament.tournament_local_join, name="tournament_join"),
+    path("tournament/local/join/setup/", tournament.tournament_local_join_setup, name="tournament_local_join_setup"),
+    path('tournament/local/verify/', tournament.tournament_local_verify, name='tournament_local_verify'),
+    path('tournament/local/get/', tournament.tournament_local_get, name='tournament_local_get'),
+    path('tournament/local/result/', tournament.tournament_local_result, name='tournament_local_result'),
+    path('tournament/local/adduser/', tournament.tournament_add_user, name='tournament_add_user'),
+    path('tournament/local/login42', tournament.tournament_login42, name='tournament_add_user'),
+    path('tournament/local/login42', tournament.tournament_login42, name='tournament_add_user'),
+    path('tournament/local/callback42', tournament.tournament_callback42, name='tournament_callback42'),
+    path('tournament/local/2FAback', tournament.tournament_2FAback, name='tournament_2FAback'),
 ]

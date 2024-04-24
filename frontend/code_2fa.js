@@ -123,6 +123,6 @@ export class code_2fa
         this.main.set_status('');
         this.main.history_stack.push('/');
         window.history.pushState({}, '', '/');
-        this.main.load('/lobby', () => this.lobby.events());
+        this.main.load('/lobby', () => this.main.lobby.events());
     }
 }

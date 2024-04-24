@@ -56,7 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     main.history_stack.push('/');
                     window.history.pushState({}, '', '/');
                     if (fromAddUser) {
-                        main.load('/lobby', () => main.lobby.eventsCallback());
+                        main.load('/lobby', () => main.lobby.eventsCallback(tourid));
                     } else {
                         main.load('/lobby', () => main.lobby.events());
                     }

@@ -13,7 +13,7 @@ class PlayersModel(AbstractUser):
     history = models.CharField(max_length=10)
     score_history = models.CharField(max_length=70)
     online_status = models.CharField(max_length=8, default='Offline')
-    tourn_alias = models.CharField(max_length=255)
+    tourn_alias = models.CharField(max_length=255, default='')
     friends = models.ManyToManyField("self", blank=True)
     acc = models.CharField(max_length=255)
     ref = models.CharField(max_length=255)

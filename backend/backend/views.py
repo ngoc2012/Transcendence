@@ -17,7 +17,7 @@ from django.db import IntegrityError
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.middleware.csrf import get_token
 from django.contrib.auth import authenticate, login as auth_login, get_user_model, logout as auth_logout
-from game.views import tournament_add_user42
+from game.tournament import tournament_add_user42
 from django.core.cache import cache
 
 API_PUBLIC = os.environ.get('API_PUBLIC')
@@ -63,6 +63,19 @@ def tournament_local_start(request):
 def csrf(request):
     return JsonResponse({'csrfToken': get_token(request)})
 
+@csrf_exempt
+def display_2fa(request):
+
+    email = request.POST['email']
+    secret = request.POST['secret']
+    # response = requests.get("http://blockchain:9000/print_me")
+    # data = response.json()
+    # print("data est egal a = ", data)
+    return render(request, 'display_2fa.html', {'email': email, 'secret_key': secret})
+
+def qrcode_2fa(request):
+	return (render(request, 'qrcode_2fa.html'))
+
 def validate_session(request):
     refresh_token = request.COOKIES.get('refresh_token')
     if refresh_token:
@@ -78,7 +91,6 @@ def validate_session(request):
 
                 ws_token = user.generate_ws_token()
                 enable2fa = request.POST.get('enable2fa', 'false') == 'true'
-                # user.secret_2fa = pyotp.random_base32() if enable2fa else ''
                 user.save()
                 cache.delete(f'user_{user.id}')
 
@@ -135,22 +147,6 @@ def get_tournament_data(request):
         return JsonResponse(data)
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
-    
-
-@csrf_exempt
-def display_2fa(request):
-
-    email = request.POST['email']
-    secret = request.POST['secret']
-    # response = requests.get("http://blockchain:9000/print_me")
-    # data = response.json()
-    # print("data est egal a = ", data)
-    return render(request, 'display_2fa.html', {'email': email, 'secret_key': secret})
-
-
-
-def qrcode_2fa(request):
-	return (render(request, 'qrcode_2fa.html'))
 
 # use sendgrid API to send an email to the user containing the code used for the 2fa
 @csrf_exempt
@@ -568,8 +564,6 @@ def friend(request, username):
 @require_POST
 def new_tournament(request):
     name = request.POST.get('name')
-    game = request.POST.get('game')
-    local = request.POST.get('local')
     try:
         if TournamentModel.objects.filter(name=name).exists():
             return JsonResponse({'error': 'A tournament with the same name already exists'}, status=400)

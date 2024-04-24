@@ -56,6 +56,14 @@ export class localTournament {
     }
 
     displayResults(results) {
+        this.dom_quit_tournament = document.getElementById('quit-tournament');
+        if (this.dom_quit_tournament)
+            this.dom_quit_tournament.style.display = 'none';
+
+        this.dom_lobby_tournament = document.getElementById('Lobby');
+        if (this.dom_lobby_tournament)
+            this.dom_lobby_tournament.addEventListener('click', () => this.tournament.backToLobby());
+
         var match = document.getElementById('match');
         match.innerHTML = '';
         match.innerHTML = '<h3>Match History</h3>';
