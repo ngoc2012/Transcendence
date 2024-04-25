@@ -9,14 +9,19 @@ export class qrcode_2fa
     }
     
     events() {
-        
+        this.main.checkcsrf();
 
         this.dom_code = document.querySelector("#code");
         this.dom_confirm = document.querySelector("#confirm");
         this.dom_cancel = document.querySelector("#cancel0");
-
         this.dom_confirm.addEventListener("click", () => this.confirm());
         this.dom_cancel.addEventListener("click", () => this.cancel());
+        this.dom_code.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                this.confirm();
+            }
+        });
     }
 
     eventsTour(login) {
@@ -125,7 +130,6 @@ export class qrcode_2fa
 
 
     cancel() {
-        
         this.main.history_stack.push('/');
         window.history.pushState({}, '', '/');
         this.main.load('/lobby', () => this.main.lobby.events());
