@@ -17,8 +17,5 @@ urlpatterns = [
     path('tournament/local/get/', tournament.tournament_local_get, name='tournament_local_get'),
     path('tournament/local/result/', tournament.tournament_local_result, name='tournament_local_result'),
     path('tournament/local/adduser/', tournament.tournament_add_user, name='tournament_add_user'),
-    path('tournament/local/login42', tournament.tournament_login42, name='tournament_add_user'),
-    path('tournament/local/login42', tournament.tournament_login42, name='tournament_add_user'),
-    path('tournament/local/callback42', tournament.tournament_callback42, name='tournament_callback42'),
     path('tournament/local/2FAback', tournament.tournament_2FAback, name='tournament_2FAback'),
 ]

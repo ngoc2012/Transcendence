@@ -5,7 +5,7 @@ export class tournament_history {
     }
 
     events() {
-        this.main.set_status('');
+        
         this.dom_proceed = document.querySelector("#proceed");
         this.dom_proceed.addEventListener("click", () => this.proceed());
         this.dom_Select = document.querySelector("#Select");

@@ -61,7 +61,7 @@ export class Lobby
 	}
 
     profile(){
-        this.main.set_status('');
+        
         if (this.main.login === ''){
             this.main.set_status('You must be logged in to see your profile');
             return ;
@@ -113,7 +113,7 @@ export class Lobby
     }
 
     new_game(game) {
-        this.main.set_status('');
+        
         if (this.main.login === '')
         {
             this.main.set_status('Please login or sign up');
@@ -169,7 +169,7 @@ export class Lobby
     }
  
     delete_game() {
-        this.main.set_status('');
+        
         if (this.main.login === '') {
             this.main.set_status('Please login or sign up');
             return;
@@ -235,7 +235,7 @@ export class Lobby
 
     rooms_update() {
         if (this.socket === -1) {
-            this.main.set_status('');
+            
             this.socket = new WebSocket(
                 'wss://'
                 + window.location.host

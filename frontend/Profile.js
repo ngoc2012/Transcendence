@@ -28,7 +28,7 @@ export class Profile{
     }
 
     backtolobby(){
-        this.main.set_status('');
+        
         this.main.history_stack.push('/');
         window.history.pushState({}, '', '/');
         this.main.load('/lobby', () => this.main.lobby.events());
@@ -287,7 +287,7 @@ export class Profile{
     }
 
     cn_cancel(){
-        this.main.set_status('');
+        
         this.main.history_stack.push('/profile/' + this.login + '/');
         window.history.pushState({}, '', '/profile/' + this.login);
         this.main.load('/profile' + this.login, () => this.main.profile.events());
@@ -425,7 +425,7 @@ export class Profile{
     }
 
     af_cancel(){
-        this.main.set_status('');
+        
         this.main.history_stack.push('/profile/' + this.login + '/');
         window.history.pushState({}, '', '/profile/' + this.login);
         this.main.load('/profile/' + this.login, () => this.main.profile.events());

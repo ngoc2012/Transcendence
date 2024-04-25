@@ -9,7 +9,7 @@ export class qrcode_2fa
     }
     
     events() {
-        this.main.set_status('');
+        
 
         this.dom_code = document.querySelector("#code");
         this.dom_confirm = document.querySelector("#confirm");
@@ -125,7 +125,7 @@ export class qrcode_2fa
 
 
     cancel() {
-        this.main.set_status('');
+        
         this.main.history_stack.push('/');
         window.history.pushState({}, '', '/');
         this.main.load('/lobby', () => this.main.lobby.events());

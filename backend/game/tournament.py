@@ -185,81 +185,81 @@ def tournament_add_user(request):
     
 # 42 API
 
-@require_POST
-def tournament_login42(request):
-    try:
-        id = request.POST.get("id")
-        if not id:
-            return JsonResponse({'error': 'Missing tournament ID'}, status=400)
+# @require_POST
+# def tournament_login42(request):
+#     try:
+#         id = request.POST.get("id")
+#         if not id:
+#             return JsonResponse({'error': 'Missing tournament ID'}, status=400)
 
-        state = uuid.uuid4().hex
-        request.session['oauth_state_tournament'] = state
-        request.session['tour_id'] = id
+#         state = uuid.uuid4().hex
+#         request.session['oauth_state_tournament'] = state
+#         request.session['tour_id'] = id
 
-        client_id = 'u-s4t2ud-bda043967d92d434d1d6c24cf1d236ce0c6cc9c718a9198973efd9c5236038ed'
-        redirect_uri = quote('https://127.0.0.1:8080/callback/')
-        scope = 'public'
-        authorize_url = f'https://api.intra.42.fr/oauth/authorize?client_id={client_id}&redirect_uri={redirect_uri}&response_type=code&scope={scope}&state={state}'
+#         client_id = 'u-s4t2ud-bda043967d92d434d1d6c24cf1d236ce0c6cc9c718a9198973efd9c5236038ed'
+#         redirect_uri = quote('https://127.0.0.1:8080/callback/')
+#         # scope = 'public'
+#         authorize_url = f'https://api.intra.42.fr/oauth/authorize?client_id={client_id}&redirect_uri={redirect_uri}&response_type=code&state={state}&prompt=login'
 
-        return JsonResponse({'url': authorize_url})
+#         return JsonResponse({'url': authorize_url})
     
-    except KeyError as e:
-        return JsonResponse({'error': f'Missing key in request: {str(e)}'}, status=400)
-    except Exception as e:
-        return JsonResponse({'error': f'An error occurred: {str(e)}'}, status=500)
+#     except KeyError as e:
+#         return JsonResponse({'error': f'Missing key in request: {str(e)}'}, status=400)
+#     except Exception as e:
+#         return JsonResponse({'error': f'An error occurred: {str(e)}'}, status=500)
     
-def tournament_add_user42(user_data, request):
-    if 'login' not in user_data or 'email' not in user_data:
-        return JsonResponse({'error': 'Missing required data'}, status=400)
+# def tournament_add_user42(user_data, request):
+#     if 'login' not in user_data or 'email' not in user_data:
+#         return JsonResponse({'error': 'Missing required data'}, status=400)
 
-    try:
-        user = User.objects.get(login=user_data['login'])
-    except User.DoesNotExist:
-        try:
-            user = User.objects.create_user(
-                username=user_data['login'],
-                email=user_data['email'],
-                password='',
-                name=user_data.get('usual_full_name', '')
-            )
-        except (ValidationError, IntegrityError) as e:
-            return JsonResponse({'error': str(e)}, status=400)
+#     try:
+#         user = User.objects.get(login=user_data['login'])
+#     except User.DoesNotExist:
+#         try:
+#             user = User.objects.create_user(
+#                 username=user_data['login'],
+#                 email=user_data['email'],
+#                 password='',
+#                 name=user_data.get('usual_full_name', '')
+#             )
+#         except (ValidationError, IntegrityError) as e:
+#             return JsonResponse({'error': str(e)}, status=400)
 
-    try:
-        tournament_id = request.session.get('tour_id')
-        if not tournament_id:
-            return JsonResponse({'error': 'Tournament missing'}, status=400)
+#     try:
+#         tournament_id = request.session.get('tour_id')
+#         if not tournament_id:
+#             return JsonResponse({'error': 'Tournament missing'}, status=400)
         
-        tournament = TournamentModel.objects.get(id=tournament_id)
-    except TournamentModel.DoesNotExist:
-        return JsonResponse({'error': 'Tournament not found'}, status=404)
+#         tournament = TournamentModel.objects.get(id=tournament_id)
+#     except TournamentModel.DoesNotExist:
+#         return JsonResponse({'error': 'Tournament not found'}, status=404)
 
-    tournament.participants.add(user)
-    tournament.callback = True
-    tournament.save()
+#     tournament.participants.add(user)
+#     tournament.callback = True
+#     tournament.save()
     
-    return render(request, 'index.html', {'from_add_user': 'true', 'id': tournament_id})
+#     return render(request, 'index.html', {'from_add_user': 'true', 'id': tournament_id})
 
-@require_POST
-def tournament_callback42(request):
-    id = request.POST.get('tourid')
-    if not id:
-        return JsonResponse({'error': 'Missing tournament ID'}, status=400)
+# @require_POST
+# def tournament_callback42(request):
+#     id = request.POST.get('tourid')
+#     if not id:
+#         return JsonResponse({'error': 'Missing tournament ID'}, status=400)
     
-    try:
-        tournament = TournamentModel.objects.get(id=id)
-    except ObjectDoesNotExist:
-        return JsonResponse({'error': 'Tournament not found'}, status=404)
+#     try:
+#         tournament = TournamentModel.objects.get(id=id)
+#     except ObjectDoesNotExist:
+#         return JsonResponse({'error': 'Tournament not found'}, status=404)
     
-    print(tournament.name)
+#     print(tournament.name)
 
-    # tournament.callback = False
-    tournament.save()
-    all_participants = get_tournament_participants(tournament)
-    print(all_participants)
+#     # tournament.callback = False
+#     tournament.save()
+#     all_participants = get_tournament_participants(tournament)
+#     print(all_participants)
 
-    participants_data = [{'login': login} for login in all_participants]
-    return  JsonResponse({'participants': participants_data, 'id': tournament.id})
+#     participants_data = [{'login': login} for login in all_participants]
+#     return  JsonResponse({'participants': participants_data, 'id': tournament.id})
 
 def tournament_2FAback(request):
     id = request.session.get('tourID', None)

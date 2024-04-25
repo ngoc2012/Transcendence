@@ -10,7 +10,7 @@ export class Login
 
     events() {
         this.main.checkcsrf();
-        this.main.set_status('');
+        
         this.dom_login = document.querySelector("#login0");
         this.dom_password = document.querySelector("#password0");
         this.dom_log_in = document.querySelector("#log_in");
@@ -135,11 +135,29 @@ export class Login
     }
 
     loginWith42() {
-        window.location.href = 'https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-bda043967d92d434d1d6c24cf1d236ce0c6cc9c718a9198973efd9c5236038ed&redirect_uri=https%3A%2F%2F127.0.0.1%3A8080%2Fcallback%2F&response_type=code';
+        var csrftoken = this.main.getCookie('csrftoken');
+
+        if (csrftoken) {
+            $.ajax({
+                url: '/login42/',
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrftoken,
+                },
+                success: (response) => {
+                    window.location.href = response.url;
+                },
+                error: (xhr, textStatus, errorThrown) => {
+                    this.main.set_status('Error');
+                }
+            })
+        } else {
+            this.main.load('/pages/login', () => this.main.log_in.events());
+        }
     }
 
     cancel() {
-        this.main.set_status('');
+        
         window.history.pushState({}, '', '/');
         this.main.load('/lobby', () => this.main.lobby.events());
     }

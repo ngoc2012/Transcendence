@@ -8,7 +8,8 @@ from django.utils import timezone
 from transchat.models import Room
 from django.shortcuts import redirect
 from django.conf import settings
-import requests, pyotp, secrets, os, random, jwt, string, pytz
+import requests, pyotp, secrets, os, random, jwt, string, pytz, uuid
+from urllib.parse import quote
 from datetime import datetime, timedelta
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
@@ -17,7 +18,6 @@ from django.db import IntegrityError
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.middleware.csrf import get_token
 from django.contrib.auth import authenticate, login as auth_login, get_user_model, logout as auth_logout
-from game.tournament import tournament_add_user42
 from django.core.cache import cache
 
 API_PUBLIC = os.environ.get('API_PUBLIC')
@@ -198,7 +198,6 @@ def generate_jwt_tokens(user_id):
 
     return access_token, refresh_token  
 
-# callback function used to get the info from the 42 API
 @csrf_exempt
 def new_player(request):
     if request.method != 'POST':
@@ -290,6 +289,23 @@ def log_in(request):
         return JsonResponse({'error': 'Invalid login credentials!'}, status=401)
 
 
+def login42(request):
+    try:
+
+        state = uuid.uuid4().hex
+        request.session['oauth_state_login'] = state
+
+        client_id = 'u-s4t2ud-bda043967d92d434d1d6c24cf1d236ce0c6cc9c718a9198973efd9c5236038ed'
+        redirect_uri = quote('https://127.0.0.1:8080/callback/')
+        authorize_url = f'https://api.intra.42.fr/oauth/authorize?client_id={client_id}&redirect_uri={redirect_uri}&response_type=code&state={state}'
+
+        return JsonResponse({'url': authorize_url})
+    
+    except KeyError as e:
+        return JsonResponse({'error': f'Missing key in request: {str(e)}'}, status=400)
+    except Exception as e:
+        return JsonResponse({'error': f'An error occurred: {str(e)}'}, status=500)
+
 # callback function used to get the info from the 42 API
 @csrf_exempt
 def callback(request):
@@ -311,12 +327,6 @@ def callback(request):
         })
 
         user_data = user_response.json()
-
-        try:
-            if request.tournamentLogin:
-                return tournament_add_user42(user_data, request)
-        except:
-            pass
 
 #       essayer de connecter sinon creer : 
         user = authenticate(username=user_data['login'], password='')
@@ -391,6 +401,7 @@ def logout(request):
     response = JsonResponse({'logout': 'success'})
     response.delete_cookie('access_token')
     response.delete_cookie('refresh_token')
+    response.delete_cookie('sessionid')
     return response
 
 

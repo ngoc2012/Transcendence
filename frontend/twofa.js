@@ -10,7 +10,7 @@ export class twofa
     
     events() {
         this.main.checkcsrf();
-        this.main.set_status('');
+        
 
         this.dom_log_in_qrcode = document.querySelector("#log_in_with_qrcode");
         this.dom_cancel = document.querySelector("#cancel0");
@@ -84,7 +84,7 @@ export class twofa
                 tour_id: this.id,
             }));
         }
-        this.main.set_status('');
+        
         this.main.history_stack.push('/');
         window.history.pushState({}, '', '/');
         this.main.load('/lobby', () => this.main.lobby.events());

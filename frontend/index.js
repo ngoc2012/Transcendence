@@ -15,7 +15,7 @@ if (my42login !== null && my42login !== "" && my42email !== "" && my42ws != "")
     var dom_log_in = document.getElementById('login');
     if (dom_log_in) {
         dom_log_in.style.display = "none";
-        dom_login.insertAdjacentHTML('afterend', '<button id="logoutButton" class="btn btn-danger">Logout</button>');
+        dom_log_in.insertAdjacentHTML('afterend', '<button id="logoutButton" class="btn btn-danger">Logout</button>');
     }
 
     var dom_signup = document.getElementById('signup');

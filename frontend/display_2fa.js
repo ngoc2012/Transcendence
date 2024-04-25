@@ -9,7 +9,7 @@ export class display_2fa {
 
     events() {
         this.main.checkcsrf();
-        this.main.set_status('');
+        
         this.dom_proceed = document.querySelector("#proceed");
         this.dom_proceed.addEventListener("click", () => this.proceed());
         this.generateQRCode();

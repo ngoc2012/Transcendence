@@ -21,31 +21,6 @@ export class Tournament {
             this.dom_tournamentForm.addEventListener('submit', (e) => this.tournamentSubmit(e));
     }
 
-    eventsCallback(tourid) {
-        const csrftoken = this.main.getCookie('csrftoken');
-    
-        if (csrftoken) {
-            $.ajax({
-                url: '/game/tournament/local/callback42',
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': csrftoken
-                },
-                data: {
-                    'tourid': tourid
-                },
-                success: (response) => {
-                    const participants = response.participants;
-                    participants.forEach(participant => {this.userAdded.push(participant.login)})
-                    this.main.load('/tournament/local', () => this.eventsLocal());
-                },
-                error: (xhr) => {
-                    this.main.set_status(xhr.responseJSON.error);
-                }
-            });
-        }
-    }
-
     eventsTwoFA(login) {
         const csrftoken = this.main.getCookie('csrftoken');
     
@@ -87,10 +62,8 @@ export class Tournament {
 
         const passwordField = document.getElementById('passwordField');
         const loginCheckbox = document.getElementById('loginCheckbox');
-        const login42 = document.getElementById('login42Tour');
         loginCheckbox.addEventListener('change', () => {
             passwordField.style.display = loginCheckbox.checked ? 'block' : 'none';
-            login42.style.display = loginCheckbox.checked ? 'none' : 'block';
             userLogin = userLogin === false ? true : false;
         });
     
@@ -112,11 +85,6 @@ export class Tournament {
             } else {
                 this.main.set_status('Please fill all required fields');
             }
-        });
-    
-        const login42Btn = document.getElementById('login42Tour');
-        login42Btn.addEventListener('click', () => {
-            this.logWith42();
         });
     }
     
@@ -190,7 +158,7 @@ export class Tournament {
                     'X-CSRFToken': csrftoken,
                 },
                 success: (response) => {
-                    this.main.set_status('');
+                    
                     this.localTournament = new localTournament(this.main, response.id, this);
                     this.main.load('/tournament/local/start', () => this.localTournament.getMatch());
                 },
@@ -273,30 +241,5 @@ export class Tournament {
     localBack() {
         this.localTournament = new localTournament(this.main, this.id, this);
         this.main.load('/tournament/local/start', () => this.localTournament.getMatch());
-    }
-
-    logWith42() {
-        var csrftoken = this.main.getCookie('csrftoken');
-
-        if (csrftoken) {
-            $.ajax({
-                url: '/game/tournament/local/login42',
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': csrftoken,
-                },
-                data: {
-                    'id': this.id
-                },
-                success: (response) => {
-                    window.location.href = response.url;
-                },
-                error: (xhr, textStatus, errorThrown) => {
-                    this.main.set_status('Error');
-                }
-            })
-        } else {
-            this.main.load('/pages/login', () => this.main.log_in.events());
-        }
     }
 }

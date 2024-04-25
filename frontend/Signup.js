@@ -6,7 +6,7 @@ export class Signup
 
     events() {
         this.main.checkcsrf();
-        this.main.set_status('');
+        
         this.dom_login = document.querySelector("#login1");
         this.dom_password = document.querySelector("#password1");
         this.dom_email = document.querySelector("#email1");
@@ -116,7 +116,7 @@ export class Signup
     }
 
     cancel() {
-        this.main.set_status('');
+        
         window.history.pushState({}, '', '/');
         this.main.load('/lobby', () => this.main.lobby.events());
     }

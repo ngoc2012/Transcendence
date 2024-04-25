@@ -10,8 +10,6 @@ export class code_2fa
     
     events() {
         this.main.checkcsrf();
-        this.main.set_status('');
-
         this.dom_code = document.querySelector("#code");
         this.dom_confirm = document.querySelector("#confirm");
         this.dom_cancel = document.querySelector("#cancel0");
@@ -34,6 +32,9 @@ export class code_2fa
         }
         
         var csrftoken = this.main.getCookie('csrftoken');
+
+        if (this.tournament)
+            return this.confirm_tour(csrftoken);
 
         if (csrftoken) {
             $.ajax({
@@ -119,8 +120,33 @@ export class code_2fa
         }
     }
 
+    confirm_tour(csrftoken) {
+        if (csrftoken) {
+            $.ajax({
+                url: '/verify/',
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrftoken,
+                },
+                data: {
+                    "input_code": this.dom_code.value,
+                },
+                success: (info) => {
+                    if (typeof info === 'string') {
+                        this.main.set_status(info);
+                    } else if (info.result === '1') {      
+                        this.main.load('/tournament/local', () => this.main.lobby.tournament.eventsTwoFA(this.login));
+                    } else {
+                        this.main.set_status('Wrong code, please try again');
+                    }
+                },
+                error: (data) => this.main.set_status(data.error)
+            });
+        }
+    }
+
     cancel() {
-        this.main.set_status('');
+        
         this.main.history_stack.push('/');
         window.history.pushState({}, '', '/');
         this.main.load('/lobby', () => this.main.lobby.events());

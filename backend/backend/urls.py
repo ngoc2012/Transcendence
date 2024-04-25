@@ -40,6 +40,7 @@ urlpatterns = [
     path('tournament/local/', views.tournament_local, name='tournament_local'),
     path('tournament/local/start/', views.tournament_local_start, name='tournament_local_start'),
     path('validate-session/', views.validate_session, name='validate_session'),
+    path('login42/', views.login42, name='login42'),
     re_path(r'^.*$', views.redirect, name='redirect'),
 ]
 
