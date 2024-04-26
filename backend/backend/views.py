@@ -227,7 +227,6 @@ def new_player(request):
         if (enable2fa == 'false'):
             enable2fa = ''
         user.secret_2fa = pyotp.random_base32() if enable2fa else ''
-        print(user.secret_2fa)
         user.save()
         
         response_data = {
@@ -247,7 +246,6 @@ def new_player(request):
     except Exception as e:
         return JsonResponse({'error': f'Unexpected error: {str(e)}'}, status=500)
 
-# callback function used to get the info from the 42 API
 @csrf_exempt
 def log_in(request):
     if request.method != 'POST':
@@ -291,7 +289,6 @@ def log_in(request):
 
 def login42(request):
     try:
-
         state = uuid.uuid4().hex
         request.session['oauth_state_login'] = state
 
@@ -406,7 +403,6 @@ def logout(request):
 
 
 def verify_qrcode(request):
-    print('in')
     input_code = request.POST.get('input_code')
 
     if not PlayersModel.objects.filter(login=request.POST['login']).exists():
@@ -418,7 +414,6 @@ def verify_qrcode(request):
     totp = pyotp.TOTP(player.secret_2fa)
     if totp.verify(input_code):
         return JsonResponse({'result': '1'})
-    print('fail')
     return JsonResponse({'result': '0'})
 
 @csrf_exempt

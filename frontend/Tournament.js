@@ -235,6 +235,10 @@ export class Tournament {
     }
 
     backToLobby() {
+        if (this.localTournament && this.localTournament.game) {
+            this.localTournament.game.stop();
+            this.localTournament.game.preventWinBox = true;
+        }
         this.main.load('/lobby', () => this.main.lobby.events());
     }
 

@@ -243,15 +243,9 @@ export class Lobby
             );
         }
 
-        this.socket.onopen = () => {
-            this.socket.send(JSON.stringify({
-                type: "authenticate",
-                token: this.ws,
-            }));
-            this.socket.send(JSON.stringify({
-                type: 'tournament_registered',
-            }));
-        };
+        // this.socket.onopen = () => {
+            
+        // };
         $.ajax({
             url: '/game/update',
             method: 'GET',
@@ -308,6 +302,13 @@ export class Lobby
                 'type': 'status',
                 'login': this.main.login
             }));
+            this.socket.send(JSON.stringify({
+                type: "authenticate",
+                token: this.ws,
+            }));
+            this.socket.send(JSON.stringify({
+                type: 'tournament_registered',
+            }));
         }
         this.socket.onclose = (e) => {
 
@@ -335,7 +336,6 @@ export class Lobby
                 this.tournament = new Tournament(this.main, tourID);
                 this.tournament.localBack();
             });
-    
             existingButton.replaceWith(clonedButton);
         }
     }    

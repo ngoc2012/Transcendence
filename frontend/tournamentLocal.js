@@ -103,7 +103,7 @@ export class localTournament {
                 success: (info) => {
                     switch (info.game) {
                         case 'pong':
-                            this.game = new Pong(this.main, this.main.lobby, info, this.tournament, this, true);
+                            this.game = new Pong(this.main, this.main.lobby, info, this.tournament, this, true, this.id);
 
                             this.dom_container = document.getElementById('match');
                             this.load('/pong/local', () => {

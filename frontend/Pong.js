@@ -2,7 +2,7 @@ import {Draw} from './Draw.js'
 
 export class Pong
 {
-    constructor(m, l, r, t = null, localTournament = null, localTour = false) {
+    constructor(m, l, r, t = null, localTournament = null, localTour = false, id = null) {
         this.main = m;
         this.lobby = l;
         this.room = r;
@@ -17,6 +17,7 @@ export class Pong
         this.tournament = t;
         this.localTournament = localTournament;
         this.localTour = localTour;
+        this.id = id;
     }
 
 	init() {
@@ -371,6 +372,7 @@ export class Pong
     }
 
     quit() {
+        this.preventWinBox = true
         this.players.forEach((p, i) => {
             this.set_state(i, 'quit');
             if (p.sk !== -1)
@@ -379,13 +381,13 @@ export class Pong
                 p.sk = -1;
             }
         });
-        this.preventWinBox = true
         this.main.history_stack.push('/');
         window.history.pushState({}, '', '/');
         this.main.load('/lobby', () => this.lobby.events());
     }
 
     stop() {
+        this.preventWinBox = true
         this.players.forEach((p, i) => {
             this.set_state(i, 'quit');
             if (p.sk !== -1)
@@ -411,6 +413,10 @@ export class Pong
             return;
         
         this.players[i].sk.onopen = (e) => {
+            if (this.id) {
+                console.log('send ID')
+                this.players[i].sk.send('tour_id:' + this.id);
+            }
             this.main.history_stack.push('/pong/' + this.room.id);
             window.history.pushState({}, '', '/pong/' + this.room.id);
         };
@@ -420,8 +426,7 @@ export class Pong
                 return;
             let data = JSON.parse(e.data);
             if ('win' in data) {
-                if (this.localTournament)
-                    this.stop();
+                this.stop();
                 this.winnerBox(data);
             }
             else if ('score' in data)

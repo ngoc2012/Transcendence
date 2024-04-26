@@ -7,7 +7,7 @@ import {code_2fa} from './code_2fa.js'
 import {qrcode_2fa} from './qrcode_2fa.js'
 import {display_2fa} from './display_2fa.js'
 import {tournament_history} from './tournament_history.js'
-import {Tournament} from './Tournament.js'
+import {chatBox} from './chatBox.js'
 
 export class Main
 {
@@ -32,6 +32,7 @@ export class Main
         this.display_2fa = new display_2fa(this);
         this.tournament_history = new tournament_history(this);
         this.profile = new Profile(this);
+        this.chatBox = new chatBox(this)
 
         this.dom_home = document.getElementById("home");
         this.dom_login = document.getElementById("login");

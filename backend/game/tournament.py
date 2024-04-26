@@ -120,7 +120,7 @@ def tournament_local_get(request):
     try:
         tournament = TournamentModel.objects.get(id=tour_id)
 
-        if tournament.localMatchIP:
+        if tournament.rematchIP:
             return tournament_matchIP(tournament)
         
         if tournament.ready == False:
@@ -342,15 +342,15 @@ def prepare_round(tournament, all_participants):
 
 def tournament_matchIP(tournament):
     try:
-        last_match = TournamentMatchModel.objects.filter(tournament=tournament).order_by('-id').first()
+        last_match = TournamentMatchModel.objects.filter(tournament=tournament).order_by('-match_number').first()
         if not last_match:
             return JsonResponse({'error': 'No matches found for this tournament.'}, status=404)
     except TournamentMatchModel.DoesNotExist:
         return JsonResponse({'error': 'Invalid tournament.'}, status=404)
 
-    if tournament.rematchIP:
-        tournament.rematchIP = False
-        tournament.save()
+
+    tournament.rematchIP = False
+    tournament.save()
 
     if last_match.player1isLocal:
         player1 = last_match.player1Local
@@ -470,7 +470,7 @@ def gen_match(tournament, room, player1, player2):
                 round_number=tournament.round,
                 match_number=tournament.total_matches)
 
-    tournament.localMatchIP = True
+    # tournament.localMatchIP = True
     tournament.save()
     return match
 
@@ -550,7 +550,7 @@ def update_tournament(tournament, match, score1, score2):
             tournament.eliminated.add(match.player1)
             tournament.waitlist.remove(match.player1)
 
-    tournament.localMatchIP = False
+    # tournament.localMatchIP = False
     tournament.save()
 
 def check_new_round(tournament):

@@ -13,14 +13,16 @@ from .ai_player import ai_player
 from django.core.cache import cache
 
 @database_sync_to_async
-def rematch(consumer):
+def rematch(self):
     try:
-        room = consumer.room
-        match = TournamentMatchModel.objects.get(room_uuid=room.id)
-        tournament = match.tournament
+        tournament = TournamentModel.objects.get(id=self.tour_id)
+        match = TournamentMatchModel.objects.filter(tournament=tournament).order_by('-match_number').first()
 
         if tournament.rematchIP:
             return
+        else:
+            tournament.rematchIP = True
+            tournament.save()
         
         new_room =  RoomsModel.objects.create(
             game=tournament.game,
@@ -37,10 +39,7 @@ def rematch(consumer):
 
         new_match = TournamentMatchModel.objects.create(**match_data)
         match.delete()
-        tournament.rematchIP = True
-        tournament.save()
-
-        return new_match
+    
     except TournamentMatchModel.DoesNotExist:
         print("Match not found")
     except Exception as e:
@@ -56,6 +55,7 @@ class PongConsumer(AsyncWebsocketConsumer):
         self.player = await get_user_by_id(self.player_id)
         self.player0: PlayersModel = await get_player0(self.room)
         self.player1: PlayersModel = await get_player1(self.room)
+        self.tour_id = False
         for i in ['x', 'y', 'dx', 'dy', 'ddy', 'ai', 'pow', 'score0', 'score1', 'started', 'server', 'team0', 'team1', 'all']:
             setattr(self, "k_" + i, str(self.room_id) + "_" + i)
         for i in ['x', 'y']:
@@ -88,17 +88,17 @@ class PongConsumer(AsyncWebsocketConsumer):
         # 1008: Policy violation.
         # 1011: Internal error.
         print(f"Player {self.player_id} disconnected with code {close_code}.")
+        await quit(self)
         score0 = cache.get(self.k_score0)
         score1 = cache.get(self.k_score1)
-        if self.room.tournamentRoom and score0 is None or score1 is None or score0 < 1 and score1 < 1:
-            await rematch(self)
-        await quit(self)
         await self.channel_layer.group_send(self.room_id, {'type': 'teams_data'})
         await self.channel_layer.group_send(self.room_id, {'type': 'group_data'})
         await self.channel_layer.group_discard(
             self.room_id,
             self.channel_name
         )
+        if (self.tour_id and score0 is None or score1 is None) or (score0 < 11 or score1 < 11) or ((score0 >= 11 or score1 >= 11) and abs(score0 - score1) >= 2):
+            await rematch(self)
 
     async def receive(self, text_data):
         if text_data == 'start':
@@ -129,6 +129,8 @@ class PongConsumer(AsyncWebsocketConsumer):
             await self.channel_layer.group_send(self.room_id, {'type': 'teams_data'})
         elif text_data == 'server':
             await change_server_async(self)
+        elif text_data.startswith('tour_id:'):
+            self.tour_id = text_data.split('tour_id:')[1]
         await self.channel_layer.group_send(self.room_id, {'type': 'group_data'})
     
     async def close_connection(self, data):
@@ -182,14 +184,10 @@ class PongConsumer(AsyncWebsocketConsumer):
                 await end_game(self)
                 await self.channel_layer.group_send(self.room_id, {'type': 'score_data'})
                 await self.channel_layer.group_send(self.room_id, {'type': 'group_data'})
-                # # Adding rules for tournament: first at 11 and win by 2 points:
-                # if self.room.tournamentRoom == True and (self.room.score1 >= 11 and self.room.score0 <= self.room.score1 - 2) or \
-                # (self.room.score0 >= 11 and self.room.score1 <= self.room.score0 - 2):
-                # if self.room.tournamentRoom == True and self.room.score0 == 1 or self.room.score1 == 1:
                 score0 = cache.get(self.k_score0)
                 score1 = cache.get(self.k_score1)
-                # if abs(score0 - score1) > 1 and (score0 >= 1 or score1 >= 1) :
-                if (score0 >= 1 or score1 >= 1) :
+                # if (score0 >= 1 or score1 >= 1) :
+                if abs(score0 - score1) > 1 and (score0 >= 11 or score1 >= 11) :
                     await self.channel_layer.group_send(self.room_id, {'type': 'win_data'})
                     if self.room.tournamentRoom == False:
                         if score0 > score1:

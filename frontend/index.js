@@ -83,9 +83,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 main.name = '';
                 main.dom_name.innerHTML = 'Anonyme';
                 main.lobby.ws = '';
-                // main.history_stack.push('/');
-                // window.history.pushState({}, '', '/');
-                // main.load('/lobby', () => main.lobby.events());
             }
         });
     }

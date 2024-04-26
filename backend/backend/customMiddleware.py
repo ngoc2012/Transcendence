@@ -114,10 +114,7 @@ class JWTMiddleware(MiddlewareMixin):
 
     def process_callback(self, request):
         state = request.GET.get('state', None)
-        if state and 'oauth_state_tournament' in request.session and state == request.session['oauth_state_tournament']:
-            request.tournamentLogin = True
-            return None
-        elif state and 'oauth_state_login'in request.session and state == request.session['oauth_state_login']:
+        if state and 'oauth_state_login'in request.session and state == request.session['oauth_state_login']:
             return None
         else:
             return  HttpResponseRedirect('/login/')
