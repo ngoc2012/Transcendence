@@ -2,6 +2,7 @@
 .vscode
 __pycache__
 package-lock.json
+/frontend/media
 .env
 backend/db.sqlite3
 backend/game/migrations/*.py

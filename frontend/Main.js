@@ -20,6 +20,7 @@ export class Main
     secret_2fa = '';
     history_stack = [];
     csrftoken = '';
+    picture = '';
 
     constructor()
     {

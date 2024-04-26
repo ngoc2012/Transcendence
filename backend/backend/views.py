@@ -4,6 +4,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from game.models import TournamentModel, TournamentMatchModel, RoomsModel
 from accounts.models import PlayersModel
+from accounts.forms import UploadFileForm
 from django.utils import timezone
 from transchat.models import Room
 from django.shortcuts import redirect
@@ -100,7 +101,8 @@ def validate_session(request):
                     'name': user.name,
                     'email': user.email,
                     'enable2fa': enable2fa,
-                    'ws': ws_token
+                    'ws': ws_token,
+                    'avatar': user.avatar.url
                 }
                 response = JsonResponse(response_data)
                 response.set_cookie('refresh_token', refresh_token, httponly=True, samesite='Lax', secure=True)
@@ -278,7 +280,8 @@ def log_in(request):
             'name': user.name,
             'email': user.email,
             'enable2fa': enable2fa,
-            'ws': ws_token
+            'ws': ws_token,
+            'avatar': user.avatar.url
         }
         response = JsonResponse(response_data)
         response.set_cookie('refresh_token', refresh_token, httponly=True, samesite='Lax', secure=True)
@@ -434,7 +437,8 @@ def profile(request, username):
         'email': user.email,
         'elo': user.elo,
         'history_score': user.score_history,
-        'friends': user.friends.all()
+        'friends': user.friends.all(),
+        'form': UploadFileForm()
     }
     print(user.online_status)
     return render(request, 'profile.html', context)
@@ -571,6 +575,20 @@ def friend(request, username):
                 response.status_code = 200
                 return response
     return render(request, 'add_friend.html')
+
+@csrf_exempt
+def avatar(request, username):
+    user = PlayersModel.objects.get(login=username)
+    print(request)
+    form = UploadFileForm(request.POST, request.FILES)
+    print(request.POST)
+    print(request.FILES)
+    if form.is_valid():
+        user.avatar = request.FILES['file']
+        user.save()
+        return redirect(request)
+    return redirect(request)
+    
 
 @require_POST
 def new_tournament(request):

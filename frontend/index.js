@@ -50,6 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 main.name = data.name;
                 main.dom_name.innerHTML = data.name;
                 main.lobby.ws = data.ws;
+                main.picture = data.avatar;
                 if (data.enable2fa == 'true') {
                     main.load('/twofa', () => main.twofa.events());
                 } else {
@@ -75,6 +76,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     var dom_logout = document.getElementById('logoutButton');
                     if (dom_logout) {
                         dom_logout.addEventListener('click', () => main.logout());
+                    }
+                    var dom_picture = document.getElementById('picture')
+                    if (dom_picture){
+                        dom_picture.src=data.avatar.replace('/app/frontend/', 'static/');
                     }
                 }
             } else {

@@ -1,6 +1,8 @@
 from django.urls import include, path, re_path
 from django.contrib import admin
 from django.urls import path
+from django.conf import settings
+from django.conf.urls.static import static
 from . import views
 from .views import callback, csrf
 
@@ -33,6 +35,7 @@ urlpatterns = [
     path('profile/<str:username>/change_login/', views.change_login, name="change_login"),
     path('profile/<str:username>/change_name/', views.name, name="name"),
     path('profile/<str:username>/add_friend/', views.friend, name="friend"),
+    path('profile/<str:username>/change_avatar/', views.avatar, name="avatar"),
     path('tournament/', views.tournament, name='tournament'),
     path('tournament_history/', views.tournament_history, name='tournament_history'),
     path('get_tournament_data/', views.get_tournament_data, name='get_tournament_data'),
@@ -44,5 +47,4 @@ urlpatterns = [
     re_path(r'^.*$', views.redirect, name='redirect'),
 ]
 
-
-
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
