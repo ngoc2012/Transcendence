@@ -114,6 +114,17 @@ export class Main
         this.load('/pages/signup', () => this.signup.events());
     }
 
+    set_chat() {
+        if (this.login != ''){
+            $.ajax({
+                url: '/transchat/chat_lobby/',
+                method: 'POST',
+                data: {
+                    'username': this.login
+                }
+            })
+    }
+}
     getCookie(name) {
         let cookieValue = null;
         if (document.cookie && document.cookie !== '') {

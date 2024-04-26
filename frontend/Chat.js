@@ -38,9 +38,12 @@ export class Chat{
 
        	this.socket.onmessage = function(e) {
        	    var data = JSON.parse(e.data);
+            var list_user = document.querySelector('user_list');
+            if (data.type === 'connection'){
+                list_user.reload()
+            }
 			document.querySelector('#chat-log').value += (data.message + '\n');
        	};
-
         this.socket.onclose = function(e) {
             console.error('Chat socket closed unexpectedly');
        	};

@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from .models import Room, User
+from accounts.models import PlayersModel
 
 @csrf_exempt
 def lobby(request):
@@ -9,35 +10,35 @@ def lobby(request):
         if 'username' in request.GET:
             username = request.GET['username']
             try:
-                get_user = User.objects.filter(username=username).get()
+                get_user = PlayersModel.objects.filter(login=username).get()
                 request.session['user'] = username
                 return render(request, 'chat_signup.html', {"username": username})
-            except User.DoesNotExist:
-                new_user = User(username=username)
-                new_user.save()
-                request.session['user'] = username
+            except PlayersModel.DoesNotExist:
+                response = HttpResponse("You must be logged in")
+                response.status_code = 401
                 return render(request, 'chat_signup.html', {"username": username})
     if request.method == 'POST':
         if 'username' in request.POST:
-            try:
-                get_user = User.objects.filter(username=request.POST['username']).get()
-                request.session['user'] = request.POST['username']
-            except User.DoesNotExist:
-                username = request.POST['username']
-                new_user = User(username=username)
-                new_user.save()
-                request.session['user'] = username
-            return HttpResponse("New user created.")
+            username = request.POST['username']
+            request.session['user'] = username
+            return HttpResponse("User ready to chat")
 
 @csrf_exempt
 def chatroom(request, room_name):
-    user = User.objects.get(username=request.session['user'])
     try:
         room = Room.objects.get(room_name=room_name)
-        room.users.add(user)
-        return render(request, "chatroom.html", {"room_name": room_name, "user":user})
     except Room.DoesNotExist:
         new_room = Room(room_name=room_name)
         new_room.save()
+    user = PlayersModel.objects.get(login=request.session['user'])
+    print(room_name)
+    try:
+        room = Room.objects.get(room_name=room_name)
+        room.users.add(user)
+        room.save()
+        return render(request, "chatroom.html", {"room_name": room_name, "user":user, "users": room.users.all()})
+    except Room.DoesNotExist:
+        new_room = Room(room_name=room_name)
         new_room.users.add(user)
-        return render(request, "chatroom.html", {"room_name": room_name, "user":user})
+        new_room.save()
+        return render(request, "chatroom.html", {"room_name": room_name, "user":user.login, "users": room.users.all()})

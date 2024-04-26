@@ -15,6 +15,7 @@ export class Lobby
 
     events() {
         this.main.checkcsrf();
+        this.main.set_chat();
         this.dom_rooms = document.getElementById("rooms");
         this.dom_tournament = document.getElementById("tournament");
         this.dom_tournament_history = document.getElementById("tournament_history");

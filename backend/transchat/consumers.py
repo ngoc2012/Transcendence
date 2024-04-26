@@ -3,6 +3,7 @@ import json
 from asgiref.sync import async_to_sync
 from channels.generic.websocket import WebsocketConsumer
 from .models import User, Room
+from accounts.models import PlayersModel
 
 class ChatConsumer(WebsocketConsumer):
     def connect(self):
@@ -21,9 +22,10 @@ class ChatConsumer(WebsocketConsumer):
 
     def disconnect(self, close_code):
         # Leave room group
-        user = User.objects.get(username=self.scope['state']['username'])
+        user = PlayersModel.objects.get(login=self.scope['state']['username'])
         room = Room.objects.get(room_name=self.scope['state']['room'])
         room.users.remove(user)
+        room.save()
         async_to_sync(self.channel_layer.group_discard)(
             self.room_group_name, self.channel_name
         )
@@ -33,12 +35,12 @@ class ChatConsumer(WebsocketConsumer):
             self.send(text_data=json.dumps({"message": "You can't block yourself.", 'user': data['user'], 'room': data['room']}))
             return
         try:
-            block_user = User.objects.filter(username=str).get(username=str)
-        except User.DoesNotExist:
+            block_user = PlayersModel.objects.get(login=str)
+        except PlayersModel.DoesNotExist:
             self.send(text_data=json.dumps({"message": "Unable to find user " + str + "."}))
             return
-        data['user'].blocked_user.add(block_user)
-        self.send(text_data=json.dumps({"message": "User " + block_user.username + " blocked succesfully.", 'user': data['username'], 'room': data['room']}))
+        data['user'].blocked_users.add(block_user)
+        self.send(text_data=json.dumps({"message": "User " + block_user.login + " blocked succesfully.", 'user': data['username'], 'room': data['room']}))
         return
     
     def unblock_user(self, huh, data, str):
@@ -46,8 +48,8 @@ class ChatConsumer(WebsocketConsumer):
             self.send(text_data=json.dumps({"message": "You can't unblock yourself.", 'user': data['username'], 'room': data['room']}))
             return
         try:
-            block_user = User.objects.filter(username=str).get(username=str)
-        except User.DoesNotExist:
+            block_user = PlayersModel.objects.get(login=str)
+        except PlayersModel.DoesNotExist:
             self.send(text_data=json.dumps({"message": "Unable to find user " + str + ".", 'user': data['username'], 'room': data['room']}))
             return
         data['user'].blocked_user.remove(block_user)
@@ -60,16 +62,16 @@ class ChatConsumer(WebsocketConsumer):
             self.send(text_data=json.dumps({"message": "You can't whisper yourself.", 'user': data['username'], 'room': data['room']}))
             return
         try:
-            User.objects.filter(username=value).get(username=value)
-        except User.DoesNotExist:
+            PlayersModel.objects.get(login=value)
+        except PlayersModel.DoesNotExist:
             self.send(text_data=json.dumps({'message': "Unable to find user " + value + ".", 'user': data['username'], 'room': data['room']}))
             return
         try:
-            receiver = Room.objects.get(room_name=data['room']).users.get(username=value)
-        except User.DoesNotExist:
+            receiver = Room.objects.get(room_name=data['room']).users.get(login=value)
+        except PlayersModel.DoesNotExist:
             self.send(text_data=json.dumps({"message": "Unable to whisper " + value + ". " + value + " is not in your room.", 'user': data['username'], 'room': data['room']}))
             return
-        if msg == receiver.username:
+        if msg == receiver.login:
             self.send(text_data=json.dumps({"message": "You can't send empty whispers.", "user": data['username'], 'room': data['room']}))
             return
         async_to_sync(self.channel_layer.group_send)(
@@ -82,7 +84,7 @@ class ChatConsumer(WebsocketConsumer):
             'text_data': json.loads(text_data),
             'message': json.loads(text_data)['message'],
             'username': json.loads(text_data)['user'],
-            'user': User.objects.get(username=json.loads(text_data)['user']),
+            'user': PlayersModel.objects.get(login=json.loads(text_data)['user']),
             'msg_split': str(json.loads(text_data)['message']).split(" "),
             'room': json.loads(text_data)['room'],
             'blockcmd': False,
@@ -94,6 +96,7 @@ class ChatConsumer(WebsocketConsumer):
             if data['text_data']['type'] == 'connection':
                 self.scope['state']['username'] = data['username']
                 self.scope['state']['room'] = data['room']
+                self.send(text_data=json.dumps({"type": "connection"}))
                 return
         for i in data['msg_split']:
             if i and data['blockcmd'] == True:
@@ -114,7 +117,7 @@ class ChatConsumer(WebsocketConsumer):
                     data['whisper'] = True
         # Send message to room group
         async_to_sync(self.channel_layer.group_send)(
-            self.room_group_name, {"type": "chat_message", "message": data['user'].username + ":\n" + data['message'], "user": data['user'].username, 'room': data['room']}
+            self.room_group_name, {"type": "chat_message", "message": data['user'].login + ":\n" + data['message'], "user": data['user'].login, 'room': data['room']}
         )
 
 
@@ -122,10 +125,10 @@ class ChatConsumer(WebsocketConsumer):
     def chat_message(self, event):
         message = event["message"]
         msg_user = event['user']
-        user = User.objects.get(username=self.scope['state']['username'])
+        user = PlayersModel.objects.get(login=self.scope['state']['username'])
         try:
-            user.blocked_user.get(username=msg_user)
-        except User.DoesNotExist:
+            user.blocked_users.get(login=msg_user)
+        except PlayersModel.DoesNotExist:
             self.send(text_data=json.dumps({"message": message, "user": msg_user}))
 
     def whisper(self, event):

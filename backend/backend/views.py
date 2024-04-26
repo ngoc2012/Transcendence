@@ -350,7 +350,8 @@ def callback(request):
                 'my42name': user.name,
                 'my42email': user.email,
                 'my42enable2fa': enable2fa,
-                'my42ws': ws_token
+                'my42ws': ws_token,
+                'avatar': user.avatar.url
             }
 
             response = render(request, 'index.html', response)
@@ -381,7 +382,8 @@ def callback(request):
             'my42name': user.name,
             'my42email': user.email,
             'my42enable2fa': enable2fa,
-            'my42ws': ws_token
+            'my42ws': ws_token,
+            'avatar': user.avatar.url
         }
         cache.delete(f'user_{user.id}')
         response = render(request, 'index.html', response)
