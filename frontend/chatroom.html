@@ -1,6 +1,8 @@
+<!DOCTYPE html>
+{% load static %}
+{% load replace_url %}
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 <body>
-	{% load static %}
     <div id="chat_closed">
         <div id="chat_open">
             <textarea id="chat-log" cols="10" rows="10" readonly="yes"></textarea><br>
@@ -12,8 +14,11 @@
     </div>
 </body>
 <div id="user_list">
-    {% for i in users %}
-    <a href="/profile/{{ i.login }}/">{{ i.login }}</a><br>
-    {% endfor %}
+    {% if users != None %}
+        {% for i in users %}
+        <img src="{{ i.avatar.url|change_url }}" id="picture" alt="User Icon" class="rounded-circle mx-2" style="width: 40px; height: 40px;">
+        <a href="/profile/{{ i.login }}/">{{ i.login }}</a><br>
+        {% endfor %}
+    {% endif %}
 </div>
 <script src="{% static 'Chat.js' %}" type="module"></script>

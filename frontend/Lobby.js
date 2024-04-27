@@ -55,7 +55,7 @@ export class Lobby
 				'username': this.main.login
 			}
 		});
-		this.main.chat = new Chat(this.main);
+		this.main.chat = new Chat(this.main, this.main.lobby);
         this.main.history_stack.push('/transchat/general_chat/');
         window.history.pushState({}, '', '/transchat/general_chat/');
         this.main.load('transchat/general_chat', () => this.main.chat.init());

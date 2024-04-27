@@ -21,6 +21,7 @@ export class Main
     history_stack = [];
     csrftoken = '';
     picture = '';
+    chat = null;
 
     constructor()
     {
@@ -193,6 +194,10 @@ export class Main
                     var dom_logout = document.getElementById('logoutButton');
                     if (dom_logout) {
                         dom_logout.style.display = "none";
+                    }
+                    var dom_picture = document.getElementById('picture');
+                    if (dom_picture){
+                        dom_picture.reload();
                     }
                 }
             },
