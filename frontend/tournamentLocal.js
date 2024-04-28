@@ -151,7 +151,7 @@ export class localTournament {
                 'score2': score2
             },
             success: (info) => {
-                this.tournament.localBack();
+                // this.tournament.localBack();
             },
             error: (jqXHR, textStatus, errorThrown) => {
                 if (jqXHR.status === 401) {
