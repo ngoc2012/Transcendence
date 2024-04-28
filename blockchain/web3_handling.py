@@ -14,7 +14,7 @@ def add_tournament_blockchain(name):
         with open('/app/blockchain/build/contracts/TournamentRegistry.json') as f:
             contract_data = json.load(f)
             contract_abi = contract_data['abi']
-
+        print("name in blockchain : ", name)
         latest_network_id = max(contract_data['networks'].keys())
         contract_address = contract_data['networks'][latest_network_id]['address']
         
@@ -25,8 +25,11 @@ def add_tournament_blockchain(name):
         tournament_index = TournamentRegistry.functions.getTournamentIndex(tournament_name).call()
 
         if tournament_index == -1:
+            print("on le crée bien le tournament dans la blockchain 1")
             TournamentRegistry.functions.addTournament(tournament_name).transact({'from': chosen_account})
+            print("on le crée bien le tournament dans la blockchain 2")
             tournament_index = TournamentRegistry.functions.getTournamentIndex(tournament_name).call()
+            print("on le crée bien le tournament dans la blockchain 3")
 
         TournamentRegistry.functions.setTournamentPending(tournament_index, True).transact({'from': chosen_account})
 
@@ -41,9 +44,9 @@ def add_player_to_tournament_blockchain(name, player, elo):
             contract_data = json.load(f)
             contract_abi = contract_data['abi']
 
-        print("name acceded : ", name)
+        # print("name acceded : ", name)
 
-        print("player acceded : ", player)
+        # print("player acceded : ", player)
 
         latest_network_id = max(contract_data['networks'].keys())
         contract_address = contract_data['networks'][latest_network_id]['address']
@@ -80,8 +83,8 @@ def tournament_history():
         contract_address = contract_data['networks'][latest_network_id]['address']
         
         TournamentRegistry = web3.eth.contract(address=contract_address, abi=contract_abi)
-        tournament_names = TournamentRegistry.functions.getActiveTournamentNames().call()
-
+        tournament_names = TournamentRegistry.functions.getTournamentNames().call()
+        # print("names in web3 : ", tournament_names)
         return {'names' : tournament_names}
 
     except Exception as e:
@@ -164,20 +167,38 @@ def add_match_to_tournament_blockchain(match, player1, player2):
         tournament_name = match.get('name')
         tournament_index = TournamentRegistry.functions.getTournamentIndex(tournament_name).call()
 
-
         matches = [
-            {'player1': {'name': player1.get('login'), 'elo': player1.get('elo')}, 'player2': {'name': player2.get('login'), 'elo': player2.get('elo')}, 'scorePlayer1': player1.get('score'), 'scorePlayer2': player2.get('score'), 'round': str(match.get('round')) , 'winner': match.get('winner')}
+            {
+                'player1': {
+                    'name': player1.get('login'),
+                    'elo': player1.get('elo')
+                },
+                'player2': {
+                    'name': player2.get('login'),
+                    'elo': player2.get('elo')
+                },
+                'scorePlayer1': int(player1.get('score')),
+                'scorePlayer2': int(player2.get('score')),
+                'round': str(match.get('round')),
+                'winner': match.get('winner')
+            }
         ]
+
+        # print("MATCH = ", matches)
         for match_data in matches:
             player1 = match_data['player1']
             player2 = match_data['player2']
-            TournamentRegistry.functions.addMatch(tournament_index,
-                                                   player1['name'], 
-                                                   player2['name'],
-                                                   match_data['scorePlayer1'], 
-                                                   match_data['scorePlayer2'],
-                                                   match_data['round'], 
-                                                   match_data['winner']).transact({'from': chosen_account})
+            scorePlayer1 = int(match_data['scorePlayer1'])
+            scorePlayer2 = int(match_data['scorePlayer2'])
+            TournamentRegistry.functions.addMatch(
+                tournament_index,
+                player1['name'],
+                player2['name'],
+                scorePlayer1,
+                scorePlayer2,
+                match_data['round'],
+                match_data['winner']
+            ).transact({'from': chosen_account})
     except Exception as e:
         print("Error:", e)
         return -1
@@ -298,12 +319,11 @@ def add_match():
     player1 = data.get('player1')
     player2 = data.get('player2')
 
-    print (match)
-    print (player1)
-    print (player2)
+    # print (match)
+    # print (player1)
+    # print (player2)
 
     result  = 1
-
     result = add_match_to_tournament_blockchain(match, player1, player2)
     if result == -1:
         return jsonify({"error": "Failed to add match to blockchain"}), 500

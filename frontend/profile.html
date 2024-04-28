@@ -7,6 +7,10 @@
 <button id="alias" type="button">Change your tournament name</button>
 <button id="password" type="button">Change your password</button>
 <button id="email" type="button">Change your email</button>
+<form action="/profile/{{ login }}/change_avatar/" enctype="multipart/form-data" method="post">
+    {{ form }}
+    <input type="submit" value="Submit">
+</form>
 <button id="back" type="button">Back to lobby</button><br>
 Your name: {{ name }}<br>
 Your login: {{ login }}<br>

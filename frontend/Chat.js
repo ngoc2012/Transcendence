@@ -1,6 +1,7 @@
 export class Chat{
-	constructor(m){
+	constructor(m, l){
 		this.main = m;
+        this.lobby = l;
 		this.socket = -1;
 	}
 
@@ -38,9 +39,16 @@ export class Chat{
 
        	this.socket.onmessage = function(e) {
        	    var data = JSON.parse(e.data);
-			document.querySelector('#chat-log').value += (data.message + '\n');
+            var list_user = document.getElementById('user_list');
+            console.log(list_user)
+            if (data.type === "connection"){
+                console.log(data.type)
+                $( "#user_list" ).load(window.location.href + " #user_list")
+                return;
+            }
+            else
+			    document.querySelector('#chat-log').value += (data.message + '\n');
        	};
-
         this.socket.onclose = function(e) {
             console.error('Chat socket closed unexpectedly');
        	};

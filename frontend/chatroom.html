@@ -1,18 +1,24 @@
 <!DOCTYPE html>
-
-<html>
-	<body>
-	{% load static %}
+{% load static %}
+{% load replace_url %}
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<body>
     <div id="chat_closed">
         <div id="chat_open">
-            <textarea id="chat-log" cols="10" rows="10"></textarea><br>
+            <textarea id="chat-log" cols="10" rows="10" readonly="yes"></textarea><br>
             <input id="chat-message-input" type="text" size="100"><br>
             <input id="chat-message-submit" type="button" value="Send">
             {{ room_name|json_script:"room-name" }}
-            <a href="#chat_open" class="open">Open chat</a>
             <a href="#chat_closed" class="close">Close chat</a>
         </div>
     </div>
 </body>
+<div id="user_list">
+    {% if users != None %}
+        {% for i in users %}
+        <img src="{{ i.avatar.url|change_url }}" id="picture" alt="User Icon" class="rounded-circle mx-2" style="width: 40px; height: 40px;">
+        <a href="/profile/{{ i.login }}/">{{ i.login }}</a><br>
+        {% endfor %}
+    {% endif %}
+</div>
 <script src="{% static 'Chat.js' %}" type="module"></script>
-</html>

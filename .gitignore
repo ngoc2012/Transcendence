@@ -3,6 +3,7 @@
 __pycache__
 package-lock.json
 .env
+frontend/media/*
 backend/db.sqlite3
 backend/game/migrations/*.py
 backend/transchat/migrations/*.py

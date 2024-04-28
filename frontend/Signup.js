@@ -55,7 +55,21 @@ export class Signup
                     this.main.name = info.name;
                     this.main.dom_name.innerHTML = info.name;
                     this.main.lobby.ws = info.ws;
-                    
+                    var dom_log_in = document.getElementById('login');
+                    if (dom_log_in) {
+                        dom_log_in.style.display = "none";
+                    }
+
+                    var dom_signup = document.getElementById('signup');
+                    if (dom_signup) {
+                        dom_signup.style.display = "none";
+                        dom_signup.insertAdjacentHTML('afterend', '<button id="logoutButton" class="btn btn-danger">Logout</button>');
+                    }
+
+                    var dom_logout = document.getElementById('logoutButton');
+                    if (dom_logout) {
+                        dom_logout.addEventListener('click', () => this.main.logout());
+                    }
                     if (checkbox) {
                         this.display2FASetup(info.secret);
                     } else {

@@ -1,4 +1,5 @@
 from django.db import models
+from accounts.models import PlayersModel
 
 class User(models.Model):
 	username = models.CharField(max_length=20)
@@ -9,7 +10,7 @@ class User(models.Model):
 
 class Room(models.Model):
 	room_name = models.CharField(max_length=25)
-	users = models.ManyToManyField(User, blank=True)
+	users = models.ManyToManyField(PlayersModel, blank=True)
 
 	def __str__(self):
 		return self.room_name

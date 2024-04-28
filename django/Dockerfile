@@ -30,6 +30,7 @@ RUN     pip3 install pyjwt
 RUN     pip3 install google-auth google-auth-oauthlib google-auth-httplib2
 RUN     pip3 install pyotp
 RUN     pip3 install sendgrid
+RUN     pip3 install Pillow
 
 RUN     pip3 install psycopg2-binary
 

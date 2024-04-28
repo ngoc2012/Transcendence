@@ -20,6 +20,8 @@ export class Main
     secret_2fa = '';
     history_stack = [];
     csrftoken = '';
+    picture = '';
+    chat = null;
 
     constructor()
     {
@@ -114,6 +116,17 @@ export class Main
         this.load('/pages/signup', () => this.signup.events());
     }
 
+    set_chat() {
+        if (this.login != ''){
+            $.ajax({
+                url: '/transchat/chat_lobby/',
+                method: 'POST',
+                data: {
+                    'username': this.login
+                }
+            })
+    }
+}
     getCookie(name) {
         let cookieValue = null;
         if (document.cookie && document.cookie !== '') {
@@ -182,6 +195,10 @@ export class Main
                     var dom_logout = document.getElementById('logoutButton');
                     if (dom_logout) {
                         dom_logout.style.display = "none";
+                    }
+                    var dom_picture = document.getElementById('picture');
+                    if (dom_picture){
+                        dom_picture.src="static/media/chat.jpg"
                     }
                 }
             },

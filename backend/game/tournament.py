@@ -230,6 +230,19 @@ def tournament_2FAback(request):
     
     return JsonResponse({'participants': participants_data, 'id': tournament.id})
 
+
+def add_player_to_blockchain(tournament_name, login):
+    player_data = {
+        'id': 0,
+        'login': login,
+        'elo': 0,
+    }
+    url = f"http://blockchain:9000/add_player/"
+    data = {"name": tournament_name, "player": player_data}
+    response = requests.post(url, json=data)
+    response.raise_for_status()
+
+
 @require_POST
 def tournament_local_verify(request):
     try:
@@ -248,20 +261,15 @@ def tournament_local_verify(request):
             return JsonResponse({'error': 'Owner not found'}, status=404)
         
         name = tournament.name
-        owner = tournament.owner
         url = f"http://blockchain:9000/add_tournament/{name}"
         response = requests.post(url)
         response.raise_for_status()
 
-        player_data = {
-            'id': owner.id,
-            'login': owner.login,
-            'elo': owner.elo,
-        }
-        url = f"http://blockchain:9000/add_player/"
-        data = {"name": name, "player": player_data}
-        response = requests.post(url, json=data)
-        response.raise_for_status()
+        for participant in tournament.participants.all():
+            add_player_to_blockchain(tournament.name, participant.login)
+
+        for participant in tournament.participantsLocal:
+            add_player_to_blockchain(tournament.name, participant)
         
     except json.JSONDecodeError as e:
         return JsonResponse({'error': f'Error decoding JSON: {str(e)}'}, status=400)
@@ -437,6 +445,12 @@ def fetch_matches(tournament):
 def tournament_local_end(tournament):
     matches = fetch_matches(tournament)
 
+    winner = tournament.participantsLocal[0] if len(tournament.participantsLocal) == 1 else (tournament.participants.first().login if not tournament.participants.first().tourn_alias else tournament.participants.first().tourn_alias)
+
+    url = f"http://blockchain:9000/add_winner/"
+    data = {"name": tournament.name, "winner": winner}
+    response = requests.post(url, json=data)
+    response.raise_for_status()
     return JsonResponse({
         'name': tournament.name,
         'round': 'Terminated',
@@ -556,15 +570,53 @@ def update_match(match, score1, score2):
 
     if score1 > score2:
         if match.player1isLocal:
-            match.winnerLocal = match.player1Local 
+            match.winnerLocal = match.player1Local
+            winblock = match.player1Local
         else:
             match.winner = match.player1
+            winblock = match.player1.login
     else:
         if match.player2isLocal:
             match.winnerLocal = match.player2Local
+            winblock = match.player2Local
+
         else:
             match.winner = match.player2
+            winblock = match.player2.login
+    
     match.save()
+    if match.player1isLocal:
+        blockplayer1 = match.player1Local
+    else:
+        blockplayer1 = match.player1.login
+
+    if match.player2isLocal:
+        blockplayer2 = match.player2Local
+    else:
+        blockplayer2 = match.player2.login
+
+    player1_data = {
+        'id': 0,
+        'login': blockplayer1,
+        'elo': 0,
+        'score': match.p1_score
+    }
+    player2_data = {
+        'id': 0,
+        'login': blockplayer2,
+        'elo': 0,
+        'score': match.p2_score
+    }
+    match_data = {
+        'name': match.tournament.name,
+        'winner': winblock,
+        'round': match.round_number,
+    }
+    url = f"http://blockchain:9000/add_match/"
+    data = {"match": match_data, "player1": player1_data, "player2": player2_data}
+    response = requests.post(url, json=data)
+    response.raise_for_status()
+
 
 def update_tournament(tournament, match, score1, score2):
     if score1 > score2:

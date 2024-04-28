@@ -44,39 +44,33 @@ export class tournament_history {
 
                 if (!isPending) {
                     document.getElementById("selectedTournamentName").innerHTML = `
-                        <h2>Selected Tournament:  ${tournamentName}</h2>
+                        <h1><p style="font-weight: bold;">${tournamentName}</p></h1>
                         <h3>Contenders:</h3>
                         <ul>
-                            ${contenders.map(contender => `<li>${contender[0]} - ${contender[1]}</li>`).join('')}
+                        ${contenders.map(contender => contender[0]).join(', ')}
                         </ul>
+                    
                         <h3>Matches:</h3>
                         <ul>
-                            ${matches.map(match => `<li>${match[4]} : ${match[0]} vs ${match[1]}, ${match[2]} - ${match[3]} | Winner: ${match[5]}</li>`).join('')}
+                        ${matches.map(match => `<li>Match number ${match[4]} : ${match[0][0]} vs ${match[1][0]} <br>Result : ${match[2]} - ${match[3]} | Winner : ${match[5]}</li>`).join('')}
                         </ul>
-                        <p>Tournament Winner: ${tournamentWinner}</p>
-
+                        <h3><p style="font-weight: bold;">Winner:<br>${tournamentWinner} !</p></h3>
                     `;
                 }
-
                 else {
                     document.getElementById("selectedTournamentName").innerHTML = `
-                        <h2>Selected Tournament:  ${tournamentName}</h2>
+                        <h1><p style="font-weight: bold;">${tournamentName}</p></h1>
                         <h3>Contenders:</h3>
                         <ul>
-                            ${contenders.map(contender => `<li>${contender[0]} - ${contender[1]}</li>`).join('')}
+                        ${contenders.map(contender => contender[0]).join(', ')}
                         </ul>
                         <h3>Matches:</h3>
                         <ul>
-                            ${matches.map(match => `<li>${match[4]} : ${match[0]} vs ${match[1]} (${match[2]}) - (${match[3]}) | Winner: ${match[5]}</li>`).join('')}
+                        ${matches.map(match => `<li>Match number ${match[4]} : ${match[0][0]} vs ${match[1][0]} <br>Result : ${match[2]} - ${match[3]} | Winner : ${match[5]}</li>`).join('')}
                         </ul>
-
-                        <p>Winner : The tournament is not over yet !</p>
-
-
+                        <h3><p style="font-weight: bold;">Winner:<br>The tournament is not over yet !</p></h3>
                     `;
-
                 }
-
             },
             error: (xhr, status, error) => {
                 console.error('Error:', error);

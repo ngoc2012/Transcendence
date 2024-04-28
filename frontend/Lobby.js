@@ -15,6 +15,7 @@ export class Lobby
 
     events() {
         this.main.checkcsrf();
+        this.main.set_chat();
         this.dom_rooms = document.getElementById("rooms");
         this.dom_tournament = document.getElementById("tournament");
         this.dom_tournament_history = document.getElementById("tournament_history");
@@ -54,7 +55,7 @@ export class Lobby
 				'username': this.main.login
 			}
 		});
-		this.main.chat = new Chat(this.main);
+		this.main.chat = new Chat(this.main, this.main.lobby);
         this.main.history_stack.push('/transchat/general_chat/');
         window.history.pushState({}, '', '/transchat/general_chat/');
         this.main.load('transchat/general_chat', () => this.main.chat.init());

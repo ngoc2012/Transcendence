@@ -5,6 +5,7 @@ from django.contrib.postgres.fields import ArrayField
 from accounts.models import PlayersModel
 from django.conf import settings
 from django.db.models import JSONField
+from django import forms
 
 class RoomsModel(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -72,3 +73,4 @@ class TournamentMatchModel(models.Model):
     player2isLocal = models.BooleanField(default=False)
     def __str__(self):
         return f"{self.tournament.name}"
+    
