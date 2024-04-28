@@ -197,7 +197,7 @@ export class Main
                     }
                     var dom_picture = document.getElementById('picture');
                     if (dom_picture){
-                        dom_picture.reload();
+                        dom_picture.src="static/media/chat.jpg"
                     }
                 }
             },
