@@ -57,6 +57,8 @@ class PongConsumer(AsyncWebsocketConsumer):
         self.player0: PlayersModel = await get_player0(self.room)
         self.player1: PlayersModel = await get_player1(self.room)
         self.tour_id = False
+        self.terminated = False
+        self.disconnected = False
         for i in ['x', 'y', 'dx', 'dy', 'ddy', 'ai', 'pow', 'score0', 'score1', 'started', 'server', 'team0', 'team1', 'all']:
             setattr(self, "k_" + i, str(self.room_id) + "_" + i)
         for i in ['x', 'y']:
@@ -88,6 +90,7 @@ class PongConsumer(AsyncWebsocketConsumer):
         # 1006: Abnormal closure (such as a server crash).
         # 1008: Policy violation.
         # 1011: Internal error.
+        self.disconnected = True
         print(f"Player {self.player_id} disconnected with code {close_code}.")
         score0 = cache.get(self.k_score0)
         score1 = cache.get(self.k_score1)
@@ -98,9 +101,6 @@ class PongConsumer(AsyncWebsocketConsumer):
             self.channel_name
         )
         await quit(self)
-        print(close_code)
-        # if (self.tour_id and score0 is None or score1 is None) or (score0 < 11 or score1 < 11) or ((score0 >= 11 or score1 >= 11) and abs(score0 - score1) >= 2):
-        # if (self.tour_id and score0 is None or score1 is None) or (score0 < 1 or score1 < 1):
         if self.tour_id and not self.terminated:
             await rematch(self)
 
@@ -194,7 +194,8 @@ class PongConsumer(AsyncWebsocketConsumer):
                 score1 = cache.get(self.k_score1)
                 if (score0 >= 1 or score1 >= 1) :
                 # if abs(score0 - score1) > 1 and (score0 >= 11 or score1 >= 11) :
-                    await self.channel_layer.group_send(self.room_id, {'type': 'win_data'})
+                    if not self.disconnected:
+                        await self.channel_layer.group_send(self.room_id, {'type': 'win_data'})
                     if self.room.tournamentRoom == False:
                         if score0 > score1:
                             self.player0.history += 'W'

@@ -14,7 +14,7 @@ export class localTournament {
         this.dom_quit_tournament = document.getElementById('quit-tournament');
         this.dom_quit_tournament.addEventListener('click', () => this.tournament.quitTournament());
         this.dom_lobby_tournament = document.getElementById('Lobby');
-        this.dom_lobby_tournament.addEventListener('click', () => this.tournament.backToLobby());
+        this.dom_lobby_tournament.style.display = 'none';
     }
 
     getMatch() {
