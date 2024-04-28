@@ -435,6 +435,7 @@ def profile(request, username):
         'elo': user.elo,
         'history_score': user.score_history,
         'friends': user.friends.all(),
+        'url': user.avatar.url,
         'form': UploadFileForm()
     }
     print(user.online_status)
