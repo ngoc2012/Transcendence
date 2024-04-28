@@ -15,14 +15,15 @@ from django.core.cache import cache
 @database_sync_to_async
 def rematch(self):
     try:
+        print('entering rematch')
         tournament = TournamentModel.objects.get(id=self.tour_id)
-        match = TournamentMatchModel.objects.filter(tournament=tournament).order_by('-match_number').first()
-
         if tournament.rematchIP:
             return
-        else:
-            tournament.rematchIP = True
-            tournament.save()
+        
+        tournament.rematchIP = True
+        tournament.save()
+
+        match = TournamentMatchModel.objects.filter(tournament=tournament).order_by('-match_number').first()
         
         new_room =  RoomsModel.objects.create(
             game=tournament.game,
@@ -88,7 +89,6 @@ class PongConsumer(AsyncWebsocketConsumer):
         # 1008: Policy violation.
         # 1011: Internal error.
         print(f"Player {self.player_id} disconnected with code {close_code}.")
-        await quit(self)
         score0 = cache.get(self.k_score0)
         score1 = cache.get(self.k_score1)
         await self.channel_layer.group_send(self.room_id, {'type': 'teams_data'})
@@ -97,7 +97,11 @@ class PongConsumer(AsyncWebsocketConsumer):
             self.room_id,
             self.channel_name
         )
-        if (self.tour_id and score0 is None or score1 is None) or (score0 < 11 or score1 < 11) or ((score0 >= 11 or score1 >= 11) and abs(score0 - score1) >= 2):
+        await quit(self)
+        print(close_code)
+        # if (self.tour_id and score0 is None or score1 is None) or (score0 < 11 or score1 < 11) or ((score0 >= 11 or score1 >= 11) and abs(score0 - score1) >= 2):
+        # if (self.tour_id and score0 is None or score1 is None) or (score0 < 1 or score1 < 1):
+        if self.tour_id and not self.terminated:
             await rematch(self)
 
     async def receive(self, text_data):
@@ -129,6 +133,8 @@ class PongConsumer(AsyncWebsocketConsumer):
             await self.channel_layer.group_send(self.room_id, {'type': 'teams_data'})
         elif text_data == 'server':
             await change_server_async(self)
+        elif text_data == 'stop':
+            self.terminated = True
         elif text_data.startswith('tour_id:'):
             self.tour_id = text_data.split('tour_id:')[1]
         await self.channel_layer.group_send(self.room_id, {'type': 'group_data'})
@@ -186,8 +192,8 @@ class PongConsumer(AsyncWebsocketConsumer):
                 await self.channel_layer.group_send(self.room_id, {'type': 'group_data'})
                 score0 = cache.get(self.k_score0)
                 score1 = cache.get(self.k_score1)
-                # if (score0 >= 1 or score1 >= 1) :
-                if abs(score0 - score1) > 1 and (score0 >= 11 or score1 >= 11) :
+                if (score0 >= 1 or score1 >= 1) :
+                # if abs(score0 - score1) > 1 and (score0 >= 11 or score1 >= 11) :
                     await self.channel_layer.group_send(self.room_id, {'type': 'win_data'})
                     if self.room.tournamentRoom == False:
                         if score0 > score1:
@@ -204,7 +210,7 @@ class PongConsumer(AsyncWebsocketConsumer):
                             self.player1.score_history += str(score0) + '-' + str(score1)
                             self.player0.save()
                             self.player1.save()
-                        return
+                    return
             await check_collision(self)
             await self.channel_layer.group_send(self.room_id, {'type': 'group_data'})
 

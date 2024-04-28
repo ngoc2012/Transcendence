@@ -94,14 +94,18 @@ def tournament_local_join(request):
 def tournament_local_result(request):
     try:
         room_id = request.POST.get("room")
+        print('room id :' + str(room_id))
         score1 = request.POST.get("score1")
         score2 = request.POST.get("score2")
 
         match = TournamentMatchModel.objects.get(room_uuid=room_id)
+        print('match.room_uuid :' + str(match.room_uuid))
+        tournament = match.tournament
+        print(tournament)
 
         update_match(match, score1, score2)
-        update_tournament(match.tournament, match, score1, score2)
-        check_new_round(match.tournament)
+        update_tournament(tournament, match, score1, score2)
+        check_new_round(tournament)
         return JsonResponse({'status': 'ok'})
         
     except ValueError:
@@ -127,16 +131,34 @@ def tournament_local_get(request):
             return JsonResponse({'error': 'not ready'})
         
         all_participants, all_waitlist = get_tournament_data(tournament)
+        print('data ok')
+        print('all participants:')
+        print(all_participants)
+        print('all waitlist:')
+        print(all_waitlist)
 
         if len(all_participants) == 1 and not all_waitlist:
             tournament.terminated = True
             tournament.save()
             return tournament_local_end(tournament)
+        print('2 ok: not terminated')
     
         all_participants = update_status(tournament, all_participants, all_waitlist)
+        print('3 ok')
+        print('all participants:')
+        print(all_participants)
+        print('all waitlist:')
+        print(all_waitlist)
         all_participants, player1, player2 = prepare_round(tournament, all_participants)
+        print('4 ok')
+        print('all participants:')
+        print(all_participants)
+        print('all waitlist:')
+        print(all_waitlist)
         room = gen_room(tournament)
+        print('5 ok')
         match = gen_match(tournament, room, player1, player2)
+        print('6 ok')
 
         move_player_to_waitlist(tournament, player1)
         move_player_to_waitlist(tournament, player2)
@@ -270,6 +292,7 @@ def get_player(player, is_local):
         return player if is_local else User.objects.get(login=player)
 
 def refresh_participants(tournament):
+    print('enter refresh particpants')
     tournament.participants.add(*list(tournament.waitlist.all()))
     tournament.waitlist.clear()
 
@@ -312,8 +335,10 @@ def update_status(tournament, all_participants, all_waitlist):
         tournament.final = True
 
     if tournament.newRound:
+        print('update status: new round entering')
         if len(all_participants) % 2 != 0:
             random_participant = random.choice(all_participants)
+            all_participants.remove(random_participant)
             move_player_to_waitlist(tournament, random_participant)
         tournament.newRound = False
     
@@ -336,6 +361,8 @@ def prepare_round(tournament, all_participants):
     tournament.total_matches += 1
     tournament.save()
     random.shuffle(all_participants)
+    print('shuffled')
+    print(all_participants)
     player1 = all_participants[0]
     player2 = all_participants[1]
     return all_participants, player1, player2
@@ -409,8 +436,6 @@ def fetch_matches(tournament):
 
 def tournament_local_end(tournament):
     matches = fetch_matches(tournament)
-    tournament.terminated = True
-    tournament.save()
 
     return JsonResponse({
         'name': tournament.name,
@@ -423,6 +448,13 @@ def tournament_local_end(tournament):
 def gen_match(tournament, room, player1, player2):
     player1_is_local = player1 in tournament.participantsLocal
     player2_is_local = player2 in tournament.participantsLocal
+
+    print(tournament.participantsLocal)
+
+    print(player1)
+    print(player1_is_local)
+    print(player2)
+    print(player2_is_local)
 
     if player1_is_local and player2_is_local:
         match = TournamentMatchModel.objects.create(

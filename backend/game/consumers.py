@@ -188,7 +188,6 @@ class RoomsConsumer(AsyncWebsocketConsumer):
         if self.login == data.get('receiver'):
             await self.send(text_data=json.dumps({'type': 'friend_request_receive', 'sender': data.get('sender'), 'receiver': data.get('receiver')}))
 
-
     async def update_online_status(self, data):
         user = await get_user_from_login(data.get('login'))
         if user:

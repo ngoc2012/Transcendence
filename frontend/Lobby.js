@@ -235,7 +235,6 @@ export class Lobby
 
     rooms_update() {
         if (this.socket === -1) {
-            
             this.socket = new WebSocket(
                 'wss://'
                 + window.location.host
@@ -243,9 +242,15 @@ export class Lobby
             );
         }
 
-        // this.socket.onopen = () => {
-            
-        // };
+        this.socket.onopen = () => {
+            this.socket.send(JSON.stringify({
+                type: "authenticate",
+                token: this.ws,
+            }));
+            this.socket.send(JSON.stringify({
+                type: 'tournament_registered',
+            }));
+        };
         $.ajax({
             url: '/game/update',
             method: 'GET',
@@ -310,9 +315,9 @@ export class Lobby
                 type: 'tournament_registered',
             }));
         }
-        this.socket.onclose = (e) => {
+        // this.socket.onclose = (e) => {
 
-        };
+        // };
     }
 
     tournament_click() {

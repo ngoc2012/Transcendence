@@ -18,6 +18,7 @@ export class Pong
         this.localTournament = localTournament;
         this.localTour = localTour;
         this.id = id;
+        this.preventWinBox = true;
     }
 
 	init() {
@@ -372,7 +373,6 @@ export class Pong
     }
 
     quit() {
-        this.preventWinBox = true
         this.players.forEach((p, i) => {
             this.set_state(i, 'quit');
             if (p.sk !== -1)
@@ -387,9 +387,8 @@ export class Pong
     }
 
     stop() {
-        this.preventWinBox = true
         this.players.forEach((p, i) => {
-            this.set_state(i, 'quit');
+            this.set_state(i, 'stop');
             if (p.sk !== -1)
             {
                 p.sk.close();
@@ -414,7 +413,6 @@ export class Pong
         
         this.players[i].sk.onopen = (e) => {
             if (this.id) {
-                console.log('send ID')
                 this.players[i].sk.send('tour_id:' + this.id);
             }
             this.main.history_stack.push('/pong/' + this.room.id);
@@ -427,6 +425,7 @@ export class Pong
             let data = JSON.parse(e.data);
             if ('win' in data) {
                 this.stop();
+                this.preventWinBox = false;
                 this.winnerBox(data);
             }
             else if ('score' in data)
@@ -477,10 +476,10 @@ export class Pong
             }
         };
     
-        this.players[i].sk.onclose = (e) => {
-            if (!this.localTournament)
-                this.main.load('/lobby', () => this.lobby.events());
-        };
+        // this.players[i].sk.onclose = (e) => {
+        //     if (!this.localTournament)
+        //         this.main.load('/lobby', () => this.lobby.events());
+        // };
     }
 
     set_state(i, e) {
