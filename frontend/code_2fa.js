@@ -92,6 +92,8 @@ export class code_2fa
                                         window.history.pushState({}, '', '/');
                                         this.main.load('/lobby', () => this.main.lobby.events());
                                     } else {
+                                        this.main.history_stack.push('/tournament/local');
+                                        window.history.pushState({}, '', '/tournament/local');
                                         this.main.load('/tournament/local', () => this.main.lobby.tournament.eventsTwoFA(this.login));
                                     }
                                 }
@@ -134,7 +136,9 @@ export class code_2fa
                 success: (info) => {
                     if (typeof info === 'string') {
                         this.main.set_status(info);
-                    } else if (info.result === '1') {      
+                    } else if (info.result === '1') {     
+                        this.main.history_stack.push('/tournament/local');
+                        window.history.pushState({}, '', '/tournament/local');
                         this.main.load('/tournament/local', () => this.main.lobby.tournament.eventsTwoFA(this.login));
                     } else {
                         this.main.set_status('Wrong code, please try again');
@@ -146,7 +150,6 @@ export class code_2fa
     }
 
     cancel() {
-        
         this.main.history_stack.push('/');
         window.history.pushState({}, '', '/');
         this.main.load('/lobby', () => this.main.lobby.events());

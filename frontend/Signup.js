@@ -73,7 +73,8 @@ export class Signup
                     if (checkbox) {
                         this.display2FASetup(info.secret);
                     } else {
-                        window.history.pushState({}, '', '/lobby');
+                        this.main.history_stack.push('/');
+                        window.history.pushState({}, '', '/');
                         this.main.load('/lobby', () => this.main.lobby.events());
                     }
                 }
@@ -131,6 +132,7 @@ export class Signup
 
     cancel() {
         this.main.set_status('');
+        this.main.history_stack.push('/');
         window.history.pushState({}, '', '/');
         this.main.load('/lobby', () => this.main.lobby.events());
     }

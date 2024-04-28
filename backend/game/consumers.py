@@ -225,8 +225,6 @@ class RoomsConsumer(AsyncWebsocketConsumer):
             response = requests.get(url)
             response.raise_for_status()
             await database_sync_to_async(tournament.delete)()
-        else:
-            await self.send(text_data=json.dumps({"type": "error_nf"}))
 
     async def broadcast_user_list(self):
         connected_user_ids = list(RoomsConsumer.connected_users)

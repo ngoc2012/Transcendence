@@ -32,6 +32,8 @@ export class display_2fa {
         if (dom_logout) {
             dom_logout.addEventListener('click', () => this.main.logout());
         }
+        this.main.history_stack.push('/');
+        window.history.pushState({}, '', '/');
         this.main.load('/lobby', () => this.main.lobby.events());
     }
 

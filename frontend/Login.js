@@ -150,7 +150,7 @@ export class Login
     }
 
     cancel() {
-        
+        this.main.history_stack.push('/');
         window.history.pushState({}, '', '/');
         this.main.load('/lobby', () => this.main.lobby.events());
     }

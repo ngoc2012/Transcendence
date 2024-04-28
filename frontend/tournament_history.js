@@ -79,6 +79,8 @@ export class tournament_history {
     }
 
     proceed() {
+        this.main.history_stack.push('/');
+        window.history.pushState({}, '', '/');
         this.main.load('/lobby', () => this.main.lobby.events());
     }
 

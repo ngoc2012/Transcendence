@@ -38,6 +38,8 @@ export class Tournament {
                     this.id = response.id;
                     const participants = response.participants;
                     participants.forEach(participant => {this.userAdded.push(participant.login)})
+                    this.main.history_stack.push('/tournament/local');
+                    window.history.pushState({}, '', '/tournament/local');
                     this.main.load('/tournament/local', () => this.eventsLocal());
                 },
                 error: (xhr) => {
@@ -108,9 +110,13 @@ export class Tournament {
                 },
                 success: (response) => {
                     if (response.success == 'twofa') {
+                        this.main.history_stack.push('/twofa');
+                        window.history.pushState({}, '', '/twofa');
                         this.main.load('/twofa', () => this.main.twofa.eventsTour(this.id, response.login, response.name, response.email));
                     } else {
                         this.userAdded.push(response.login);
+                        this.main.history_stack.push('/tournament/local');
+                        window.history.pushState({}, '', '/tournament/local');
                         this.main.load('/tournament/local', () => this.eventsLocal());
                     }
                 },
@@ -160,6 +166,8 @@ export class Tournament {
                 success: (response) => {
                     
                     this.localTournament = new localTournament(this.main, response.id, this);
+                    this.main.history_stack.push('/tournament/local/start');
+                    window.history.pushState({}, '', '/tournament/local/start');
                     this.main.load('/tournament/local/start', () => this.localTournament.getMatch());
                 },
                 error: (xhr) => {
@@ -193,6 +201,8 @@ export class Tournament {
                 success: (response) => {
                     this.name = response.name;
                     this.id = response.id;
+                    this.main.history_stack.push('/tournament/local');
+                    window.history.pushState({}, '', '/tournament/local');
                     this.main.load('/tournament/local', () => this.eventsLocal(response.name));
                 },
                 error: (xhr, textStatus, errorThrown) => {
@@ -205,6 +215,8 @@ export class Tournament {
                 }
             });
         } else {
+            this.history_stack.push('/login');
+            window.history.pushState({page: '/login'}, '', '/login');
             this.main.load('/pages/login', () => this.main.log_in.events());
         }        
     }
@@ -218,6 +230,8 @@ export class Tournament {
             this.id = -1;
             this.game = null;
             this.lobby.tournament = null;
+            this.main.history_stack.push('/');
+            window.history.pushState({}, '', '/');
             this.main.load('/lobby', () => this.main.lobby.events());
         } else {
             const confirmQuit = confirm("Warning: Quitting the tournament will end tournament for every player. Are you sure?");
@@ -229,6 +243,8 @@ export class Tournament {
                     this.id = -1;
                     this.game = null;
                     this.lobby.tournament = null;
+                    this.main.history_stack.push('/');
+                    window.history.pushState({}, '', '/');
                     this.main.load('/lobby', () => this.main.lobby.events());
             }
         }
@@ -239,6 +255,8 @@ export class Tournament {
             this.localTournament.game.stop();
             this.localTournament.game.preventWinBox = true;
         }
+        this.main.history_stack.push('/');
+        window.history.pushState({}, '', '/');
         this.main.load('/lobby', () => this.main.lobby.events());
     }
 

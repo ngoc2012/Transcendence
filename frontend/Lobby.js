@@ -39,6 +39,8 @@ export class Lobby
     eventsCallback(tourid) {
         console.log(tourid)
         this.tournament = new Tournament(this.main, tourid);
+        this.main.history_stack.push('/tournament');
+        window.history.pushState({}, '', '/tournament');
         this.main.load('/tournament', () => this.tournament.eventsCallback(tourid));
     }
 
@@ -109,6 +111,8 @@ export class Lobby
                 error: () => this.main.set_status('Error: Can not join game')
             });
         } else {
+            this.history_stack.push('/login');
+            window.history.pushState({page: '/login'}, '', '/login');
             this.main.load('/pages/login', () => this.main.log_in.events());
         }
     }
@@ -157,6 +161,8 @@ export class Lobby
                 error: () => this.main.set_status('Error: Can not create game')
             });
         } else {
+            this.history_stack.push('/login');
+            window.history.pushState({page: '/login'}, '', '/login');
             this.main.load('/pages/login', () => this.main.log_in.events());
         }
     }
@@ -224,6 +230,8 @@ export class Lobby
                 }
             });
         } else {
+            this.history_stack.push('/login');
+            window.history.pushState({page: '/login'}, '', '/login');
             this.main.load('/pages/login', () => this.main.log_in.events());
         }
     }
@@ -277,9 +285,6 @@ export class Lobby
             if (data.type === 'tournament_local_found') {
                 this.displayTournamentLocalBack(data.id);
             }
-            else if (data.type === 'error_nf') {
-                // this.main.load('/tournament/lobby', () => this.eventsLobby());
-            }
             else if (data.type === 'friend_request_send'){
                 this.main.profile.send_request(data);
             }
@@ -328,6 +333,10 @@ export class Lobby
             return;
         }
         this.tournament = new Tournament(this.main);
+        // this.main.history_stack.push('/tournament');
+        // window.history.pushState({}, '', '/tournament');
+        this.main.history_stack.push('/tournament');
+        window.history.pushState({page: '/tournament'}, '', '/tournament');
         this.main.load('/tournament', () => this.tournament.events());
     }
 
