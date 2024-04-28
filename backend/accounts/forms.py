@@ -16,4 +16,4 @@ class PlayersModelChangeForm(UserChangeForm):
 
 
 class UploadFileForm(forms.Form):
-    file = forms.FileField(label="Choose a new profile picture")
+    file = forms.FileField(label="")

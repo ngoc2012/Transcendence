@@ -1,7 +1,7 @@
-{% load static %}
-<!-- {{ context|json_script:"user" }} -->
-<!-- {% csrf_token %} -->
-<button id="add_friend" type="button">Add a friend</button>
+<!-- {% load static %} -->
+        <!-- {{ context|json_script:"user" }} -->
+        <!-- {% csrf_token %} -->
+<!-- <button id="add_friend" type="button">Add a friend</button>
 <button id="log_in" type="button">Change your login</button>
 <button id="new_name" type="button">Change your name</button>
 <button id="alias" type="button">Change your tournament name</button>
@@ -21,4 +21,79 @@ Your match history: {% if history %}{% for i in history %} {% if i == 'W' %} Win
 Your score history: {% for i in history_score %} {{ i }} {% endfor %}<br>
 Your email: {{ email }} <br>
 Your ranking {{ elo }}<br>
-Your friends: <br> {% for i in friends %} {{ i.login }} - {{ i.online_status }} <br> {% endfor %}<br>
+Your friends: <br> {% for i in friends %} {{ i.login }} - {{ i.online_status }} <br> {% endfor %}<br> -->
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Profile</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="{% static 'styles/profile.css' %}">
+
+
+  <style>
+
+    .profile-picture {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        margin: 0 auto 20px;
+        display: block;
+        }
+
+  </style>
+</head>
+<body>
+
+<div class="container mt-5">
+  <div class="row">
+    <div class="col-md-6 offset-md-3 mb-4">
+        <img src="{% static 'media/chat.jpg' %}" id="picture" alt="User Icon" class="rounded-circle profile-picture">
+        <h1 class="text-center mb-4">{{ name }} Profile</h1>
+
+      <!-- <h3 class="text-center">Your Information</h3> -->
+      <p>Your name: {{ name }}</p>
+      <p>Your login: {{ login }}</p>
+      {% if context != '' %}
+        {% if alias %}
+          <p>Your alias: {{ alias }}</p>
+        {% endif %}
+      {% endif %}
+      <p>Your match history: {% if history %}{% for i in history %} {% if i == 'W' %} Win {% else %} Lose {% endif %} {% endfor %} {% else %} No recent matches {% endif %}</p>
+      <p>Your score history: {% for i in history_score %} {{ i }} {% endfor %}</p>
+      <p>Your email: {{ email }}</p>
+      <p>Your friends:</p>
+      <ul>
+        {% for i in friends %}
+          <li>{{ i.login }} - {{ i.online_status }}</li>
+        {% endfor %}
+      </ul>
+      <hr>
+      <button id="add_friend" class="btn btn-primary btn-block mb-2" type="button">Add a friend</button>
+      <button id="log_in" class="btn btn-primary btn-block mb-2" type="button">Change your login</button>
+      <button id="new_name" class="btn btn-primary btn-block mb-2" type="button">Change your name</button>
+      <button id="alias" class="btn btn-primary btn-block mb-2" type="button">Change your tournament name</button>
+      <button id="password" class="btn btn-primary btn-block mb-2" type="button">Change your password</button>
+      <button id="email" class="btn btn-primary btn-block mb-2" type="button">Change your email</button>
+      
+      <form action="/profile/{{ login }}/change_avatar/" enctype="multipart/form-data" method="post">
+          {% csrf_token %}
+          {{ form }}
+          <input type="submit" class="btn btn-primary btn-block mb-2" value="Submit a new profile picture">        
+      </form>
+      <hr>
+      <button id="back" class="btn btn-secondary btn-block mb-4" type="button">Back to lobby</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+</body>
+</html>

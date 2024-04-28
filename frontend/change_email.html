@@ -1,8 +1,15 @@
-<label for="email">Enter your new mail address:</label>
-<input type="text" name="email" id="new_email">
-<label for="confirm_email">Confirm your new mail address:</label>
-<input type="password" name="confirm_email" id="email_confirm">
-<label for="password">Enter your password:</label>
-<input type="password" name="password" id="password">
-<button type="button" id="confirm">Confirm</button>
-<button type="button" id="cancel">Cancel</button>
+<div class="form-group">
+    <label for="email">Enter your new email address:</label>
+    <input type="email" class="form-control" name="email" id="new_email">
+  </div>
+  <div class="form-group">
+    <label for="confirm_email">Confirm your new email address:</label>
+    <input type="email" class="form-control" name="confirm_email" id="email_confirm">
+  </div>
+  <div class="form-group">
+    <label for="password">Enter your password:</label>
+    <input type="password" class="form-control" name="password" id="password">
+  </div>
+  <button type="button" class="btn btn-primary" id="confirm">Confirm</button>
+  <button type="button" class="btn btn-secondary" id="cancel">Cancel</button>
+  
