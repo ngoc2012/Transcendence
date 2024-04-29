@@ -188,7 +188,7 @@ JWT_REFRESH_SECRET_KEY = os.environ.get('JWT_REFRESH_SECRET_KEY')
 CACHES = {
     "default": {
         # "BACKEND": "django.core.cache.backends.redis.RedisCache",
-        "LOCATION": "redis://redis:6379",
+        "LOCATION": "redis://redis:5379",
         "BACKEND": "django_redis.cache.RedisCache",
         # "LOCATION": "redis://redis:6379/1",
         # "OPTIONS": {

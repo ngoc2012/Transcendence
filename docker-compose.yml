@@ -103,7 +103,7 @@ services:
     env_file:
      - .env
     ports:
-      - 6379:6379
+      - 5379:5379
     networks:
       - network
 
