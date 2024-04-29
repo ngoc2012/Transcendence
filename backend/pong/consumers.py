@@ -207,6 +207,8 @@ class PongConsumer(AsyncWebsocketConsumer):
                         if score0 > score1:
                             self.player0.history += 'W'
                             self.player1.history += 'L'
+                            self.player0.opp_history.add(self.player1)
+                            self.player1.opp_history.add(self.player0)
                             self.player0.score_history += str(score0) + '-' + str(score1)
                             self.player1.score_history += str(score0) + '-' + str(score1)
                             self.player0.save()
@@ -214,6 +216,8 @@ class PongConsumer(AsyncWebsocketConsumer):
                         else:
                             self.player0.history += 'L'
                             self.player1.history += 'W'
+                            self.player0.opp_history.add(self.player1)
+                            self.player1.opp_history.add(self.player0)
                             self.player0.score_history += str(score0) + '-' + str(score1)
                             self.player1.score_history += str(score0) + '-' + str(score1)
                             self.player0.save()

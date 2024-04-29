@@ -12,6 +12,7 @@ class PlayersModel(AbstractUser):
     elo = models.IntegerField(default=1500)
     history = models.CharField(max_length=10)
     score_history = models.CharField(max_length=70)
+    opp_history = models.ManyToManyField('self', blank=True, symmetrical=False, related_name='opps')
     online_status = models.CharField(max_length=8, default='Offline')
     tourn_alias = models.CharField(max_length=255, default='')
     friends = models.ManyToManyField("self", blank=True)
@@ -19,7 +20,7 @@ class PlayersModel(AbstractUser):
     ref = models.CharField(max_length=255)
     ws_token = models.CharField(max_length=255, blank=True, null=True)
     ws_token_expires = models.DateTimeField(blank=True, null=True)
-    blocked_users = models.ManyToManyField('self', blank=True, symmetrical=False)
+    blocked_users = models.ManyToManyField('self', blank=True, symmetrical=False, related_name='blocked_user')
     avatar = models.ImageField(upload_to='media', default='/media/chat.jpg')
 
     USERNAME_FIELD = 'login'

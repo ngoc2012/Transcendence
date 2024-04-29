@@ -65,13 +65,18 @@ Your friends: <br> {% for i in friends %} {{ i.login }} - {{ i.online_status }} 
         {% endif %}
       {% endif %}
       <p>Your match history: {% if history %}{% for i in history %} {% if i == 'W' %} Win {% else %} Lose {% endif %} {% endfor %} {% else %} No recent matches {% endif %}</p>
-      <p>Your score history: {% for i in history_score %} {{ i }} {% endfor %}</p>
+      <p>Opponent history: {% if opp %} {% for i in opp %} {{ i.login }} {% endfor %} {% else %} No recent matches {% endif %}</p>
+      <p>Your score history: {% if history_score %} {% for i in history_score %} {{ i }} {% endfor %} {% else %} No recent matches{% endif %}</p>
       <p>Your email: {{ email }}</p>
       <p>Your friends:</p>
       <ul>
-        {% for i in friends %}
-          <li>{{ i.login }} - {{ i.online_status }}</li>
-        {% endfor %}
+        {% if friends %}
+            {% for i in friends %}
+                <li>{{ i.login }} - {{ i.online_status }}</li>
+            {% endfor %}
+        {% else %}
+            <p>You don't have friends (sadge)</p>
+        {% endif %}
       </ul>
       <hr>
       <button id="add_friend" class="btn btn-primary btn-block mb-2" type="button">Add a friend</button>
