@@ -35,7 +35,7 @@ def room_list(rooms):
         {
             "id": str(i),
             "name": i.name,
-            "owner":i.player0.login
+            "owner": i.player0.login,
             } for i in rooms])
 
 @sync_to_async
