@@ -15,7 +15,7 @@ if (my42login !== null && my42login !== "" && my42email !== "" && my42ws != "")
     var dom_log_in = document.getElementById('login');
     if (dom_log_in) {
         dom_log_in.style.display = "none";
-        dom_log_in.insertAdjacentHTML('afterend', '<button id="logoutButton" class="btn btn-danger">Logout</button>');
+        dom_log_in.insertAdjacentHTML('afterend', '<button id="logoutButton" class="btn btn-danger">Log Out</button>');
     }
 
     var dom_signup = document.getElementById('signup');
@@ -118,7 +118,7 @@ let targetColor2 = [...color2];
                     var dom_signup = document.getElementById('signup');
                     if (dom_signup) {
                         dom_signup.style.display = "none";
-                        dom_signup.insertAdjacentHTML('afterend', '<button id="logoutButton" class="btn btn-danger">Logout</button>');
+                        dom_signup.insertAdjacentHTML('afterend', '<button id="logoutButton" class="btn btn-danger">Log Out</button>');
                     }
 
                     var dom_logout = document.getElementById('logoutButton');
