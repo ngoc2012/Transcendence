@@ -431,6 +431,7 @@ def profile(request, username):
         'name': user.name,
         'alias': user.tourn_alias,
         'history': user.history,
+        'opp': user.opp_history.all(),
         'email': user.email,
         'elo': user.elo,
         'history_score': user.score_history,
@@ -438,7 +439,6 @@ def profile(request, username):
         'url': user.avatar.url,
         'form': UploadFileForm()
     }
-    print(user.online_status)
     return render(request, 'profile.html', context)
 
 @csrf_exempt

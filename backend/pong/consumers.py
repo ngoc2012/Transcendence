@@ -123,6 +123,11 @@ class PongConsumer(AsyncWebsocketConsumer):
         elif text_data == 'power':
             await set_power_play(self)
         elif text_data == 'ai_player':
+            players = cache.get(self.k_all)
+            # print(cache.get(self.k_ai), len(players))
+            ai = cache.get(self.k_ai)
+            if (ai == None or ai == False) and len(players) > 1:
+                return
             await ai_player(self)
         elif text_data == 'quit':
             next
@@ -138,6 +143,8 @@ class PongConsumer(AsyncWebsocketConsumer):
         elif text_data.startswith('tour_id:'):
             self.tour_id = text_data.split('tour_id:')[1]
         await self.channel_layer.group_send(self.room_id, {'type': 'group_data'})
+        self.player0: PlayersModel = await get_player0(self.room)
+        self.player1: PlayersModel = await get_player1(self.room)
     
     async def close_connection(self, data):
         await self.send(text_data=json.dumps({
@@ -192,25 +199,41 @@ class PongConsumer(AsyncWebsocketConsumer):
                 await self.channel_layer.group_send(self.room_id, {'type': 'group_data'})
                 score0 = cache.get(self.k_score0)
                 score1 = cache.get(self.k_score1)
-                if (score0 >= 1 or score1 >= 1) :
+                if cache.get(self.k_ai) == True:
+                    print("player ai")
+                if (score0 >= 2 or score1 >= 2) :
                 # if abs(score0 - score1) > 1 and (score0 >= 11 or score1 >= 11) :
                     if not self.disconnected:
                         await self.channel_layer.group_send(self.room_id, {'type': 'win_data'})
                     if self.room.tournamentRoom == False:
-                        if score0 > score1:
+                        if score0 > score1 and cache.get(self.k_ai) == False:
                             self.player0.history += 'W'
                             self.player1.history += 'L'
+                            self.player0.opp_history.add(self.player1)
+                            self.player1.opp_history.add(self.player0)
                             self.player0.score_history += str(score0) + '-' + str(score1)
                             self.player1.score_history += str(score0) + '-' + str(score1)
                             self.player0.save()
                             self.player1.save()
-                        else:
+                        elif cache.get(self.k_ai) == False:
                             self.player0.history += 'L'
                             self.player1.history += 'W'
+                            self.player0.opp_history.add(self.player1)
+                            self.player1.opp_history.add(self.player0)
                             self.player0.score_history += str(score0) + '-' + str(score1)
                             self.player1.score_history += str(score0) + '-' + str(score1)
                             self.player0.save()
                             self.player1.save()
+                        elif score0 > score1 and cache.get(self.k_ai) == True:
+                            self.player0.history += 'W'
+                            self.player0.opp_history.add(PlayersModel.objects.get(login='ai'))
+                            self.player0.score_history += str(score0) + '-' + str(score1)
+                            self.player0.save()
+                        else:
+                            self.player0.history += 'L'
+                            self.player0.opp_history.add(PlayersModel.objects.get(login='ai'))
+                            self.player0.score_history += str(score0) + '-' + str(score1)
+                            self.player0.save()
                     return
             await check_collision(self)
             await self.channel_layer.group_send(self.room_id, {'type': 'group_data'})

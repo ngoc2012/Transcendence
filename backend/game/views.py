@@ -115,7 +115,6 @@ def join(request):
     room = RoomsModel.objects.get(id=request.POST['game_id'])
     room.player1 = player
     room.save()
-    print("debug join = " + str(room.player1))
     if player.id in players:
         return (HttpResponse("Error: Player with login " + request.POST['login'] + " is already in the room!"))
     room, player = add_player_to_room(request.POST['game_id'], request.POST['login'])
