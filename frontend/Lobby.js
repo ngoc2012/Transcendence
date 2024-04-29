@@ -24,11 +24,13 @@ export class Lobby
         this.dom_chat = document.querySelector("#chat");
         this.dom_delete = document.querySelector("#delete");
         this.dom_profile = document.querySelector('#profile');
+        this.dom_homebar = document.querySelector('#homebar');
         this.dom_pong.addEventListener("click", () => this.new_game("pong"));
         this.dom_delete.addEventListener("click", () => this.delete_game());
         this.dom_join.addEventListener("click", () => this.join());
 		this.dom_chat.addEventListener("click", () => this.start_chat());
         this.dom_profile.addEventListener("click", () => this.profile());
+        this.dom_homebar.addEventListener("click", () => this.homebar());
         this.dom_tournament.addEventListener("click", () => this.tournament_click());
         this.dom_tournament_history.addEventListener("click", () => this.tournament_history_click());
         if (this.main.login != '') {
@@ -64,7 +66,7 @@ export class Lobby
 	}
 
     profile(){
-        
+
         if (this.main.login === ''){
             this.main.set_status('You must be logged in to see your profile');
             return ;
@@ -72,6 +74,12 @@ export class Lobby
         this.main.history_stack.push('/profile/' + this.main.login);
         window.history.pushState({}, '', '/profile/' + this.main.login);
         this.main.load('/profile/' + this.main.login, () => this.main.profile.init());
+    }
+
+    homebar() {
+        this.main.history_stack.push('/');
+        window.history.pushState({}, '', '/');
+        this.main.load('/lobby', () => this.lobby.events());
     }
 
     join() {
@@ -91,7 +99,7 @@ export class Lobby
                 method: 'POST',
                 headers: {
                     'X-CSRFToken': csrftoken,
-                },        
+                },
                 data: {
                     'login': this.main.login,
                     "game_id": this.dom_rooms.options[this.dom_rooms.selectedIndex].value
@@ -118,13 +126,13 @@ export class Lobby
     }
 
     new_game(game) {
-        
+
         if (this.main.login === '')
         {
             this.main.set_status('Please login or sign up');
             return;
         }
-        
+
         var csrftoken = this.main.getCookie('csrftoken');
 
         if (csrftoken) {
@@ -174,9 +182,9 @@ export class Lobby
 		}
         this.main.load('/tournament_history', () => this.main.tournament_history.events());
     }
- 
+
     delete_game() {
-        
+
         if (this.main.login === '') {
             this.main.set_status('Please login or sign up');
             return;
@@ -340,18 +348,34 @@ export class Lobby
 
     displayTournamentLocalBack(tourID) {
         const existingButton = document.getElementById('tournament');
-    
+
         if (existingButton) {
             const clonedButton = existingButton.cloneNode(true);
             clonedButton.textContent = 'Tournament';
-    
+
             clonedButton.addEventListener('click', () => {
                 this.tournament = new Tournament(this.main, tourID);
                 this.tournament.localBack();
             });
             existingButton.replaceWith(clonedButton);
         }
-    }    
+    }
+
+    changeBackground() {
+        this.color1 = this.color1.map(c => {
+            c += Math.floor(Math.random() * 50 - 25); // Increase the range to -25 to +25
+            return Math.max(0, Math.min(255, c)); // Clamping the color between 0 and 255
+        });
+        this.color2 = this.color2.map(c => {
+            c += Math.floor(Math.random() * 50 - 25); // Increase the range to -25 to +25
+            return Math.max(0, Math.min(255, c)); // Clamping the color between 0 and 255
+        });
+
+        const newColor1 = `rgb(${this.color1[0]}, ${this.color1[1]}, ${this.color1[2]})`;
+        const newColor2 = `rgb(${this.color2[0]}, ${this.color2[1]}, ${this.color2[2]})`;
+
+        this.bg.style.background = `linear-gradient(120deg, ${newColor1}, ${newColor2})`;
+    }
 
     checkLogin() {
         if (this.main.login != '') {

@@ -95,7 +95,8 @@ def update(request):
     data = [
         {
             "id": str(room.id),
-            "name": room.name
+            "name": room.name,
+            "owner": room.player0.login,
         } for room in RoomsModel.objects.filter(tournamentRoom=False)
     ]
     return JsonResponse(data, safe=False)

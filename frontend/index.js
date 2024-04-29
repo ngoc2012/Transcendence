@@ -49,11 +49,47 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    const bg = document.getElementById('dynamic-bg');
+let color1 = [166, 192, 254]; // Initial color in RGB
+let color2 = [246, 128, 132]; // Initial color in RGB
+let targetColor1 = [...color1];
+let targetColor2 = [...color2];
+
+    function interpolateColors(current, target) {
+        return current.map((c, i) => {
+            if (c < target[i]) {
+                return Math.min(c + 1, target[i]);
+            } else {
+                return Math.max(c - 1, target[i]);
+            }
+        });
+    }
+
+    function updateTargetColors() {
+        targetColor1 = targetColor1.map(c => Math.max(0, Math.min(255, c + Math.floor(Math.random() * 50 - 25))));
+        targetColor2 = targetColor2.map(c => Math.max(0, Math.min(255, c + Math.floor(Math.random() * 50 - 25))));
+    }
+
+    function changeBackground() {
+        color1 = interpolateColors(color1, targetColor1);
+        color2 = interpolateColors(color2, targetColor2);
+
+        const newColor1 = `rgb(${color1[0]}, ${color1[1]}, ${color1[2]})`;
+        const newColor2 = `rgb(${color2[0]}, ${color2[1]}, ${color2[2]})`;
+
+        bg.style.background = `linear-gradient(120deg, ${newColor1}, ${newColor2})`;
+
+        if (color1.every((c, i) => c === targetColor1[i]) && color2.every((c, i) => c === targetColor2[i])) {
+            updateTargetColors();
+        }
+    }
+
+    setInterval(changeBackground, 100);
+    updateTargetColors();
+
+
     if (!main.login)
         checkSession();
-
-    // var main_title = document.getElementById('main_title');
-    // main_title.addEventListener('click', () => main.load(''));
 
     function checkSession() {
         validateSessionToken().then(data => {
@@ -128,7 +164,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function    reload() {
-        console.log('reload')
         const   path = window.location.pathname;
         if (main.lobby.game && main.lobby.game !== undefined)
         {
