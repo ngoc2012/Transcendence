@@ -270,7 +270,8 @@ export class Lobby
                     rooms.forEach((room) => {
                         var option = document.createElement("option");
                         option.value = room.id;
-                        option.text = room.name + " - " + room.id;
+                        let string = room.id.substring(0,5)
+                        option.text = room.name  + " - " + string + "... - " + room.owner;
                         this.dom_rooms.add(option);
                     });
                 }
@@ -301,7 +302,8 @@ export class Lobby
                     rooms.forEach((room) => {
                         var option = document.createElement("option");
                         option.value = room.id;
-                        option.text = room.name + " - " + room.id;
+                        let string = room.id.substring(0,5)
+                        option.text = room.name  + " - " + string + "... - " + room.owner;
                         this.dom_rooms.add(option);
                     });
                 }

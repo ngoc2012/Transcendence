@@ -34,7 +34,8 @@ def room_list(rooms):
     return json.dumps([
         {
             "id": str(i),
-            "name": i.name
+            "name": i.name,
+            "owner": i.player0.login,
             } for i in rooms])
 
 @sync_to_async
