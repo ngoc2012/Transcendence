@@ -123,6 +123,11 @@ class PongConsumer(AsyncWebsocketConsumer):
         elif text_data == 'power':
             await set_power_play(self)
         elif text_data == 'ai_player':
+            players = cache.get(self.k_all)
+            # print(cache.get(self.k_ai), len(players))
+            ai = cache.get(self.k_ai)
+            if (ai == None or ai == False) and len(players) > 1:
+                return
             await ai_player(self)
         elif text_data == 'quit':
             next
