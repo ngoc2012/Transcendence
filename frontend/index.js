@@ -2,7 +2,7 @@ import {Main} from './Main.js'
 
 export var main = new Main();
 
-//recupere la data obtenue du callback de l'auth 42 
+//recupere la data obtenue du callback de l'auth 42
 if (my42login !== null && my42login !== "" && my42email !== "" && my42ws != "")
 {
     main.login = my42login;
@@ -26,11 +26,11 @@ if (my42login !== null && my42login !== "" && my42email !== "" && my42ws != "")
 
     var dom_logout = document.getElementById('logoutButton');
     if (dom_logout) {
-        dom_logout.addEventListener('click', () => main.logout());
+        dom_logout.addEventListener('click', () => this.reload());
     }
 }
 
-document.addEventListener('DOMContentLoaded', () => { 
+document.addEventListener('DOMContentLoaded', () => {
     if (!main.csrftoken) {
         fetch('/get-csrf/')
         .then(response => response.json())
@@ -38,9 +38,22 @@ document.addEventListener('DOMContentLoaded', () => {
             main.csrftoken = data.csrfToken;
         });
     }
-    
+
+    var main_title = document.getElementById('main_title');
+    if (main_title) {
+        event.preventDefault();
+        main_title.addEventListener('click', () => {
+            main.history_stack.push('/');
+            window.history.pushState({}, '', '/');
+            main.load('/lobby', () => main.lobby.events());
+        });
+    }
+
     if (!main.login)
         checkSession();
+
+    // var main_title = document.getElementById('main_title');
+    // main_title.addEventListener('click', () => main.load(''));
 
     function checkSession() {
         validateSessionToken().then(data => {
@@ -115,6 +128,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function    reload() {
+        console.log('reload')
         const   path = window.location.pathname;
         if (main.lobby.game && main.lobby.game !== undefined)
         {
@@ -129,7 +143,7 @@ document.addEventListener('DOMContentLoaded', () => {
             main.load('/lobby', () => main.lobby.events());
         }
     }
-    
+
     window.onpopstate = function (event) { reload();};
     main.history_stack.push(window.location.pathname);
     window.history.pushState({}, '', window.location.pathname);

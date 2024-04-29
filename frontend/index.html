@@ -22,7 +22,7 @@
     var my42ws = '{{ my42ws }}';
     var my42enable2fa = '{{ my42enable2fa }}';
   </script>
-  
+
   <style>
     canvas {
       border: 1px solid #000;
@@ -51,7 +51,7 @@
       font-size: 18px;
     }
     #status {
-      display: none; 
+      display: none;
       background-color: #dc3545;
       color: white;
       padding: 10px;
@@ -88,7 +88,7 @@
         box-shadow: -2px 0 5px rgba(0,0,0,0.15);
         transition: right 0.3s ease-in-out;
     }
-    
+
   </style>
   <base href="/">
 </head>
@@ -96,15 +96,16 @@
 
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-  <a class="navbar-brand" href="#">Transcendence</a>
+  <!-- <a class="navbar-brand" href="#">Transcendence</a> -->
+  <div class="navbar-brand" id="main_title">Transcendence</div>
   <div class="collapse navbar-collapse" id="navbarNav">
     <ul class="navbar-nav ml-auto">
     </ul>
   </div>
   <img src="{% static 'media/chat.jpg' %}" id="picture" alt="User Icon" class="rounded-circle mx-2" style="width: 40px; height: 40px;">
   <h><span id="name"></span></h>
-  <h><button id="profile" class="btn btn-info" type="button">Profile</button></h> 
-  <h><button id="login" class="btn btn-primary ml-lg-2">Login</button></h> 
+  <h><button id="profile" class="btn btn-info" type="button">Profile</button></h>
+  <h><button id="login" class="btn btn-primary ml-lg-2">Login</button></h>
   <button id="signup" class="btn btn-success ml-lg-2">Signup</button>
 </nav>
 
@@ -128,8 +129,8 @@
   <button id="toggle-sidebar" style="position: fixed; top: 50%; right: 0; transform: translateY(-50%); width: 40px; padding: 8px 4px; writing-mode: vertical-rl; text-orientation: upright; background: #007bff; color: white; border: none; cursor: pointer; z-index: 1050;">
     <i class="fas fa-comment"></i>
 </button>
-       
-  
+
+
   <script>
 
       function handleStatusChange(mutationsList, observer) {
@@ -144,9 +145,9 @@
     }
 
     const statusObserver = new MutationObserver(handleStatusChange);
-    
+
     const observerConfig = { childList: true, subtree: true };
-    
+
     statusObserver.observe(document.getElementById('status'), observerConfig);
 
     </script>
