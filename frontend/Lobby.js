@@ -64,7 +64,6 @@ export class Lobby
 	}
 
     profile(){
-        
         if (this.main.login === ''){
             this.main.set_status('You must be logged in to see your profile');
             return ;

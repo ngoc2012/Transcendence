@@ -95,19 +95,22 @@
 <body>
 
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-  <!-- <a class="navbar-brand" href="#">Transcendence</a> -->
-  <div class="navbar-brand" id="main_title">Transcendence</div>
-  <div class="collapse navbar-collapse" id="navbarNav">
-    <ul class="navbar-nav ml-auto">
-    </ul>
+  <div class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="navbar-brand" id="main_title">Transcendence</div>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ml-auto">
+      </ul>
+    </div>
+    <div class="d-flex align-items-center">
+      <img src="{% static 'media/chat.jpg' %}" id="picture" alt="User Icon" class="rounded-circle mx-2" style="width: 40px; height: 40px;">
+    
+      <h><span id="name"></span></h>
+      <h><button id="profile" class="btn btn-info ml-2" type="button">Profile</button></h>
+      <h><button id="login" class="btn btn-primary ml-2">Login</button></h>
+      <button id="signup" class="btn btn-success ml-2">Signup</button>
+    </div>
   </div>
-  <img src="{% static 'media/chat.jpg' %}" id="picture" alt="User Icon" class="rounded-circle mx-2" style="width: 40px; height: 40px;">
-  <h><span id="name"></span></h>
-  <h><button id="profile" class="btn btn-info" type="button">Profile</button></h>
-  <h><button id="login" class="btn btn-primary ml-lg-2">Login</button></h>
-  <button id="signup" class="btn btn-success ml-lg-2">Signup</button>
-</nav>
+
 
   <div class="container mt-5">
     <div class="row justify-content-center">
