@@ -234,7 +234,7 @@ class PongConsumer(AsyncWebsocketConsumer):
                             self.player0.opp_history.add(PlayersModel.objects.get(login='ai'))
                             self.player0.score_history += str(score0) + '-' + str(score1)
                             self.player0.save()
-                    return
+                return
             await check_collision(self)
             await self.channel_layer.group_send(self.room_id, {'type': 'group_data'})
 

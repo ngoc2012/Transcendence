@@ -324,7 +324,7 @@ export class Pong
                 else
                 {
                     this.players.push({
-                        'id': player.id,
+                        'id': info.player_id,
                         'sk': -1
                     });
                     let i = this.players.length - 1;
