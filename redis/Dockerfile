@@ -12,7 +12,7 @@ RUN chmod +x entrypoint.sh
 ENTRYPOINT [ "./entrypoint.sh" ]
 
 # Expose Redis port
-EXPOSE 6379
+EXPOSE 5379
 
 # Start Redis server when the container launches
-CMD ["redis-server", "--protected-mode no"]
+CMD ["redis-server", "--protected-mode no", "--port 5379"]

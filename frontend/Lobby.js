@@ -333,8 +333,6 @@ export class Lobby
             return;
         }
         this.tournament = new Tournament(this.main);
-        // this.main.history_stack.push('/tournament');
-        // window.history.pushState({}, '', '/tournament');
         this.main.history_stack.push('/tournament');
         window.history.pushState({page: '/tournament'}, '', '/tournament');
         this.main.load('/tournament', () => this.tournament.events());
