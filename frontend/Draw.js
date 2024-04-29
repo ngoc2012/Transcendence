@@ -7,8 +7,13 @@ export class Draw
         this.pong = p;
         this.ratio = 1.0;
         this.json_font = null;
+        this.data = null;
 	}
 
+    init_3D() {
+
+    }
+    
 	init() {
 		this.n_paddles = 0;
 		this.paddles = [];
@@ -200,27 +205,28 @@ export class Draw
 	}
 
 	execute(data) {
+        // console.log(this.pong.ctx.canvas.width, this.pong.ctx.canvas.height, this.ratio)
 		// Clear the canvas
-		this.pong.ctx.clearRect(0, 0, this.pong.room.data.WIDTH, this.pong.room.data.HEIGHT);
+		this.pong.ctx.clearRect(0, 0, this.pong.ctx.canvas.width, this.pong.ctx.canvas.height);
         // Draw table
         this.pong.ctx.fillStyle = '#0077FF';
-        this.pong.ctx.fillRect(0, 0, this.pong.room.data.WIDTH, this.pong.room.data.HEIGHT);
+        this.pong.ctx.fillRect(0, 0, this.pong.ctx.canvas.width, this.pong.ctx.canvas.height);
         
         // Draw limites
         this.pong.ctx.strokeStyle = '#A9A9A9';
         this.pong.ctx.lineWidth = 1;
         this.pong.ctx.setLineDash([10, 15]);
         this.pong.ctx.beginPath();
-        this.pong.ctx.moveTo(this.pong.room.data.WIDTH / 4 + this.pong.room.data.PADDLE_WIDTH, 0);
-        this.pong.ctx.lineTo(this.pong.room.data.WIDTH / 4 + this.pong.room.data.PADDLE_WIDTH, this.pong.room.data.HEIGHT);
+        this.pong.ctx.moveTo(this.pong.ctx.canvas.width / 4 + this.pong.room.data.PADDLE_WIDTH * this.ratio, 0);
+        this.pong.ctx.lineTo(this.pong.ctx.canvas.width / 4 + this.pong.room.data.PADDLE_WIDTH * this.ratio, this.pong.ctx.canvas.height);
         this.pong.ctx.stroke();
 
         this.pong.ctx.strokeStyle = '#A9A9A9';
         this.pong.ctx.lineWidth = 1;
         this.pong.ctx.setLineDash([10, 15]);
         this.pong.ctx.beginPath();
-        this.pong.ctx.moveTo(this.pong.room.data.WIDTH / 4 * 3 - this.pong.room.data.PADDLE_WIDTH, 0);
-        this.pong.ctx.lineTo(this.pong.room.data.WIDTH / 4 * 3 - this.pong.room.data.PADDLE_WIDTH, this.pong.room.data.HEIGHT);
+        this.pong.ctx.moveTo(this.pong.ctx.canvas.width / 4 * 3 - this.pong.room.data.PADDLE_WIDTH * this.ratio, 0);
+        this.pong.ctx.lineTo(this.pong.ctx.canvas.width / 4 * 3 - this.pong.room.data.PADDLE_WIDTH * this.ratio, this.pong.ctx.canvas.height);
         this.pong.ctx.stroke();
 
         this.pong.ctx.setLineDash([]);
@@ -229,23 +235,23 @@ export class Draw
         this.pong.ctx.strokeStyle = '#262626';
         this.pong.ctx.lineWidth = 3;
         this.pong.ctx.beginPath();
-        this.pong.ctx.moveTo(this.pong.room.data.WIDTH / 2, 0);
-        this.pong.ctx.lineTo(this.pong.room.data.WIDTH / 2, this.pong.room.data.HEIGHT);
+        this.pong.ctx.moveTo(this.pong.ctx.canvas.width / 2, 0);
+        this.pong.ctx.lineTo(this.pong.ctx.canvas.width / 2, this.pong.ctx.canvas.height);
         this.pong.ctx.stroke();
 
 		// Draw paddles
 		this.pong.ctx.fillStyle = '#8b3a62';
         data.players.forEach((p) => {
 		    this.pong.ctx.fillRect(
-                p.x,
-                p.y,
-                this.pong.room.data.PADDLE_WIDTH,
-                this.pong.room.data.PADDLE_HEIGHT);
+                p.x * this.ratio,
+                p.y * this.ratio,
+                this.pong.room.data.PADDLE_WIDTH * this.ratio,
+                this.pong.room.data.PADDLE_HEIGHT * this.ratio);
         });
 
 		// Draw this.pong.ball
 		this.pong.ctx.beginPath();
-		this.pong.ctx.arc(data.ball.x, data.ball.y, this.pong.room.data.RADIUS, 0, Math.PI * 2);
+		this.pong.ctx.arc(data.ball.x * this.ratio, data.ball.y * this.ratio, this.pong.room.data.RADIUS * this.ratio, 0, Math.PI * 2);
 		this.pong.ctx.fillStyle = '#FFA500';
 		this.pong.ctx.fill();
 		this.pong.ctx.closePath();
