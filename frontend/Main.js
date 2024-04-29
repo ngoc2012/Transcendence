@@ -8,6 +8,7 @@ import {qrcode_2fa} from './qrcode_2fa.js'
 import {display_2fa} from './display_2fa.js'
 import {tournament_history} from './tournament_history.js'
 import {chatBox} from './chatBox.js'
+import {Chat} from './Chat.js'
 
 export class Main
 {
@@ -35,6 +36,8 @@ export class Main
         this.tournament_history = new tournament_history(this);
         this.profile = new Profile(this);
         this.chatBox = new chatBox(this)
+        this.chat = new Chat(this, this.lobby);
+        this.chat.init()
 
         this.dom_home = document.getElementById("home");
         this.dom_login = document.getElementById("login");
@@ -125,7 +128,13 @@ export class Main
                     'username': this.login
                 }
             })
-    }
+        }
+        this.chat.socket.onopen = function(e) {
+            this.chat.socket.send(JSON.stringify({
+                'type': 'connection',
+                'user': this.login,
+            }));
+        };
 }
     getCookie(name) {
         let cookieValue = null;

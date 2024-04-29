@@ -22,10 +22,10 @@ class ChatConsumer(WebsocketConsumer):
 
     def disconnect(self, close_code):
         # Leave room group
-        user = PlayersModel.objects.get(login=self.scope['state']['username'])
-        room = Room.objects.get(room_name=self.scope['state']['room'])
-        room.users.remove(user)
-        room.save()
+        # user = PlayersModel.objects.get(login=self.scope['state']['username'])
+        # room = Room.objects.get(room_name=self.scope['state']['room'])
+        # room.users.remove(user)
+        # room.save()
         async_to_sync(self.channel_layer.group_discard)(
             self.room_group_name, self.channel_name
         )
@@ -80,6 +80,7 @@ class ChatConsumer(WebsocketConsumer):
 
     # Receive message from WebSocket
     def receive(self, text_data):
+        print(text_data)
         data = {
             'text_data': json.loads(text_data),
             'message': json.loads(text_data)['message'],
@@ -125,6 +126,7 @@ class ChatConsumer(WebsocketConsumer):
     def chat_message(self, event):
         message = event["message"]
         msg_user = event['user']
+        print(self.scope)
         user = PlayersModel.objects.get(login=self.scope['state']['username'])
         try:
             user.blocked_users.get(login=msg_user)
