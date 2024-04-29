@@ -138,6 +138,8 @@ class PongConsumer(AsyncWebsocketConsumer):
         elif text_data.startswith('tour_id:'):
             self.tour_id = text_data.split('tour_id:')[1]
         await self.channel_layer.group_send(self.room_id, {'type': 'group_data'})
+        self.player0: PlayersModel = await get_player0(self.room)
+        self.player1: PlayersModel = await get_player1(self.room)
     
     async def close_connection(self, data):
         await self.send(text_data=json.dumps({
@@ -192,7 +194,7 @@ class PongConsumer(AsyncWebsocketConsumer):
                 await self.channel_layer.group_send(self.room_id, {'type': 'group_data'})
                 score0 = cache.get(self.k_score0)
                 score1 = cache.get(self.k_score1)
-                if (score0 >= 1 or score1 >= 1) :
+                if (score0 >= 2 or score1 >= 2) :
                 # if abs(score0 - score1) > 1 and (score0 >= 11 or score1 >= 11) :
                     if not self.disconnected:
                         await self.channel_layer.group_send(self.room_id, {'type': 'win_data'})
