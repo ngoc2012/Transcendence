@@ -109,6 +109,8 @@ class PongConsumer(AsyncWebsocketConsumer):
             players = cache.get(self.k_all)
             if players == None or len(players) < 2:
                 return
+            if self.player_id != cache.get(self.k_server):
+                return
             info = await get_info(self)
             if info and not cache.get(self.k_started):
                 asyncio.create_task(self.game_loop())
