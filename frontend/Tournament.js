@@ -130,13 +130,19 @@ export class Tournament {
     checkAdded() {
         const playerStack = document.getElementById('player-stack');
         if (playerStack && this.userAdded.length > 0) {
-            playerStack.innerHTML = '<h3>Current Players</h3>';
-    
+            playerStack.innerHTML = '<h3 class="text-center mt-5">Current Players</h3>';
+
             this.userAdded.forEach(user => {
                 let playerEntry = document.createElement('div');
                 playerEntry.textContent = user;
+                playerEntry.style.fontFamily = "Poppins, sans-serif";
+                playerEntry.style.fontWeight = 400;
+                playerEntry.style.fontStyle = "normal";
+                playerEntry.style.color = "white";
+                playerEntry.classList.add('text-center');
                 playerStack.appendChild(playerEntry);
             });
+            
     
             var startBtn = document.getElementById('startTour');
             if (startBtn) {
