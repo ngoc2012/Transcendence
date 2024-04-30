@@ -47,7 +47,8 @@ export class Pong
 
         window.addEventListener('resize', () => {
             this.reset_ratio();
-            this.draw.init();
+            this.draw.execute(this.draw.data);
+            this.draw.update_3D(this.draw.data);
             // Your code to be executed on window resize
             // console.log('Window resized to: ' + window.innerWidth + 'x' + window.innerHeight);
           });

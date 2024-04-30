@@ -63,9 +63,12 @@ def up(consumer):
     if y == None:
         return
     if y > 0:
+        k_y = cache.get(consumer.k_y)
+        if k_y == None:
+            return
         cache.set(consumer.k_player_y, y - pong_data['STEP'])
         if not cache.get(consumer.k_started) and consumer.player_id == cache.get(consumer.k_server):
-            cache.set(consumer.k_y, cache.get(consumer.k_y) - pong_data['STEP'])
+            cache.set(consumer.k_y, k_y - pong_data['STEP'])
 
 @sync_to_async
 def down(consumer):
@@ -73,9 +76,12 @@ def down(consumer):
     if y == None:
         return
     if y < pong_data['HEIGHT'] - pong_data['PADDLE_HEIGHT']:
+        k_y = cache.get(consumer.k_y)
+        if k_y == None:
+            return
         cache.set(consumer.k_player_y, y + pong_data['STEP'])
         if not cache.get(consumer.k_started) and consumer.player_id == cache.get(consumer.k_server):
-            cache.set(consumer.k_y, cache.get(consumer.k_y) + pong_data['STEP'])
+            cache.set(consumer.k_y, k_y + pong_data['STEP'])
 
 @sync_to_async
 def left(consumer):
