@@ -11,6 +11,7 @@ export class Draw
         this.table = null;
         this.barrier1 = null;
         this.barrier2 = null;
+        this.paddles = [];
 	}
 
     update_3D(data) {
@@ -59,9 +60,6 @@ export class Draw
     }
     
 	init() {
-		this.n_paddles = 0;
-		this.paddles = [];
-
 		// Set up the scene
         this.scene = new THREE.Scene();
         this.scene.background = new THREE.Color(0x808080);
@@ -132,7 +130,7 @@ export class Draw
         this.data = data;
         if (data === null)
             return;
-		if (data.players.length !== this.n_paddles) {
+		if (data.players.length !== this.paddles.length) {
             this.paddles.forEach((p) => {this.scene.remove(p);});
             this.paddles = [];
 			data.players.forEach((p) => {
@@ -143,7 +141,6 @@ export class Draw
 				this.paddles.push(paddle);
                 
 			});
-			this.n_paddles = data.players.length;
 		}
 
         if (data.players.length === 0)
