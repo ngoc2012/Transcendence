@@ -184,6 +184,8 @@ export class Lobby
 			this.main.set_status('You must be logged to see the tournament history.');
 			return;
 		}
+        this.main.history_stack.push('/tournament_history');
+        window.history.pushState({page: '/tournament_history'}, '', '/tournament_history');
         this.main.load('/tournament_history', () => this.main.tournament_history.events());
     }
 

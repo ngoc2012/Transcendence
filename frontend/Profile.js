@@ -18,7 +18,6 @@ export class Profile{
         this.dom_login = document.getElementById("log_in");
         this.dom_name = document.getElementById("new_name");
         this.dom_cancel = document.getElementById("back");
-        this.dom_form = document.getelementbyid('id_file')
         this.dom_alias.addEventListener("click", () => this.change_alias());
         this.dom_friend.addEventListener("click", () => this.add_friend());
         this.dom_password.addEventListener("click", () => this.change_password());
@@ -26,13 +25,9 @@ export class Profile{
         this.dom_login.addEventListener("click", ()=> this.change_login());
         this.dom_name.addEventListener("click", () => this.change_name());
         this.dom_cancel.addEventListener("click", () => this.backtolobby());
-        this.dom_form.addEventListener("click", () => this.testform());
 
     }
 
-    testform(){
-        console.log("COUCOU")
-    }
     backtolobby(){
         this.main.history_stack.push('/');
         window.history.pushState({}, '', '/');
