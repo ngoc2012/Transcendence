@@ -2,6 +2,8 @@ import {Main} from './Main.js'
 
 export var main = new Main();
 
+var reload_page = true;
+
 //recupere la data obtenue du callback de l'auth 42
 if (my42login !== null && my42login !== "" && my42email !== "" && my42ws != "")
 {
@@ -86,13 +88,13 @@ document.addEventListener('DOMContentLoaded', () => {
     setInterval(changeBackground, 100);
     updateTargetColors();
 
-
     if (!main.login)
         checkSession();
 
     function checkSession() {
         validateSessionToken().then(data => {
             if (data && data.validSession) {
+                reload_page = false;
                 main.email = data.email;
                 main.login = data.login;
                 main.name = data.name;
@@ -178,8 +180,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    window.onpopstate = function (event) { reload();};
-    main.history_stack.push(window.location.pathname);
-    window.history.pushState({}, '', window.location.pathname);
-    reload();
+    if (reload_page) {
+        window.onpopstate = function (event) { reload();};
+        main.history_stack.push(window.location.pathname);
+        window.history.pushState({}, '', window.location.pathname);
+        reload();
+    }
 });

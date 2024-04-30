@@ -20,7 +20,7 @@ export class Lobby
         this.dom_tournament = document.getElementById("tournament");
         this.dom_tournament_history = document.getElementById("tournament_history");
         this.dom_join = document.querySelector("#join");
-        this.dom_pong = document.querySelector("#pong");
+        this.dom_pong = document.getElementById("pong");
         this.dom_chat = document.querySelector("#chat");
         this.dom_delete = document.querySelector("#delete");
         this.dom_profile = document.querySelector('#profile');
@@ -79,7 +79,7 @@ export class Lobby
     homebar() {
         this.main.history_stack.push('/');
         window.history.pushState({}, '', '/');
-        this.main.load('/lobby', () => this.lobby.events());
+        this.main.load('/lobby', () => this.events());
     }
 
     join() {

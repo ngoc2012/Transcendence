@@ -23,12 +23,18 @@
             margin-right: 1%;
         }
 
-        #rooms {
-            width: 100%;
+        .form-group .col-sm-2, .form-group .col-sm-6, .form-group .col-sm-4 {
+            padding-right: 5px;  /* Reduces the right padding */
+            padding-left: 5px;   /* Reduces the left padding */
         }
-        
-        .btn-group button#join {
-            margin-right: 10px;
+
+        .btn-group button {
+            margin-right: 5px; /* Reduces the space between buttons */
+        }
+
+        /* Optionally, reduce the top and bottom margins if needed */
+        .form-group {
+            margin-bottom: 10px; /* Smaller bottom margin for the form group */
         }
 
         body {
@@ -51,27 +57,32 @@
             transform: scale(1.2);
         }
 
+        #rooms {
+            border-radius: 10px;
+            border: 2px solid rgba(255, 255, 255, 0.75);
+            padding: 22px;
+            color: #ffffff;
+            background-color: rgba(66, 66, 66, 0.5);
+        }
+
     </style>
 </head>
 
 <body>
     <div class="container">
         <h1 id="dyn-title">Transcendence</h1>
-        <!-- <h3>Welcome!</h3> -->
         <div class="form-group row">
-
-            <label for="rooms" class="col-sm-2 col-form-label" style="font-size: 20px;">Rooms</label>            <div class="col-sm-7">
-
+            <label for="rooms" class="col-sm-2 col-form-label">Rooms</label>
+            <div class="col-sm-6">
                 <select id="rooms" class="form-control"></select>
             </div>
-            <div class="col-sm-3">
+            <div class="col-sm-4">
                 <div class="btn-group">
                     <button id="join" class="btn btn-primary" type="button">Join</button>
                     <button id="delete" class="btn btn-danger" type="button">Delete</button>
                 </div>
             </div>
-        </div>
-    </div>
+        </div>        
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
