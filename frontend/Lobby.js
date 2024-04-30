@@ -16,6 +16,12 @@ export class Lobby
     events() {
         this.main.checkcsrf();
         this.main.set_chat();
+        if (this.main.login != '') {
+            this.rooms_update();
+        }
+        if (this.listenersOK) {
+            return;
+        }
         this.dom_rooms = document.getElementById("rooms");
         this.dom_tournament = document.getElementById("tournament");
         this.dom_tournament_history = document.getElementById("tournament_history");
@@ -33,9 +39,7 @@ export class Lobby
         this.dom_homebar.addEventListener("click", () => this.homebar());
         this.dom_tournament.addEventListener("click", () => this.tournament_click());
         this.dom_tournament_history.addEventListener("click", () => this.tournament_history_click());
-        if (this.main.login != '') {
-            this.rooms_update();
-        }
+        this.listenersOK = true
     }
 
     eventsCallback(tourid) {

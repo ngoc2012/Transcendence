@@ -40,16 +40,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    var main_title = document.getElementById('main_title');
-    if (main_title) {
-        event.preventDefault();
-        main_title.addEventListener('click', () => {
-            main.history_stack.push('/');
-            window.history.pushState({}, '', '/');
-            main.load('/lobby', () => main.lobby.events());
-        });
-    }
-
     const bg = document.getElementById('dynamic-bg');
     let color1 = [166, 192, 254]; // Initial color in RGB
     let color2 = [246, 128, 132]; // Initial color in RGB
