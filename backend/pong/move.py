@@ -44,8 +44,16 @@ def check_collision(consumer):
                 
 @sync_to_async
 def update_ball(consumer):
-    x = cache.get(consumer.k_x) + cache.get(consumer.k_dx) * pong_data['DX']
-    y = cache.get(consumer.k_y) + cache.get(consumer.k_dy) * cache.get(consumer.k_ddy)
+    k_x = cache.get(consumer.k_x)
+    k_y = cache.get(consumer.k_y)
+    k_dx = cache.get(consumer.k_dx)
+    k_dy = cache.get(consumer.k_dy)
+    k_ddy = cache.get(consumer.k_ddy)
+    # k_x, k_y, k_dx, k_dy, k_ddy = cache.mget(consumer.k_x, consumer.k_y, consumer.k_dx, consumer.k_dy, consumer.k_ddy)
+    if k_x == None or k_y == None or k_ddy == None or k_dx == None or k_dy == None:
+        return
+    x = k_x + k_dx * pong_data['DX']
+    y = k_y + k_dy * k_ddy
     if y + pong_data['RADIUS'] > pong_data['HEIGHT']:
         y = pong_data['HEIGHT'] - pong_data['RADIUS']
     if y < pong_data['RADIUS']:

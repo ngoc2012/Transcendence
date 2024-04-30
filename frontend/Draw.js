@@ -145,8 +145,8 @@ export class Draw
 
         if (data.players.length === 0)
             return;
-        console.log(this.paddles);
-        console.log(data.players);
+        // console.log(this.paddles);
+        // console.log(data.players);
 		data.players.forEach((p, i) => {
 			this.paddles[i].position.x = (p.x - this.pong.room.data.WIDTH / 2) * this.ratio + this.pong.room.data.PADDLE_WIDTH * this.ratio / 2;
 			this.paddles[i].position.y = (this.pong.room.data.HEIGHT / 2 - p.y) * this.ratio - this.pong.room.data.PADDLE_HEIGHT * this.ratio / 2;
