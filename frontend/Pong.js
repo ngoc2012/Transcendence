@@ -21,6 +21,16 @@ export class Pong
         this.preventWinBox = true;
     }
 
+    reset_ratio() {
+        let width = window.innerWidth - 1;
+        if (width < this.room.data.WIDTH)
+        {
+            this.ctx.canvas.width = width;
+            this.ctx.canvas.height = width * this.room.data.HEIGHT / this.room.data.WIDTH;
+            this.draw.ratio = width / this.room.data.WIDTH;
+        }
+    }
+
 	init() {
         this.dom_game_name = document.getElementById("game_name");
         this.dom_game_name.innerHTML = this.room.name;
@@ -33,6 +43,15 @@ export class Pong
 		this.ctx = this.canvas.getContext('2d');
         this.ctx.canvas.width  = this.room.data.WIDTH;
         this.ctx.canvas.height = this.room.data.HEIGHT;
+        this.reset_ratio();
+
+        window.addEventListener('resize', () => {
+            this.reset_ratio();
+            this.draw.execute(this.draw.data);
+            this.draw.update_3D(this.draw.data);
+            // Your code to be executed on window resize
+            // console.log('Window resized to: ' + window.innerWidth + 'x' + window.innerHeight);
+          });
 
         this.pongThreeJS = document.getElementById('pongThreeJS');
 

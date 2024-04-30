@@ -126,7 +126,7 @@ export class Lobby
     }
 
     new_game(game) {
-
+        console.log(game);
         if (this.main.login === '')
         {
             this.main.set_status('Please login or sign up');
@@ -245,6 +245,7 @@ export class Lobby
     }
 
     pong_game(info) {
+        console.log(info);
         this.quit();
         this.game = new Pong(this.main, this, info);
         this.main.load('/pong', () => this.game.init());
