@@ -1,12 +1,22 @@
-body{
-    background: #555;
-}
 
-p, h1, h2, h3, h4, h5, h6, span {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+  p, h1, h2, h3, h4, h5, h6, span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-family: "Poppins", sans-serif;
+      font-weight: 400;
+      font-style: normal;
+      color: white;
+      
+    }
+
+  label {
+      font-family: "Poppins", sans-serif;
+      font-weight: 400;
+      font-style: normal;
+      color: white;
   }
+
 
   #dynamic-bg {
     position: fixed;
@@ -18,5 +28,9 @@ p, h1, h2, h3, h4, h5, h6, span {
     filter: blur(8px);
     z-index: -1;
     transition: background 2s;
+  }
+  
+  .btn {
+    opacity: 80%;
   }
   
