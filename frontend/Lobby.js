@@ -363,22 +363,6 @@ export class Lobby
         }
     }
 
-    changeBackground() {
-        this.color1 = this.color1.map(c => {
-            c += Math.floor(Math.random() * 50 - 25); // Increase the range to -25 to +25
-            return Math.max(0, Math.min(255, c)); // Clamping the color between 0 and 255
-        });
-        this.color2 = this.color2.map(c => {
-            c += Math.floor(Math.random() * 50 - 25); // Increase the range to -25 to +25
-            return Math.max(0, Math.min(255, c)); // Clamping the color between 0 and 255
-        });
-
-        const newColor1 = `rgb(${this.color1[0]}, ${this.color1[1]}, ${this.color1[2]})`;
-        const newColor2 = `rgb(${this.color2[0]}, ${this.color2[1]}, ${this.color2[2]})`;
-
-        this.bg.style.background = `linear-gradient(120deg, ${newColor1}, ${newColor2})`;
-    }
-
     checkLogin() {
         if (this.main.login != '') {
             this.dom_l
