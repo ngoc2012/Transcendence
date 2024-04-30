@@ -259,7 +259,7 @@ export class Lobby
 
     rooms_update() {
         if (this.socket === -1) {
-            console.log('New lobby socket');
+            // console.log('New lobby socket');
             this.socket = new WebSocket(
                 'wss://'
                 + window.location.host
@@ -280,8 +280,8 @@ export class Lobby
             url: '/game/update',
             method: 'GET',
             success: (rooms) => {
-                console.log('update rooms');
-                console.log(rooms);
+                // console.log('update rooms');
+                // console.log(rooms);
                 var options_rooms = this.dom_rooms && this.dom_rooms.options;
                 this.dom_rooms.innerHTML = "";
                 if (options_rooms && rooms && rooms.length > 0) {
@@ -298,7 +298,7 @@ export class Lobby
         });
 
         this.socket.onmessage = (e) => {
-            console.log(e);
+            // console.log(e);
             if (!('data' in e))
                 return;
             const data = JSON.parse(e.data);
@@ -318,8 +318,8 @@ export class Lobby
             }
             else {
                 const rooms = data;
-                console.log(rooms);
-                console.log(this.dom_rooms);
+                // console.log(rooms);
+                // console.log(this.dom_rooms);
                 var options_rooms = this.dom_rooms && this.dom_rooms.options;
                 // this.dom_rooms.innerHTML = "";
                 for (let i = this.dom_rooms.length - 1; i >= 0; i--) {
@@ -327,7 +327,7 @@ export class Lobby
                   }
                 if (options_rooms && rooms && rooms.length > 0) {
                     rooms.forEach((room) => {
-                        console.log(room);
+                        // console.log(room);
                         var option = document.createElement("option");
                         option.value = room.id;
                         let string = room.id.substring(0,5)
@@ -335,7 +335,7 @@ export class Lobby
                         this.dom_rooms.add(option);
                     });
                 }
-                console.log(this.dom_rooms);
+                // console.log(this.dom_rooms);
                 if (rooms.length > 0)
                     this.dom_rooms.size = rooms.length;
             };
