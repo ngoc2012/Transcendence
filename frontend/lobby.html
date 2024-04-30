@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Room Selection</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Jersey+15&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
     <style>
         .container {
             margin-top: 50px;
@@ -36,15 +37,36 @@
             margin-right: 10px;
         }
 
+        body {
+            font-family: "Poppins", sans-serif;
+            font-weight: 400;
+            font-style: normal;
+            color: white;
+        }
+
+        .dyn-title:hover {
+            transform: scale(1.5);
+            transition: transform 0.3s ease;
+        }
+
+        #dyn-title {
+            transition: transform 0.3s ease; /* Smooth scaling transition */
+        }
+
+        #dyn-title:hover {
+            transform: scale(1.2);
+        }
+
     </style>
 </head>
 
 <body>
     <div class="container">
-        <h1>Welcome to Transcendence !</h1>
+        <h1 id="dyn-title">Transcendence</h1>
+        <!-- <h3>Welcome!</h3> -->
         <div class="form-group row">
 
-            <label for="rooms" class="col-sm-2 col-form-label" style="font-size: 20px;">Room selection:</label>            <div class="col-sm-7">
+            <label for="rooms" class="col-sm-2 col-form-label" style="font-size: 20px;">Rooms</label>            <div class="col-sm-7">
 
                 <select id="rooms" class="form-control"></select>
             </div>

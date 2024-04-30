@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="{% static 'bootstrap-4.0.0-dist/css/bootstrap.css' %}">
   <link rel="icon" type="image/gif" href="{% static 'icons8-home.gif' %}">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link href="https://fonts.googleapis.com/css2?family=Jersey+15&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
   <script src="{% static 'jquery-3.7.1.js' %}"></script>
   <script src="{% static 'bootstrap-4.0.0-dist/js/bootstrap.bundle.js' %}"></script>
   <script src="{% static 'index.js' %}" type="module"></script>
@@ -28,6 +29,13 @@
       border: 1px solid #000;
       display: block;
       margin: 20px auto;
+    }
+
+    body {
+        font-family: "Poppins", sans-serif;
+        font-weight: 400;
+        font-style: normal;
+        color: white;
     }
 
     h {
@@ -178,7 +186,7 @@
     width: 100%;
     height: 100%;
     background: linear-gradient(120deg, #a6c0fe, #f68084);
-    filter: blur(8px);
+    filter: blur(10px);
     z-index: -1;
     transition: background 2s;
   }
@@ -229,38 +237,36 @@
             <li class="nav-item">
               <button id="homebar" class="btn btn-secondary btn-block mb-2" type="button">
                 <myicon><i class="fas fa-house-user" style="color: #ffffff; margin-right: 5px;"></i></myicon>
-                  <span class="text" style="margin-left: -5px;">Home</span>
+                  <span class="text" style="margin-left: -5px; color: #ffffff;">Home</span>
               </button>
             </li>
             <li class="nav-item">
               <button id="pong" class="btn btn-success btn-block mb-2" type="button">
                 <myicon><i class="fas fa-table-tennis" style="margin-right: 5px;"></i></myicon>
-                <span class="text" style="margin-left: -5px;">Pong</span>
+                <span class="text" style="margin-left: -5px; color: #ffffff;">Pong</span>
               </button>
             </li>
             <li class="nav-item">
               <button id="tournament" class="btn btn-warning btn-block mb-2" type="button">
                 <myicon><i class="fas fa-trophy" style="color: #ffffff; margin-right: 5px;"></i></myicon>
-                <span class="text" style="margin-left: -5px;">Tournament</span>
+                <span class="text" style="margin-left: -5px; color: #ffffff;">Tournament</span>
               </button>
             </li>
             <li class="nav-item">
               <button id="tournament_history" class="btn btn-secondary btn-block mb-2" type="button">
                 <myicon><i class="fab fa-ethereum" style="color: #ffffff; margin-right: 5px;"></i></myicon>
-                <span class="text" style="margin-left: -5px;">Blockchain</span>
+                <span class="text" style="margin-left: -5px; color: #ffffff;">Blockchain</span>
               </button>
             </li>
             <li class="nav-item">
               <button id="chat" class="btn btn-info btn-block mb-2" type="button">
               <myicon><i class="fas fa-comment" style="color: #ffffff; margin-right: 5px;"></i></myicon>
-              <span class="text" style="margin-left: -5px;">Chat</span>
+              <span class="text" style="margin-left: -5px; color: #ffffff;">Chat</span>
               </button>
             </li>
         </ul>
     </div>
   </div>
-  
-
 
 <button id="toggle-sidebar" style="position: fixed; top: 50%; right: 0; transform: translateY(-50%); width: 40px; padding: 8px 4px; writing-mode: vertical-rl; text-orientation: upright; background: #007bff62; color: white; border: none; cursor: pointer; z-index: 1050;">
   <i class="fas fa-users"></i>

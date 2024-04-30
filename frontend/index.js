@@ -49,10 +49,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const bg = document.getElementById('dynamic-bg');
-let color1 = [166, 192, 254]; // Initial color in RGB
-let color2 = [246, 128, 132]; // Initial color in RGB
-let targetColor1 = [...color1];
-let targetColor2 = [...color2];
+    let color1 = [166, 192, 254]; // Initial color in RGB
+    let color2 = [246, 128, 132]; // Initial color in RGB
+    let targetColor1 = [...color1];
+    let targetColor2 = [...color2];
 
     function interpolateColors(current, target) {
         return current.map((c, i) => {
