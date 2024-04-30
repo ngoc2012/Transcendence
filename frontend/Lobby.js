@@ -336,6 +336,8 @@ export class Lobby
                     });
                 }
                 console.log(this.dom_rooms);
+                if (rooms.length > 0)
+                    this.dom_rooms.size = rooms.length;
             };
         }
 
