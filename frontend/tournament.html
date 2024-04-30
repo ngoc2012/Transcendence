@@ -5,14 +5,41 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create Tournament - Transcendence</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .container {
+            margin-top: 20%;
+            text-align: left;
+        }
+        body {
+            font-family: "Poppins", sans-serif;
+            font-weight: 400;
+            font-style: normal;
+            color: white;
+        }
+
+        .form-group {
+            margin-bottom: 50px;
+            padding-top: 10px;
+            padding-bottom: 10px;
+        }
+
+        .form-label-left {
+            text-align: left; /* Align label text to the left */
+            margin-bottom: 0; /* Remove default bottom margin for label */
+        }
+        .btn-primary {
+            border-radius: 20px; /* Rounded corners */
+            width: 200px; /* Fixed width */
+            text-align: center; /* Center text */
+        }
+    </style>
 </head>
 <body>
-    <div class="container mt-5">
-        <h3>Create a New Tournament</h3>
+    <div class="container">
         <form id="tournamentForm" method="post">
             {% csrf_token %}
             <div class="form-group">
-                <label for="name">Tournament Name:</label>
+                <label for="name" class="form-label-left">Tournament Name</label>
                 <input type="text" id="tname" name="name" class="form-control" required>
             </div>
             <button type="submit" class="btn btn-primary">Create Tournament</button>
