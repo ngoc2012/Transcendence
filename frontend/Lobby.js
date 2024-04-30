@@ -39,7 +39,7 @@ export class Lobby
         this.dom_homebar.addEventListener("click", () => this.homebar());
         this.dom_tournament.addEventListener("click", () => this.tournament_click());
         this.dom_tournament_history.addEventListener("click", () => this.tournament_history_click());
-        this.listenersOK = true
+        this.listenersOK = true;
     }
 
     eventsCallback(tourid) {
