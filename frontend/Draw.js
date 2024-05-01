@@ -166,11 +166,11 @@ export class Draw
 		// Clear the canvas
 		this.pong.ctx.clearRect(0, 0, this.pong.ctx.canvas.width, this.pong.ctx.canvas.height);
         // Draw table
-        this.pong.ctx.fillStyle = '#0077FF';
+        this.pong.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
         this.pong.ctx.fillRect(0, 0, this.pong.ctx.canvas.width, this.pong.ctx.canvas.height);
         
         // Draw limites
-        this.pong.ctx.strokeStyle = '#A9A9A9';
+        this.pong.ctx.strokeStyle = '#FFFFFF';
         this.pong.ctx.lineWidth = 1;
         this.pong.ctx.setLineDash([10, 15]);
         this.pong.ctx.beginPath();
@@ -178,7 +178,7 @@ export class Draw
         this.pong.ctx.lineTo(this.pong.ctx.canvas.width / 4 + this.pong.room.data.PADDLE_WIDTH * this.ratio, this.pong.ctx.canvas.height);
         this.pong.ctx.stroke();
 
-        this.pong.ctx.strokeStyle = '#A9A9A9';
+        this.pong.ctx.strokeStyle = '#FFFFFF';
         this.pong.ctx.lineWidth = 1;
         this.pong.ctx.setLineDash([10, 15]);
         this.pong.ctx.beginPath();
@@ -189,7 +189,7 @@ export class Draw
         this.pong.ctx.setLineDash([]);
 
         // Draw barriers
-        this.pong.ctx.strokeStyle = '#262626';
+        this.pong.ctx.strokeStyle = '#FFFFFF';
         this.pong.ctx.lineWidth = 3;
         this.pong.ctx.beginPath();
         this.pong.ctx.moveTo(this.pong.ctx.canvas.width / 2, 0);
@@ -197,7 +197,7 @@ export class Draw
         this.pong.ctx.stroke();
 
 		// Draw paddles
-		this.pong.ctx.fillStyle = '#8b3a62';
+		this.pong.ctx.fillStyle = '#FFFFFF';
         data.players.forEach((p) => {
 		    this.pong.ctx.fillRect(
                 p.x * this.ratio,
@@ -209,7 +209,7 @@ export class Draw
 		// Draw this.pong.ball
 		this.pong.ctx.beginPath();
 		this.pong.ctx.arc(data.ball.x * this.ratio, data.ball.y * this.ratio, this.pong.room.data.RADIUS * this.ratio, 0, Math.PI * 2);
-		this.pong.ctx.fillStyle = '#FFA500';
+		this.pong.ctx.fillStyle = '#FFFFFF';
 		this.pong.ctx.fill();
 		this.pong.ctx.closePath();
 	}
