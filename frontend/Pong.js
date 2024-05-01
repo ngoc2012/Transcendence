@@ -573,7 +573,7 @@ export class Pong
         document.body.appendChild(winBox);
         const winnerText = document.createElement('p');
         winnerText.textContent = `${data.win === 'player0' ? this.player1 : this.player2} wins !`;
-        winnerText.style.cssText = 'font-size: 60px; font-family: "Poppins", sans-serif; font-weight: bold; font-style: normal; color: white; text-align: center;';
+        winnerText.style.cssText = 'font-size: 40px; font-family: "Poppins", sans-serif; font-weight: bold; font-style: normal; color: white; text-align: center; padding: 2%';
         winBox.appendChild(winnerText);
         const scoreContainer = document.createElement('div');
         const scoreText = document.createElement('p');

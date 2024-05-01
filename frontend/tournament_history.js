@@ -24,8 +24,7 @@ export class tournament_history {
         if (!tournament_name)
         {
             document.getElementById("selectedTournamentName").innerHTML = `
-            <h2></h2>
-            <h3>There is no active or finished tournament to display !</h3>
+            <h8>There is no active or finished tournament to display !</h8>
         `;
         }
         $.ajax({

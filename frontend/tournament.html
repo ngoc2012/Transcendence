@@ -8,10 +8,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create Tournament - Transcendence</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+
+<style>
+
+    tre {
+        text-align: center;
+        margin-bottom: 5%;
+    }
+</style>
+
 </head>
 <body>
     <div class="container mt-5">
-        <h3>Create a New Tournament</h3>
+        <tre><h3>Create a New Tournament</h3></tre>
         <form id="tournamentForm" method="post">
             {% csrf_token %}
             <div class="form-group">
