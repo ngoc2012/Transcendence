@@ -1,4 +1,5 @@
 import {Main} from './Main.js'
+import { join_game } from './game.js';
 
 export var main = new Main();
 
@@ -13,7 +14,6 @@ if (my42login !== null && my42login !== "" && my42email !== "" && my42ws != "")
     main.lobby.ws = my42ws
     main.name = my42name;
     main.dom_name.innerHTML = main.name;
-    history.replaceState({}, '', 'https://127.0.0.1:8080');
     var dom_log_in = document.getElementById('login');
     if (dom_log_in) {
         dom_log_in.style.display = "none";
@@ -30,6 +30,33 @@ if (my42login !== null && my42login !== "" && my42email !== "" && my42ws != "")
         dom_logout.addEventListener('click', () => this.reload());
     }
 }
+
+function    reload(path, isPopState = false) {
+    if (main.lobby.game && main.lobby.game !== undefined)
+    {
+        main.lobby.game.quit();
+        main.lobby.game = undefined;
+    }
+    
+    if (path === '/login') {
+        main.load('/pages/login', () => main.log_in.events(isPopState));
+    } else if (path === '/signup') {
+        main.load('/pages/signup', () => main.signup.events(isPopState));
+    } else if (path === '/lobby') {
+        main.load('/lobby', () => main.lobby.events(isPopState));
+    } else if (path === '/') {
+        main.load('/lobby', () => main.lobby.events(isPopState));
+    } else if (path.startsWith('/pong/')) {
+        join_game(main, path.substring(6));
+    } else {
+        main.load('/lobby', () => main.lobby.events(isPopState));
+    }       
+}
+
+window.addEventListener('popstate', (event) => {
+    reload(event.state.page, true);
+});
+
 
 document.addEventListener('DOMContentLoaded', () => {
     if (!main.csrftoken) {
@@ -94,8 +121,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (data.enable2fa == 'true') {
                     main.load('/twofa', () => main.twofa.events());
                 } else {
-                    main.history_stack.push('/');
-                    window.history.pushState({}, '', '/');
                     if (fromAddUser) {
                         main.load('/lobby', () => main.lobby.eventsCallback(tourid));
                     } else {
@@ -154,26 +179,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function    reload() {
-        const   path = window.location.pathname;
-        if (main.lobby.game && main.lobby.game !== undefined)
-        {
-            main.lobby.game.quit();
-            main.lobby.game = undefined;
-        }
-        if (path === '/login') {
-            main.load('/pages/login', () => main.log_in.events());
-        } else if (path === '/signup') {
-            main.load('/pages/signup', () => main.signup.events());
-        } else {
-            main.load('/lobby', () => main.lobby.events());
-        }
-    }
-
-    if (reload_page) {
-        window.onpopstate = function (event) { reload();};
-        main.history_stack.push(window.location.pathname);
-        window.history.pushState({}, '', window.location.pathname);
-        reload();
-    }
+    reload(window.location.pathname);
 });
+
+

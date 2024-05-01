@@ -4,9 +4,12 @@ export class Signup
         this.main = m;
     }
 
-    events() {
+    events(isPopState) {
         this.main.checkcsrf();
         this.main.set_status('');
+        if (!isPopState)
+            window.history.pushState({page: '/signup'}, '', '/signup');
+
         this.dom_login = document.querySelector("#login1");
         this.dom_password = document.querySelector("#password1");
         this.dom_email = document.querySelector("#email1");
@@ -70,13 +73,10 @@ export class Signup
                     if (dom_logout) {
                         dom_logout.addEventListener('click', () => this.main.logout());
                     }
-                    if (checkbox) {
+                    if (checkbox)
                         this.display2FASetup(info.secret);
-                    } else {
-                        this.main.history_stack.push('/');
-                        window.history.pushState({}, '', '/');
+                    else
                         this.main.load('/lobby', () => this.main.lobby.events());
-                    }
                 }
             },
             error: (jqXHR, textStatus, errorThrown) => {
@@ -132,8 +132,6 @@ export class Signup
 
     cancel() {
         this.main.set_status('');
-        this.main.history_stack.push('/');
-        window.history.pushState({}, '', '/');
         this.main.load('/lobby', () => this.main.lobby.events());
     }
 }

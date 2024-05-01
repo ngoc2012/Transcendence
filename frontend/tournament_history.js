@@ -4,15 +4,15 @@ export class tournament_history {
         this.main = m;
     }
 
-    events() {
-        
+    events(isPopState) {
+        if (!isPopState)
+            window.history.pushState({ page: '/tournament_history' }, '', '/tournament_history');
         this.dom_proceed = document.querySelector("#proceed");
         this.dom_proceed.addEventListener("click", () => this.proceed());
         this.dom_Select = document.querySelector("#Select");
         this.dom_Select.addEventListener("click", () => this.selectTournament());
 
     }
-
 
     selectTournament() {
 

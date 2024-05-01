@@ -10,7 +10,10 @@ export class Profile{
         this.events();
     }
 
-    events(){
+    events(isPopState){
+        if (!isPopState)
+            window.history.pushState({page: '/profile/'}, '', '/profile/');
+        
         this.dom_alias = document.getElementById("alias");
         this.dom_friend = document.getElementById("add_friend");
         this.dom_password = document.getElementById("password");
@@ -211,6 +214,7 @@ export class Profile{
             this.main.set_status('Passwords do not match');
             return;
         }
+        
         $.ajax({
             url: '/profile/' + this.login + '/change_login/',
             method: 'POST',

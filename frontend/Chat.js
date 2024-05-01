@@ -7,35 +7,26 @@ export class Chat{
 
 	init(){
 		this.main.checkcsrf();
-		this.dom_input = document.querySelector('#chat-message-input');
-		this.dom_chatlog = document.querySelector('#chat-log');
-		this.dom_submit = document.querySelector('#chat-message-submit');
-		this.roomName = JSON.parse(document.getElementById('room-name').textContent);
-		this.dom_input.addEventListener('keydown', (event) => this.press_enter(event));
-		this.dom_submit.addEventListener("click", () => this.send_message())
-		this.dom_input.focus();
 
         this.socket = new WebSocket(
             'wss://'
             + window.location.host
             + '/ws/transchat/general_chat/'
 			);
-		this.events(this.socket);
+        console.log('connecting chat')
 	}
 
 	events(e){
+        this.dom_input = document.querySelector('#chat-message-input');
+		this.dom_chatlog = document.querySelector('#chat-log');
+		this.dom_submit = document.querySelector('#chat-message-submit');
+		this.roomName = JSON.parse(document.getElementById('room-name').textContent);
+		this.dom_input.addEventListener('keydown', (event) => this.press_enter(event));
+		this.dom_submit.addEventListener("click", () => this.send_message())
+		this.dom_input.focus();
 		const socket = this.socket;
 		const login = this.main.login;
 		const room = this.roomName;
-
-		this.socket.onopen = function(e) {
-			socket.send(JSON.stringify({
-				'type': 'connection',
-				'message': room,
-				'user': login,
-                'room': room
-			}));
-		};
 
        	this.socket.onmessage = function(e) {
        	    var data = JSON.parse(e.data);
