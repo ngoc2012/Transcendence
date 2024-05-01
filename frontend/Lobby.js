@@ -108,7 +108,7 @@ export class Lobby
                     'X-CSRFToken': csrftoken,
                 },
                 data: {
-                    'name': 'Star wars',
+                    'name': 'PONG',
                     'game': game,
                     'login': this.main.login
                 },
