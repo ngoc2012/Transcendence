@@ -50,18 +50,8 @@ export class Main
         this.dom_email = document.getElementById("email");
         this.dom_container = document.getElementById("container");
         this.dom_login42 = document.getElementById("login42");
-
         this.dom_signup.addEventListener("click", () => this.signup_click());
         this.dom_login.addEventListener("click", () => this.login_click());
-        // this.dom_home.addEventListener("click", () => {
-        //     if (this.lobby.game && this.lobby.game !== undefined)
-        //     {
-        //         this.lobby.game.quit();
-        //         this.lobby.game = undefined;
-        //     }
-        //     window.history.pushState({}, '', '/');
-        //     this.load('/lobby', () => this.lobby.events());
-        // });
     }
 
     load(page, callback) {

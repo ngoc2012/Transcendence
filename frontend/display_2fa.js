@@ -25,7 +25,6 @@ export class display_2fa {
         var dom_signup = document.getElementById('signup');
         if (dom_signup) {
             dom_signup.style.display = "none";
-            // dom_signup.insertAdjacentHTML('afterend', '<button id="logoutButton" class="btn btn-danger">Logout</button>');
         }
 
         var dom_logout = document.getElementById('logoutButton');

@@ -76,7 +76,7 @@ def get_tournament(tour_id):
         return TournamentModel.objects.select_related('owner', 'winner').get(id=tour_id)
     except TournamentModel.DoesNotExist:
         return None
-    
+
 @database_sync_to_async
 def get_user_from_token(token):
     try:
@@ -84,7 +84,7 @@ def get_user_from_token(token):
         return user
     except(get_user_model().DoesNotExist) as e:
         return None
-    
+
 @database_sync_to_async
 def get_connected_players(connected_user_ids):
     return list(PlayersModel.objects.filter(id__in=connected_user_ids).values('id', 'login', 'name'))
@@ -93,7 +93,7 @@ class RoomsConsumer(AsyncWebsocketConsumer):
     connected_users = set()
 
     async def connect(self):
-                 
+
         self.group_name = "rooms"
         self.login = ''
         await self.channel_layer.group_add(
@@ -173,7 +173,7 @@ class RoomsConsumer(AsyncWebsocketConsumer):
                 await self.send_friend_request(data)
             elif data.get('type') == 'friend_request_receive':
                 await self.friend_request_receive(data)
-    
+
     async def tournament_registered(self):
         tournament = TournamentModel.objects.filter(owner=self.user, terminated=False).first()
         if tournament and not tournament.ready and not tournament.callback:
@@ -210,13 +210,13 @@ class RoomsConsumer(AsyncWebsocketConsumer):
             await self.broadcast_user_list()
         else:
             await self.close(code=4001)
-    
+
     async def close_connection(self, data):
         await self.send(text_data=json.dumps({
             "type": 'close',
             "login_id": data['login_id']
         }))
-    
+
     async def quit_tournament(self, data):
         tourId = data.get('tour_id')
         tournament = await get_tournament(tourId)
@@ -237,7 +237,7 @@ class RoomsConsumer(AsyncWebsocketConsumer):
                 'users': players_list,
             }
         )
-    
+
     async def broadcast_users(self, event):
         await self.send(text_data=json.dumps({
             'type': 'users_list',
@@ -262,7 +262,7 @@ class RoomsConsumer(AsyncWebsocketConsumer):
                 'text': json.dumps(message),
             }
         )
-    
+
     async def send_message(self, event):
         message_content = json.loads(event['text'])
         await self.send(text_data=json.dumps(message_content))

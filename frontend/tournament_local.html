@@ -1,40 +1,58 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'style.css' %}">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Local Tournament - Transcendence</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
-    
-    #playerCount {
-        width: 10%;
-        margin-Bottom: 30px;
-    }
+        #playerCount {
+            width: 10%;
+            margin-Bottom: 30px;
+        }
 
-    #playerForm { display: none; }
-    #passwordField { display: none; }
+        #playerForm {
+            display: none;
+        }
+
+        #passwordField {
+            display: none;
+        }
     </style>
 </head>
-<body>
-    <div id="no-invite"></div>
-    <div id="player-stack"></div>
-    <button id="addPlayer">Add Player</button>
-    
-    <form id="playerForm">
-        <label for="loginName">Login:</label>
-        <input type="text" id="loginTour" name="login"><br>
-        
-        <input type="checkbox" id="loginCheckbox" name="loginCheckbox">
-        <label for="loginCheckbox">User Login</label><br>
-
-        <div id="passwordField">
-            <label for="password">Password:</label>
-            <input type="password" id="passwordTour" name="password"><br>
+<body class="d-flex justify-content-center align-items-center vh-100">
+    <div class="container">
+        <div id="no-invite"></div>
+        <div id="player-stack"></div>
+        <div class="d-flex justify-content-center mt-3">
+            <button id="addPlayer" class="btn btn-primary mr-2">Add Player</button>
+            <button id="startTour" class="btn btn-success">Start</button>
         </div>
         
-        <input id="submitBtn" type="submit" value="Submit">
-    </form>
-    <button id="startTour">Start</button>
+        <form id="playerForm">
+            <div class="form-group">
+                <label for="loginName">Login:</label>
+                <input type="text" class="form-control" id="loginTour" name="login">
+            </div>
+            
+            <div class="form-check">
+                <input type="checkbox" class="form-check-input" id="loginCheckbox" name="loginCheckbox">
+                <label class="form-check-label" for="loginCheckbox">User Login</label>
+            </div>
+
+            <div id="passwordField" class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" class="form-control" id="passwordTour" name="password">
+            </div>
+            
+            <button id="submitBtn" type="submit" class="btn btn-primary">Submit</button>
+        </form>
+    </div>
+    
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>
-

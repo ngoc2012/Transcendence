@@ -29,6 +29,9 @@ Your friends: <br> {% for i in friends %} {{ i.login }} - {{ i.online_status }} 
 <html lang="en">
 {% load replace_url %}
 <head>
+      {% load static %}
+
+    <link rel="stylesheet" href="{% static 'style.css' %}">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>User Profile</title>

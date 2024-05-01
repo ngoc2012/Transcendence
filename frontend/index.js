@@ -2,6 +2,8 @@ import {Main} from './Main.js'
 
 export var main = new Main();
 
+var reload_page = true;
+
 //recupere la data obtenue du callback de l'auth 42
 if (my42login !== null && my42login !== "" && my42email !== "" && my42ws != "")
 {
@@ -15,13 +17,12 @@ if (my42login !== null && my42login !== "" && my42email !== "" && my42ws != "")
     var dom_log_in = document.getElementById('login');
     if (dom_log_in) {
         dom_log_in.style.display = "none";
-        dom_log_in.insertAdjacentHTML('afterend', '<button id="logoutButton" class="btn btn-danger">Logout</button>');
+        dom_log_in.insertAdjacentHTML('afterend', '<button id="logoutButton" class="btn btn-danger">Log Out</button>');
     }
 
     var dom_signup = document.getElementById('signup');
     if (dom_signup) {
         dom_signup.style.display = "none";
-        // dom_signup.insertAdjacentHTML('afterend', '<button id="logoutButton" class="btn btn-danger">Logout</button>');
     }
 
     var dom_logout = document.getElementById('logoutButton');
@@ -39,25 +40,51 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    var main_title = document.getElementById('main_title');
-    if (main_title) {
-        event.preventDefault();
-        main_title.addEventListener('click', () => {
-            main.history_stack.push('/');
-            window.history.pushState({}, '', '/');
-            main.load('/lobby', () => main.lobby.events());
+    const bg = document.getElementById('dynamic-bg');
+    let color1 = [166, 192, 254]; // Initial color in RGB
+    let color2 = [246, 128, 132]; // Initial color in RGB
+    let targetColor1 = [...color1];
+    let targetColor2 = [...color2];
+
+    function interpolateColors(current, target) {
+        return current.map((c, i) => {
+            if (c < target[i]) {
+                return Math.min(c + 1, target[i]);
+            } else {
+                return Math.max(c - 1, target[i]);
+            }
         });
     }
+
+    function updateTargetColors() {
+        targetColor1 = targetColor1.map(c => Math.max(0, Math.min(255, c + Math.floor(Math.random() * 50 - 25))));
+        targetColor2 = targetColor2.map(c => Math.max(0, Math.min(255, c + Math.floor(Math.random() * 50 - 25))));
+    }
+
+    function changeBackground() {
+        color1 = interpolateColors(color1, targetColor1);
+        color2 = interpolateColors(color2, targetColor2);
+
+        const newColor1 = `rgb(${color1[0]}, ${color1[1]}, ${color1[2]})`;
+        const newColor2 = `rgb(${color2[0]}, ${color2[1]}, ${color2[2]})`;
+
+        bg.style.background = `linear-gradient(120deg, ${newColor1}, ${newColor2})`;
+
+        if (color1.every((c, i) => c === targetColor1[i]) && color2.every((c, i) => c === targetColor2[i])) {
+            updateTargetColors();
+        }
+    }
+
+    setInterval(changeBackground, 100);
+    updateTargetColors();
 
     if (!main.login)
         checkSession();
 
-    // var main_title = document.getElementById('main_title');
-    // main_title.addEventListener('click', () => main.load(''));
-
     function checkSession() {
         validateSessionToken().then(data => {
             if (data && data.validSession) {
+                reload_page = false;
                 main.email = data.email;
                 main.login = data.login;
                 main.name = data.name;
@@ -83,7 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     var dom_signup = document.getElementById('signup');
                     if (dom_signup) {
                         dom_signup.style.display = "none";
-                        dom_signup.insertAdjacentHTML('afterend', '<button id="logoutButton" class="btn btn-danger">Logout</button>');
+                        dom_signup.insertAdjacentHTML('afterend', '<button id="logoutButton" class="btn btn-danger">Log Out</button>');
                     }
 
                     var dom_logout = document.getElementById('logoutButton');
@@ -128,7 +155,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function    reload() {
-        console.log('reload')
         const   path = window.location.pathname;
         if (main.lobby.game && main.lobby.game !== undefined)
         {
@@ -144,8 +170,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    window.onpopstate = function (event) { reload();};
-    main.history_stack.push(window.location.pathname);
-    window.history.pushState({}, '', window.location.pathname);
-    reload();
+    if (reload_page) {
+        window.onpopstate = function (event) { reload();};
+        main.history_stack.push(window.location.pathname);
+        window.history.pushState({}, '', window.location.pathname);
+        reload();
+    }
 });

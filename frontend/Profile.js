@@ -25,6 +25,7 @@ export class Profile{
         this.dom_login.addEventListener("click", ()=> this.change_login());
         this.dom_name.addEventListener("click", () => this.change_name());
         this.dom_cancel.addEventListener("click", () => this.backtolobby());
+
     }
 
     backtolobby(){

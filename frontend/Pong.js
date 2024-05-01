@@ -21,6 +21,16 @@ export class Pong
         this.preventWinBox = true;
     }
 
+    reset_ratio() {
+        let width = window.innerWidth - 1;
+        if (width < this.room.data.WIDTH)
+        {
+            this.ctx.canvas.width = width;
+            this.ctx.canvas.height = width * this.room.data.HEIGHT / this.room.data.WIDTH;
+            this.draw.ratio = width / this.room.data.WIDTH;
+        }
+    }
+
 	init() {
         this.dom_game_name = document.getElementById("game_name");
         this.dom_game_name.innerHTML = this.room.name;
@@ -33,6 +43,19 @@ export class Pong
 		this.ctx = this.canvas.getContext('2d');
         this.ctx.canvas.width  = this.room.data.WIDTH;
         this.ctx.canvas.height = this.room.data.HEIGHT;
+        this.reset_ratio();
+
+        window.addEventListener('resize', () => {
+            this.reset_ratio();
+            this.draw.execute(this.draw.data);
+            this.draw.update_3D(this.draw.data);
+            // Your code to be executed on window resize
+            // console.log('Window resized to: ' + window.innerWidth + 'x' + window.innerHeight);
+        });
+    
+        window.addEventListener("beforeunload", () => {
+            console.log("Are you sure you want to leave this page?");
+        });
 
         this.pongThreeJS = document.getElementById('pongThreeJS');
 
@@ -539,26 +562,34 @@ export class Pong
     
         const winBox = document.createElement('div');
         winBox.id = 'winBox';
-        winBox.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 500px; height: 300px; padding: 20px; background-color: #fff; border: 2px solid #000; text-align: center; z-index: 100;';
+        winBox.style.cssText = `
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 400px;
+        height: 300px;
+        padding: 20px;
+        background-color: #fff;
+        border: 2px solid #ffd700;
+        border-radius: 15px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+        text-align: center;
+        z-index: 100;
+    `;
         document.body.appendChild(winBox);
-    
-        const scoreTitle = document.createElement('h2');
-        scoreTitle.textContent = 'SCOREBOARD';
-        scoreTitle.style.cssText = 'font-family: Stencil Std, fantasy; font-size: 30px; margin-bottom: 20px; text-align: center;';
-        winBox.appendChild(scoreTitle);
+        const winnerText = document.createElement('p');
+        winnerText.textContent = `${data.win === 'player0' ? this.player1 : this.player2} wins !`;
+        winnerText.style.cssText = 'font-size: 60px; font-weight: bold; color: #4CAF50; text-align: center;';
+        winBox.appendChild(winnerText);
     
         const scoreContainer = document.createElement('div');
         const scoreText = document.createElement('p');
-        scoreText.textContent = `${this.player1} ${data.score[0]} - ${data.score[1]} ${this.player2}`;
-        scoreText.style.cssText = 'font-family: Stencil Std, fantasy; font-size: 20px;';
+        scoreText.textContent = `${this.player1} ${data.score[0]}  -  ${data.score[1]} ${this.player2}`;
+        scoreText.style.cssText = 'font-size: 20px;';
         scoreContainer.appendChild(scoreText);
         winBox.appendChild(scoreContainer);
-    
-        const winnerText = document.createElement('p');
-        winnerText.textContent = `${data.win === 'player0' ? this.player1 : this.player2} wins!`;
-        winnerText.style.cssText = 'font-family: Stencil Std, fantasy; font-size: 20px; font-weight: bold; color: #4CAF50; text-align: center;';
-        winBox.appendChild(winnerText);
-    
+
         const backButton = document.createElement('button');
         backButton.textContent = 'Back to lobby';
         backButton.classList.add('btn', 'btn-primary');
@@ -572,13 +603,14 @@ export class Pong
             const nextMatchButton = document.createElement('button');
             nextMatchButton.textContent = 'Next Match';
             nextMatchButton.classList.add('btn', 'btn-primary');
+            nextMatchButton.style.marginLeft = '10px';
             nextMatchButton.onclick = () => {
                 removeElements();
                 this.tournament.localBack();
             };
             winBox.appendChild(nextMatchButton);
         }
-    
+
         function removeElements() {
             canvas && (canvas.style.filter = '');
             backdrop.parentNode && backdrop.parentNode.removeChild(backdrop);

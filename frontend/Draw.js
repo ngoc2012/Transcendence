@@ -7,12 +7,59 @@ export class Draw
         this.pong = p;
         this.ratio = 1.0;
         this.json_font = null;
+        this.data = null;
+        this.table = null;
+        this.barrier1 = null;
+        this.barrier2 = null;
+        this.paddles = [];
 	}
 
-	init() {
-		this.n_paddles = 0;
-		this.paddles = [];
+    update_3D(data) {
+        if (this.table !== null) {
+            this.scene.remove(this.table);
+            this.scene.remove(this.barrier1);
+            this.scene.remove(this.barrier2);
+            this.scene.remove(this.ball);
+        }
+        if (this.paddles.length > 0) {
+            this.paddles.forEach((p) => {this.scene.remove(p);});
+            this.paddles = [];
+        }
+        // Draw table
+        const tableGeometry = new THREE.BoxGeometry(
+			this.pong.room.data.WIDTH * this.ratio,
+			this.pong.room.data.HEIGHT * this.ratio,
+			2);
+        const tableMaterial = new THREE.MeshPhongMaterial({ color: 0x0077FF });
+        this.table = new THREE.Mesh(tableGeometry, tableMaterial);
+        this.table.position.z = -1;
+        this.scene.add(this.table);
+        
+        // Draw barriers
+        const barrierGeometry = new THREE.BoxGeometry(
+			this.pong.room.data.WIDTH * this.ratio, 2,
+			this.pong.room.data.RADIUS * this.ratio * 2);
+        const barrierMaterial = new THREE.MeshPhongMaterial({ color: 0x0077FF });
+        this.barrier1 = new THREE.Mesh(barrierGeometry, barrierMaterial);
+        this.barrier1.position.y = this.pong.room.data.HEIGHT * this.ratio / 2 + 1;
+        this.barrier1.position.z = this.pong.room.data.RADIUS * this.ratio;
+        this.scene.add(this.barrier1);
+        this.barrier2 = new THREE.Mesh(barrierGeometry, barrierMaterial);
+        this.barrier2.position.y = -this.pong.room.data.HEIGHT * this.ratio / 2 - 1;
+        this.barrier2.position.z = this.pong.room.data.RADIUS * this.ratio;
+        this.scene.add(this.barrier2);
+        
+        // Create ball
+        const ballGeometry = new THREE.SphereGeometry(this.pong.room.data.RADIUS * this.ratio, 32, 32);
+        const ballMaterial = new THREE.MeshPhongMaterial({ color: 0xFFA500 });
+        this.ball = new THREE.Mesh(ballGeometry, ballMaterial);
+        this.ball.position.z = this.pong.room.data.RADIUS * this.ratio / 2;
+        this.scene.add(this.ball);
 
+        this.update(data);
+    }
+    
+	init() {
 		// Set up the scene
         this.scene = new THREE.Scene();
         this.scene.background = new THREE.Color(0x808080);
@@ -41,99 +88,7 @@ export class Draw
 			this.pong.room.data.PADDLE_HEIGHT * this.ratio,
 			this.paddleDepth);
         
-        // Draw table
-        const tableGeometry = new THREE.BoxGeometry(
-			this.pong.room.data.WIDTH * this.ratio,
-			this.pong.room.data.HEIGHT * this.ratio,
-			2);
-        const tableMaterial = new THREE.MeshPhongMaterial({ color: 0x0077FF });
-        const table = new THREE.Mesh(tableGeometry, tableMaterial);
-        table.position.z = -1;
-        this.scene.add(table);
-        
-        // Draw barriers
-        const barrierGeometry = new THREE.BoxGeometry(
-			this.pong.room.data.WIDTH * this.ratio, 2,
-			this.pong.room.data.RADIUS * this.ratio * 2);
-        const barrierMaterial = new THREE.MeshPhongMaterial({ color: 0x0077FF });
-        const barrier1 = new THREE.Mesh(barrierGeometry, barrierMaterial);
-        barrier1.position.y = this.pong.room.data.HEIGHT * this.ratio / 2 + 1;
-        barrier1.position.z = this.pong.room.data.RADIUS * this.ratio;
-        this.scene.add(barrier1);
-        const barrier2 = new THREE.Mesh(barrierGeometry, barrierMaterial);
-        barrier2.position.y = -this.pong.room.data.HEIGHT * this.ratio / 2 - 1;
-        barrier2.position.z = this.pong.room.data.RADIUS * this.ratio;
-        this.scene.add(barrier2);
-        
-        // Draw scores
-        // $.ajax({
-        //     url: '/pong/load_font',
-        //     method: 'GET',
-        //     headers: {
-        //         'Authorization': `Bearer ${sessionStorage.JWTToken}`
-        //     },
-        //     success: (response) => {
-        //         if (response.token) {
-        //             sessionStorage.setItem('JWTToken', response.token);
-        //         }
-        //         if (response.error) {
-        //             const message = response.message;
-        //             this.main.set_status('Error: ' + message);
-        //         }
-        //         else
-        //         {
-        //             this.json_font = response;
-        //             const loader = new THREE.FontLoader();
-        //             const font = loader.parse( this.json_font );
-        //             var geometry = new THREE.TextGeometry('1 - 0', {
-        //                 font: font,
-        //                 size: 1,
-        //                 height: 0.5,
-        //                 curveSegments: 12,
-        //                 bevelEnabled: true,
-        //                 bevelThickness: 0.03,
-        //                 bevelSize: 0.02,
-        //                 bevelSegments: 5
-        //             });
-        //             var material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
-        //             var mesh = new THREE.Mesh(geometry, material);
-        //             this.scene.add(mesh);
-        //         }
-        //     },
-        //     error: (xhr, textStatus, errorThrown) => {
-        //     let errorMessage = "Error: Can not get json font";
-        //     if (xhr.responseJSON && xhr.responseJSON.error) {
-        //         errorMessage = xhr.responseJSON.error;
-        //     }
-        //     this.main.set_status(errorMessage);
-        //     }
-        // });
-
-        // const loader = new THREE.FontLoader();
-        // loader.load('https://threejs.org/examples/fonts/optimer_regular.typeface.json', (font) => {
-        // const geometry = new THREE.TextGeometry('Buy Here!', {
-        //     font: font,
-        //     size: 2,
-        //     height: 200
-        // });
-        // geometry.center();
-        // const material = new THREE.MeshLambertMaterial({
-        //     color: 0x686868
-        // });
-        // const mesh = new THREE.Mesh(geometry, material);
-        // mesh.position.y = - 1; // FIX
-        
-        // mesh.name = "bhText"
-        // this.scene.add(mesh);
-        
-        // });
-        
-        // Create ball
-        const ballGeometry = new THREE.SphereGeometry(this.pong.room.data.RADIUS * this.ratio, 32, 32);
-        const ballMaterial = new THREE.MeshPhongMaterial({ color: 0xFFA500 });
-        this.ball = new THREE.Mesh(ballGeometry, ballMaterial);
-        this.ball.position.z = this.pong.room.data.RADIUS * this.ratio / 2;
-        this.scene.add(this.ball);
+        this.update_3D(this.data);
  
         this.center = new THREE.Vector3(0, 0, 0); 
         this.distance = 200 * this.ratio / Math.tan(Math.PI * this.camera.fov / 360);
@@ -172,7 +127,10 @@ export class Draw
     }
 
 	update(data) {
-		if (data.players.length !== this.n_paddles) {
+        this.data = data;
+        if (data === null)
+            return;
+		if (data.players.length !== this.paddles.length) {
             this.paddles.forEach((p) => {this.scene.remove(p);});
             this.paddles = [];
 			data.players.forEach((p) => {
@@ -183,9 +141,12 @@ export class Draw
 				this.paddles.push(paddle);
                 
 			});
-			this.n_paddles = data.players.length;
 		}
 
+        if (data.players.length === 0)
+            return;
+        // console.log(this.paddles);
+        // console.log(data.players);
 		data.players.forEach((p, i) => {
 			this.paddles[i].position.x = (p.x - this.pong.room.data.WIDTH / 2) * this.ratio + this.pong.room.data.PADDLE_WIDTH * this.ratio / 2;
 			this.paddles[i].position.y = (this.pong.room.data.HEIGHT / 2 - p.y) * this.ratio - this.pong.room.data.PADDLE_HEIGHT * this.ratio / 2;
@@ -200,27 +161,29 @@ export class Draw
 	}
 
 	execute(data) {
+        this.data = data;
+        // console.log(this.pong.ctx.canvas.width, this.pong.ctx.canvas.height, this.ratio)
 		// Clear the canvas
-		this.pong.ctx.clearRect(0, 0, this.pong.room.data.WIDTH, this.pong.room.data.HEIGHT);
+		this.pong.ctx.clearRect(0, 0, this.pong.ctx.canvas.width, this.pong.ctx.canvas.height);
         // Draw table
         this.pong.ctx.fillStyle = '#0077FF';
-        this.pong.ctx.fillRect(0, 0, this.pong.room.data.WIDTH, this.pong.room.data.HEIGHT);
+        this.pong.ctx.fillRect(0, 0, this.pong.ctx.canvas.width, this.pong.ctx.canvas.height);
         
         // Draw limites
         this.pong.ctx.strokeStyle = '#A9A9A9';
         this.pong.ctx.lineWidth = 1;
         this.pong.ctx.setLineDash([10, 15]);
         this.pong.ctx.beginPath();
-        this.pong.ctx.moveTo(this.pong.room.data.WIDTH / 4 + this.pong.room.data.PADDLE_WIDTH, 0);
-        this.pong.ctx.lineTo(this.pong.room.data.WIDTH / 4 + this.pong.room.data.PADDLE_WIDTH, this.pong.room.data.HEIGHT);
+        this.pong.ctx.moveTo(this.pong.ctx.canvas.width / 4 + this.pong.room.data.PADDLE_WIDTH * this.ratio, 0);
+        this.pong.ctx.lineTo(this.pong.ctx.canvas.width / 4 + this.pong.room.data.PADDLE_WIDTH * this.ratio, this.pong.ctx.canvas.height);
         this.pong.ctx.stroke();
 
         this.pong.ctx.strokeStyle = '#A9A9A9';
         this.pong.ctx.lineWidth = 1;
         this.pong.ctx.setLineDash([10, 15]);
         this.pong.ctx.beginPath();
-        this.pong.ctx.moveTo(this.pong.room.data.WIDTH / 4 * 3 - this.pong.room.data.PADDLE_WIDTH, 0);
-        this.pong.ctx.lineTo(this.pong.room.data.WIDTH / 4 * 3 - this.pong.room.data.PADDLE_WIDTH, this.pong.room.data.HEIGHT);
+        this.pong.ctx.moveTo(this.pong.ctx.canvas.width / 4 * 3 - this.pong.room.data.PADDLE_WIDTH * this.ratio, 0);
+        this.pong.ctx.lineTo(this.pong.ctx.canvas.width / 4 * 3 - this.pong.room.data.PADDLE_WIDTH * this.ratio, this.pong.ctx.canvas.height);
         this.pong.ctx.stroke();
 
         this.pong.ctx.setLineDash([]);
@@ -229,23 +192,23 @@ export class Draw
         this.pong.ctx.strokeStyle = '#262626';
         this.pong.ctx.lineWidth = 3;
         this.pong.ctx.beginPath();
-        this.pong.ctx.moveTo(this.pong.room.data.WIDTH / 2, 0);
-        this.pong.ctx.lineTo(this.pong.room.data.WIDTH / 2, this.pong.room.data.HEIGHT);
+        this.pong.ctx.moveTo(this.pong.ctx.canvas.width / 2, 0);
+        this.pong.ctx.lineTo(this.pong.ctx.canvas.width / 2, this.pong.ctx.canvas.height);
         this.pong.ctx.stroke();
 
 		// Draw paddles
 		this.pong.ctx.fillStyle = '#8b3a62';
         data.players.forEach((p) => {
 		    this.pong.ctx.fillRect(
-                p.x,
-                p.y,
-                this.pong.room.data.PADDLE_WIDTH,
-                this.pong.room.data.PADDLE_HEIGHT);
+                p.x * this.ratio,
+                p.y * this.ratio,
+                this.pong.room.data.PADDLE_WIDTH * this.ratio,
+                this.pong.room.data.PADDLE_HEIGHT * this.ratio);
         });
 
 		// Draw this.pong.ball
 		this.pong.ctx.beginPath();
-		this.pong.ctx.arc(data.ball.x, data.ball.y, this.pong.room.data.RADIUS, 0, Math.PI * 2);
+		this.pong.ctx.arc(data.ball.x * this.ratio, data.ball.y * this.ratio, this.pong.room.data.RADIUS * this.ratio, 0, Math.PI * 2);
 		this.pong.ctx.fillStyle = '#FFA500';
 		this.pong.ctx.fill();
 		this.pong.ctx.closePath();
