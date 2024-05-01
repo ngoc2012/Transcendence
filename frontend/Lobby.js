@@ -2,6 +2,7 @@ import {Pong} from './Pong.js'
 import { Chat } from './Chat.js'
 import { Profile } from './Profile.js'
 import {Tournament} from './Tournament.js';
+import {join_game} from './game.js';
 
 export class Lobby
 {
@@ -13,7 +14,7 @@ export class Lobby
         this.ws = null;
     }
 
-    events() {
+    events(isPopState) {
         this.main.checkcsrf();
         this.main.set_chat();
         if (this.main.login != '') {
@@ -22,6 +23,9 @@ export class Lobby
         if (this.listenersOK) {
             return;
         }
+        if (!isPopState)
+            window.history.pushState({page: '/'}, '', '/');
+
         this.dom_rooms = document.getElementById("rooms");
         this.dom_tournament = document.getElementById("tournament");
         this.dom_tournament_history = document.getElementById("tournament_history");
@@ -33,7 +37,13 @@ export class Lobby
         this.dom_homebar = document.querySelector('#homebar');
         this.dom_pong.addEventListener("click", () => this.new_game("pong"));
         this.dom_delete.addEventListener("click", () => this.delete_game());
-        this.dom_join.addEventListener("click", () => this.join());
+        this.dom_join.addEventListener("click", () => {
+            if (this.dom_rooms.selectedIndex === -1) {
+                this.main.set_status('Please select a room to join');
+                return;
+            }
+            join_game(this.main, this.dom_rooms.options[this.dom_rooms.selectedIndex].value);
+        });
 		this.dom_chat.addEventListener("click", () => this.start_chat());
         this.dom_profile.addEventListener("click", () => this.profile());
         this.dom_homebar.addEventListener("click", () => this.homebar());
@@ -45,8 +55,6 @@ export class Lobby
     eventsCallback(tourid) {
         console.log(tourid)
         this.tournament = new Tournament(this.main, tourid);
-        this.main.history_stack.push('/tournament');
-        window.history.pushState({}, '', '/tournament');
         this.main.load('/tournament', () => this.tournament.eventsCallback(tourid));
     }
 
@@ -84,49 +92,6 @@ export class Lobby
         this.main.history_stack.push('/');
         window.history.pushState({}, '', '/');
         this.main.load('/lobby', () => this.events());
-    }
-
-    join() {
-        if (this.main.login === '') {
-            this.main.set_status('Please login or sign up');
-            return;
-        }
-        if (this.dom_rooms.selectedIndex === -1) {
-            this.main.set_status('Please select a room to join');
-            return;
-        }
-        var csrftoken = this.main.getCookie('csrftoken');
-
-        if (csrftoken) {
-            $.ajax({
-                url: '/game/join',
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': csrftoken,
-                },
-                data: {
-                    'login': this.main.login,
-                    "game_id": this.dom_rooms.options[this.dom_rooms.selectedIndex].value
-                },
-                success: (info) => {
-                    if (typeof info === 'string') {
-                        this.main.set_status(info);
-                        this.rooms_update();
-                    } else {
-                        switch (info.game) {
-                            case 'pong':
-                                this.pong_game(info);
-                                break;
-                        }
-                    }
-                },
-                error: () => this.main.set_status('Error: Can not join game')
-            });
-        } else {
-            this.history_stack.push('/login');
-            window.history.pushState({page: '/login'}, '', '/login');
-            this.main.load('/pages/login', () => this.main.log_in.events());
-        }
     }
 
     new_game(game) {

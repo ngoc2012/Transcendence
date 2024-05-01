@@ -56,6 +56,7 @@ export class Main
             url: page + '/',
             method: 'GET',
             success: (html) => {
+                // console.log(html);
                 this.dom_container.innerHTML = html;
                 //pas oublier de changer ca
                 if (callback && typeof callback === 'function') {
@@ -66,6 +67,10 @@ export class Main
             error: (jqXHR, textStatus, errorThrown) => {
                 if (jqXHR.status === 401) {
                     this.login_click();
+                }
+                else
+                {
+                    this.dom_container.innerHTML = textStatus;
                 }
             }
         });
@@ -93,16 +98,12 @@ export class Main
     }
 
     login_click() {
-        this.history_stack.push('/login');
-        window.history.pushState({page: '/login'}, '', '/login');
         this.load('/pages/login', () => this.log_in.events());
     }
     
     set_status(s) {this.dom_status.innerHTML = s;}
 
     signup_click() {
-        this.history_stack.push('/signup');
-        window.history.pushState({}, '', '/signup');
         this.load('/pages/signup', () => this.signup.events());
     }
 
