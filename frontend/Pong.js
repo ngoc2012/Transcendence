@@ -512,37 +512,42 @@ export class Pong
 
     preMatchBox(player1, player2) {
         let backdrop = document.createElement('div');
-        backdrop.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); z-index: 99;';
+        backdrop.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(51, 51, 51, 0.6); z-index: 99;';
         document.body.appendChild(backdrop);
         document.getElementById('pongCanvas').style.filter = 'blur(8px)';
-
+    
         let matchBox = document.createElement('div');
         matchBox.setAttribute('id', 'matchBox');
-        matchBox.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); padding: 20px; background-color: #fff; border: 2px solid #000; text-align: center; z-index: 100;';
-
+        matchBox.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); padding: 20px; background-color: #ffffff7a; border: 2px solid #ffffff; text-align: center; z-index: 100; border-radius: 10px;';
+    
         let matchText = document.createElement('p');
         matchText.textContent = `Match can start whenever you are ready!`;
+        matchText.style.cssText = 'font-family: "Poppins", sans-serif; font-weight: 400; font-style: normal; color: white;';
         matchBox.appendChild(matchText);
-
+    
         let instruct1 = document.createElement('p');
         instruct1.textContent = `${player1} controls: 'q' = up, 'a' = down`;
+        instruct1.style.cssText = 'font-family: "Poppins", sans-serif; font-weight: 400; font-style: normal; color: white;';
         matchBox.appendChild(instruct1);
         let instruct2 = document.createElement('p');
         instruct2.textContent = `${player2} controls: 'o' = up, 'l' = down`;
+        instruct2.style.cssText = 'font-family: "Poppins", sans-serif; font-weight: 400; font-style: normal; color: white;';
         matchBox.appendChild(instruct2);
-
+    
         let startButton = document.createElement('button');
         startButton.textContent = 'Start';
+        startButton.classList.add('btn', 'btn-primary');
         startButton.onclick = () => {
             document.getElementById('pongCanvas').style.filter = '';
             document.body.removeChild(backdrop);
             document.body.removeChild(matchBox);
-            this.start()
-        }   
+            this.start();
+        };
         matchBox.appendChild(startButton);
-
+    
         document.body.appendChild(matchBox);
     }
+    
 
     winnerBox(data) {
         if (this.preventWinBox || !window.location.href.includes('pong')) return;
@@ -551,38 +556,25 @@ export class Pong
             this.localTournament.sendResult(data.score[0], data.score[1], this.room.id);
         }
     
-        const backdrop = document.createElement('div');
-        backdrop.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); z-index: 99;';
+        let backdrop = document.createElement('div');
+        backdrop.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(51, 51, 51, 0.6); z-index: 99;';
         document.body.appendChild(backdrop);
+        document.getElementById('pongCanvas').style.filter = 'blur(8px)';
     
         const canvas = document.getElementById('pongCanvas');
         if (canvas) {
             canvas.style.filter = 'blur(8px)';
         }
     
-        const winBox = document.createElement('div');
-        winBox.id = 'winBox';
-        winBox.style.cssText = `
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        width: 400px;
-        height: 300px;
-        padding: 20px;
-        background-color: #fff;
-        border: 2px solid #ffd700;
-        border-radius: 15px;
-        box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
-        text-align: center;
-        z-index: 100;
-    `;
+        let winBox = document.createElement('div');
+        winBox.setAttribute('id', 'winBox');
+        winBox.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); padding: 20px; background-color: #ffffff7a; border: 2px solid #ffffff; text-align: center; z-index: 100; border-radius: 10px;';
+
         document.body.appendChild(winBox);
         const winnerText = document.createElement('p');
         winnerText.textContent = `${data.win === 'player0' ? this.player1 : this.player2} wins !`;
-        winnerText.style.cssText = 'font-size: 60px; font-weight: bold; color: #4CAF50; text-align: center;';
+        winnerText.style.cssText = 'font-size: 60px; font-family: "Poppins", sans-serif; font-weight: bold; font-style: normal; color: white; text-align: center;';
         winBox.appendChild(winnerText);
-    
         const scoreContainer = document.createElement('div');
         const scoreText = document.createElement('p');
         scoreText.textContent = `${this.player1} ${data.score[0]}  -  ${data.score[1]} ${this.player2}`;
