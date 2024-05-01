@@ -56,9 +56,21 @@ label {
 .form-control {
   border-radius: 10px;
   border: 2px solid rgba(255, 255, 255, 0.75);
-  padding: 12px;
+  /* padding: 12px; */
   color: #ffffff;
   background-color: rgba(66, 66, 66, 0.5);
+}
+
+
+.form-label-left {
+  text-align: left;
+  margin-bottom: 0;
+}
+
+/* INPUT elements */
+
+input {
+  height: 50px !important;
 }
 
 input.form-control:focus {
@@ -67,7 +79,8 @@ input.form-control:focus {
   color: white;
 }
 
-.form-label-left {
-  text-align: left;
-  margin-bottom: 0;
+/* SELECT elements */
+
+select {
+  height: 50px !important;
 }
