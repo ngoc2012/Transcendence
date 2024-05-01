@@ -130,7 +130,7 @@ export class Lobby
     }
 
     new_game(game) {
-        console.log(game);
+        // console.log(game);
         if (this.main.login === '')
         {
             this.main.set_status('Please login or sign up');
@@ -184,6 +184,8 @@ export class Lobby
 			this.main.set_status('You must be logged to see the tournament history.');
 			return;
 		}
+        this.main.history_stack.push('/tournament_history');
+        window.history.pushState({page: '/tournament_history'}, '', '/tournament_history');
         this.main.load('/tournament_history', () => this.main.tournament_history.events());
     }
 
@@ -249,7 +251,7 @@ export class Lobby
     }
 
     pong_game(info) {
-        console.log(info);
+        // console.log(info);
         this.quit();
         this.game = new Pong(this.main, this, info);
         this.main.load('/pong', () => this.game.init());
@@ -257,6 +259,7 @@ export class Lobby
 
     rooms_update() {
         if (this.socket === -1) {
+            // console.log('New lobby socket');
             this.socket = new WebSocket(
                 'wss://'
                 + window.location.host
@@ -277,6 +280,8 @@ export class Lobby
             url: '/game/update',
             method: 'GET',
             success: (rooms) => {
+                // console.log('update rooms');
+                // console.log(rooms);
                 var options_rooms = this.dom_rooms && this.dom_rooms.options;
                 this.dom_rooms.innerHTML = "";
                 if (options_rooms && rooms && rooms.length > 0) {
@@ -293,6 +298,7 @@ export class Lobby
         });
 
         this.socket.onmessage = (e) => {
+            // console.log(e);
             if (!('data' in e))
                 return;
             const data = JSON.parse(e.data);
@@ -307,12 +313,21 @@ export class Lobby
                     this.main.profile.receive_request(data)
                 }
             }
+            else if (data.type === 'users_list'){
+                // Je ne sais pas si on doit faire quelque chose ici
+            }
             else {
-                const rooms = JSON.parse(e.data);
+                const rooms = data;
+                // console.log(rooms);
+                // console.log(this.dom_rooms);
                 var options_rooms = this.dom_rooms && this.dom_rooms.options;
-                this.dom_rooms.innerHTML = "";
+                // this.dom_rooms.innerHTML = "";
+                for (let i = this.dom_rooms.length - 1; i >= 0; i--) {
+                    this.dom_rooms.remove(i);
+                  }
                 if (options_rooms && rooms && rooms.length > 0) {
                     rooms.forEach((room) => {
+                        // console.log(room);
                         var option = document.createElement("option");
                         option.value = room.id;
                         let string = room.id.substring(0,5)
@@ -320,6 +335,9 @@ export class Lobby
                         this.dom_rooms.add(option);
                     });
                 }
+                // console.log(this.dom_rooms);
+                if (rooms.length > 0)
+                    this.dom_rooms.size = rooms.length;
             };
         }
 

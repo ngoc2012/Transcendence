@@ -7,40 +7,28 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign up</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
-        .container {
-            margin-top: 50px;
-            text-align: center;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-        input, select {
-            margin-bottom: 20px;
-            width: 20%;
-        }
-        button1 {
-            margin-top: 10px;
-        }
+
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Sign up</h1>
+        <h2>Sign Up</h2>
         <form>
-            <label for="login">Login:</label>
-            <input type="text" name="login" id="login1" class="form-control" />
-            <label for="password">Password:</label>
-            <input type="password" name="password" id="password1" class="form-control" />
-            <label for="name">Full Name:</label>
-            <input type="text" name="name" id="name1" class="form-control" />
-            <label for="email">Email:</label>
-            <input type="email" name="email" id="email1" class="form-control" />
-            <input type="checkbox" id="enable2fa" name="enable2fa" class="form-check-input">
+            <div class="form-group row justify-content-center">
+                <div class="col-sm-8 text-left">
+                    <label for="login" class="col-form-label">Login</label>
+                    <input type="text" name="login" id="login1" class="form-control" required/>
+                    <label for="password" class="col-form-label">Password</label>
+                    <input type="password" name="password" id="password1" class="form-control" required/>
+                    <label for="name" class="col-form-label">Name</label>
+                    <input type="name" name="name" id="name1" class="form-control"/>
+                    <label for="email" class="col-form-label">Email</label>
+                    <input type="email" name="email" id="email1" class="form-control" />
+                </div>
+            </div>
             <label for="enable2fa">Enable 2FA</label>
+            <input type="checkbox" id="enable2fa" name="enable2fa" class="form-check-input">
             <button1 id="signup1" class="btn btn-primary" type="button">Sign up</button1>
             <button1 id="cancel1" class="btn btn-danger" type="button">Cancel</button1>
         </form>

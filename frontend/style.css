@@ -1,36 +1,89 @@
+/* General layout/settings */
 
-  p, h1, h2, h3, h4, h5, h6, span {
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      font-family: "Poppins", sans-serif;
-      font-weight: 400;
-      font-style: normal;
-      color: white;
-      
-    }
+html, body {
+  height: 100%; /* Limit the height to the viewport */
+  margin: 0;
+  padding: 0;
+  /* overflow: hidden; Prevent scrolling on the entire page */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  font-family: "Poppins", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+  color: white;
+}
 
-  label {
-      font-family: "Poppins", sans-serif;
-      font-weight: 400;
-      font-style: normal;
-      color: white;
-  }
+#main_container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  width: 100%; /* Adjust width as needed, up to 100% of the viewport */
+  max-height: 100%; /* Ensure it does not exceed the viewport height */
+  overflow: auto; /* Allows internal scrolling if content exceeds the container size */
+  padding: 20px; /* Adds padding within the container */
+  box-sizing: border-box; /* Includes padding in the width and height calculations */
+}
+
+.container {
+  text-align: center;
+}
+
+canvas {
+  border: 1px solid #000;
+  display: block;
+  margin: 20px auto;
+}
+
+p, h1, h2, h3, h4, h5, h6, span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: "Poppins", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+  color: white;
+}
+
+label {
+  font-family: "Poppins", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+  color: white;
+}
+
+.btn {
+  opacity: 90%;
+}
+
+/* Form control */
+
+.form-label-left {
+  text-align: left;
+  margin-bottom: 0;
+}
+
+.form-control {
+  border-radius: 10px;
+  border: 2px solid rgba(255, 255, 255, 0.75);
+  padding: 12px;
+  color: #ffffff;
+  background-color: rgba(66, 66, 66, 0.5);
+}
+
+input.form-control:focus {
+  background-color: rgba(85, 85, 85, 0.8) !important; 
+  outline: none !important;
+  color: white;
+}
+
+.form-label-left {
+  text-align: left;
+  margin-bottom: 0;
+}
 
 
-  #dynamic-bg {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(120deg, #a6c0fe, #f68084);
-    filter: blur(8px);
-    z-index: -1;
-    transition: background 2s;
-  }
-  
-  .btn {
-    opacity: 80%;
-  }
+
   
