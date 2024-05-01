@@ -497,7 +497,7 @@ def email(request, username):
 
 @csrf_exempt
 def change_login(request, username):
-    user = PlayersModel.objects.filter(login=username).get(login=username)
+    user = PlayersModel.objects.get(login=username)
     if request.method == 'POST':
         if check_password(request.POST['password'], user.password) == False:
             response = HttpResponse('Invalid password.')
@@ -506,7 +506,9 @@ def change_login(request, username):
         try:
             check_login = PlayersModel.objects.get(login=request.POST['new_login'])
         except PlayersModel.DoesNotExist:
-            user.login = request.POST['new_login']
+            new_username = request.POST['new_login']
+            user.login = new_username
+            user.username = new_username
             user.save()
             response = HttpResponse('Login changed succesfully')
             response.status_code = 200

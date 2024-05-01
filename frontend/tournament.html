@@ -1,24 +1,13 @@
 <head>
     {% load static %}
     <link rel="stylesheet" href="{% static 'style.css' %}">
-    <style>
-        
-        .container {
-            margin-top: 35%;
-            text-align: center;
-        }
-
-        .btn-primary {
-            margin-right: 5px;
-            border-radius: 20px;
-            width: 200px;
-            text-align: center;
-        }
-
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Tournament - Transcendence</title>
 </head>
 <body>
     <div class="container">
+        <h2>New Tournament</h2>
         <form id="tournamentForm" method="post">
             {% csrf_token %}
             <div class="form-group row justify-content-center">

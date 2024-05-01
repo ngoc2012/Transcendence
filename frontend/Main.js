@@ -8,6 +8,7 @@ import {qrcode_2fa} from './qrcode_2fa.js'
 import {display_2fa} from './display_2fa.js'
 import {tournament_history} from './tournament_history.js'
 import {chatBox} from './chatBox.js'
+import {Chat} from './Chat.js'
 
 export class Main
 {
@@ -35,6 +36,8 @@ export class Main
         this.tournament_history = new tournament_history(this);
         this.profile = new Profile(this);
         this.chatBox = new chatBox(this)
+        this.chat = new Chat(this, this.lobby);
+        this.chat.init()
 
         this.dom_home = document.getElementById("home");
         this.dom_login = document.getElementById("login");
@@ -56,6 +59,7 @@ export class Main
             url: page + '/',
             method: 'GET',
             success: (html) => {
+                // console.log(html);
                 this.dom_container.innerHTML = html;
                 //pas oublier de changer ca
                 if (callback && typeof callback === 'function') {
@@ -66,6 +70,10 @@ export class Main
             error: (jqXHR, textStatus, errorThrown) => {
                 if (jqXHR.status === 401) {
                     this.login_click();
+                }
+                else
+                {
+                    this.dom_container.innerHTML = textStatus;
                 }
             }
         });
@@ -93,16 +101,12 @@ export class Main
     }
 
     login_click() {
-        this.history_stack.push('/login');
-        window.history.pushState({page: '/login'}, '', '/login');
         this.load('/pages/login', () => this.log_in.events());
     }
     
     set_status(s) {this.dom_status.innerHTML = s;}
 
     signup_click() {
-        this.history_stack.push('/signup');
-        window.history.pushState({}, '', '/signup');
         this.load('/pages/signup', () => this.signup.events());
     }
 
@@ -115,7 +119,13 @@ export class Main
                     'username': this.login
                 }
             })
-    }
+        }
+        this.chat.socket.onopen = function(e) {
+            this.chat.socket.send(JSON.stringify({
+                'type': 'connection',
+                'user': this.login,
+            }));
+        };
 }
     getCookie(name) {
         let cookieValue = null;

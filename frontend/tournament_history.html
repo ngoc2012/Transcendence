@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     {% load static %}
 
@@ -9,60 +10,77 @@
     <title>Tournament Lobby - Transcendence</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        #tournamentForm {
-            margin-bottom: 20px;
-        }
-        #selectedTournamentName {
-            margin-bottom: 20px;
-        }
-        #proceed {
-            margin-top: 20px;
-        }
-        .container {
-            text-align: center;
-        }
+
+
         h2 {
-            margin-bottom: 20px;
+            margin-bottom: 2%;
         }
+
         h3 {
-            margin-top: 30px;
+            margin-top: 3%;
         }
-        h3 {
-            margin-top: 30px;
-        }
+
         ul {
             list-style-type: none;
             padding-left: 0;
         }
+
         p {
-            margin-top: 30px;
+            margin-top: 3%;
         }
+
+        #selectedTournamentName {
+            margin-bottom: 2%;
+        }
+
+        #proceed {
+            margin-top: 2%;
+        }
+
+        #tournamentForm {
+            margin-bottom: 5%;
+        }
+
+        .form-group {
+            margin-bottom: 0;
+        }
+
+        h8 {
+            font-family: "Poppins", sans-serif;
+            font-weight: 400;
+            font-style: normal;
+            color: white;
+            font-size: 25px;
+            }
     </style>
 </head>
+
 <body>
-        <div class="row">
-            <div class="col-md-6 offset-md-3">
-                <form id="tournamentForm">
-                    <label for="tournamentSelect">Select a Tournament to display</label>
-                    <div class="form-group row">
-                        <div class="col-sm-8">  <select class="form-control" id="tournamentSelect" name="tournaments">
-                                {% for name in names %}
-                                    <option value="{{ name }}">{{ name }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="col-sm-2">  <button id="Select" class="btn btn-primary" type="button">Select</button>
-                        </div>
+    <div class="row mt-5">
+        <div class="col-md-6 offset-md-3">
+            <form id="tournamentForm">
+                <label for="tournamentSelect" class="text-right">Select a Tournament to display</label>
+                <div class="form-group row">
+                    <div class="col-sm-8">
+                        <select class="form-control" id="tournamentSelect" name="tournaments">
+                            {% for name in names %}
+                                <option value="{{ name }}">{{ name }}</option>
+                            {% endfor %}
+                        </select>
                     </div>
-                </form>
-                
-                <div id="selectedTournamentName"></div>
-                <button id="proceed" class="btn btn-primary" type="button">Proceed</button>
+                    <div class="col-sm-2">
+                        <button id="Select" class="btn btn-primary" type="button">Select</button>
+                    </div>
+                </div>
+            </form>
+            <div class="text-center">
+            <div id="selectedTournamentName"></div>
+            <button id="proceed" class="btn btn-primary" type="button">Proceed</button>
             </div>
         </div>
+    </div>
 
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.com/bootstrap.min.js"></script>
 </body>
+
 </html>
-
-
