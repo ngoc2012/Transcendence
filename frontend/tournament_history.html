@@ -11,9 +11,6 @@
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
 
-        .container {
-            text-align: center;
-        }
 
         h2 {
             margin-bottom: 2%;
@@ -40,7 +37,6 @@
             margin-top: 2%;
         }
 
-        /* Remove unnecessary centering styles */
         #tournamentForm {
             margin-bottom: 5%;
         }
@@ -63,7 +59,7 @@
     <div class="row mt-5">
         <div class="col-md-6 offset-md-3">
             <form id="tournamentForm">
-                <label for="tournamentSelect">Select a Tournament to display</label>
+                <label for="tournamentSelect" class="text-right">Select a Tournament to display</label>
                 <div class="form-group row">
                     <div class="col-sm-8">
                         <select class="form-control" id="tournamentSelect" name="tournaments">
@@ -77,9 +73,10 @@
                     </div>
                 </div>
             </form>
-
+            <div class="text-center">
             <div id="selectedTournamentName"></div>
             <button id="proceed" class="btn btn-primary" type="button">Proceed</button>
+            </div>
         </div>
     </div>
 
