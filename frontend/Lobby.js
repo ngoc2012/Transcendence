@@ -45,7 +45,7 @@ export class Lobby
             join_game(this.main, this.dom_rooms.options[this.dom_rooms.selectedIndex].value);
         });
 		this.dom_chat.addEventListener("click", () => this.start_chat());
-        this.dom_profile.addEventListener("click", () => this.profile());
+        this.dom_profile.addEventListener("click", () => this.profile(false));
         this.dom_homebar.addEventListener("click", () => this.homebar());
         this.dom_tournament.addEventListener("click", () => this.tournament_click());
         this.dom_tournament_history.addEventListener("click", () => this.tournament_history_click());
@@ -72,8 +72,6 @@ export class Lobby
 			}
 		});
 		this.main.chat = new Chat(this.main, this.main.lobby);
-        this.main.history_stack.push('/transchat/general_chat/');
-        window.history.pushState({}, '', '/transchat/general_chat/');
         this.main.load('transchat/general_chat', () => this.main.chat.init());
 	}
 
@@ -89,9 +87,7 @@ export class Lobby
     }
 
     homebar() {
-        this.main.history_stack.push('/');
-        window.history.pushState({}, '', '/');
-        this.main.load('/lobby', () => this.events());
+        this.main.load('/lobby', () => this.events(false));
     }
 
     new_game(game) {
@@ -137,11 +133,8 @@ export class Lobby
                 },
                 error: () => this.main.set_status('Error: Can not create game')
             });
-        } else {
-            this.history_stack.push('/login');
-            window.history.pushState({page: '/login'}, '', '/login');
-            this.main.load('/pages/login', () => this.main.log_in.events());
-        }
+        } else
+            this.main.load('/pages/login', () => this.main.log_in.events(false));
     }
 
     tournament_history_click() {
@@ -149,9 +142,7 @@ export class Lobby
 			this.main.set_status('You must be logged to see the tournament history.');
 			return;
 		}
-        this.main.history_stack.push('/tournament_history');
-        window.history.pushState({page: '/tournament_history'}, '', '/tournament_history');
-        this.main.load('/tournament_history', () => this.main.tournament_history.events());
+        this.main.load('/tournament_history', () => this.main.tournament_history.events(false));
     }
 
     delete_game() {
@@ -208,11 +199,8 @@ export class Lobby
                     this.main.set_status(errorMessage);
                 }
             });
-        } else {
-            this.history_stack.push('/login');
-            window.history.pushState({page: '/login'}, '', '/login');
-            this.main.load('/pages/login', () => this.main.log_in.events());
-        }
+        } else
+            this.main.load('/pages/login', () => this.main.log_in.events(false));
     }
 
     pong_game(info) {
@@ -331,9 +319,7 @@ export class Lobby
             return;
         }
         this.tournament = new Tournament(this.main);
-        this.main.history_stack.push('/tournament');
-        window.history.pushState({page: '/tournament'}, '', '/tournament');
-        this.main.load('/tournament', () => this.tournament.events());
+        this.main.load('/tournament', () => this.tournament.events(false));
     }
 
     displayTournamentLocalBack(tourID) {

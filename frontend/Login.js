@@ -97,7 +97,7 @@ export class Login
                                     dom_logout.addEventListener('click', () => this.main.logout());
                                 }
                                 
-                                this.main.load('/lobby', () => this.main.lobby.events());
+                                this.main.load('/lobby', () => this.main.lobby.events(false));
                             }
                         },
                         error: (xhr, textStatus, errorThrown) => {
@@ -145,11 +145,11 @@ export class Login
                 }
             })
         } else {
-            this.main.load('/pages/login', () => this.main.log_in.events());
+            this.main.load('/pages/login', () => this.main.log_in.events(false));
         }
     }
 
     cancel() {
-        this.main.load('/lobby', () => this.main.lobby.events());
+        this.main.load('/lobby', () => this.main.lobby.events(false));
     }
 }

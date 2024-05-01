@@ -1,4 +1,5 @@
 import {Main} from './Main.js'
+import { join_game } from './game.js';
 
 export var main = new Main();
 
@@ -36,6 +37,7 @@ function    reload(path, isPopState = false) {
         main.lobby.game.quit();
         main.lobby.game = undefined;
     }
+    
     if (path === '/login') {
         main.load('/pages/login', () => main.log_in.events(isPopState));
     } else if (path === '/signup') {
@@ -44,6 +46,8 @@ function    reload(path, isPopState = false) {
         main.load('/lobby', () => main.lobby.events(isPopState));
     } else if (path === '/') {
         main.load('/lobby', () => main.lobby.events(isPopState));
+    } else if (path.startsWith('/pong/')) {
+        join_game(main, path.substring(6));
     } else {
         main.load('/lobby', () => main.lobby.events(isPopState));
     }       
