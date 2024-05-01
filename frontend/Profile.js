@@ -211,6 +211,7 @@ export class Profile{
             this.main.set_status('Passwords do not match');
             return;
         }
+        
         $.ajax({
             url: '/profile/' + this.login + '/change_login/',
             method: 'POST',
