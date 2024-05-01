@@ -22,7 +22,7 @@ export class Main
     history_stack = [];
     csrftoken = '';
     picture = '';
-    chat = null;
+    chat = '';
 
     constructor()
     {
@@ -109,23 +109,25 @@ export class Main
         this.load('/pages/signup', () => this.signup.events());
     }
 
-    set_chat() {
+    set_chat(c, l) {
         if (this.login != ''){
             $.ajax({
                 url: '/transchat/chat_lobby/',
                 method: 'POST',
                 data: {
-                    'username': this.login
+                    'username': l
                 }
             })
+            c.socket.onopen = function(e) {
+                console.log("sending connecting message");
+                c.socket.send(JSON.stringify({
+                    'type': 'connection',
+                    'user': l,
+                }));
+            };
         }
-        this.chat.socket.onopen = function(e) {
-            this.chat.socket.send(JSON.stringify({
-                'type': 'connection',
-                'user': this.login,
-            }));
-        };
-}
+    }
+
     getCookie(name) {
         let cookieValue = null;
         if (document.cookie && document.cookie !== '') {
@@ -209,5 +211,11 @@ export class Main
                 }
             }
         });
+    }
+
+    refresh_user_list(users){
+        var user_list = document.getElementById('user-list');
+        console.log("oui");
+        // user_list.appendChild(document.createElement("a").href )
     }
 }

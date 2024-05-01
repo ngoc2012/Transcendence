@@ -1,8 +1,8 @@
 import uuid
 from django.db import models
 from django.utils import timezone
+import datetime
 from django.contrib.postgres.fields import ArrayField
-from accounts.models import PlayersModel
 from django.conf import settings
 from django.db.models import JSONField
 from django import forms
@@ -74,3 +74,12 @@ class TournamentMatchModel(models.Model):
     def __str__(self):
         return f"{self.tournament.name}"
     
+class MatchModel(models.Model):
+    id = models.AutoField(primary_key=True)
+    opp = models.CharField(max_length=255)
+    score = models.CharField(max_length=10, blank=True)
+    date = models.DateField()
+    result = models.CharField(max_length=1)
+
+    def __str__(self):
+        return self.result

@@ -81,6 +81,13 @@ class ChatConsumer(WebsocketConsumer):
     # Receive message from WebSocket
     def receive(self, text_data):
         print(text_data)
+        if json.loads(text_data)["type"] == 'connection':
+            if self.scope['state']['username'] == '':
+                if json.loads(text_data)['type'] == 'connection':
+                    self.scope['state']['username'] = json.loads(text_data)['user']
+                    self.scope['state']['room'] = 'general_chat'
+                    async_to_sync(self.channel_layer.group_send)(self.room_group_name, {"type": "update"})
+                    return
         data = {
             'text_data': json.loads(text_data),
             'message': json.loads(text_data)['message'],
@@ -93,12 +100,6 @@ class ChatConsumer(WebsocketConsumer):
             'whisper': False,
             'type': json.loads(text_data)['type']
         }
-        if self.scope['state']['username'] == '':
-            if data['text_data']['type'] == 'connection':
-                self.scope['state']['username'] = data['username']
-                self.scope['state']['room'] = data['room']
-                self.send(text_data=json.dumps({"type": "connection"}))
-                return
         for i in data['msg_split']:
             if i and data['blockcmd'] == True:
                 self.block_user(self, data, i)
@@ -126,12 +127,18 @@ class ChatConsumer(WebsocketConsumer):
     def chat_message(self, event):
         message = event["message"]
         msg_user = event['user']
-        print(self.scope)
         user = PlayersModel.objects.get(login=self.scope['state']['username'])
         try:
             user.blocked_users.get(login=msg_user)
         except PlayersModel.DoesNotExist:
             self.send(text_data=json.dumps({"message": message, "user": msg_user}))
+
+    def update(self, event):
+        type = event['type']
+        queryset = Room.objects.get(room_name=self.room_name).users.all()
+        print(queryset.values("login"))
+        self.send(json.dumps({'type': 'update', 'users': list(queryset.values("login"))}))
+        print("mais ?")
 
     def whisper(self, event):
         message = event['message']

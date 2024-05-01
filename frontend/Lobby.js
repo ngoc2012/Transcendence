@@ -15,7 +15,7 @@ export class Lobby
 
     events() {
         this.main.checkcsrf();
-        this.main.set_chat();
+        this.main.set_chat(this.main.chat, this.main.login);
         if (this.main.login != '') {
             this.rooms_update();
         }

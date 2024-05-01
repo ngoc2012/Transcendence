@@ -30,7 +30,6 @@ Your friends: <br> {% for i in friends %} {{ i.login }} - {{ i.online_status }} 
 {% load replace_url %}
 <head>
       {% load static %}
-
     <link rel="stylesheet" href="{% static 'style.css' %}">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -67,9 +66,7 @@ Your friends: <br> {% for i in friends %} {{ i.login }} - {{ i.online_status }} 
           <p>Your alias: {{ alias }}</p>
         {% endif %}
       {% endif %}
-      <p>Your match history: {% if history %}{% for i in history %} {% if i == 'W' %} Win {% else %} Lose {% endif %} {% endfor %} {% else %} No recent matches {% endif %}</p>
-      <p>Opponent history: {% if opp %} {% for i in opp %} {{ i.login }} {% endfor %} {% else %} No recent matches {% endif %}</p>
-      <p>Your score history: {% if history_score %} {% for i in history_score %} {{ i }} {% endfor %} {% else %} No recent matches{% endif %}</p>
+      <p>Your match history: {% if history %} {% for i in history %} {% if i.result == 'W' %} Win {% else %} Lose {% endif %} {{ i.score}} VS {{ i.opp }} | {{ i.date }} <br> {% endfor %} {% else %} No recent matches {% endif %}</p>
       <p>Your email: {{ email }}</p>
       <p>Your friends:</p>
       <ul>

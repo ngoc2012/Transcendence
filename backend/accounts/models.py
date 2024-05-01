@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from game.models import MatchModel
 import datetime
 
 
@@ -10,7 +11,8 @@ class PlayersModel(AbstractUser):
     secret_2fa = models.TextField(default='', blank=True)
     session_id = models.CharField(max_length=40, null=True, blank=True)
     elo = models.IntegerField(default=1500)
-    history = models.CharField(max_length=10)
+    history = models.ManyToManyField(MatchModel, symmetrical=False, blank=True)
+    # history = models.CharField(max_length=10)
     score_history = models.CharField(max_length=70)
     opp_history = models.ManyToManyField('self', blank=True, symmetrical=False, related_name='opps')
     online_status = models.CharField(max_length=8, default='Offline')

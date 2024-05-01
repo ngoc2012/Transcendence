@@ -2,10 +2,12 @@ import json
 from channels.db import database_sync_to_async
 from asgiref.sync import sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
+from django.utils import timezone
 from accounts.models import PlayersModel
+import datetime
 
 import asyncio
-from game.models import RoomsModel, TournamentMatchModel, TournamentModel
+from game.models import RoomsModel, TournamentMatchModel, TournamentModel, MatchModel
 from .data import pong_data
 from .move import check_collision, update_ball, up, down, left, right
 from .game import get_info, get_room_data, get_teams_data, get_score_data, end_game, quit, change_side, get_win_data, change_server_async, set_power_play, game_init
@@ -201,40 +203,38 @@ class PongConsumer(AsyncWebsocketConsumer):
                 await self.channel_layer.group_send(self.room_id, {'type': 'group_data'})
                 score0 = cache.get(self.k_score0)
                 score1 = cache.get(self.k_score1)
-                if cache.get(self.k_ai) == True:
-                    print("player ai")
-                if (score0 >= 2 or score1 >= 2) :
+                if (score0 >= 1 or score1 >= 1) :
                 # if abs(score0 - score1) > 1 and (score0 >= 11 or score1 >= 11) :
                     if not self.disconnected:
                         await self.channel_layer.group_send(self.room_id, {'type': 'win_data'})
                     if self.room.tournamentRoom == False:
                         if score0 > score1 and cache.get(self.k_ai) == False:
-                            self.player0.history += 'W'
-                            self.player1.history += 'L'
-                            self.player0.opp_history.add(self.player1)
-                            self.player1.opp_history.add(self.player0)
-                            self.player0.score_history += str(score0) + '-' + str(score1)
-                            self.player1.score_history += str(score0) + '-' + str(score1)
+                            match0 = MatchModel(id=MatchModel.objects.count(), opp=self.player1.login, score=str(str(score0) + '-' + str(score1)), date=datetime.date.today(), result='W')
+                            match1 = MatchModel(id=MatchModel.objects.count(), opp=self.player1.login, score=str(str(score0) + '-' + str(score1)), date=datetime.date.today(), result='L')
+                            match0.save()
+                            match1.save()
+                            self.player0.history.add(match0)
+                            self.player1.history.add(match1)
                             self.player0.save()
                             self.player1.save()
                         elif cache.get(self.k_ai) == False:
-                            self.player0.history += 'L'
-                            self.player1.history += 'W'
-                            self.player0.opp_history.add(self.player1)
-                            self.player1.opp_history.add(self.player0)
-                            self.player0.score_history += str(score0) + '-' + str(score1)
-                            self.player1.score_history += str(score0) + '-' + str(score1)
+                            match0 = MatchModel(id=MatchModel.objects.count(), opp=self.player1.login, score=str(str(score0) + '-' + str(score1)), date=datetime.date.today(), result='L')
+                            match1 = MatchModel(id=MatchModel.objects.count(), opp=self.player1.login, score=str(str(score0) + '-' + str(score1)), date=datetime.date.today(), result='W')
+                            match0.save()
+                            match1.save()
+                            self.player0.history.add(match0)
+                            self.player1.history.add(match1)
                             self.player0.save()
                             self.player1.save()
                         elif score0 > score1 and cache.get(self.k_ai) == True:
-                            self.player0.history += 'W'
-                            self.player0.opp_history.add(PlayersModel.objects.get(login='ai'))
-                            self.player0.score_history += str(score0) + '-' + str(score1)
+                            match = MatchModel(id=MatchModel.objects.count(), opp=PlayersModel.objects.get(login='ai').login, score=str(str(score0) + '-' + str(score1)), date=datetime.date.today(), result='W')
+                            match.save()
+                            self.player0.history.add(match)
                             self.player0.save()
                         else:
-                            self.player0.history += 'L'
-                            self.player0.opp_history.add(PlayersModel.objects.get(login='ai'))
-                            self.player0.score_history += str(score0) + '-' + str(score1)
+                            match = MatchModel(id=MatchModel.objects.count(), opp=PlayersModel.objects.get(login='ai').login, score=str(str(score0) + '-' + str(score1)), date=datetime.date.today(), result='L')
+                            match.save()
+                            self.player0.history.add(match)
                             self.player0.save()
                 return
             await check_collision(self)

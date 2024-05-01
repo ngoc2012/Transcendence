@@ -8,6 +8,8 @@ export class Profile{
         this.email = this.main.email;
         this.name = this.main.name;
         this.events();
+        var context = document.getElementById("context").textContent;
+        console.log(context);
     }
 
     events(){

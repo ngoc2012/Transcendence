@@ -8,6 +8,7 @@ from accounts.forms import UploadFileForm
 from django.utils import timezone
 from transchat.models import Room
 from django.shortcuts import redirect
+import json
 from django.conf import settings
 import requests, pyotp, secrets, os, random, jwt, string, pytz, uuid
 from urllib.parse import quote
@@ -430,8 +431,7 @@ def profile(request, username):
         'password': user.password,
         'name': user.name,
         'alias': user.tourn_alias,
-        'history': user.history,
-        'opp': user.opp_history.all(),
+        'history': user.history.all(),
         'email': user.email,
         'elo': user.elo,
         'history_score': user.score_history,
@@ -439,6 +439,7 @@ def profile(request, username):
         'url': user.avatar.url,
         'form': UploadFileForm()
     }
+    # return render(request, 'profile.html', context)
     return render(request, 'profile.html', context)
 
 @csrf_exempt

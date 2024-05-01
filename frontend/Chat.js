@@ -31,8 +31,13 @@ export class Chat{
        	this.socket.onmessage = function(e) {
        	    var data = JSON.parse(e.data);
             var list_user = document.getElementById('user_list');
-            if (data.type === "connection" && list_user){
+            console.log(data);
+            if (data.type === "refresh" && list_user){
                 $( "#user_list" ).load(window.location.href + " #user_list")
+                return;
+            }
+            else if (data.type === 'update'){
+                this.main.refresh_user_list(data.users);
                 return;
             }
             else
