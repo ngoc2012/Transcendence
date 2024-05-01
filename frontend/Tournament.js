@@ -16,6 +16,7 @@ export class Tournament {
 
     events() {
         this.main.checkcsrf();
+        window.history.pushState({page: '/tournament'}, '', '/tournament');
         this.dom_tournamentForm = document.getElementById('tournamentForm');
         if (this.dom_tournamentForm)
             this.dom_tournamentForm.addEventListener('submit', (e) => this.tournamentSubmit(e));

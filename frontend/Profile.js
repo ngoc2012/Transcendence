@@ -12,7 +12,10 @@ export class Profile{
         console.log(context);
     }
 
-    events(){
+    events(isPopState){
+        if (!isPopState)
+            window.history.pushState({page: '/profile/'}, '', '/profile/');
+        
         this.dom_alias = document.getElementById("alias");
         this.dom_friend = document.getElementById("add_friend");
         this.dom_password = document.getElementById("password");
