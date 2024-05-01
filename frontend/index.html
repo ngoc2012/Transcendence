@@ -4,12 +4,10 @@
 <head>
     {% load static %}
 
-    <link rel="stylesheet" href="{% static 'style.css' %}">
     <link rel="stylesheet" href="{% static 'bootstrap-4.0.0-dist/css/bootstrap.css' %}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
-        crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <link href="https://fonts.googleapis.com/css2?family=Jersey+15&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
-        rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link href="https://fonts.googleapis.com/css2?family=Jersey+15&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
     <script src="{% static 'jquery-3.7.1.js' %}"></script>
     <script src="{% static 'bootstrap-4.0.0-dist/js/bootstrap.bundle.js' %}"></script>
     <script src="{% static 'index.js' %}" type="module"></script>
@@ -21,18 +19,10 @@
     <title>Transcendence</title>
 
     <style>
-      /* Background wrapper */
-      .background-wrapper {
-          position: fixed;
-          top: 20px;
-          right: 20px;
-          background-color: #ffffff7a;
-          border-radius: 25px;
-          padding: 10px;
-          display: inline-block;
-      }
+        h {
+          margin-right:10px;
+        } 
 
-      /* Dynamic background */
       #dynamic-bg {
           position: fixed;
           top: 0;
@@ -147,6 +137,14 @@
       #left-sidebar:hover .btn .text {
           display: inline;
       }
+
+      .btn myicon {
+         order: 1;
+        }
+
+        .btn .text {
+      order: 2;
+        }
       
       .btn:hover myicon i {
           animation: bounce 0.6s ease-in-out infinite;
@@ -180,19 +178,28 @@
         }
 
         @media (max-width: 768px) {
-            /* Disable hover effect by making hover state identical to normal state */
             #left-sidebar:hover {
                 width: 100%;
             }
 
             #left-sidebar .btn .text {
-                display: none; /* Keeps text hidden as hover effects are not useful on mobile */
+                display: none;
             }
 
             #left-sidebar .btn {
                 justify-content: center;
             }
         }
+
+        .background-wrapper {
+          position: fixed;
+          top: 20px;
+          right: 20px;
+          background-color: #ffffff7a;
+          border-radius: 25px;
+          padding: 10px;
+          display: inline-block;
+      }
     </style>
     <base href="/">
   </head>
@@ -202,26 +209,23 @@
 
     <div class="background-wrapper">
         <div class="top-right-container">
-            <div class="d-flex align-items-center">
-                <img src="{% static 'media/chat.jpg' %}" id="picture" alt="User Icon" class="rounded-circle mx-2 style="width: 40px; height: 40px;"
-                    style="width: 40px; height: 40px;">
-                <h><span id="name"></span></h>
-                <h><button id="profile" class="btn btn-info ml-2" type="button">Profile</button></h>
-                <h><button id="login" class="btn btn-primary ml-2">Log In</button></h>
-                <button id="signup" class="btn btn-success ml-2">Sign Up</button>
-            </div>
+          <div class="d-flex align-items-center">
+            <img src="{% static 'media/chat.jpg' %}" id="picture" alt="User Icon" class="rounded-circle mx-2" style="width: 40px; height: 40px;">
+            <h><span id="name"></span></h>
+            <h><button id="profile" class="btn btn-info ml-2" type="button">Profile</button></h>
+            <h><button id="login" class="btn btn-primary ml-2">Log In</button></h>
+            <button id="signup" class="btn btn-success ml-2">Sign Up</button>
+          </div>
         </div>
     </div>
 
     <div class="container-fluid">
       <div class="row justify-content-center">
-          <div class="col-md-6">
-          </div>
+          <div class="col-md-6"></div>
       </div>
-      <div id="main_container" class="mt-3">
-      </div>
+      <div id="main_container" class="mt-3"></div>
       <div id="status" class="mt-3"></div>
-  </div>
+    </div>
 
   <div id="left-sidebar" class="left-sidebar">
     <div class="p-3">
@@ -280,7 +284,6 @@
     var my42email = '{{ my42email }}';
     var my42ws = '{{ my42ws }}';
     var my42enable2fa = '{{ my42enable2fa }}';
-
 
     function handleStatusChange(mutationsList, observer) {
       for(let mutation of mutationsList) {
