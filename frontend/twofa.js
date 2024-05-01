@@ -8,9 +8,10 @@ export class twofa
         this.main = m;
     }
     
-    events() {
+    events(isPopState) {
         this.main.checkcsrf();
-        
+        if (!isPopState)
+            window.history.pushState({page: '/twofa'}, '', '/twofa');
 
         this.dom_log_in_qrcode = document.querySelector("#log_in_with_qrcode");
         this.dom_cancel = document.querySelector("#cancel0");
@@ -87,6 +88,6 @@ export class twofa
         
         this.main.history_stack.push('/');
         window.history.pushState({}, '', '/');
-        this.main.load('/lobby', () => this.main.lobby.events());
+        this.main.load('/lobby', () => this.main.lobby.events(false));
     }
 }
