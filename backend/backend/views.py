@@ -423,7 +423,6 @@ def verify_qrcode(request):
 
 @csrf_exempt
 def profile(request, username):
-    print("user profile = " + username)
     user = PlayersModel.objects.filter(login=username).get(login=username)
     context = {
         'id': user.id,
