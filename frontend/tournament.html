@@ -1,54 +1,47 @@
-<!DOCTYPE html>
-<html lang="en">
 <head>
-    {% load static %}
-
-    <link rel="stylesheet" href="{% static 'style.css' %}">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create Tournament - Transcendence</title>
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
         .container {
-            margin-top: 20%;
-            text-align: left;
-        }
-        body {
-            font-family: "Poppins", sans-serif;
-            font-weight: 400;
-            font-style: normal;
-            color: white;
+            margin-top: 35%;
+            text-align: center;
         }
 
-        .form-group {
-            margin-bottom: 50px;
-            padding-top: 10px;
-            padding-bottom: 10px;
+        .form-control {
+            height: 40px;
         }
 
         .form-label-left {
             text-align: left; 
             margin-bottom: 0;
         }
+
         .btn-primary {
+            margin-right: 5px;
             border-radius: 20px;
             width: 200px;
             text-align: center;
         }
+
+        #tname {
+            border-radius: 10px;
+            border: 2px solid rgba(255, 255, 255, 0.75);
+            padding: 22px;
+            color: #ffffff;
+            background-color: rgba(66, 66, 66, 0.5);
+        }
+
     </style>
 </head>
 <body>
     <div class="container">
         <form id="tournamentForm" method="post">
             {% csrf_token %}
-            <div class="form-group">
-                <label for="name" class="form-label-left">Tournament Name</label>
-                <input type="text" id="tname" name="name" class="form-control" required>
+            <div class="form-group row justify-content-center">
+                <div class="col-sm-8 text-left">
+                    <label for="rooms" class="col-form-label">Tournament Name</label>
+                    <input id="tname" name="name" class="form-control" required>
+                </div>
             </div>
             <button type="submit" class="btn btn-primary">Create Tournament</button>
         </form>
     </div>
-
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
-</html>
