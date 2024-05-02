@@ -42,7 +42,11 @@ export class display_2fa {
         const login = this.main.login;
         const secret = `otpauth://totp/${login}?secret=${secretKey}&issuer=Transcendence`;
         const qrCodeElement = document.querySelector("#qrcode");
-        new QRCode(qrCodeElement, secret);
-    }
+        qrCodeElement.innerHTML = ""; // Clear any previous content
+        const qrCodeWrapper = document.createElement("div");
+        qrCodeWrapper.classList.add("text-center", "my-3"); // Added classes for centering and margin
+        qrCodeElement.appendChild(qrCodeWrapper);
+        new QRCode(qrCodeWrapper, secret);
+    }               
 }
 

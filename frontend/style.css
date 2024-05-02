@@ -83,4 +83,56 @@ input.form-control:focus {
 
 select {
   height: 50px !important;
+}.form-check-label {
+  margin-left: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  user-select: none;
+  margin-top: 3px;
+}
+
+.form-check-input {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px !important;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.398);
+  border: none;
+  cursor: pointer;
+  vertical-align: middle;
+  transition: background-color 0.3s ease;
+}
+
+.form-check-input:checked {
+  background-color: #ffffff;
+  border: none;
+}
+
+/* CHECKBOXES */
+
+.form-check-label {
+  margin-left: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  user-select: none;
+  margin-top: 3px;
+}
+
+.form-check-input {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px !important;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.398);
+  border: none;
+  cursor: pointer;
+  vertical-align: middle;
+  transition: background-color 0.3s ease;
+}
+
+.form-check-input:checked {
+  background-color: #ffffff;
+  border: none;
 }

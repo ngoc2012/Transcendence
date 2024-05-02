@@ -13,7 +13,7 @@ export class code_2fa
         this.dom_code = document.querySelector("#code");
         this.dom_confirm = document.querySelector("#confirm");
         this.dom_cancel = document.querySelector("#cancel0");
-        document.getElementById("email_address").innerText = this.main.email;
+        // document.getElementById("email_address").innerText = this.main.email;
         this.dom_confirm.addEventListener("click", () => this.confirm());
         this.dom_cancel.addEventListener("click", () => this.cancel());
     }
