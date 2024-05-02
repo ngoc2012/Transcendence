@@ -16,7 +16,7 @@ export class Lobby
 
     events(isPopState) {
         this.main.checkcsrf();
-        this.main.set_chat(this.main.chat, this.main.login);
+        this.main.set_chat(this.main.login);
         if (this.main.login != '') {
             this.rooms_update();
         }
@@ -64,6 +64,10 @@ export class Lobby
 			this.main.set_status('You must be logged in to chat.');
 			return;
 		}
+        this.main.chat_socket.send(JSON.stringify({
+            'type': 'connection',
+            'user': this.main.login
+        }));
         $.ajax({
 			url: '/transchat/chat_lobby/',
 			method: 'POST',
@@ -72,7 +76,7 @@ export class Lobby
 			}
 		});
 		this.main.chat = new Chat(this.main, this.main.lobby);
-        this.main.load('transchat/general_chat', () => this.main.chat.init(false));
+        this.main.load('transchat/general_chat', () => this.main.chat.events(false));
 	}
 
     profile(){

@@ -135,10 +135,15 @@ class ChatConsumer(WebsocketConsumer):
 
     def update(self, event):
         type = event['type']
+        room = Room.objects.get(room_name='general_chat')
+        if self.scope['state']['username'] != '':
+            try:
+                room.users.get(login=self.scope['state']['username'])
+            except PlayersModel.DoesNotExist:
+                room.users.add(PlayersModel.objects.get(login=self.scope['state']['username']))
+                room.save();
         queryset = Room.objects.get(room_name=self.room_name).users.all()
-        print(queryset.values("login"))
         self.send(json.dumps({'type': 'update', 'users': list(queryset.values("login"))}))
-        print("mais ?")
 
     def whisper(self, event):
         message = event['message']

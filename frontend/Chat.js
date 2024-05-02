@@ -2,18 +2,20 @@ export class Chat{
 	constructor(m, l){
 		this.main = m;
         this.lobby = l;
-		this.socket = -1;
+		this.chat_socket = this.main.chat_socket;
 	}
 
 	init(){
 		this.main.checkcsrf();
 
-        this.socket = new WebSocket(
+        this.main.chat_socket = new WebSocket(
             'wss://'
             + window.location.host
             + '/ws/transchat/general_chat/'
-			);
-        console.log('connecting chat')
+		);
+		this.chat_socket = this.main.chat_socket;
+		console.log('connecting chat')
+		this.socket_events(this);
 	}
 
 	events(isPopState){
@@ -30,30 +32,38 @@ export class Chat{
 		const login = this.main.login;
 		const room = this.roomName;
 
-       	this.socket.onmessage = function(e) {
+
+	}
+
+	socket_events(c){
+		c.main.chat_socket.onopen = function(e) {
+			if (c.main.login != ''){
+				console.log("sending connecting message");
+            	c.main.chat_socket.send(JSON.stringify({
+                	'type': 'connection',
+	                'user': c.main.login,
+            	}));
+			}
+        };
+
+       	c.main.chat_socket.onmessage = function(e) {
        	    var data = JSON.parse(e.data);
             var list_user = document.getElementById('user_list');
-            console.log(data);
-            if (data.type === "refresh" && list_user){
-                $( "#user_list" ).load(window.location.href + " #user_list")
-                return;
-            }
-            else if (data.type === 'update'){
-                this.main.refresh_user_list(data.users);
+            if (data.type === 'update'){
+                c.main.refresh_user_list(data.users);
                 return;
             }
             else
 			    document.querySelector('#chat-log').value += (data.message + '\n');
        	};
-        this.socket.onclose = function(e) {
+        c.main.chat_socket.onclose = function(e) {
             console.error('Chat socket closed unexpectedly');
        	};
 	}
-
 	send_message(){
 		const room = this.roomName;
 		const message = this.dom_input.value;
-		this.socket.send(JSON.stringify({
+		this.main.chat_socket.send(JSON.stringify({
 			'message': message,
 			'user': this.main.login,
             'room' : room,

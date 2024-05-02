@@ -47,7 +47,7 @@ export class Profile{
         this.dom_aliasconfirm = document.querySelector("#confirm");
         this.dom_aliascancel = document.querySelector('#cancel');
         this.dom_aliasconfirm.addEventListener("click", () => this.alias_confirm());
-        this.dom_aliascancel.addEventListener("click", () => this.alias_cancel());
+        this.dom_aliascancel.addEventListener("click", () => this.alias_cancel(false));
     }
 
     alias_confirm(){
@@ -74,19 +74,18 @@ export class Profile{
     }
 
     alias_cancel(){
-        this.main.history_stack.push('/profile/' + this.main.login + '/');
-        window.history.pushState({}, '', '/profile/' + this.main.login + '/');
-        this.main.load('/profile/' + this.main.login, () => this.main.profile.events());
+        this.main.load('/profile/' + this.main.login, () => this.main.profile.events(false));
     }
 
     change_password(){
-        this.main.history_stack.push('/profile/' + this.login + '/change_password/');
-        window.history.pushState({}, '', '/profile/' + this.login + '/change_password/');
-        this.main.load('/profile/' + this.login + '/change_password', () => this.cp_events());
+        this.main.load('/profile/' + this.login + '/change_password', () => this.cp_events(false));
     }
 
 
-    cp_events(){
+    cp_events(isPopState){
+        if (!isPopState){
+            window.history.pushState({page: '/profile/' + this.login + '/change_password'}, '', '/profile/' + this.login + '/change_password');
+        }
         this.dom_oldvalue = document.querySelector("#oldpwd")
         this.dom_newvalue = document.querySelector("#newpwd");
         this.dom_newvaluerepeat = document.querySelector("#pwdrepeat");
@@ -114,9 +113,7 @@ export class Profile{
             },
             success: ()=>{
                 this.main.set_status(info);
-                this.main.history_stack.push('/profile/' + this.main.login + '/');
-                window.history.pushState({}, '', '/profile/' + this.main.login + '/');
-                this.main.load('/profile/' + this.main.login, () => this.main.profile.events());
+                this.main.load('/profile/' + this.main.login, () => this.main.profile.events(false));
             },
             error: (info) =>{
                 this.main.set_status(info.responseText);
@@ -128,18 +125,17 @@ export class Profile{
     }
 
     cp_cancel(){
-        this.main.history_stack.push('/profile/' + this.main.login + '/');
-        window.history.pushState({}, '', '/profile/' + this.main.login + '/');
-        this.main.load('/profile/' + this.main.login, () => this.main.profile.events());
+        this.main.load('/profile/' + this.main.login, () => this.main.profile.events(false));
     }
 
     change_email(){
-        this.main.history_stack.push('/profile/' + this.main.login + '/change_email/');
-        window.history.pushState({}, '', '/profile/' + this.main.login + '/change_email/');
-        this.main.load('/profile/' + this.main.login + '/change_email', () => this.ce_events());
+        this.main.load('/profile/' + this.main.login + '/change_email', () => this.ce_events(false));
     }
 
-    ce_events(){
+    ce_events(isPopState){
+        if (!isPopState){
+            window.history.pushState({page: '/profile/' + this.login + '/change_email'}, '', '/profile/' + this.login + '/change_email');
+        }
         this.dom_cenewemail = document.querySelector('#new_email');
         this.dom_cepassword =document.querySelector('#password');
         this.dom_ceconfirmemail = document.querySelector('#email_confirm');
@@ -181,18 +177,17 @@ export class Profile{
     }
 
     ce_cancel(){
-        this.main.history_stack.push('/profile/' + this.login + '/');
-        window.history.pushState({}, '', '/profile/' + this.login +'/');
-        this.main.load('/profile/' + this.login, () => this.main.profile.events());
+        this.main.load('/profile/' + this.login, () => this.main.profile.events(false));
     }
 
     change_login(){
-        this.main.history_stack.push('/profile/' + this.login + '/change_login/');
-        window.history.pushState({}, '', '/profile/' + this.login + '/change_login/');
-        this.main.load('/profile/' + this.login + '/change_login', () => this.cl_events());
+        this.main.load('/profile/' + this.login + '/change_login', () => this.cl_events(false));
     }
 
-    cl_events(){
+    cl_events(isPopState){
+        if (!isPopState){
+            window.history.pushState({page: '/profile/' + this.login + '/change_login'}, '', '/profile/' + this.login + '/change_login');
+        }
         this.dom_cllogin = document.querySelector("#log_in");
         this.dom_clpassword = document.querySelector("#password");
         this.dom_clpasswordrepeat = document.querySelector("#password_repeat");
@@ -225,9 +220,7 @@ export class Profile{
                 this.login = this.dom_cllogin.value;
                 this.main.login = this.login;
                 this.main.set_status(info);
-                this.main.history_stack.push('/profile/' + this.login +'/');
-                window.history.pushState({}, '', '/profile/' + this.login + '/')
-                this.main.load('/profile/' + this.login, () => this.main.profile.events());
+                this.main.load('/profile/' + this.login, () => this.main.profile.events(false));
             },
             error: (info) =>{
                 this.main.set_status(info.responseText);
@@ -236,18 +229,17 @@ export class Profile{
     }
 
     cl_cancel(){
-        this.main.history_stack.push('/profile/' + this.login);
-        window.history.pushState({}, '', '/profile/' + this.login);
-        this.main.load('/profile/' + this.login, () => this.main.profile.events());
+        this.main.load('/profile/' + this.login, () => this.main.profile.events(false));
     }
 
     change_name(){
-        this.main.history_stack.push('/profile/' + this.login + '/change_name/');
-        window.history.pushState({}, '', '/profile' + this.login + '/change_name/');
-        this.main.load('/profile/' + this.login + '/change_name', () => this.cn_events());
+        this.main.load('/profile/' + this.login + '/change_name', () => this.cn_events(false));
     }
 
-    cn_events(){
+    cn_events(isPopState){
+        if (!isPopState){
+            window.history.pushState({page: '/profile/' + this.login + '/change_name'}, '', '/profile/' + this.login + '/change_name');
+        }
         this.dom_cn_name = document.querySelector("#newname");
         this.dom_cn_password = document.querySelector("#password");
         this.dom_cn_pwd_repeat = document.querySelector("#password_repeat");
@@ -277,9 +269,7 @@ export class Profile{
             success: (info)=>{
                 this.main.set_status(info);
                 this.main.name = this.dom_cn_name;
-                this.main.history_stack.push('/profile' + this.login +'/');
-                window.history.pushState({}, '', '/profile/' + this.login + '/');
-                this.main.load('/profile/' + this.login, () => this.main.profile.events());
+                this.main.load('/profile/' + this.login, () => this.main.profile.events(false));
             },
             error: (info)=>{
                 this.main.set_status(info.responseText);
@@ -288,19 +278,17 @@ export class Profile{
     }
 
     cn_cancel(){
-        
-        this.main.history_stack.push('/profile/' + this.login + '/');
-        window.history.pushState({}, '', '/profile/' + this.login);
-        this.main.load('/profile' + this.login, () => this.main.profile.events());
+        this.main.load('/profile' + this.login, () => this.main.profile.events(false));
     }
 
     add_friend(){
-        this.main.history_stack.push('/profile/' + this.login + '/add_friend/');
-        window.history.pushState({}, '', '/profile/' + this.login + '/add_friend/');
-        this.main.load('/profile/' + this.login + '/add_friend', () => this.friend_events());
+        this.main.load('/profile/' + this.login + '/add_friend', () => this.friend_events(false));
     }
 
-    friend_events(){
+    friend_events(isPopState){
+        if (!isPopState){
+            window.history.pushState({page: '/profile/' + this.login + '/add_friend'}, '', '/profile/' + this.login + '/add_friend');
+        }
         this.dom_friend_name = document.querySelector("#friend");
         this.dom_af_confirm = document.querySelector("#confirm");
         this.dom_af_cancel = document.querySelector("#cancel");
@@ -328,9 +316,7 @@ export class Profile{
                     'type': 'friend_request_send'
                 }));
                 this.main.set_status(info);
-                this.main.history_stack.push('/profile/' + this.login);
-                window.history.pushState({}, '', '/profile/' + this.login);
-                this.main.load('/profile/' + this.login, () => this.friend_events());
+                this.main.load('/profile/' + this.login, () => this.friend_events(false));
             },
             error: (info)=>{
                 this.main.set_status(info.responseText);
@@ -349,9 +335,7 @@ export class Profile{
             },
             success: (info)=>{
                 this.main.set_status(info);
-                this.main.history_stack.push('/profile/' + this.login + '/');
-                window.history.pushState({}, '', '/profile/' + this.login +'/');
-                this.main.load('/profile/' + this.login, () => this.main.profile.events());            
+                this.main.load('/profile/' + this.login, () => this.main.profile.events(false));            
             },
             error: (info) =>{
                 this.main.set_status(info.responseText);
@@ -426,9 +410,6 @@ export class Profile{
     }
 
     af_cancel(){
-        
-        this.main.history_stack.push('/profile/' + this.login + '/');
-        window.history.pushState({}, '', '/profile/' + this.login);
-        this.main.load('/profile/' + this.login, () => this.main.profile.events());
+        this.main.load('/profile/' + this.login, () => this.main.profile.events(false));
     }
 }

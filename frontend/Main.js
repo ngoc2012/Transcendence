@@ -23,6 +23,7 @@ export class Main
     csrftoken = '';
     picture = '';
     chat = '';
+    chat_socket = -1;
 
     constructor()
     {
@@ -110,7 +111,7 @@ export class Main
         this.load('/pages/signup', () => this.signup.events());
     }
 
-    set_chat(c, l) {
+    set_chat(l) {
         if (this.login != ''){
             $.ajax({
                 url: '/transchat/chat_lobby/',
@@ -119,13 +120,6 @@ export class Main
                     'username': l
                 }
             })
-            c.socket.onopen = function(e) {
-                console.log("sending connecting message");
-                c.socket.send(JSON.stringify({
-                    'type': 'connection',
-                    'user': l,
-                }));
-            };
         }
     }
 
@@ -216,7 +210,13 @@ export class Main
 
     refresh_user_list(users){
         var user_list = document.getElementById('user-list');
-        console.log("oui");
-        // user_list.appendChild(document.createElement("a").href )
+        console.log(user_list);
+        user_list.innerHTML = '';
+        for (let i = 0; users[i]; i++){
+            let new_element = document.createElement("a")
+            new_element.href = '/profile/' + users[i].login +'/';
+            new_element.innerHTML = users[i].login + '<br>';
+            user_list.appendChild(new_element);
+        }
     }
 }
