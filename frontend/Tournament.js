@@ -131,7 +131,7 @@ export class Tournament {
     checkAdded() {
         const playerStack = document.getElementById('player-stack');
         if (playerStack && this.userAdded.length > 0) {
-            playerStack.innerHTML = '<h3 class="text-center mt-5">Current Players</h3>';
+            playerStack.innerHTML = '<h4 class="text-center mt-5">Participants</h4>';
 
             this.userAdded.forEach(user => {
                 let playerEntry = document.createElement('div');
