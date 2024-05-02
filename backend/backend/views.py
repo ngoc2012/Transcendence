@@ -434,12 +434,10 @@ def profile(request, username):
         'history': user.history.all(),
         'email': user.email,
         'elo': user.elo,
-        'history_score': user.score_history,
         'friends': user.friends.all(),
         'url': user.avatar.url,
         'form': UploadFileForm()
     }
-    # return render(request, 'profile.html', context)
     return render(request, 'profile.html', context)
 
 @csrf_exempt

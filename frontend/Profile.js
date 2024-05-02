@@ -3,18 +3,16 @@ export class Profile{
         this.main = m;
     }
 
-    init(){
+    init(isPopState){
         this.login = this.main.login;
         this.email = this.main.email;
         this.name = this.main.name;
-        this.events();
-        var context = document.getElementById("context").textContent;
-        console.log(context);
+        this.events(isPopState);
     }
 
     events(isPopState){
         if (!isPopState)
-            window.history.pushState({page: '/profile/'}, '', '/profile/');
+            window.history.pushState({page: '/profile/' + this.login}, '', '/profile/' + this.login);
         
         this.dom_alias = document.getElementById("alias");
         this.dom_friend = document.getElementById("add_friend");
@@ -34,18 +32,17 @@ export class Profile{
     }
 
     backtolobby(){
-        this.main.history_stack.push('/');
-        window.history.pushState({}, '', '/');
-        this.main.load('/lobby', () => this.main.lobby.events());
+        this.main.load('/lobby', () => this.main.lobby.events(false));
     }
 
     change_alias(){
-        this.main.history_stack.push('/profile/' + this.login + '/alias/');
-        window.history.pushState({}, '', '/profile/' + this.login + '/alias/');
-        this.main.load('/profile/' + this.login + '/alias', () => this.alias_events());
+        this.main.load('/profile/' + this.login + '/alias', () => this.alias_events(false));
     }
     
-    alias_events(){
+    alias_events(isPopState){
+        if (!isPopState){
+            window.history.pushState({page: '/profile/' + this.login + '/alias'}, '', '/profile/' + this.login + '/alias');
+        }
         this.dom_textfield = document.querySelector('#alias');
         this.dom_aliasconfirm = document.querySelector("#confirm");
         this.dom_aliascancel = document.querySelector('#cancel');
@@ -67,9 +64,7 @@ export class Profile{
                 },
                 success: (info) =>{
                     this.main.set_status(info);
-                    this.main.history_stack.push('/profile/' + this.main.login + '/');
-                    window.history.pushState({}, '', '/profile/' + this.main.login + '/');
-                    this.main.load('/profile/' + this.main.login, () => this.main.profile.events());
+                    this.main.load('/profile/' + this.main.login, () => this.main.profile.events(false));
                 },
                 error: (info) =>{
                     this.main.set_status(info.responseText);

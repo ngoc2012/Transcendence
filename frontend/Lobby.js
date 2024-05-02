@@ -72,7 +72,7 @@ export class Lobby
 			}
 		});
 		this.main.chat = new Chat(this.main, this.main.lobby);
-        this.main.load('transchat/general_chat', () => this.main.chat.init());
+        this.main.load('transchat/general_chat', () => this.main.chat.init(false));
 	}
 
     profile(){
@@ -81,9 +81,7 @@ export class Lobby
             this.main.set_status('You must be logged in to see your profile');
             return ;
         }
-        this.main.history_stack.push('/profile/' + this.main.login);
-        window.history.pushState({}, '', '/profile/' + this.main.login);
-        this.main.load('/profile/' + this.main.login, () => this.main.profile.init());
+        this.main.load('/profile/' + this.main.login, () => this.main.profile.init(false));
     }
 
     homebar() {

@@ -16,7 +16,9 @@ export class Chat{
         console.log('connecting chat')
 	}
 
-	events(e){
+	events(isPopState){
+        if (!isPopState)
+            window.history.pushState({page: '/profile/transchat/general_chat/'}, '', '/transchat/general_chat/');
         this.dom_input = document.querySelector('#chat-message-input');
 		this.dom_chatlog = document.querySelector('#chat-log');
 		this.dom_submit = document.querySelector('#chat-message-submit');

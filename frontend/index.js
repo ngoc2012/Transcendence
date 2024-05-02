@@ -48,7 +48,12 @@ function    reload(path, isPopState = false) {
         main.load('/lobby', () => main.lobby.events(isPopState));
     } else if (path.startsWith('/pong/')) {
         join_game(main, path.substring(6));
-    } else {
+    } else if (path === '/transchat/general_chat'){
+        main.load('transchat/general_chat', () => main.chat.events(isPopState));
+    } else if (path === '/profile/' + this.main.login){
+        main.load('/profile/' + this.main.login, () => this.main.profile.init(isPopState));
+    }
+    else {
         main.load('/lobby', () => main.lobby.events(isPopState));
     }       
 }
