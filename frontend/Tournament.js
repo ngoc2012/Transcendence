@@ -171,10 +171,7 @@ export class Tournament {
                     'X-CSRFToken': csrftoken,
                 },
                 success: (response) => {
-                    
                     this.localTournament = new localTournament(this.main, response.id, this);
-                    this.main.history_stack.push('/tournament/local/start');
-                    window.history.pushState({}, '', '/tournament/local/start');
                     this.main.load('/tournament/local/start', () => this.localTournament.getMatch());
                 },
                 error: (xhr) => {

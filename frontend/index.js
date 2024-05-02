@@ -48,7 +48,15 @@ function    reload(path, isPopState = false) {
         main.load('/lobby', () => main.lobby.events(isPopState));
     } else if (path.startsWith('/pong/')) {
         join_game(main, path.substring(6));
-    } else {
+    } else if (path === '/tournament/local') {
+        main.load('/tournament/local', () => main.lobby.events(isPopState));
+    } else if (path === '/tournament') {
+        main.load('/tournament', () => main.lobby.tournament.events(false));
+    } else if (path === '/tournament/local/start') {
+    
+    }
+    
+    else {
         main.load('/lobby', () => main.lobby.events(isPopState));
     }       
 }
