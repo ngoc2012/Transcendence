@@ -19,6 +19,7 @@ export class Pong
         this.localTour = localTour;
         this.id = id;
         this.preventWinBox = true;
+        this.pmBox = false;
     }
 
     reset_ratio() {
@@ -97,6 +98,20 @@ export class Pong
             this.dom_keyboard_layout = document.getElementById('keyboard_layout');
         }
 
+        document.addEventListener('keydown', (event) => {
+            if (event.key === ' ') {
+                event.preventDefault();
+                if (this.pmBox)
+                    return;
+                if (this.localTournament) {
+                    this.startLocal();
+                } else {
+                    this.start();
+                }
+            }
+        });        
+        
+
         if (!this.localTour) {
             
             document.addEventListener('keydown', (event) => {
@@ -126,12 +141,6 @@ export class Pong
                     case 'Control':
                         this.set_state(0, "server");
                         break;
-                    // case ' ':
-                    //     this.start();
-                    //     break;
-                    // case 'q':
-                    //     this.quit();
-                    //     break;
                 }
                 
                 let commands = ['up', 'down', 'left', 'right'];
@@ -399,6 +408,13 @@ export class Pong
             this.players[0].sk.send('start');
     }
 
+    startLocal() {
+        if (this.players[0].sk !== -1)
+            this.players[0].sk.send('start');
+        if (this.players[1].sk !== -1)
+            this.players[1].sk.send('start');
+    }
+
     quit() {
         this.players.forEach((p, i) => {
             this.set_state(i, 'quit');
@@ -515,6 +531,7 @@ export class Pong
     }
 
     preMatchBox(player1, player2) {
+        this.pmBox = true;
         let backdrop = document.createElement('div');
         backdrop.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(51, 51, 51, 0.6); z-index: 99;';
         document.body.appendChild(backdrop);
@@ -537,6 +554,10 @@ export class Pong
         instruct2.textContent = `${player2} controls: 'o' = up, 'l' = down`;
         instruct2.style.cssText = 'font-family: "Poppins", sans-serif; font-weight: 400; font-style: normal; color: white;';
         matchBox.appendChild(instruct2);
+        let instruct3 = document.createElement('p');
+        instruct2.textContent = `Press 'space' to launch the ball`;
+        instruct2.style.cssText = 'font-family: "Poppins", sans-serif; font-weight: 400; font-style: normal; color: white;';
+        matchBox.appendChild(instruct3);
     
         let startButton = document.createElement('button');
         startButton.textContent = 'Start';
@@ -545,7 +566,7 @@ export class Pong
             document.getElementById('pongCanvas').style.filter = '';
             document.body.removeChild(backdrop);
             document.body.removeChild(matchBox);
-            this.start();
+            this.pmBox = false;
         };
         matchBox.appendChild(startButton);
     
