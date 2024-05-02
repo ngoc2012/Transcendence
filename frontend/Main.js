@@ -48,7 +48,7 @@ export class Main
         this.dom_name = document.getElementById("name");
         this.dom_name.innerHTML = "Anonyme";
         this.dom_email = document.getElementById("email");
-        this.dom_container = document.getElementById("container");
+        this.dom_container = document.getElementById("main_container");
         this.dom_login42 = document.getElementById("login42");
         this.dom_signup.addEventListener("click", () => this.signup_click());
         this.dom_login.addEventListener("click", () => this.login_click());

@@ -10,13 +10,18 @@
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
   
   <style>
-  
+    .container {
+        margin-top: 10%;
+        text-align: center;
+    }
+
     #team0-container {
+
       position: absolute;
       left: 20%;
       transform: translateX(-20%);
       top: 8%;
-      margin-top: 0;
+      margin-top: 7%;
       padding-top: 0;
       width: 50%;
       text-align: center;
@@ -28,7 +33,7 @@
       right: 20%;
       transform: translateX(20%);
       top: 8%;
-      margin-top: 0;
+      margin-top: 7%;
       padding-top: 0;
       width: 50%;
       text-align: center;
@@ -42,15 +47,12 @@
       text-align: center;
     }
   
-    /* #game_name::before,
-    #game_name::after {
-      content: "\2605";
-      color: gold;
-      font-size: 24px;
-    } */
+
   
     .button-container {
       text-align: center;
+      margin-bottom: 10%;
+
     }
   
   </style>
@@ -58,7 +60,7 @@
 </head>
 <body>
   <div class="container">
-    <h3 class="text-center" id="game_name"></h3>
+    <h2 class="text-center" id="game_name"></h2>
 
     <div id="team0-container">
       <h4 id="team0">team0</h4>
@@ -122,5 +124,16 @@
   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+
+  <script>
+    window.addEventListener("keydown", function (e) {
+        if(["ArrowUp","ArrowDown"].indexOf(e.code) > -1) {
+            e.preventDefault();
+            console.log("COUCOU");
+          }
+        console.log("COUCOU");
+      }, false);
+  </script>
 </body>
 </html>

@@ -98,7 +98,11 @@ export class Pong
         }
 
         if (!this.localTour) {
+            
             document.addEventListener('keydown', (event) => {
+                if (["ArrowUp", "ArrowDown"].includes(event.key)) {
+                    event.preventDefault();
+                }
                 switch (event.key) {
                     case 'ArrowUp':
                         this.set_state(0, "up");

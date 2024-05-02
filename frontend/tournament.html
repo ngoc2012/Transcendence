@@ -1,36 +1,22 @@
-<!DOCTYPE html>
-<html lang="en">
 <head>
     {% load static %}
-
     <link rel="stylesheet" href="{% static 'style.css' %}">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create Tournament - Transcendence</title>
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-
-<style>
-
-    tre {
-        text-align: center;
-        margin-bottom: 5%;
-    }
-</style>
-
 </head>
 <body>
-    <div class="container mt-5">
-        <tre><h3>Create a New Tournament</h3></tre>
+    <div class="container">
+        <h2>New Tournament</h2>
         <form id="tournamentForm" method="post">
             {% csrf_token %}
-            <div class="form-group">
-                <label for="name">Tournament Name:</label>
-                <input type="text" id="tname" name="name" class="form-control" required>
+            <div class="form-group row justify-content-center">
+                <div class="col-sm-8 text-left">
+                    <label for="rooms" class="col-form-label">Tournament Name</label>
+                    <input id="tname" name="name" class="form-control" required>
+                </div>
             </div>
             <button type="submit" class="btn btn-primary">Create Tournament</button>
         </form>
     </div>
-
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
-</html>
