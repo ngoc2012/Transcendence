@@ -11,6 +11,12 @@ export class Profile{
     }
 
     events(isPopState){
+        if (this.main.lobby.game && this.main.lobby.game !== null)
+        {
+            this.main.lobby.game.close_room();
+            this.main.lobby.game = null;
+        }
+
         if (!isPopState)
             window.history.pushState({page: '/profile/'}, '', '/profile/');
         

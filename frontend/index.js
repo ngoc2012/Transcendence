@@ -5,6 +5,28 @@ export var main = new Main();
 
 var reload_page = true;
 
+function    reload(path, isPopState = false) {
+    if (main.lobby.game && main.lobby.game !== null)
+    {
+        main.lobby.game.close_room();
+        main.lobby.game = null;
+    }
+
+    if (path === '/login') {
+        main.load('/pages/login', () => main.log_in.events(isPopState));
+    } else if (path === '/signup') {
+        main.load('/pages/signup', () => main.signup.events(isPopState));
+    } else if (path === '/lobby') {
+        main.load('/lobby', () => main.lobby.events(isPopState));
+    } else if (path === '/') {
+        main.load('/lobby', () => main.lobby.events(isPopState));
+    } else if (path.startsWith('/pong/')) {
+        join_game(main, path.substring(6));
+    } else {
+        main.load('/lobby', () => main.lobby.events(isPopState));
+    }
+}
+
 //recupere la data obtenue du callback de l'auth 42
 if (my42login !== null && my42login !== "" && my42email !== "" && my42ws != "")
 {
@@ -37,7 +59,7 @@ function    reload(path, isPopState = false) {
         main.lobby.game.quit();
         main.lobby.game = undefined;
     }
-    
+
     if (path === '/login') {
         main.load('/pages/login', () => main.log_in.events(isPopState));
     } else if (path === '/signup') {
@@ -48,17 +70,9 @@ function    reload(path, isPopState = false) {
         main.load('/lobby', () => main.lobby.events(isPopState));
     } else if (path.startsWith('/pong/')) {
         join_game(main, path.substring(6));
-    } else if (path === '/tournament/local') {
-        main.load('/tournament/local', () => main.lobby.events(isPopState));
-    } else if (path === '/tournament') {
-        main.load('/tournament', () => main.lobby.tournament.events(false));
-    } else if (path === '/tournament/local/start') {
-    
-    }
-    
-    else {
+    } else {
         main.load('/lobby', () => main.lobby.events(isPopState));
-    }       
+    }
 }
 
 window.addEventListener('popstate', (event) => {
@@ -76,8 +90,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const bg = document.getElementById('dynamic-bg');
-    let color1 = [166, 192, 254]; 
-    let color2 = [246, 128, 132]; 
+    let color1 = [166, 192, 254];
+    let color2 = [246, 128, 132];
     let targetColor1 = [...color1];
     let targetColor2 = [...color2];
 
