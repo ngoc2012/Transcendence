@@ -312,6 +312,36 @@ export class Lobby
         // this.socket.onclose = (e) => {
 
         // };
+        this.main.chat_socket = new WebSocket(
+            'wss://'
+            + window.location.host
+            + '/ws/transchat/general_chat/'
+        );
+        if (this.main.chat_socket.readyState === 1){
+            this.main.chat_socket.onopen = function(e) {
+			    if (this.main.login != ''){
+				    console.log("sending connecting message");
+            	    this.main.chat_socket.send(JSON.stringify({
+                	    'type': 'connection',
+	                    'user': c.main.login,
+                	}));
+			    }
+            };
+
+       	    this.main.chat_socket.onmessage = function(e) {
+       	        var data = JSON.parse(e.data);
+                var list_user = document.getElementById('user_list');
+                if (data.type === 'update'){
+                    c.main.refresh_user_list(data.users);
+                    return;
+                }
+                else
+			        document.querySelector('#chat-log').value += (data.message + '\n');
+       	    };
+            this.main.chat_socket.onclose = function(e) {
+                console.error('Chat socket closed unexpectedly');
+       	    };
+        }
     }
 
     tournament_click() {
