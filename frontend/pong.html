@@ -13,6 +13,10 @@
 
     .container {
         margin-top: 5%;
+        margin-left: 0;
+        padding-left: 0;
+        margin-right: 0;
+        padding-right: 0;
         text-align: center;
     }
 
@@ -35,7 +39,12 @@
     #pongCanvas {
         border: 1px solid white;
     }
-
+    #pongThreeJS {
+        margin-left: 0;
+        padding-left: 0;
+        margin-right: 0;
+        padding-right: 0;
+    }
 
     .btn-custom {
       background-color: rgba(0, 0, 0, 0.7);
@@ -76,17 +85,85 @@
         <div class="score" id="score1">0</div>
       </div>
     </div>
-      
-      <div id="pongThreeJS" style="display: none;"></div>
-      <canvas id="pongCanvas" class="mt-3"></canvas>      
+    
 
+        <div id="pongThreeJS" style="display: none;"></div>
+        <canvas id="pongCanvas" class="mt-3"></canvas>      
 
+        <div id="display_board" style="display: none; transform: scale(0.6);">
+            <form>
+                <div class="form-row">
+                    <div class="col">
+                        <label for="angle">Angle</label>
+                        <input type="range" class="form-control-range" min="10" max="90" step="1" value="50" id="angle">
+                    </div>
+                    <div class="col">
+                        <label for="ratio">Ratio</label>
+                        <input type="range" class="form-control-range" min="1" max="10" step="1" value="2" id="ratio">
+                    </div>
+                    <div class="col">
+                        <label for="near">Near</label>
+                        <input type="range" class="form-control-range" min="1" max="10" step="1" value="1" id="near">
+                    </div>
+                    <div class="col">
+                        <label for="far">Far</label>
+                        <input type="range" class="form-control-range" min="100" max="2000" step="100" value="1000" id="far">
+                    </div>
+                    <div class="col">
+                        <label for="pos_x">x</label>
+                        <input type="range" class="form-control-range" min="-3.0" max="3.0" step="0.2" value="0" id="pos_x">
+                    </div>
+                    <div class="col">
+                        <label for="pos_y">y</label>
+                        <input type="range" class="form-control-range" min="-3.0" max="0.0" step="0.2" value="-1.0" id="pos_y">
+                    </div>
+                    <div class="col">
+                        <label for="pos_z">z</label>
+                        <input type="range" class="form-control-range" min="0.1" max="3.0" step="0.1" value="2.0" id="pos_z">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="col">
+                        <label for="center_x">Camera x</label>
+                        <input type="range" class="form-control-range" min="-10" max="10" step="1" value="0" id="center_x">
+                    </div>
+                    <div class="col">
+                        <label for="center_y">Camera y</label>
+                        <input type="range" class="form-control-range" min="-10" max="10" step="1" value="0" id="center_y">
+                    </div>
+                    <div class="col">
+                        <label for="center_z">Camera z</label>
+                        <input type="range" class="form-control-range" min="-10" max="10" step="1" value="0" id="center_z">
+                    </div>
+                    <div class="col">
+                        <label for="amb_dens">Ambient Dens</label>
+                        <input type="range" class="form-control-range" min="0.0" max="1.0" step="0.1" value="0.8" id="amb_dens">
+                    </div>
+                    <div class="col">
+                        <label for="dir_dens">Direction Dens</label>
+                        <input type="range" class="form-control-range" min="0.0" max="1.0" step="0.1" value="0.5" id="dir_dens">
+                    </div>
+                    <div class="col">
+                        <label for="light_x">Light x</label>
+                        <input type="range" class="form-control-range" min="0.0" max="1.0" step="0.1" value="-0.5" id="light_x">
+                    </div>
+                    <div class="col">
+                        <label for="light_y">Light y</label>
+                        <input type="range" class="form-control-range" min="0.0" max="1.0" step="0.1" value="1.0" id="light_y">
+                    </div>
+                    <div class="col">
+                        <label for="light_z">Light z</label>
+                        <input type="range" class="form-control-range" min="0.0" max="1.0" step="0.1" value="0.5" id="light_z">
+                    </div>
+                </div>
+            </form>
+        </div>
 
       <button id="start" type="button" class="btn btn-custom mt-3 mb-3">Start</button>
       <button id="quit" type="button" class="btn btn-custom mt-3 mb-3">Quit</button>
       <button id="toggle_AI" type="button" class="btn btn-custom mt-3 mb-3">AI</button>
       <button id="power_play" type="button" class="btn btn-custom mt-3 mb-3">Power play off</button>
-
+      
       <button id="toggle_display" type="button" class="btn btn-custom mt-3 mb-3">3D</button>
       <button id="new_local_player" type="button" class="btn btn-custom mt-3 mb-3">New local player</button>
       <div id="local_player" style="display: none; margin-bottom: 3%;">
@@ -99,37 +176,11 @@
         <button id="join_local" type="button" class="btn btn-custom mt-3">Join</button>
         <button id="close_local" type="button" class="btn btn-custom mt-3">Close</button>
       </div>   
-      
-      
-      
-      <button id="toggle_display_board" type="button" class="btn btn-custom mt-3" style="display: none;">Show display board</button>
-      <div id="display_board" style="display: none;">
-        <div>Camera:
-          <div>Angle: <input type="range" min="10" max="90" step="1" value="50" id="angle"></div>
-          <div>Ratio: <input type="range" min="1" max="10" step="1" value="2" id="ratio"></div>
-          <div>Near: <input type="range" min="1" max="10" step="1" value="1" id="near"></div>
-          <div>Far: <input type="range" min="100" max="2000" step="100" value="1000" id="far"></div>
-          <div>x: <input type="range" min="-3.0" max="3.0" step="0.2" value="0" id="pos_x"></div>
-          <div>y: <input type="range" min="-3.0" max="0.0" step="0.2" value="-1.0" id="pos_y"></div>
-          <div>z: <input type="range" min="0.1" max="3.0" step="0.1" value="2.0" id="pos_z"></div>
-        </div>
-        <div>Camera Center:
-          <div>x: <input type="range" min="-10" max="10" step="1" value="0" id="center_x"></div>
-          <div>y: <input type="range" min="-10" max="10" step="1" value="0" id="center_y"></div>
-          <div>z: <input type="range" min="-10" max="10" step="1" value="0" id="center_z"></div>
-        </div>
-        <div>Light:
-          <div>Ambient Density: <input type="range" min="0.0" max="1.0" step="0.1" value="0.5" id="amb_dens"></div>
-          <div>Direction Density: <input type="range" min="0.0" max="1.0" step="0.1" value="0.5" id="dir_dens"></div>
-          <div>x: <input type="range" min="0.0" max="1.0" step="0.1" value="-0.5" id="light_x"></div>
-          <div>y: <input type="range" min="0.0" max="1.0" step="0.1" value="1.0" id="light_y"></div>
-          <div>z: <input type="range" min="0.0" max="1.0" step="0.1" value="0.5" id="light_z"></div>
-        </div>
+      <div class="d-flex justify-content-center align-items-center">
+        <button id="toggle_display_board" type="button" style="display: none;" class="btn btn-custom mb-4">Show display board</button>
       </div>
+    
   </div>
-
-
-
 
   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>

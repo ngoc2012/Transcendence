@@ -96,6 +96,10 @@ export class Login
                                 if (dom_logout) {
                                     dom_logout.addEventListener('click', () => this.main.logout());
                                 }
+                                var dom_picture = document.getElementById('picture');
+                                if (dom_picture){
+                                    dom_picture.src = this.main.picture.replace('/app/frontend/', '/static/');
+                                }
                                 this.main.load('/lobby', () => this.main.lobby.events(false));
                             }
                         },

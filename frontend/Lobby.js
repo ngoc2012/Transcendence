@@ -40,13 +40,20 @@ export class Lobby
         this.dom_rooms = document.getElementById("rooms");
         this.dom_tournament = document.getElementById("tournament");
         this.dom_tournament_history = document.getElementById("tournament_history");
+        this.dom_tournament2 = document.getElementById("tournament2");
+        this.dom_tournament_history2 = document.getElementById("tournament_history2");
         this.dom_join = document.querySelector("#join");
         this.dom_pong = document.getElementById("pong");
+        this.dom_pong2 = document.getElementById("pong2");
         this.dom_chat = document.querySelector("#chat");
+        this.dom_chat2 = document.querySelector("#chat2");
         this.dom_delete = document.querySelector("#delete");
         this.dom_profile = document.querySelector('#profile');
         this.dom_homebar = document.querySelector('#homebar');
+        this.dom_homebar2 = document.querySelector('#homebar2');
         this.dom_pong.addEventListener("click", () => this.new_game("pong"));
+        this.dom_pong2.addEventListener("click", () => this.new_game("pong"));
+
         this.dom_delete.addEventListener("click", () => this.delete_game());
         this.dom_join.addEventListener("click", () => {
             if (this.dom_rooms.selectedIndex === -1) {
@@ -56,10 +63,16 @@ export class Lobby
             join_game(this.main, this.dom_rooms.options[this.dom_rooms.selectedIndex].value);
         });
 		this.dom_chat.addEventListener("click", () => this.start_chat());
+        this.dom_chat2.addEventListener("click", () => this.start_chat());
+
         this.dom_profile.addEventListener("click", () => this.profile(false));
         this.dom_homebar.addEventListener("click", () => this.homebar());
+        this.dom_homebar2.addEventListener("click", () => this.homebar());
         this.dom_tournament.addEventListener("click", () => this.tournament_click());
+        this.dom_tournament2.addEventListener("click", () => this.tournament_click());
         this.dom_tournament_history.addEventListener("click", () => this.tournament_history_click());
+        this.dom_tournament_history2.addEventListener("click", () => this.tournament_history_click());
+
         this.listenersOK = true;
     }
 
@@ -92,7 +105,7 @@ export class Lobby
             this.main.set_status('You must be logged in to see your profile');
             return ;
         }
-        this.main.load('/profile/' + this.main.login, () => this.main.profile.init(false));
+        this.main.load_with_data('/profile/' + this.main.login, () => this.main.profile.init(false), {'requester': this.main.login, 'user': this.main.login});
     }
 
     homebar() {
@@ -305,7 +318,7 @@ export class Lobby
 		    if (this.main.login != ''){
            	    this.main.chat_socket.send(JSON.stringify({
                	    'type': 'connection',
-	                   'user': this.main.login,
+	                'user': this.main.login,
                	}));
 		    }
         };
@@ -313,7 +326,6 @@ export class Lobby
        	this.main.chat_socket.onmessage = (e) => {
        	    var data = JSON.parse(e.data);
             var list_user = document.getElementById('user_list');
-            console.log(data);
             if (data.type === 'update'){
                 this.main.refresh_user_list(data.users, data.pictures);
                 return;
@@ -381,12 +393,19 @@ export class Lobby
     }
 
     quit() {
+        var user_list = document.getElementById('user-list');
+        if (user_list){
+            user_list.innerHTML = "<p>You must be logged<br>to see online users</p>";
+        }
         if (this.socket !== -1)
         {
             this.socket.close();
             this.socket = -1;
         }
         if (this.main.chat_socket !== -1){
+            this.main.chat_socket.send(JSON.stringify({
+                'type': 'update'
+            }));
             this.main.chat_socket.close();
             this.main.chat_socket = -1;
         }

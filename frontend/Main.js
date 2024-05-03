@@ -216,6 +216,24 @@ export class Main
         });
     }
 
+    find_profile(requester, login){
+        var csrftoken = this.getCookie('csrftoken')
+        $.ajax({
+            url: '/profile/' + login + '/',
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken,
+            },
+            data:{
+                'user': login,
+                'requester': requester
+            },
+            success: (info) => {
+                this.load_with_data('/profile/' + login, () => this.profile.events(false), {'user':login, 'requester': requester});
+            }
+        })
+    }
+
     refresh_user_list(users, pics){
         var user_list = document.getElementById('user-list');
         user_list.innerHTML = '';
@@ -228,10 +246,12 @@ export class Main
                 new_profile_pic.src = 'static/' + pics[i].avatar;
             new_profile_pic.className = "rounded-circle mx-2";
             new_profile_pic.style = "width: 40px; height: 40px;"
-            new_element.href = '/profile/' + users[i].login +'/';
+            new_element.addEventListener("click", () => this.find_profile(this.login, users[i].login));
             new_element.innerHTML = users[i].login + '<br>';
+            new_element.style = "cursor: pointer;"
             user_list.appendChild(new_profile_pic);
             user_list.appendChild(new_element);
         }
     }
+
 }

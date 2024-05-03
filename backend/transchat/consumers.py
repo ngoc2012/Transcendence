@@ -33,7 +33,7 @@ class ChatConsumer(WebsocketConsumer):
 
     def block_user(self, huh, data, str):
         if str == data['username']:
-            self.send(text_data=json.dumps({"message": "You can't block yourself.", 'user': data['user'], 'room': data['room']}))
+            self.send(text_data=json.dumps({"message": "You can't block yourself.", 'user': data['user']}))
             return
         try:
             block_user = PlayersModel.objects.get(login=str)
@@ -41,46 +41,49 @@ class ChatConsumer(WebsocketConsumer):
             self.send(text_data=json.dumps({"message": "Unable to find user " + str + "."}))
             return
         data['user'].blocked_users.add(block_user)
-        self.send(text_data=json.dumps({"message": "User " + block_user.login + " blocked succesfully.", 'user': data['username'], 'room': data['room']}))
+        data['user'].save()
+        self.send(text_data=json.dumps({"message": "User " + block_user.login + " blocked succesfully.", 'user': data['username']}))
         return
     
     def unblock_user(self, huh, data, str):
         if str == data['username']:
-            self.send(text_data=json.dumps({"message": "You can't unblock yourself.", 'user': data['username'], 'room': data['room']}))
+            self.send(text_data=json.dumps({"message": "You can't unblock yourself.", 'user': data['username']}))
             return
         try:
             block_user = PlayersModel.objects.get(login=str)
         except PlayersModel.DoesNotExist:
-            self.send(text_data=json.dumps({"message": "Unable to find user " + str + ".", 'user': data['username'], 'room': data['room']}))
+            self.send(text_data=json.dumps({"message": "Unable to find user " + str + " or you didn't block this user.", 'user': data['username']}))
             return
-        data['user'].blocked_user.remove(block_user)
-        self.send(text_data=json.dumps({"message": "User " + block_user.username + " unblocked succesfully.", 'user': data['username'], 'room': data['room']}))
+        data['user'].blocked_users.remove(block_user)
+        data['user'].save()
+        self.send(text_data=json.dumps({"message": "User " + block_user.username + " unblocked succesfully.", 'user': data['username']}))
         return
 
     def send_whisper(self, huh, data, value):
         msg = ' '.join(data['msg_split'][2::])
         if value == data['username']:
-            self.send(text_data=json.dumps({"message": "You can't whisper yourself.", 'user': data['username'], 'room': data['room']}))
+            self.send(text_data=json.dumps({"message": "You can't whisper yourself.", 'user': data['username']}))
             return
         try:
             PlayersModel.objects.get(login=value)
         except PlayersModel.DoesNotExist:
-            self.send(text_data=json.dumps({'message': "Unable to find user " + value + ".", 'user': data['username'], 'room': data['room']}))
+            self.send(text_data=json.dumps({'message': "Unable to find user " + value + ".", 'user': data['username']}))
             return
         try:
-            receiver = Room.objects.get(room_name=data['room']).users.get(login=value)
+            receiver = Room.objects.get(room_name='general_chat').users.get(login=value)
         except PlayersModel.DoesNotExist:
-            self.send(text_data=json.dumps({"message": "Unable to whisper " + value + ". " + value + " is not in your room.", 'user': data['username'], 'room': data['room']}))
+            self.send(text_data=json.dumps({"message": "Unable to whisper " + value + ". " + value + " is not in your room.", 'user': data['username']}))
             return
         if msg == receiver.login:
-            self.send(text_data=json.dumps({"message": "You can't send empty whispers.", "user": data['username'], 'room': data['room']}))
+            self.send(text_data=json.dumps({"message": "You can't send empty whispers.", "user": data['username']}))
             return
         async_to_sync(self.channel_layer.group_send)(
-            self.room_group_name, {"type": "whisper", "message": msg, "receiver": receiver.username, 'room': data['room'], 'sender': data['username']}
+            self.room_group_name, {"type": "whisper", "message": msg, "receiver": receiver.username, 'sender': data['username']}
         )
 
     # Receive message from WebSocket
     def receive(self, text_data):
+        print(text_data)
         if json.loads(text_data)["type"] == 'connection':
             if self.scope['state']['username'] == '':
                 if json.loads(text_data)['type'] == 'connection':
@@ -94,13 +97,15 @@ class ChatConsumer(WebsocketConsumer):
                         room.save()
                     async_to_sync(self.channel_layer.group_send)(self.room_group_name, {"type": "update"})
                     return
+        elif json.loads(text_data)["type"] == 'update':
+                async_to_sync(self.channel_layer.group_send)(self.room_group_name, {"type": "update"})
+                return
         data = {
             'text_data': json.loads(text_data),
             'message': json.loads(text_data)['message'],
             'username': json.loads(text_data)['user'],
             'user': PlayersModel.objects.get(login=json.loads(text_data)['user']),
             'msg_split': str(json.loads(text_data)['message']).split(" "),
-            'room': json.loads(text_data)['room'],
             'blockcmd': False,
             'unblockcmd': False,
             'whisper': False,
@@ -124,9 +129,10 @@ class ChatConsumer(WebsocketConsumer):
                 if i == '/whisper' or i == '/WHISPER' or i == '/w' or i == '/W':
                     data['whisper'] = True
         # Send message to room group
-        async_to_sync(self.channel_layer.group_send)(
-            self.room_group_name, {"type": "chat_message", "message": data['user'].login + ":\n" + data['message'], "user": data['user'].login, 'room': data['room']}
-        )
+        if data['message'] != '':
+            async_to_sync(self.channel_layer.group_send)(
+                self.room_group_name, {"type": "chat_message", "message": data['user'].login + ":\n" + data['message'], "user": data['user'].login}
+            )
 
 
     # Receive message from room group
@@ -157,4 +163,4 @@ class ChatConsumer(WebsocketConsumer):
         receiver = event['receiver']
         user = event['sender']
         if self.scope['state']['username'] == receiver:
-            self.send(json.dumps({"type": "whisper", "message": user + " whispered :\n" + message, 'user': receiver, 'room': event['room']}))
+            self.send(json.dumps({"type": "whisper", "message": user + " whispered :\n" + message, 'user': receiver}))

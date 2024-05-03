@@ -35,11 +35,19 @@ Your friends: <br> {% for i in friends %} {{ i.login }} - {{ i.online_status }} 
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>User Profile</title>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-  <link rel="stylesheet" href="{% static 'styles/profile.css' %}">
 
 
   <style>
-
+    /* body {
+      overflow;
+    } */
+    .profile-picture {
+      width: 30%;
+      height: 15%;
+      border-radius: 50%;
+      margin: 0 auto 20px;
+      display: block;
+      }
     .profile-picture {
         width: 120px;
         height: 120px;
@@ -51,51 +59,72 @@ Your friends: <br> {% for i in friends %} {{ i.login }} - {{ i.online_status }} 
   </style>
 </head>
 <body>
-
-<div class="container mt-5">
-  <div class="row">
-    <div class="col-md-6 offset-md-3 mb-4">
+  {% if ownprofile %}
+  <div class="container mt-5">
+    <div class="row">
+      <div class="col-md-6 offset-md-3 mb-4">
         <img src="{{ url|change_url }}" id="picture" alt="User Icon" class="rounded-circle profile-picture">
         <h1 class="text-center mb-4">{{ name }} Profile</h1>
-
-      <!-- <h3 class="text-center">Your Information</h3> -->
-      <p>Your name: {{ name }}</p>
-      <p>Your login: {{ login }}</p>
-      {% if context != '' %}
-        {% if alias %}
-          <p>Your alias: {{ alias }}</p>
+        
+        <!-- <h3 class="text-center">Your Information</h3> -->
+        <p>Your name: {{ name }}</p>
+        <p>Your login: {{ login }}</p>
+        {% if context != '' %}
+          {% if alias %}
+            <p>Your alias: {{ alias }}</p>
+          {% endif %}
         {% endif %}
-      {% endif %}
-      <p>Your match history: {% if history %} {% for i in history %} {% if i.result == 'W' %} Win {% else %} Lose {% endif %} {{ i.score}} VS {{ i.opp }} | {{ i.date }} <br> {% endfor %} {% else %} No recent matches {% endif %}</p>
-      <p>Your email: {{ email }}</p>
-      <p>Your friends:</p>
-      <ul>
-        {% if friends %}
-            {% for i in friends %}
-                <li>{{ i.login }} - {{ i.online_status }}</li>
-            {% endfor %}
-        {% else %}
-            <p>You don't have friends (sadge)</p>
-        {% endif %}
-      </ul>
-      <hr>
-      <button id="add_friend" class="btn btn-primary btn-block mb-2" type="button">Add a friend</button>
-      <button id="log_in" class="btn btn-primary btn-block mb-2" type="button">Change your login</button>
-      <button id="new_name" class="btn btn-primary btn-block mb-2" type="button">Change your name</button>
-      <button id="alias" class="btn btn-primary btn-block mb-2" type="button">Change your tournament name</button>
-      <button id="password" class="btn btn-primary btn-block mb-2" type="button">Change your password</button>
-      <button id="email" class="btn btn-primary btn-block mb-2" type="button">Change your email</button>
-      
-      <form action="/profile/{{ login }}/change_avatar/" enctype="multipart/form-data" method="post">
-          {% csrf_token %}
-          {{ form }}
-          <input type="submit" class="btn btn-primary btn-block mb-2" value="Submit a new profile picture">        
-      </form>
-      <hr>
-      <button id="back" class="btn btn-secondary btn-block mb-4" type="button">Back to lobby</button>
+        <p>Your match history: {% if history %} {% for i in history %} {% if i.result == 'W' %} Win {% else %} Lose {% endif %} {{ i.score}} VS {{ i.opp }} | {{ i.date }} <br> {% endfor %} {% else %} No recent matches {% endif %}</p>
+        <p>Your email: {{ email }}</p>
+        <p>Your friends:</p>
+        <ul>
+          {% if friends %}
+              {% for i in friends %}
+                  <li>{{ i.login }} - {{ i.online_status }}</li>
+              {% endfor %}
+          {% else %}
+              <p>You don't have friends (sadge)</p>
+          {% endif %}
+        </ul>
+        <hr>
+        <button id="add_friend" class="btn btn-primary btn-block mb-2" type="button">Add a friend</button>
+        <button id="log_in" class="btn btn-primary btn-block mb-2" type="button">Change your login</button>
+        <button id="new_name" class="btn btn-primary btn-block mb-2" type="button">Change your name</button>
+        <button id="alias" class="btn btn-primary btn-block mb-2" type="button">Change your tournament name</button>
+        <button id="password" class="btn btn-primary btn-block mb-2" type="button">Change your password</button>
+        <button id="email" class="btn btn-primary btn-block mb-2" type="button">Change your email</button>
+        
+        <form action="/profile/{{ login }}/change_avatar/" enctype="multipart/form-data" method="post">
+            {% csrf_token %}
+            {{ form }}
+            <input type="submit" class="btn btn-primary btn-block mb-2" value="Submit a new profile picture">        
+        </form>
+        <hr>
+        <button id="back" class="btn btn-secondary btn-block mb-4" type="button">Back to lobby</button>
+      </div>
     </div>
   </div>
-</div>
+{% else %}
+  <div class="container mt-5">
+    <div class="row">
+      <div class="col-md-6 offset-md-3 mb-4">
+          <img src="{{ url|change_url }}" id="picture" alt="User Icon" class="rounded-circle profile-picture">
+          <h1 class="text-center mb-4">{{ name }} Profile</h1>
+
+        <!-- <h3 class="text-center">Your Information</h3> -->
+        <p>Name: {{ name }}</p>
+        <p>Login: {{ login }}</p>
+        {% if context != '' %}
+          {% if alias %}
+            <p>Alias: {{ alias }}</p>
+          {% endif %}
+        {% endif %}
+        <p>Match history: {% if history %} {% for i in history %} {% if i.result == 'W' %} Win {% else %} Lose {% endif %} {{ i.score}} VS {{ i.opp }} | {{ i.date }} <br> {% endfor %} {% else %} No recent matches {% endif %}</p>
+        <button id="back" class="btn btn-secondary btn-block mb-4" type="button">Back to lobby</button>
+      </div>
+    </div>
+  </div>
+{% endif %}
 
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>

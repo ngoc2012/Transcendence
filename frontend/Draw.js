@@ -12,6 +12,9 @@ export class Draw
         this.barrier1 = null;
         this.barrier2 = null;
         this.paddles = [];
+        this.line = null;
+        this.line1 = [];
+        this.line2 = [];
 	}
 
     update_3D(data) {
@@ -36,42 +39,55 @@ export class Draw
         this.table.position.z = -1;
         this.scene.add(this.table);
 
+        if (this.line) {
+            this.scene.remove(this.line);
+            this.line.geometry.dispose();
+            this.line.material.dispose();
+            this.line = undefined;
+        }
 
         const lineGeometry = new THREE.BoxGeometry(4, this.pong.room.data.HEIGHT * this.ratio, 2);
         const lineMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff});
 
-        const line = new THREE.Mesh(lineGeometry, lineMaterial);
-        
-        line.position.x = 0;
-        line.position.y = 0;
-        line.position.z = 2;
-        
-        this.scene.add(line);
-
+        this.line = new THREE.Mesh(lineGeometry, lineMaterial);
+        this.line.position.x = 0;
+        this.line.position.y = 0;
+        this.line.position.z = 2;
+        this.scene.add(this.line);
 
         const lineMaterial2 = new THREE.LineDashedMaterial({ color: 0xffffff, dashSize: 10, gapSize: 15, });
 
-
         for (let i = 0; i < 3; i++) {
+
+            if (this.line1[i]) {
+                this.scene.remove(this.line1[i]);
+                this.line1[i].geometry.dispose();
+                this.line1[i].material.dispose();
+                this.line1[i] = undefined;
+            }
             const line1Geometry = new THREE.BufferGeometry().setFromPoints([
-                new THREE.Vector3(-(this.pong.room.data.WIDTH * this.ratio) / 4 - 1 + i, -1 * ((this.pong.room.data.HEIGHT * this.ratio) / 2), 2), // Start point (au bas de la table)
-                new THREE.Vector3(-(this.pong.room.data.WIDTH * this.ratio) / 4 - 1 + i, this.pong.room.data.HEIGHT * this.ratio / 2, 1) // End point (au milieu de la table)
+                new THREE.Vector3(-(this.pong.room.data.WIDTH * this.ratio) / 4 - 1 + i, -1 * ((this.pong.room.data.HEIGHT * this.ratio) / 2), 2),
+                new THREE.Vector3(-(this.pong.room.data.WIDTH * this.ratio) / 4 - 1 + i, this.pong.room.data.HEIGHT * this.ratio / 2, 1)
             ]);
-            const line1 = new THREE.Line(line1Geometry, lineMaterial2);
-            line1.computeLineDistances();
-            this.scene.add(line1);
+            this.line1[i] = new THREE.Line(line1Geometry, lineMaterial2);
+            this.line1[i].computeLineDistances();
+            this.scene.add(this.line1[i]);
         }
 
-
-
         for (let i = 0; i < 3; i++) {
+            if (this.line2[i]) {
+                this.scene.remove(this.line2[i]);
+                this.line2[i].geometry.dispose();
+                this.line2[i].material.dispose();
+                this.line2[i] = undefined;
+            }
             const line2Geometry = new THREE.BufferGeometry().setFromPoints([
-                new THREE.Vector3((this.pong.room.data.WIDTH * this.ratio) / 4 - 1 + i, -1 * ((this.pong.room.data.HEIGHT * this.ratio) / 2), 2), // Start point
-                new THREE.Vector3((this.pong.room.data.WIDTH * this.ratio) / 4 - 1 + i, this.pong.room.data.HEIGHT * this.ratio / 2, 1) // End point
+                new THREE.Vector3((this.pong.room.data.WIDTH * this.ratio) / 4 - 1 + i, -1 * ((this.pong.room.data.HEIGHT * this.ratio) / 2), 2),
+                new THREE.Vector3((this.pong.room.data.WIDTH * this.ratio) / 4 - 1 + i, this.pong.room.data.HEIGHT * this.ratio / 2, 1)
             ]);
-            const line2 = new THREE.Line(line2Geometry, lineMaterial2);
-            line2.computeLineDistances();
-            this.scene.add(line2);
+            this.line2[i] = new THREE.Line(line2Geometry, lineMaterial2);
+            this.line2[i].computeLineDistances();
+            this.scene.add(this.line2[i]);
         }
 
         // Draw barriers
