@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse, JsonResponse
-from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from django.views.decorators.http import require_POST
 from game.models import TournamentModel, TournamentMatchModel, RoomsModel
 from accounts.models import PlayersModel
@@ -424,21 +424,96 @@ def verify_qrcode(request):
 
 @csrf_exempt
 def profile(request, username):
-    user = PlayersModel.objects.filter(login=username).get(login=username)
-    context = {
-        'id': user.id,
-        'login': user.login,
-        'password': user.password,
-        'name': user.name,
-        'alias': user.tourn_alias,
-        'history': user.history.all(),
-        'email': user.email,
-        'elo': user.elo,
-        'friends': user.friends.all(),
-        'url': user.avatar.url,
-        'form': UploadFileForm()
-    }
-    return render(request, 'profile.html', context)
+    if request.method == 'POST':
+        if request.POST['requester'] and request.POST['user']:
+            print("requester qnd user")
+            if request.POST['requester'] == request.POST['user']:
+                print("request != user")
+                user = PlayersModel.objects.filter(login=username).get(login=username)
+                context = {
+                    'ownprofile': True,
+                    'id': user.id,
+                    'login': user.login,
+                    'password': user.password,
+                    'name': user.name,
+                    'alias': user.tourn_alias,
+                    'history': user.history.all(),
+                    'email': user.email,
+                    'elo': user.elo,
+                    'friends': user.friends.all(),
+                    'url': user.avatar.url,
+                    'form': UploadFileForm()
+                }
+                return render(request, 'profile.html', context)
+            else:
+                user = PlayersModel.objects.filter(login=username).get(login=username)
+                context = {
+                    'ownprofile': False,
+                    'id': user.id,
+                    'login': user.login,
+                    'password': user.password,
+                    'name': user.name,
+                    'alias': user.tourn_alias,
+                    'history': user.history.all(),
+                    'email': user.email,
+                    'elo': user.elo,
+                    'friends': user.friends.all(),
+                    'url': user.avatar.url,
+                    'form': UploadFileForm()
+                }
+                return render(request, 'profile.html', context)
+    elif request.GET['requester'] and request.GET['user']:
+        if request.GET['requester'] == request.GET['user']:
+            user = PlayersModel.objects.filter(login=username).get(login=username)
+            context = {
+                'ownprofile': True,
+                'id': user.id,
+                'login': user.login,
+                'password': user.password,
+                'name': user.name,
+                'alias': user.tourn_alias,
+                'history': user.history.all(),
+                'email': user.email,
+                'elo': user.elo,
+                'friends': user.friends.all(),
+                'url': user.avatar.url,
+                'form': UploadFileForm()
+            }
+            return render(request, 'profile.html', context)
+        else:
+            user = PlayersModel.objects.filter(login=username).get(login=username)
+            context = {
+                'ownprofile': False,
+                'id': user.id,
+                'login': user.login,
+                'password': user.password,
+                'name': user.name,
+                'alias': user.tourn_alias,
+                'history': user.history.all(),
+                'email': user.email,
+                'elo': user.elo,
+                'friends': user.friends.all(),
+                'url': user.avatar.url,
+                'form': UploadFileForm()
+            }
+            return render(request, 'profile.html', context)
+    else:
+        user = PlayersModel.objects.filter(login=username).get(login=username)
+        context = {
+            'ownprofile': True,
+            'id': user.id,
+            'login': user.login,
+            'password': user.password,
+            'name': user.name,
+            'alias': user.tourn_alias,
+            'history': user.history.all(),
+            'email': user.email,
+            'elo': user.elo,
+            'friends': user.friends.all(),
+            'url': user.avatar.url,
+            'form': UploadFileForm()
+        }
+        return render(request, 'profile.html', context)
 
 @csrf_exempt
 def alias(request, username):
