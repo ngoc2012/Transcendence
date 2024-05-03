@@ -6,7 +6,6 @@ export var main = new Main();
 var reload_page = true;
 
 function    reload(path, isPopState = false) {
-    console.log(path)
     if (main.lobby.game && main.lobby.game !== null)
     {
         main.lobby.game.close_room();
@@ -25,7 +24,7 @@ function    reload(path, isPopState = false) {
     } else if (path === '/transchat/general_chat'){
         main.load('transchat/general_chat', () => main.chat.events(isPopState));
     } else if (path.startsWith('/profile/')){
-        main.load('/profile/' + path.substring(9), () => this.main.profile.init(isPopState));
+        main.load('/profile/' + path.substring(9), () => main.profile.init(isPopState));
     }
     else {
         main.load('/lobby', () => main.lobby.events(isPopState));

@@ -425,10 +425,8 @@ def verify_qrcode(request):
 @csrf_exempt
 def profile(request, username):
     if request.method == 'POST':
-        if request.POST['requester'] and request.POST['user']:
-            print("requester qnd user")
+        if 'requester' in request.POST and 'user' in request.POST:
             if request.POST['requester'] == request.POST['user']:
-                print("request != user")
                 user = PlayersModel.objects.filter(login=username).get(login=username)
                 context = {
                     'ownprofile': True,
@@ -462,7 +460,7 @@ def profile(request, username):
                     'form': UploadFileForm()
                 }
                 return render(request, 'profile.html', context)
-    elif request.GET['requester'] and request.GET['user']:
+    elif 'requester' in request.GET and 'user' in request.GET:
         if request.GET['requester'] == request.GET['user']:
             user = PlayersModel.objects.filter(login=username).get(login=username)
             context = {
