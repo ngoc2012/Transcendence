@@ -596,6 +596,7 @@ def new_tournament(request):
         if TournamentModel.objects.filter(name=name).exists():
             return JsonResponse({'error': 'A tournament with the same name already exists'}, status=400)
         else:
+            print(request.user)
             owner = request.user
             tournament = TournamentModel.objects.create(name=name, game='pong', owner=owner, newRound=True, local=True)
             tournament.participants.add(owner)
