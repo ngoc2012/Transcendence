@@ -40,13 +40,20 @@ export class Lobby
         this.dom_rooms = document.getElementById("rooms");
         this.dom_tournament = document.getElementById("tournament");
         this.dom_tournament_history = document.getElementById("tournament_history");
+        this.dom_tournament2 = document.getElementById("tournament2");
+        this.dom_tournament_history2 = document.getElementById("tournament_history2");
         this.dom_join = document.querySelector("#join");
         this.dom_pong = document.getElementById("pong");
+        this.dom_pong2 = document.getElementById("pong2");
         this.dom_chat = document.querySelector("#chat");
+        this.dom_chat2 = document.querySelector("#chat2");
         this.dom_delete = document.querySelector("#delete");
         this.dom_profile = document.querySelector('#profile');
         this.dom_homebar = document.querySelector('#homebar');
+        this.dom_homebar2 = document.querySelector('#homebar2');
         this.dom_pong.addEventListener("click", () => this.new_game("pong"));
+        this.dom_pong2.addEventListener("click", () => this.new_game("pong"));
+
         this.dom_delete.addEventListener("click", () => this.delete_game());
         this.dom_join.addEventListener("click", () => {
             if (this.dom_rooms.selectedIndex === -1) {
@@ -56,10 +63,16 @@ export class Lobby
             join_game(this.main, this.dom_rooms.options[this.dom_rooms.selectedIndex].value);
         });
 		this.dom_chat.addEventListener("click", () => this.start_chat());
+        this.dom_chat2.addEventListener("click", () => this.start_chat());
+
         this.dom_profile.addEventListener("click", () => this.profile(false));
         this.dom_homebar.addEventListener("click", () => this.homebar());
+        this.dom_homebar2.addEventListener("click", () => this.homebar());
         this.dom_tournament.addEventListener("click", () => this.tournament_click());
+        this.dom_tournament2.addEventListener("click", () => this.tournament_click());
         this.dom_tournament_history.addEventListener("click", () => this.tournament_history_click());
+        this.dom_tournament_history2.addEventListener("click", () => this.tournament_history_click());
+
         this.listenersOK = true;
     }
 

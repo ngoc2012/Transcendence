@@ -84,15 +84,15 @@
         }
         
         #left-sidebar {
-            position: fixed;
-            top: 35%;
-            left: 0;
-            width: 70px;
-            background-color: #ffffff7a;
-            color: white;
-            transition: width 0.3s ease-in-out;
-            z-index: 1040;
-            overflow: hidden;
+          position: fixed;
+          top: 35%;
+          left: 0;
+          width: 70px;
+          background-color: #ffffff7a;
+          color: white;
+          transition: width 0.3s ease-in-out;
+          z-index: 1040;
+          overflow: hidden;
           border-top-right-radius: 10px;
           border-bottom-right-radius: 10px;
       }
@@ -107,7 +107,7 @@
           color: #ffffff;
           opacity: 100%;
         }
-        
+
         #left-sidebar myicon {
             flex: 0 0 auto;
             display: flex;
@@ -119,7 +119,7 @@
         }
         
         #left-sidebar .text {
-            flex-grow: 1;
+          flex-grow: 1;
           display: none;
           justify-content: flex-end;
           text-align: right;
@@ -165,7 +165,27 @@
             }
         }
 
-        /* MOBILE */
+      /* MOBILE */
+      .mobile-sidebar {
+          position: fixed;
+          top: 85%;
+          transform: translateX(-50%);
+          width: 60%;
+          background-color: #ffffff7a;
+          color: white;
+          transition: width 0.3s ease-in-out;
+          z-index: 1040;
+          overflow: hidden;
+          border-radius: 10px;
+          display: flex; 
+          justify-content: space-between;
+          align-items: center;
+          margin-left: auto;
+          margin-right: auto;
+          display: none;
+      }
+
+
 
         @media screen and (max-width: 768px) {
             #toggle-sidebar {
@@ -175,7 +195,17 @@
                 border-top-left-radius: 0;
                 border-bottom-left-radius: 0;
             }
+
+
+            .mobile-sidebar {
+              display: block;
+            }
+            #left-sidebar {
+              display: none;
+            }
         }
+
+
 
         @media (max-width: 768px) {
             #left-sidebar:hover {
@@ -219,7 +249,7 @@
         </div>
     </div>
 
-    <div class="container-fluid">
+    <div class="container">
       <div class="row justify-content-center">
           <div class="col-md-6"></div>
       </div>
@@ -264,11 +294,45 @@
     </div>
   </div>
 
+
+
+
+  <div id="mobile-sidebar" class="mobile-sidebar"  style="transform: scale(0.8);">
+    <div class="p-3">
+        <ul class="nav flex-row">
+          <li class="nav-item mr-3">
+            <button id="homebar2" class="btn btn-secondary btn-block mb-2" type="button">
+                <myicon><i class="fas fa-house-user" style="margin-right: 5px;"></i></myicon>
+            </button>
+          </li>
+          <li class="nav-item mr-3">
+              <button id="pong2" class="btn btn-success btn-block mb-2" type="button">
+                  <myicon><i class="fas fa-table-tennis" style="margin-right: 5px;"></i></myicon>
+              </button>
+          </li>
+          <li class="nav-item mr-3">
+              <button id="tournament2" class="btn btn-warning btn-block mb-2" type="button">
+                  <myicon><i class="fas fa-trophy" style="margin-right: 5px;"></i></myicon>
+              </button>
+          </li>
+          <li class="nav-item mr-3">
+              <button id="tournament_history2" class="btn btn-secondary btn-block mb-2" type="button">
+                  <myicon><i class="fab fa-ethereum" style="margin-right: 5px;"></i></myicon>
+              </button>
+          </li>
+          <li class="nav-item">
+              <button id="chat2" class="btn btn-info btn-block mb-2" type="button">
+                  <myicon><i class="fas fa-comment" style="margin-right: 5px;"></i></myicon>
+              </button>
+          </li>
+        </ul>
+    </div>
+  </div>
+
   <div id="user-sidebar">
     <div class="p-3">
         <h5 class="text-center">Online Users</h5>
         <ul id="user-list" class="list-unstyled">
-        <p>You must be logged<br>to see online users</p>
         </ul>
     </div>
   </div>

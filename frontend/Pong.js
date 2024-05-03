@@ -23,7 +23,7 @@ export class Pong
     }
 
     reset_ratio() {
-        let width = window.innerWidth - 1;
+        let width = window.innerWidth - 2;
         if (width < this.room.data.WIDTH)
         {
             this.ctx.canvas.width = width;
