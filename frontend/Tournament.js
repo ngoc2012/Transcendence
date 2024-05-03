@@ -15,6 +15,12 @@ export class Tournament {
     }
 
     events() {
+        if (this.main.lobby.game && this.main.lobby.game !== null)
+        {
+            this.main.lobby.game.close_room();
+            this.main.lobby.game = null;
+        }
+        
         this.main.checkcsrf();
         window.history.pushState({page: '/tournament'}, '', '/tournament');
         this.dom_tournamentForm = document.getElementById('tournamentForm');

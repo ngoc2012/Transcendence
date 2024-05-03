@@ -5,6 +5,28 @@ export var main = new Main();
 
 var reload_page = true;
 
+function    reload(path, isPopState = false) {
+    if (main.lobby.game && main.lobby.game !== null)
+    {
+        main.lobby.game.close_room();
+        main.lobby.game = null;
+    }
+    
+    if (path === '/login') {
+        main.load('/pages/login', () => main.log_in.events(isPopState));
+    } else if (path === '/signup') {
+        main.load('/pages/signup', () => main.signup.events(isPopState));
+    } else if (path === '/lobby') {
+        main.load('/lobby', () => main.lobby.events(isPopState));
+    } else if (path === '/') {
+        main.load('/lobby', () => main.lobby.events(isPopState));
+    } else if (path.startsWith('/pong/')) {
+        join_game(main, path.substring(6));
+    } else {
+        main.load('/lobby', () => main.lobby.events(isPopState));
+    }       
+}
+
 //recupere la data obtenue du callback de l'auth 42
 if (my42login !== null && my42login !== "" && my42email !== "" && my42ws != "")
 {
@@ -27,30 +49,8 @@ if (my42login !== null && my42login !== "" && my42email !== "" && my42ws != "")
 
     var dom_logout = document.getElementById('logoutButton');
     if (dom_logout) {
-        dom_logout.addEventListener('click', () => this.reload());
+        dom_logout.addEventListener('click', () => reload());
     }
-}
-
-function    reload(path, isPopState = false) {
-    if (main.lobby.game && main.lobby.game !== undefined)
-    {
-        main.lobby.game.quit();
-        main.lobby.game = undefined;
-    }
-    
-    if (path === '/login') {
-        main.load('/pages/login', () => main.log_in.events(isPopState));
-    } else if (path === '/signup') {
-        main.load('/pages/signup', () => main.signup.events(isPopState));
-    } else if (path === '/lobby') {
-        main.load('/lobby', () => main.lobby.events(isPopState));
-    } else if (path === '/') {
-        main.load('/lobby', () => main.lobby.events(isPopState));
-    } else if (path.startsWith('/pong/')) {
-        join_game(main, path.substring(6));
-    } else {
-        main.load('/lobby', () => main.lobby.events(isPopState));
-    }       
 }
 
 window.addEventListener('popstate', (event) => {

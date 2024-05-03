@@ -15,6 +15,11 @@ export class Lobby
     }
 
     events(isPopState) {
+        if (this.main.lobby.game && this.main.lobby.game !== null)
+        {
+            this.main.lobby.game.close_room();
+            this.main.lobby.game = null;
+        }
         this.main.checkcsrf();
         this.main.set_chat();
         if (this.main.login != '') {

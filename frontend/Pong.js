@@ -415,7 +415,7 @@ export class Pong
             this.players[1].sk.send('start');
     }
 
-    quit() {
+    close_room() {
         this.players.forEach((p, i) => {
             this.set_state(i, 'quit');
             if (p.sk !== -1)
@@ -424,6 +424,10 @@ export class Pong
                 p.sk = -1;
             }
         });
+    }
+
+    quit() {
+        this.close_room()
         this.main.history_stack.push('/');
         window.history.pushState({}, '', '/');
         this.main.load('/lobby', () => this.lobby.events());
