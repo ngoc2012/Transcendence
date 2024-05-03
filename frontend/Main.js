@@ -208,14 +208,21 @@ export class Main
         });
     }
 
-    refresh_user_list(users){
+    refresh_user_list(users, pics){
         var user_list = document.getElementById('user-list');
-        console.log(user_list);
         user_list.innerHTML = '';
         for (let i = 0; users[i]; i++){
-            let new_element = document.createElement("a")
+            let new_profile_pic = document.createElement("img");
+            let new_element = document.createElement("a");
+            if (pics[i].avatar.startsWith('/') == false)
+                new_profile_pic.src = 'static/' + pics[i].avatar;
+            else
+                new_profile_pic.src = 'static/' + pics[i].avatar;
+            new_profile_pic.className = "rounded-circle mx-2";
+            new_profile_pic.style = "width: 40px; height: 40px;"
             new_element.href = '/profile/' + users[i].login +'/';
             new_element.innerHTML = users[i].login + '<br>';
+            user_list.appendChild(new_profile_pic);
             user_list.appendChild(new_element);
         }
     }

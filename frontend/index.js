@@ -30,8 +30,8 @@ function    reload(path, isPopState = false) {
         join_game(main, path.substring(6));
     } else if (path === '/transchat/general_chat'){
         main.load('transchat/general_chat', () => main.chat.events(isPopState));
-    } else if (path === '/profile/' + this.main.login){
-        main.load('/profile/' + this.main.login, () => this.main.profile.init(isPopState));
+    } else if (path.startsWith('/profile/')){
+        main.load('/profile/' + path.substring(9), () => this.main.profile.init(isPopState));
     }
     else {
         main.load('/lobby', () => main.lobby.events(isPopState));

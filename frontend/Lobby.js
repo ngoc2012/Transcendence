@@ -69,10 +69,6 @@ export class Lobby
 			this.main.set_status('You must be logged in to chat.');
 			return;
 		}
-        this.main.chat_socket.send(JSON.stringify({
-            'type': 'connection',
-            'user': this.main.login
-        }));
         $.ajax({
 			url: '/transchat/chat_lobby/',
 			method: 'POST',
@@ -317,6 +313,33 @@ export class Lobby
         // this.socket.onclose = (e) => {
 
         // };
+        if (this.main.chat_socket === -1){
+            this.main.chat_socket = new WebSocket(
+                'wss://'
+                + window.location.host
+                + '/ws/transchat/general_chat/'
+            );
+        }
+        this.main.chat_socket.onopen = (e) => {
+		    if (this.main.login != ''){
+           	    this.main.chat_socket.send(JSON.stringify({
+               	    'type': 'connection',
+	                   'user': this.main.login,
+               	}));
+		    }
+        };
+
+       	this.main.chat_socket.onmessage = (e) => {
+       	    var data = JSON.parse(e.data);
+            var list_user = document.getElementById('user_list');
+            console.log(data);
+            if (data.type === 'update'){
+                this.main.refresh_user_list(data.users, data.pictures);
+                return;
+            }
+            else
+		        document.querySelector('#chat-log').value += (data.message + '\n');
+       	};
     }
 
     tournament_click() {
@@ -355,6 +378,10 @@ export class Lobby
         {
             this.socket.close();
             this.socket = -1;
+        }
+        if (this.main.chat_socket !== -1){
+            this.main.chat_socket.close();
+            this.main.chat_socket = -1;
         }
     }
 }
