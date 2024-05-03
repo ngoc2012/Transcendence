@@ -53,28 +53,6 @@ if (my42login !== null && my42login !== "" && my42email !== "" && my42ws != "")
     }
 }
 
-function    reload(path, isPopState = false) {
-    if (main.lobby.game && main.lobby.game !== undefined)
-    {
-        main.lobby.game.quit();
-        main.lobby.game = undefined;
-    }
-
-    if (path === '/login') {
-        main.load('/pages/login', () => main.log_in.events(isPopState));
-    } else if (path === '/signup') {
-        main.load('/pages/signup', () => main.signup.events(isPopState));
-    } else if (path === '/lobby') {
-        main.load('/lobby', () => main.lobby.events(isPopState));
-    } else if (path === '/') {
-        main.load('/lobby', () => main.lobby.events(isPopState));
-    } else if (path.startsWith('/pong/')) {
-        join_game(main, path.substring(6));
-    } else {
-        main.load('/lobby', () => main.lobby.events(isPopState));
-    }
-}
-
 window.addEventListener('popstate', (event) => {
     reload(event.state.page, true);
 });

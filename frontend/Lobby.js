@@ -234,29 +234,8 @@ export class Lobby
                 type: 'tournament_registered',
             }));
         };
-        $.ajax({
-            url: '/game/update',
-            method: 'GET',
-            success: (rooms) => {
-                // console.log('update rooms');
-                // console.log(rooms);
-                var options_rooms = this.dom_rooms && this.dom_rooms.options;
-                this.dom_rooms.innerHTML = "";
-                if (options_rooms && rooms && rooms.length > 0) {
-                    rooms.forEach((room) => {
-                        var option = document.createElement("option");
-                        option.value = room.id;
-                        let string = room.id.substring(0,5)
-                        option.text = room.name  + " - " + string + "... - " + room.owner;
-                        this.dom_rooms.add(option);
-                    });
-                }
-            },
-            error: () => this.main.set_status('Error: Can not update rooms')
-        });
 
         this.socket.onmessage = (e) => {
-            // console.log(e);
             if (!('data' in e))
                 return;
             const data = JSON.parse(e.data);
@@ -274,29 +253,28 @@ export class Lobby
             else if (data.type === 'users_list'){
                 // Je ne sais pas si on doit faire quelque chose ici
             }
-            else {
-                const rooms = data;
-                // console.log(rooms);
-                // console.log(this.dom_rooms);
-                var options_rooms = this.dom_rooms && this.dom_rooms.options;
-                // this.dom_rooms.innerHTML = "";
-                for (let i = this.dom_rooms.length - 1; i >= 0; i--) {
-                    this.dom_rooms.remove(i);
-                  }
-                if (options_rooms && rooms && rooms.length > 0) {
+            else if (data.type === 'rooms') {
+                const rooms = data.room;
+                const selectElement = document.getElementById('rooms');
+
+                for (let i = selectElement.options.length - 1; i >= 0; i--) {
+                    selectElement.remove(i);
+                }
+
+                if (rooms && rooms.length > 0) {
                     rooms.forEach((room) => {
-                        // console.log(room);
                         var option = document.createElement("option");
                         option.value = room.id;
-                        let string = room.id.substring(0,5)
-                        option.text = room.name  + " - " + string + "... - " + room.owner;
-                        this.dom_rooms.add(option);
+                        let string = room.id.substring(0, 5);
+                        option.text = `${room.name} - ${string}... - ${room.owner}`;
+                        selectElement.add(option);
                     });
+                } else {
+                    var noRoomsOption = document.createElement("option");
+                    noRoomsOption.text = "No rooms available";
+                    selectElement.add(noRoomsOption);
                 }
-                // console.log(this.dom_rooms);
-                if (rooms.length > 0)
-                    this.dom_rooms.size = rooms.length;
-            };
+            }
         }
 
         if (this.socket.readyState === 1){
@@ -312,9 +290,6 @@ export class Lobby
                 type: 'tournament_registered',
             }));
         }
-        // this.socket.onclose = (e) => {
-
-        // };
     }
 
     tournament_click() {
