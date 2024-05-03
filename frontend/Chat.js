@@ -14,7 +14,7 @@ export class Chat{
 
 	events(isPopState){
         if (!isPopState)
-            window.history.pushState({page: '/profile/transchat/general_chat/'}, '', '/transchat/general_chat/');
+            window.history.pushState({page: '/transchat/general_chat/'}, '', '/transchat/general_chat/');
         this.dom_input = document.querySelector('#chat-message-input');
 		this.dom_chatlog = document.querySelector('#chat-log');
 		this.dom_submit = document.querySelector('#chat-message-submit');

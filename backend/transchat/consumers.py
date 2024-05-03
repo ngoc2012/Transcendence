@@ -22,10 +22,11 @@ class ChatConsumer(WebsocketConsumer):
 
     def disconnect(self, close_code):
         # Leave room group
-        # user = PlayersModel.objects.get(login=self.scope['state']['username'])
-        # room = Room.objects.get(room_name=self.scope['state']['room'])
-        # room.users.remove(user)
-        # room.save()
+        user = PlayersModel.objects.get(login=self.scope['state']['username'])
+        room = Room.objects.get(room_name=self.scope['state']['room'])
+        room.users.remove(user)
+        room.save()
+        async_to_sync(self.channel_layer.group_send)(self.room_group_name, {"type": "update"})
         async_to_sync(self.channel_layer.group_discard)(
             self.room_group_name, self.channel_name
         )
@@ -80,12 +81,17 @@ class ChatConsumer(WebsocketConsumer):
 
     # Receive message from WebSocket
     def receive(self, text_data):
-        print(text_data)
         if json.loads(text_data)["type"] == 'connection':
             if self.scope['state']['username'] == '':
                 if json.loads(text_data)['type'] == 'connection':
                     self.scope['state']['username'] = json.loads(text_data)['user']
                     self.scope['state']['room'] = 'general_chat'
+                    room = Room.objects.get(room_name='general_chat')
+                    try:
+                        room.users.get(login=self.scope['state']['username'])
+                    except PlayersModel.DoesNotExist:
+                        room.users.add(PlayersModel.objects.get(login=self.scope['state']['username']))
+                        room.save()
                     async_to_sync(self.channel_layer.group_send)(self.room_group_name, {"type": "update"})
                     return
         data = {
@@ -143,7 +149,8 @@ class ChatConsumer(WebsocketConsumer):
                 room.users.add(PlayersModel.objects.get(login=self.scope['state']['username']))
                 room.save();
         queryset = Room.objects.get(room_name=self.room_name).users.all()
-        self.send(json.dumps({'type': 'update', 'users': list(queryset.values("login"))}))
+        queryseturl = Room.objects.get(room_name=self.room_name).users.all().values("avatar")
+        self.send(json.dumps({'type': 'update', 'users': list(queryset.values("login")), 'pictures': list(queryseturl)}))
 
     def whisper(self, event):
         message = event['message']

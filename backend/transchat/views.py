@@ -18,6 +18,11 @@ def lobby(request):
                 response.status_code = 401
                 return render(request, 'chat_signup.html', {"username": username})
     if request.method == 'POST':
+        try:
+            Room.objects.get(room_name='general_chat')
+        except Room.DoesNotExist:
+            room = Room(room_name='general_chat')
+            room.save()
         if 'username' in request.POST:
             username = request.POST['username']
             request.session['user'] = username
@@ -31,7 +36,6 @@ def chatroom(request, room_name):
         new_room = Room(room_name=room_name)
         new_room.save()
     user = PlayersModel.objects.get(login=request.session['user'])
-    print(room_name)
     try:
         room = Room.objects.get(room_name=room_name)
         room.users.add(user)
