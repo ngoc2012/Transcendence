@@ -12,6 +12,8 @@ export class Lobby
         this.game = null;
         this.tournament = null;
         this.ws = null;
+        this.socketTour1 = null;
+        this.socketTour2 = null;
     }
 
     events(isPopState) {
@@ -20,16 +22,20 @@ export class Lobby
             this.main.lobby.game.close_room();
             this.main.lobby.game = null;
         }
+
         this.main.checkcsrf();
+
         this.main.set_chat(this.main.login);
         if (this.main.login != '') {
             this.rooms_update();
         }
+
+        if (!isPopState)
+            window.history.pushState({page: '/'}, '', '/');
+
         if (this.listenersOK) {
             return;
         }
-        if (!isPopState)
-            window.history.pushState({page: '/'}, '', '/');
 
         this.dom_rooms = document.getElementById("rooms");
         this.dom_tournament = document.getElementById("tournament");
@@ -57,10 +63,11 @@ export class Lobby
         this.listenersOK = true;
     }
 
+    // 2FA Tournament
     eventsCallback(tourid) {
         console.log(tourid)
         this.tournament = new Tournament(this.main, tourid);
-        this.main.load('/tournament', () => this.tournament.eventsCallback(tourid));
+        this.main.load('/tournament/local/start', () => this.tournament.localBack(false));
     }
 
 	start_chat(){
@@ -94,7 +101,6 @@ export class Lobby
     }
 
     new_game(game) {
-        // console.log(game);
         if (this.main.login === '')
         {
             this.main.set_status('Please login or sign up');
@@ -154,6 +160,7 @@ export class Lobby
             this.main.set_status('Please login or sign up');
             return;
         }
+
         if (this.dom_rooms.selectedIndex === -1) {
             this.main.set_status('Select a game');
             return;
@@ -207,7 +214,6 @@ export class Lobby
     }
 
     pong_game(info) {
-        // console.log(info);
         this.quit();
         this.game = new Pong(this.main, this, info);
         this.main.load('/pong', () => this.game.init());
@@ -215,7 +221,6 @@ export class Lobby
 
     rooms_update() {
         if (this.socket === -1) {
-            // console.log('New lobby socket');
             this.socket = new WebSocket(
                 'wss://'
                 + window.location.host
@@ -228,9 +233,9 @@ export class Lobby
                 type: "authenticate",
                 token: this.ws,
             }));
-            this.socket.send(JSON.stringify({
-                type: 'tournament_registered',
-            }));
+            // this.socket.send(JSON.stringify({
+            //     type: 'tournament_registered',
+            // }));
         };
 
         this.socket.onmessage = (e) => {
@@ -284,13 +289,12 @@ export class Lobby
                 type: "authenticate",
                 token: this.ws,
             }));
-            this.socket.send(JSON.stringify({
-                type: 'tournament_registered',
-            }));
+            // this.socket.send(JSON.stringify({
+            //     type: 'tournament_registered',
+            // }));
         }
-        // this.socket.onclose = (e) => {
 
-        // };
+
         if (this.main.chat_socket === -1){
             this.main.chat_socket = new WebSocket(
                 'wss://'
@@ -326,24 +330,50 @@ export class Lobby
             this.main.set_status('Please login or sign up');
             return;
         }
-        this.tournament = new Tournament(this.main);
-        this.main.load('/tournament', () => this.tournament.events(false));
-    }
 
-    displayTournamentLocalBack(tourID) {
-        const existingButton = document.getElementById('tournament');
+        var csrftoken = this.main.getCookie('csrftoken');
 
-        if (existingButton) {
-            const clonedButton = existingButton.cloneNode(true);
-            clonedButton.textContent = 'Tournament';
-
-            clonedButton.addEventListener('click', () => {
-                this.tournament = new Tournament(this.main, tourID);
-                this.tournament.localBack();
+        if (csrftoken) {
+            $.ajax({
+                url: '/tournament/request/',
+                method: 'GET',
+                headers: {
+                    'X-CSRFToken': csrftoken,
+                },
+                success: (response) => {
+                    console.log(response.status);
+                    if (response.status === 'not_found') {
+                        this.tournament = new Tournament(this.main);
+                        this.main.load('/tournament', () => this.tournament.events(false));
+                    } else {
+                        this.tournament = new Tournament(this.main, response.id);
+                        this.tournament.localBack();
+                    }
+                },
+                error: () => {
+                    console.log('error');
+                }
             });
-            existingButton.replaceWith(clonedButton);
         }
     }
+
+    // displayTournamentLocalBack(tourID) {
+    //     let button = document.getElementById('tournament');
+
+    //     if (button) {
+    //         button = button.cloneNode(true);
+    //         button.textContent = 'Tournament';
+
+    //         button.onclick = () => {
+    //             if (this.main.login === '') {
+    //                 this.main.set_status('Please login or sign up');
+    //                 return;
+    //             }
+    //
+    //         };
+    //         document.getElementById('tournament').replaceWith(button);
+    //     }
+    // }
 
     checkLogin() {
         if (this.main.login != '') {

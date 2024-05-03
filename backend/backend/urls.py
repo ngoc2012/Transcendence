@@ -36,6 +36,7 @@ urlpatterns = [
     path('profile/<str:username>/change_name/', views.name, name="name"),
     path('profile/<str:username>/add_friend/', views.friend, name="friend"),
     path('profile/<str:username>/change_avatar/', views.avatar, name="avatar"),
+    path('tournament/request/', views.tournament_request, name="tournament_request"),
     path('tournament/', views.tournament, name='tournament'),
     path('tournament_history/', views.tournament_history, name='tournament_history'),
     path('get_tournament_data/', views.get_tournament_data, name='get_tournament_data'),

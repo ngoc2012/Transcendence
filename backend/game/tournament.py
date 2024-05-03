@@ -59,7 +59,7 @@ def tournament_local_join_setup(request):
 
 @require_POST
 def tournament_local_join(request):
-    
+
     game_id = request.POST.get('game_id')
     if not game_id:
         return HttpResponse("Error: No game id!")
@@ -68,7 +68,7 @@ def tournament_local_join(request):
         room = RoomsModel.objects.get(id=game_id)
     except RoomsModel.DoesNotExist:
         return HttpResponse(f"Error: Room does not exist")
-    
+
     match = TournamentMatchModel.objects.filter(room=room).first()
     if not match:
         return HttpResponse(f"Error: No match found in room with id {game_id}")
@@ -94,20 +94,17 @@ def tournament_local_join(request):
 def tournament_local_result(request):
     try:
         room_id = request.POST.get("room")
-        print('room id :' + str(room_id))
         score1 = request.POST.get("score1")
         score2 = request.POST.get("score2")
 
         match = TournamentMatchModel.objects.get(room_uuid=room_id)
-        print('match.room_uuid :' + str(match.room_uuid))
         tournament = match.tournament
-        print(tournament)
 
         update_match(match, score1, score2)
         update_tournament(tournament, match, score1, score2)
         check_new_round(tournament)
         return JsonResponse({'status': 'ok'})
-        
+
     except ValueError:
         return JsonResponse({'error': 'Invalid input for scores. Please provide numeric values.'}, status=400)
     except ObjectDoesNotExist:
@@ -120,51 +117,33 @@ def tournament_local_get(request):
     tour_id = request.POST.get("id")
     if not tour_id:
         return JsonResponse({'error': 'No tournament ID provided'}, status=400)
-        
+
     try:
         tournament = TournamentModel.objects.get(id=tour_id)
 
         if tournament.rematchIP:
             return tournament_matchIP(tournament)
-        
+
         if tournament.ready == False:
             return JsonResponse({'error': 'not ready'})
-        
+
         all_participants, all_waitlist = get_tournament_data(tournament)
-        print('data ok')
-        print('all participants:')
-        print(all_participants)
-        print('all waitlist:')
-        print(all_waitlist)
 
         if len(all_participants) == 1 and not all_waitlist:
             tournament.terminated = True
             tournament.save()
             return tournament_local_end(tournament)
-        print('2 ok: not terminated')
-    
+
         all_participants = update_status(tournament, all_participants, all_waitlist)
-        print('3 ok')
-        print('all participants:')
-        print(all_participants)
-        print('all waitlist:')
-        print(all_waitlist)
         all_participants, player1, player2 = prepare_round(tournament, all_participants)
-        print('4 ok')
-        print('all participants:')
-        print(all_participants)
-        print('all waitlist:')
-        print(all_waitlist)
         room = gen_room(tournament)
-        print('5 ok')
         match = gen_match(tournament, room, player1, player2)
-        print('6 ok')
 
         move_player_to_waitlist(tournament, player1)
         move_player_to_waitlist(tournament, player2)
 
         player1Name, player2Name = check_alias(match, player1, player2)
-        
+
         if player1 and player2:
             return JsonResponse({
                 'name': tournament.name,
@@ -201,7 +180,7 @@ def tournament_add_user(request):
             return add_local_player(tournament, login)
         else:
             return add_user_player(request, tournament, login, password)
-        
+
     except json.JSONDecodeError:
         return JsonResponse({'error': 'Invalid JSON'}, status=400)
 
@@ -210,10 +189,10 @@ def tournament_2FAback(request):
     login = request.session.get('login2FA', None)
     if not id or not login:
         return JsonResponse({'error': 'Session data missing or incomplete'}, status=400)
-    
+
     if login != request.POST.get('login'):
         return JsonResponse({'error': 'Unauthorized access'}, status=403)
-    
+
     try:
         tournament = TournamentModel.objects.get(id=id)
         user = User.objects.get(login=login)
@@ -227,7 +206,7 @@ def tournament_2FAback(request):
     all_participants = get_tournament_participants(tournament)
     participants_data = [
     {'login': login} for login in all_participants if login != tournament.owner.login]
-    
+
     return JsonResponse({'participants': participants_data, 'id': tournament.id})
 
 
@@ -251,7 +230,7 @@ def tournament_local_verify(request):
 
         if not id:
             return JsonResponse({'error': 'Missing id'}, status=400)
-        
+
 
         tournament = TournamentModel.objects.get(id=id)
         tournament.ready = True
@@ -259,7 +238,7 @@ def tournament_local_verify(request):
 
         if not tournament.owner == request.user:
             return JsonResponse({'error': 'Owner not found'}, status=404)
-        
+
         name = tournament.name
         url = f"http://blockchain:9000/add_tournament/{name}"
         response = requests.post(url)
@@ -270,7 +249,7 @@ def tournament_local_verify(request):
 
         for participant in tournament.participantsLocal:
             add_player_to_blockchain(tournament.name, participant)
-        
+
     except json.JSONDecodeError as e:
         return JsonResponse({'error': f'Error decoding JSON: {str(e)}'}, status=400)
     except TournamentModel.DoesNotExist:
@@ -286,7 +265,7 @@ def tournament_local_verify(request):
         return JsonResponse({'error': str(e)}, status=400)
     except Exception as e:
         return JsonResponse({'error': 'An unexpected error occurred'}, status=500)
-    
+
     return JsonResponse({'message': 'Done', 'id': tournament.id})
 
 # SECONDARY METHODS
@@ -300,7 +279,6 @@ def get_player(player, is_local):
         return player if is_local else User.objects.get(login=player)
 
 def refresh_participants(tournament):
-    print('enter refresh particpants')
     tournament.participants.add(*list(tournament.waitlist.all()))
     tournament.waitlist.clear()
 
@@ -343,13 +321,12 @@ def update_status(tournament, all_participants, all_waitlist):
         tournament.final = True
 
     if tournament.newRound:
-        print('update status: new round entering')
         if len(all_participants) % 2 != 0:
             random_participant = random.choice(all_participants)
             all_participants.remove(random_participant)
             move_player_to_waitlist(tournament, random_participant)
         tournament.newRound = False
-    
+
     tournament.save()
     return all_participants
 
@@ -369,8 +346,6 @@ def prepare_round(tournament, all_participants):
     tournament.total_matches += 1
     tournament.save()
     random.shuffle(all_participants)
-    print('shuffled')
-    print(all_participants)
     player1 = all_participants[0]
     player2 = all_participants[1]
     return all_participants, player1, player2
@@ -396,7 +371,7 @@ def tournament_matchIP(tournament):
         player2 = last_match.player2Local
     else:
         player2 = last_match.player2.login
-    
+
     player1Name, player2Name = check_alias(last_match, player1, player2)
 
     response_data = {
@@ -463,13 +438,6 @@ def gen_match(tournament, room, player1, player2):
     player1_is_local = player1 in tournament.participantsLocal
     player2_is_local = player2 in tournament.participantsLocal
 
-    print(tournament.participantsLocal)
-
-    print(player1)
-    print(player1_is_local)
-    print(player2)
-    print(player2_is_local)
-
     if player1_is_local and player2_is_local:
         match = TournamentMatchModel.objects.create(
                 tournament=tournament,
@@ -482,7 +450,7 @@ def gen_match(tournament, room, player1, player2):
                 match_number=tournament.total_matches,
                 player1isLocal=True,
                 player2isLocal=True)
-    
+
     elif player1_is_local and not player2_is_local:
         match = TournamentMatchModel.objects.create(
                 tournament=tournament,
@@ -528,12 +496,12 @@ def add_local_player(tournament, login):
         if login in tournament.participantsLocal:
             return JsonResponse({'error': f'Player {login} already added to the tournament'}, status=400)
         return JsonResponse({'error': f'Player {login} already exists'}, status=400)
-    
+
     except User.DoesNotExist:
         if login not in tournament.participantsLocal:
             tournament.participantsLocal.append(login)
             tournament.save()
-        
+
     return JsonResponse({'success': True, 'login': login, 'local': True})
 
 def add_user_player(request, tournament, login, password):
@@ -541,7 +509,7 @@ def add_user_player(request, tournament, login, password):
         user = User.objects.get(login=login)
         if not user.check_password(password):
             return JsonResponse({'error': f'Player {login} password is incorrect'}, status=400)
-        
+
         if user in tournament.participants.all():
             return JsonResponse({'error': f'Player {login} already added to the tournament'}, status=400)
 
@@ -551,13 +519,13 @@ def add_user_player(request, tournament, login, password):
             tournament.callback = True
             tournament.save()
             return JsonResponse({'success': 'twofa', 'login': login, 'name': user.name, 'email': user.email})
-        
+
         else:
             tournament.participants.add(user)
             tournament.save()
 
         return JsonResponse({'success': True, 'login': login, 'local': False})
-    
+
     except User.DoesNotExist:
         return JsonResponse({'error': f'Player {login} not found'}, status=400)
 
@@ -583,7 +551,7 @@ def update_match(match, score1, score2):
         else:
             match.winner = match.player2
             winblock = match.player2.login
-    
+
     match.save()
     if match.player1isLocal:
         blockplayer1 = match.player1Local
@@ -646,81 +614,3 @@ def check_new_round(tournament):
         tournament.newRound = True
         refresh_participants(tournament)
     tournament.save()
-
-    # 42 API
-
-# @require_POST
-# def tournament_login42(request):
-#     try:
-#         id = request.POST.get("id")
-#         if not id:
-#             return JsonResponse({'error': 'Missing tournament ID'}, status=400)
-
-#         state = uuid.uuid4().hex
-#         request.session['oauth_state_tournament'] = state
-#         request.session['tour_id'] = id
-
-#         client_id = 'u-s4t2ud-bda043967d92d434d1d6c24cf1d236ce0c6cc9c718a9198973efd9c5236038ed'
-#         redirect_uri = quote('https://127.0.0.1:8080/callback/')
-#         # scope = 'public'
-#         authorize_url = f'https://api.intra.42.fr/oauth/authorize?client_id={client_id}&redirect_uri={redirect_uri}&response_type=code&state={state}&prompt=login'
-
-#         return JsonResponse({'url': authorize_url})
-    
-#     except KeyError as e:
-#         return JsonResponse({'error': f'Missing key in request: {str(e)}'}, status=400)
-#     except Exception as e:
-#         return JsonResponse({'error': f'An error occurred: {str(e)}'}, status=500)
-    
-# def tournament_add_user42(user_data, request):
-#     if 'login' not in user_data or 'email' not in user_data:
-#         return JsonResponse({'error': 'Missing required data'}, status=400)
-
-#     try:
-#         user = User.objects.get(login=user_data['login'])
-#     except User.DoesNotExist:
-#         try:
-#             user = User.objects.create_user(
-#                 username=user_data['login'],
-#                 email=user_data['email'],
-#                 password='',
-#                 name=user_data.get('usual_full_name', '')
-#             )
-#         except (ValidationError, IntegrityError) as e:
-#             return JsonResponse({'error': str(e)}, status=400)
-
-#     try:
-#         tournament_id = request.session.get('tour_id')
-#         if not tournament_id:
-#             return JsonResponse({'error': 'Tournament missing'}, status=400)
-        
-#         tournament = TournamentModel.objects.get(id=tournament_id)
-#     except TournamentModel.DoesNotExist:
-#         return JsonResponse({'error': 'Tournament not found'}, status=404)
-
-#     tournament.participants.add(user)
-#     tournament.callback = True
-#     tournament.save()
-    
-#     return render(request, 'index.html', {'from_add_user': 'true', 'id': tournament_id})
-
-# @require_POST
-# def tournament_callback42(request):
-#     id = request.POST.get('tourid')
-#     if not id:
-#         return JsonResponse({'error': 'Missing tournament ID'}, status=400)
-    
-#     try:
-#         tournament = TournamentModel.objects.get(id=id)
-#     except ObjectDoesNotExist:
-#         return JsonResponse({'error': 'Tournament not found'}, status=404)
-    
-#     print(tournament.name)
-
-#     # tournament.callback = False
-#     tournament.save()
-#     all_participants = get_tournament_participants(tournament)
-#     print(all_participants)
-
-#     participants_data = [{'login': login} for login in all_participants]
-#     return  JsonResponse({'participants': participants_data, 'id': tournament.id})
