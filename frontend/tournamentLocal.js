@@ -90,7 +90,7 @@ export class localTournament {
                 const hr = document.createElement('hr');
                 container.appendChild(hr);
             }
-        });    
+        });
     }
 
     joinMatch(roomId) {

@@ -29,14 +29,17 @@ def get_user_from_token(token):
     except(get_user_model().DoesNotExist) as e:
         return None
 
-@sync_to_async
+@database_sync_to_async
 def room_list(rooms):
-    return json.dumps([
+    rooms_data = [
         {
-            "id": str(i),
-            "name": i.name,
-            "owner": i.player0.login,
-            } for i in rooms])
+            "id": str(room.id),
+            "name": room.name,
+            "owner": room.player0.login,
+        } for room in rooms
+    ]
+    global_data = {"type": "rooms", "room": rooms_data}
+    return json.dumps(global_data)
 
 @sync_to_async
 def close_connection(data):
@@ -65,10 +68,6 @@ def get_match_by_room(room):
 @database_sync_to_async
 def get_connected_players(connected_user_ids):
     return list(PlayersModel.objects.filter(id__in=connected_user_ids).values('id', 'login', 'name'))
-def check_player_in_tournament(player):
-    tournament = TournamentModel.objects.filter(
-      owner=player, terminated=False).select_related('owner').distinct().first()
-    return tournament
 
 @database_sync_to_async
 def get_tournament(tour_id):

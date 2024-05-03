@@ -11,13 +11,6 @@ function    reload(path, isPopState = false) {
         main.lobby.game.close_room();
         main.lobby.game = null;
     }
-    
-    if (main.lobby.game && main.lobby.game !== undefined)
-    {
-        main.lobby.game.quit();
-        main.lobby.game = undefined;
-    }
-    
     if (path === '/login') {
         main.load('/pages/login', () => main.log_in.events(isPopState));
     } else if (path === '/signup') {
@@ -35,7 +28,7 @@ function    reload(path, isPopState = false) {
     }
     else {
         main.load('/lobby', () => main.lobby.events(isPopState));
-    }  
+    }
 }
 
 //recupere la data obtenue du callback de l'auth 42
@@ -60,7 +53,7 @@ if (my42login !== null && my42login !== "" && my42email !== "" && my42ws != "")
 
     var dom_logout = document.getElementById('logoutButton');
     if (dom_logout) {
-        dom_logout.addEventListener('click', () => reload());
+        dom_logout.addEventListener('click', () => this.reload());
     }
 }
 
@@ -79,8 +72,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const bg = document.getElementById('dynamic-bg');
-    let color1 = [166, 192, 254]; 
-    let color2 = [246, 128, 132]; 
+    let color1 = [166, 192, 254];
+    let color2 = [246, 128, 132];
     let targetColor1 = [...color1];
     let targetColor2 = [...color2];
 
