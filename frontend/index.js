@@ -6,6 +6,7 @@ export var main = new Main();
 var reload_page = true;
 
 function    reload(path, isPopState = false) {
+    console.log(path)
     if (main.lobby.game && main.lobby.game !== null)
     {
         main.lobby.game.close_room();

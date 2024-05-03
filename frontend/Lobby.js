@@ -86,7 +86,7 @@ export class Lobby
             this.main.set_status('You must be logged in to see your profile');
             return ;
         }
-        this.main.load('/profile/' + this.main.login, () => this.main.profile.init(false));
+        this.main.load_with_data('/profile/' + this.main.login, () => this.main.profile.init(false), {'requester': this.main.login, 'user': this.main.login});
     }
 
     homebar() {
@@ -352,12 +352,19 @@ export class Lobby
     }
 
     quit() {
+        var user_list = document.getElementById('user-list');
+        if (user_list){
+            user_list.innerHTML = "<p>You must be logged<br>to see online users</p>";
+        }
         if (this.socket !== -1)
         {
             this.socket.close();
             this.socket = -1;
         }
         if (this.main.chat_socket !== -1){
+            this.main.chat_socket.send(JSON.stringify({
+                'type': 'update'
+            }));
             this.main.chat_socket.close();
             this.main.chat_socket = -1;
         }
