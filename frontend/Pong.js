@@ -429,8 +429,8 @@ export class Pong
 
     quit() {
         this.close_room();
-        this.main.history_stack.push('/');
-        window.history.pushState({}, '', '/');
+        // this.main.history_stack.push('/');
+        // window.history.pushState({}, '', '/');
         this.main.load('/lobby', () => this.lobby.events());
     }
 
@@ -464,8 +464,8 @@ export class Pong
                 this.players[i].sk.send('tour_id:' + this.id);
                 this.lobby.socketTour1 = this.players[i].sk;
             }
-            this.main.history_stack.push('/pong/' + this.room.id);
-            window.history.pushState({}, '', '/pong/' + this.room.id);
+            // this.main.history_stack.push('/pong/' + this.room.id);
+            // window.history.pushState({}, '', '/pong/' + this.room.id);
         };
 
         this.players[i].sk.onmessage = (e) => {

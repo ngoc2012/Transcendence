@@ -180,8 +180,8 @@ export class Main
                     // this.twofat = '';
                     this.secret_2fa = '';
 
-                    this.history_stack.push('/');
-                    window.history.pushState({}, '', '/');
+                    // this.history_stack.push('/');
+                    // window.history.pushState({}, '', '/');
                     this.load('/lobby', () => this.lobby.events());
 
                     var dom_log_in = document.getElementById('login');

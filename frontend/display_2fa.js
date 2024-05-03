@@ -16,7 +16,7 @@ export class display_2fa {
     }
 
     proceed() {
-        window.history.pushState({}, '', '/');
+        // window.history.pushState({}, '', '/');
         var dom_log_in = document.getElementById('login');
         if (dom_log_in) {
             dom_log_in.style.display = "none";
@@ -31,8 +31,8 @@ export class display_2fa {
         if (dom_logout) {
             dom_logout.addEventListener('click', () => this.main.logout());
         }
-        this.main.history_stack.push('/');
-        window.history.pushState({}, '', '/');
+        // this.main.history_stack.push('/');
+        // window.history.pushState({}, '', '/');
         this.main.load('/lobby', () => this.main.lobby.events());
     }
 
