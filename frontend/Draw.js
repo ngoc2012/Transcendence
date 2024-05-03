@@ -40,8 +40,6 @@ export class Draw
         this.scene.add(this.table);
 
         if (this.line) {
-            console.log("wesh line")
-
             this.scene.remove(this.line);
             this.line.geometry.dispose();
             this.line.material.dispose();
@@ -57,18 +55,7 @@ export class Draw
         this.line.position.z = 2;
         this.scene.add(this.line);
 
-
-
-
-
         const lineMaterial2 = new THREE.LineDashedMaterial({ color: 0xffffff, dashSize: 10, gapSize: 15, });
-
-        // if (this.line1[i]) {
-        //     this.scene.remove(this.line1[i]);
-        //     this.line1[i].geometry.dispose();
-        //     this.line1[i].material.dispose();
-        //     this.line1[i] = undefined;
-        // }
 
         for (let i = 0; i < 3; i++) {
 
@@ -131,7 +118,7 @@ export class Draw
 	init() {
 		// Set up the scene
         this.scene = new THREE.Scene();
-        this.scene.background = null; // Set background to transparent
+        this.scene.background = null;
       
         this.camera = new THREE.PerspectiveCamera(75,
           this.pong.room.data.WIDTH / this.pong.room.data.HEIGHT,
