@@ -39,7 +39,7 @@ export class Pong
         this.dom_team1 = document.getElementById("team1");
         this.dom_score0 = document.getElementById("score0");
         this.dom_score1 = document.getElementById("score1");
-        
+
 		this.canvas = document.getElementById('pongCanvas');
 		this.ctx = this.canvas.getContext('2d');
         this.ctx.canvas.width  = this.room.data.WIDTH;
@@ -53,7 +53,7 @@ export class Pong
             // Your code to be executed on window resize
             // console.log('Window resized to: ' + window.innerWidth + 'x' + window.innerHeight);
         });
-    
+
         window.addEventListener("beforeunload", () => {
             console.log("Are you sure you want to leave this page?");
         });
@@ -85,7 +85,7 @@ export class Pong
         this.dom_toggle_display = document.getElementById('toggle_display');
         this.dom_toggle_display_board = document.getElementById('toggle_display_board');
         this.dom_display_board = document.getElementById('display_board');
-        
+
         if (!this.localTour) {
             this.dom_local_player = document.getElementById('local_player');
             this.dom_toggle_AI = document.getElementById("toggle_AI");
@@ -109,11 +109,11 @@ export class Pong
                     this.start();
                 }
             }
-        });        
-        
+        });
+
 
         if (!this.localTour) {
-            
+
             document.addEventListener('keydown', (event) => {
                 if (["ArrowUp", "ArrowDown"].includes(event.key)) {
                     event.preventDefault();
@@ -142,7 +142,7 @@ export class Pong
                         this.set_state(0, "server");
                         break;
                 }
-                
+
                 let commands = ['up', 'down', 'left', 'right'];
                 if (event.key && event.key.length === 1)
                 {
@@ -154,7 +154,7 @@ export class Pong
                         if (index < 2 || (index >= 2 && this.power_play))
                             this.set_state(i_player, commands[index]);
                     }
-                    
+
                 }
             });
         } else {
@@ -167,7 +167,7 @@ export class Pong
                         this.set_state(0, "down");
                         break;
                 }
-                
+
                 let commands = ['up', 'down', 'left', 'right'];
                 if (event.key && event.key.length === 1)
                 {
@@ -179,7 +179,7 @@ export class Pong
                         if (index < 2)
                             this.set_state(i_player, commands[index]);
                     }
-                    
+
                 }
             });
         }
@@ -213,7 +213,7 @@ export class Pong
 		this.dom_light_x.addEventListener('input', this.draw.update_camera.bind(this.draw));
 		this.dom_light_y.addEventListener('input', this.draw.update_camera.bind(this.draw));
 		this.dom_light_z.addEventListener('input', this.draw.update_camera.bind(this.draw));
-        
+
         if (!this.localTour) {
             this.dom_new_local_player.addEventListener('click', () => {
                 this.dom_local_player.style.display = 'block';
@@ -254,6 +254,7 @@ export class Pong
                         if (this.players[i].sk !== -1)
                         {
                             this.keyboard_layout += 'olpk';
+                            this.lobby.socketTour2 = this.players[i].sk;
                         }
                         this.preMatchBox(this.localTournament.player1, this.localTournament.player2);
                     }
@@ -427,7 +428,7 @@ export class Pong
     }
 
     quit() {
-        this.close_room()
+        this.close_room();
         this.main.history_stack.push('/');
         window.history.pushState({}, '', '/');
         this.main.load('/lobby', () => this.lobby.events());
@@ -454,13 +455,14 @@ export class Pong
             + this.players[i].id
             + '/'
         );
-        
+
         if (i !== 0)
             return;
-        
+
         this.players[i].sk.onopen = (e) => {
             if (this.id) {
                 this.players[i].sk.send('tour_id:' + this.id);
+                this.lobby.socketTour1 = this.players[i].sk;
             }
             this.main.history_stack.push('/pong/' + this.room.id);
             window.history.pushState({}, '', '/pong/' + this.room.id);
@@ -522,11 +524,6 @@ export class Pong
                 this.draw.execute(data);
             }
         };
-    
-        // this.players[i].sk.onclose = (e) => {
-        //     if (!this.localTournament)
-        //         this.main.load('/lobby', () => this.lobby.events());
-        // };
     }
 
     set_state(i, e) {
@@ -540,16 +537,16 @@ export class Pong
         backdrop.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(51, 51, 51, 0.6); z-index: 99;';
         document.body.appendChild(backdrop);
         document.getElementById('pongCanvas').style.filter = 'blur(8px)';
-    
+
         let matchBox = document.createElement('div');
         matchBox.setAttribute('id', 'matchBox');
-        matchBox.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); padding: 20px; background-color: #ffffff7a; border: 2px solid #ffffff; text-align: center; z-index: 100; border-radius: 10px;';
-    
+        matchBox.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); padding: 20px; background-color: #ffffff7a; border: 2px solid #ffffff; text-align: center; z-index: 10000; border-radius: 10px;';
+
         let matchText = document.createElement('p');
         matchText.textContent = `Match can start whenever you are ready!`;
         matchText.style.cssText = 'font-family: "Poppins", sans-serif; font-weight: 400; font-style: normal; color: white;';
         matchBox.appendChild(matchText);
-    
+
         let instruct1 = document.createElement('p');
         instruct1.textContent = `${player1} controls: 'q' = up, 'a' = down`;
         instruct1.style.cssText = 'font-family: "Poppins", sans-serif; font-weight: 400; font-style: normal; color: white;';
@@ -562,7 +559,7 @@ export class Pong
         instruct2.textContent = `Press 'space' to launch the ball`;
         instruct2.style.cssText = 'font-family: "Poppins", sans-serif; font-weight: 400; font-style: normal; color: white;';
         matchBox.appendChild(instruct3);
-    
+
         let startButton = document.createElement('button');
         startButton.textContent = 'Start';
         startButton.classList.add('btn', 'btn-primary');
@@ -573,28 +570,28 @@ export class Pong
             this.pmBox = false;
         };
         matchBox.appendChild(startButton);
-    
+
         document.body.appendChild(matchBox);
     }
-    
+
 
     winnerBox(data) {
         if (this.preventWinBox || !window.location.href.includes('pong')) return;
-    
+
         if (this.localTournament) {
             this.localTournament.sendResult(data.score[0], data.score[1], this.room.id);
         }
-    
+
         let backdrop = document.createElement('div');
         backdrop.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(51, 51, 51, 0.6); z-index: 99;';
         document.body.appendChild(backdrop);
         document.getElementById('pongCanvas').style.filter = 'blur(8px)';
-    
+
         const canvas = document.getElementById('pongCanvas');
         if (canvas) {
             canvas.style.filter = 'blur(8px)';
         }
-    
+
         let winBox = document.createElement('div');
         winBox.setAttribute('id', 'winBox');
         winBox.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); padding: 15px; background-color: #ffffff7a; border: 2px solid #ffffff; text-align: center; z-index: 100; border-radius: 10px;';
@@ -619,7 +616,7 @@ export class Pong
             this.quit();
         };
         winBox.appendChild(backButton);
-    
+
         if (this.tournament) {
             const nextMatchButton = document.createElement('button');
             nextMatchButton.textContent = 'Next Match';
@@ -627,7 +624,7 @@ export class Pong
             nextMatchButton.style.marginLeft = '10px';
             nextMatchButton.onclick = () => {
                 removeElements();
-                this.tournament.localBack();
+                this.tournament.nextMatch();
             };
             winBox.appendChild(nextMatchButton);
         }

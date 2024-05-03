@@ -10,11 +10,19 @@ export class localTournament {
         this.player2 = '';
     }
 
-    startEvents() {
+    startEvents(isPopState) {
+        if (!isPopState)
+            window.history.pushState({page: '/tournament/local/start'}, '', '/tournament/local/start');
         this.dom_quit_tournament = document.getElementById('quit-tournament');
         this.dom_quit_tournament.addEventListener('click', () => this.tournament.quitTournament());
         this.dom_lobby_tournament = document.getElementById('Lobby');
         this.dom_lobby_tournament.style.display = 'none';
+    }
+
+    rematch(isPopState) {
+        if (!isPopState)
+            window.history.pushState({page: '/tournament/local/start'}, '', '/tournament/local/start');
+        this.getMatch();
     }
 
     getMatch() {
@@ -51,9 +59,6 @@ export class localTournament {
                 },
                 error: () => this.main.set_status('Error: Can not join game')
             });
-        } else {
-            console.log('Login required');
-            this.main.load('/pages/login', () => this.main.log_in.events());
         }
     }
 
@@ -71,7 +76,7 @@ export class localTournament {
         match.innerHTML = '<h4>Match History</h4>';
 
         var container = document.getElementById('tournament-matches');
-        
+
         container.innerHTML = '';
 
         results.forEach((match, index) => {
@@ -83,9 +88,9 @@ export class localTournament {
                 <p>Player 1: ${match.player1} (${match.p1_score})</p>
                 <p>Player 2: ${match.player2} (${match.p2_score})</p>
                 <p>Winner: ${match.winner}</p>`;
-    
+
             container.appendChild(matchElement);
-    
+
             if (index < results.length - 1) {
                 const hr = document.createElement('hr');
                 container.appendChild(hr);
@@ -111,18 +116,15 @@ export class localTournament {
                     switch (info.game) {
                         case 'pong':
                             this.game = new Pong(this.main, this.main.lobby, info, this.tournament, this, true, this.id);
-
                             this.dom_container = document.getElementById('match');
                             this.load('/pong/local', () => {
                                 this.game.init();
                             });
                             break;
-                    }                
-                },                
+                    }
+                },
                 error: () => this.main.set_status('Error: Can not join game')
             });
-        } else {
-            this.main.load('/pages/login', () => this.main.log_in.events());
         }
     }
 
@@ -140,7 +142,7 @@ export class localTournament {
                 if (jqXHR.status === 401) {
                     this.login_click();
                 }
-            }
+            },
         });
     }
 
