@@ -5,33 +5,13 @@ export var main = new Main();
 
 var reload_page = true;
 
-//recupere la data obtenue du callback de l'auth 42
-if (my42login !== null && my42login !== "" && my42email !== "" && my42ws != "")
-{
-    main.login = my42login;
-    main.email = my42email;
-    main.enable2fa = my42enable2fa
-    main.lobby.ws = my42ws
-    main.name = my42name;
-    main.dom_name.innerHTML = main.name;
-    var dom_log_in = document.getElementById('login');
-    if (dom_log_in) {
-        dom_log_in.style.display = "none";
-        dom_log_in.insertAdjacentHTML('afterend', '<button id="logoutButton" class="btn btn-danger">Log Out</button>');
-    }
-
-    var dom_signup = document.getElementById('signup');
-    if (dom_signup) {
-        dom_signup.style.display = "none";
-    }
-
-    var dom_logout = document.getElementById('logoutButton');
-    if (dom_logout) {
-        dom_logout.addEventListener('click', () => this.reload());
-    }
-}
-
 function    reload(path, isPopState = false) {
+    if (main.lobby.game && main.lobby.game !== null)
+    {
+        main.lobby.game.close_room();
+        main.lobby.game = null;
+    }
+    
     if (main.lobby.game && main.lobby.game !== undefined)
     {
         main.lobby.game.quit();
@@ -55,7 +35,33 @@ function    reload(path, isPopState = false) {
     }
     else {
         main.load('/lobby', () => main.lobby.events(isPopState));
-    }       
+    }  
+}
+
+//recupere la data obtenue du callback de l'auth 42
+if (my42login !== null && my42login !== "" && my42email !== "" && my42ws != "")
+{
+    main.login = my42login;
+    main.email = my42email;
+    main.enable2fa = my42enable2fa
+    main.lobby.ws = my42ws
+    main.name = my42name;
+    main.dom_name.innerHTML = main.name;
+    var dom_log_in = document.getElementById('login');
+    if (dom_log_in) {
+        dom_log_in.style.display = "none";
+        dom_log_in.insertAdjacentHTML('afterend', '<button id="logoutButton" class="btn btn-danger">Log Out</button>');
+    }
+
+    var dom_signup = document.getElementById('signup');
+    if (dom_signup) {
+        dom_signup.style.display = "none";
+    }
+
+    var dom_logout = document.getElementById('logoutButton');
+    if (dom_logout) {
+        dom_logout.addEventListener('click', () => reload());
+    }
 }
 
 window.addEventListener('popstate', (event) => {
