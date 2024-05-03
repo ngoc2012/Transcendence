@@ -11,8 +11,6 @@ export class localTournament {
     }
 
     startEvents(isPopState) {
-        if (!isPopState)
-            window.history.pushState({page: '/tournament/local/start'}, '', '/tournament/local/start');
         this.dom_quit_tournament = document.getElementById('quit-tournament');
         this.dom_quit_tournament.addEventListener('click', () => this.tournament.quitTournament());
         this.dom_lobby_tournament = document.getElementById('Lobby');
@@ -20,8 +18,6 @@ export class localTournament {
     }
 
     rematch(isPopState) {
-        if (!isPopState)
-            window.history.pushState({page: '/tournament/local/start'}, '', '/tournament/local/start');
         this.getMatch();
     }
 

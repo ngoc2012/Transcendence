@@ -35,7 +35,7 @@ export class Signup
 
         let checkbox = this.dom_enable2fa.checked;
         let csrftoken = this.main.getCookie('csrftoken');
-        
+
         $.ajax({
             url: '/new_player/',
             method: 'POST',
@@ -66,7 +66,10 @@ export class Signup
                     var dom_signup = document.getElementById('signup');
                     if (dom_signup) {
                         dom_signup.style.display = "none";
-                        dom_signup.insertAdjacentHTML('afterend', '<button id="logoutButton" class="btn btn-danger">Log Out</button>');
+                        dom_logout = document.getElementById('logoutButton');
+                        if (!dom_logout) {
+                            dom_signup.insertAdjacentHTML('afterend', '<button id="logoutButton" class="btn btn-danger">Log Out</button>');
+                        }
                     }
 
                     var dom_logout = document.getElementById('logoutButton');
@@ -92,7 +95,7 @@ export class Signup
             }
         })
     }
-    
+
     display2FASetup(secret) {
         let csrftoken = this.main.getCookie('csrftoken');
 
