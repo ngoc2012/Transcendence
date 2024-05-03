@@ -1,15 +1,27 @@
-<body>
-    <div class="container text-center mt-5">
-        <div id="no-invite"></div>
-
-        <h1 id="tournament-infos"></h1>
-        <h2 id="match-infos"></h2>
+<head>
+    <style>
+        .match-info {
+            background-color: rgba(255, 255, 255, 0.252); /* Semi-transparent white */
+            border-radius: 10px; /* Rounded corners */
+            padding: 15px; /* Padding inside the box */
+            margin: 10px auto; /* Spacing between each match box */
+            width: 50%; /* Sets the width of the match box */
+        }
+        hr {
+            width: 50%; /* Matches the width of match-info */
+        }
+    </style>
+</head>
+<div class="row justify-content-center">
+    <div class="col-xs-12 col-md-8 col-lg-6 text-center">
+        <h2 id="tournament-infos"></h2>
+        <h4 id="tournament-infos2"></h4>
+        <h3 id="match-infos"></h3>
         <div id="match"></div>
-        <button id="quit-tournament" class="btn btn-secondary">Quit</button>
         <div id="tournament-matches"></div>
         <button id="Lobby" class="btn btn-primary mr-2">Lobby</button>
     </div>
-
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+</div>
+<div class="row justify-content-center">
+    <button id="quit-tournament" class="btn btn-secondary">Quit</button>
+</div>

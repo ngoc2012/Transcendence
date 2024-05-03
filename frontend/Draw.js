@@ -25,21 +25,60 @@ export class Draw
             this.paddles.forEach((p) => {this.scene.remove(p);});
             this.paddles = [];
         }
+        
         // Draw table
         const tableGeometry = new THREE.BoxGeometry(
 			this.pong.room.data.WIDTH * this.ratio,
 			this.pong.room.data.HEIGHT * this.ratio,
 			2);
-        const tableMaterial = new THREE.MeshPhongMaterial({ color: 0x0077FF });
+        const tableMaterial = new THREE.MeshPhongMaterial({ color: 0x000000, opacity: 0.7 });
         this.table = new THREE.Mesh(tableGeometry, tableMaterial);
         this.table.position.z = -1;
         this.scene.add(this.table);
+
+
+        const lineGeometry = new THREE.BoxGeometry(4, this.pong.room.data.HEIGHT * this.ratio, 2);
+        const lineMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff});
+
+        const line = new THREE.Mesh(lineGeometry, lineMaterial);
         
+        line.position.x = 0;
+        line.position.y = 0;
+        line.position.z = 2;
+        
+        this.scene.add(line);
+
+
+        const lineMaterial2 = new THREE.LineDashedMaterial({ color: 0xffffff, dashSize: 10, gapSize: 15, });
+
+
+        for (let i = 0; i < 3; i++) {
+            const line1Geometry = new THREE.BufferGeometry().setFromPoints([
+                new THREE.Vector3(-(this.pong.room.data.WIDTH * this.ratio) / 4 - 1 + i, -1 * ((this.pong.room.data.HEIGHT * this.ratio) / 2), 2), // Start point (au bas de la table)
+                new THREE.Vector3(-(this.pong.room.data.WIDTH * this.ratio) / 4 - 1 + i, this.pong.room.data.HEIGHT * this.ratio / 2, 1) // End point (au milieu de la table)
+            ]);
+            const line1 = new THREE.Line(line1Geometry, lineMaterial2);
+            line1.computeLineDistances();
+            this.scene.add(line1);
+        }
+
+
+
+        for (let i = 0; i < 3; i++) {
+            const line2Geometry = new THREE.BufferGeometry().setFromPoints([
+                new THREE.Vector3((this.pong.room.data.WIDTH * this.ratio) / 4 - 1 + i, -1 * ((this.pong.room.data.HEIGHT * this.ratio) / 2), 2), // Start point
+                new THREE.Vector3((this.pong.room.data.WIDTH * this.ratio) / 4 - 1 + i, this.pong.room.data.HEIGHT * this.ratio / 2, 1) // End point
+            ]);
+            const line2 = new THREE.Line(line2Geometry, lineMaterial2);
+            line2.computeLineDistances();
+            this.scene.add(line2);
+        }
+
         // Draw barriers
         const barrierGeometry = new THREE.BoxGeometry(
 			this.pong.room.data.WIDTH * this.ratio, 2,
 			this.pong.room.data.RADIUS * this.ratio * 2);
-        const barrierMaterial = new THREE.MeshPhongMaterial({ color: 0x0077FF });
+        const barrierMaterial = new THREE.MeshPhongMaterial({ color: 0xffffff, transparent: true, opacity: 1 });
         this.barrier1 = new THREE.Mesh(barrierGeometry, barrierMaterial);
         this.barrier1.position.y = this.pong.room.data.HEIGHT * this.ratio / 2 + 1;
         this.barrier1.position.z = this.pong.room.data.RADIUS * this.ratio;
@@ -48,10 +87,11 @@ export class Draw
         this.barrier2.position.y = -this.pong.room.data.HEIGHT * this.ratio / 2 - 1;
         this.barrier2.position.z = this.pong.room.data.RADIUS * this.ratio;
         this.scene.add(this.barrier2);
-        
+
+
         // Create ball
         const ballGeometry = new THREE.SphereGeometry(this.pong.room.data.RADIUS * this.ratio, 32, 32);
-        const ballMaterial = new THREE.MeshPhongMaterial({ color: 0xFFA500 });
+        const ballMaterial = new THREE.MeshPhongMaterial({ color: 0xFFFFFF });
         this.ball = new THREE.Mesh(ballGeometry, ballMaterial);
         this.ball.position.z = this.pong.room.data.RADIUS * this.ratio / 2;
         this.scene.add(this.ball);
@@ -62,11 +102,12 @@ export class Draw
 	init() {
 		// Set up the scene
         this.scene = new THREE.Scene();
-        this.scene.background = new THREE.Color(0x808080);
+        this.scene.background = null; // Set background to transparent
+      
         this.camera = new THREE.PerspectiveCamera(75,
-			this.pong.room.data.WIDTH / this.pong.room.data.HEIGHT,
-			0.1, 1000);
-        this.renderer = new THREE.WebGLRenderer();
+          this.pong.room.data.WIDTH / this.pong.room.data.HEIGHT,
+          0.1, 1000);
+        this.renderer = new THREE.WebGLRenderer({ alpha: true });
         //this.controls = new OrbitControls( this.camera, this.renderer.domElement );
 
         this.renderer.setSize(this.pong.room.data.WIDTH * this.ratio, this.pong.room.data.HEIGHT * this.ratio);
@@ -75,9 +116,9 @@ export class Draw
         this.pong.pongThreeJS.appendChild(this.renderer.domElement);
         
         // Add lighting
-        this.ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+        this.ambientLight = new THREE.AmbientLight(0xFFFFFF, 0.8);
         this.scene.add(this.ambientLight);
-        this.directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+        this.directionalLight = new THREE.DirectionalLight(0xFFFFFF, 0.8);
         this.directionalLight.position.set(0, 1, 0);
         this.scene.add(this.directionalLight);
 
@@ -120,10 +161,10 @@ export class Draw
     }
     
     getRandomColor() {
-        var color = Math.floor(Math.random() * 16777215).toString(16);
-        while (color.length < 6)
-            color = '0' + color;
-        return '#' + color;
+        // var color = Math.floor(Math.random() * 16777215).toString(16);
+        // while (color.length < 6)
+        //     color = '0' + color;
+        return '#FFFFFF';
     }
 
 	update(data) {
@@ -145,8 +186,7 @@ export class Draw
 
         if (data.players.length === 0)
             return;
-        // console.log(this.paddles);
-        // console.log(data.players);
+
 		data.players.forEach((p, i) => {
 			this.paddles[i].position.x = (p.x - this.pong.room.data.WIDTH / 2) * this.ratio + this.pong.room.data.PADDLE_WIDTH * this.ratio / 2;
 			this.paddles[i].position.y = (this.pong.room.data.HEIGHT / 2 - p.y) * this.ratio - this.pong.room.data.PADDLE_HEIGHT * this.ratio / 2;
@@ -162,7 +202,6 @@ export class Draw
 
 	execute(data) {
         this.data = data;
-        // console.log(this.pong.ctx.canvas.width, this.pong.ctx.canvas.height, this.ratio)
 		// Clear the canvas
 		this.pong.ctx.clearRect(0, 0, this.pong.ctx.canvas.width, this.pong.ctx.canvas.height);
         // Draw table

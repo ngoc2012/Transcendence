@@ -33,10 +33,12 @@ export class localTournament {
                     this.player1 = info.player1;
                     this.player2 = info.player2;
                     var tournamentInfosDiv = document.getElementById('tournament-infos');
+                    var tournamentInfos2Div = document.getElementById('tournament-infos2');
                     var matchInfosDiv = document.getElementById('match-infos');
                     if (info.round === 'Terminated') {
-                        tournamentInfosDiv.textContent = `Tournament - ${info.name} | ${info.round}`;
-                        matchInfosDiv.textContent = `Congratulations ${info.tourwinner}, you won the tournament!`;
+                        tournamentInfosDiv.textContent = `Tournament - ${info.name}`;
+                        tournamentInfos2Div.textContent = `${info.round}`;
+                        matchInfosDiv.textContent = `Congratulations ${info.tourwinner}!`;
                         this.displayResults(info.results)
                     }
                     else {
@@ -66,24 +68,29 @@ export class localTournament {
 
         var match = document.getElementById('match');
         match.innerHTML = '';
-        match.innerHTML = '<h3>Match History</h3>';
+        match.innerHTML = '<h4>Match History</h4>';
 
         var container = document.getElementById('tournament-matches');
         
         container.innerHTML = '';
 
-        results.forEach(match => {
+        results.forEach((match, index) => {
             const matchElement = document.createElement('div');
             matchElement.className = 'match-info';
             matchElement.innerHTML = `
-                <p>Match Number: ${match.match_number}</p>
-                <p>Round Number: ${match.round_number}</p>
+                <h5>Match ${match.match_number}</h5>
+                <p>Round ${match.round_number}</p>
                 <p>Player 1: ${match.player1} (${match.p1_score})</p>
                 <p>Player 2: ${match.player2} (${match.p2_score})</p>
-                <p>Winner: ${match.winner}</p>
-                <hr>`;
+                <p>Winner: ${match.winner}</p>`;
+    
             container.appendChild(matchElement);
-        });
+    
+            if (index < results.length - 1) {
+                const hr = document.createElement('hr');
+                container.appendChild(hr);
+            }
+        });    
     }
 
     joinMatch(roomId) {
