@@ -291,7 +291,7 @@ export class Profile{
     }
 
     cn_cancel(){
-        this.main.load('/profile' + this.login, () => this.main.profile.events(false));
+        this.main.load('/profile/' + this.login, () => this.main.profile.events(false));
     }
 
     add_friend(){

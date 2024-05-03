@@ -229,7 +229,6 @@ export class Main
     refresh_user_list(users, pics){
         var user_list = document.getElementById('user-list');
         user_list.innerHTML = '';
-        console.log(window.location)
         for (let i = 0; users[i]; i++){
             let new_profile_pic = document.createElement("img");
             let new_element = document.createElement("a");

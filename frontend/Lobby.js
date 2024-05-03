@@ -25,11 +25,11 @@ export class Lobby
         if (this.main.login != '') {
             this.rooms_update();
         }
+        if (!isPopState)
+            window.history.pushState({page: '/'}, '', '/');
         if (this.listenersOK) {
             return;
         }
-        if (!isPopState)
-            window.history.pushState({page: '/'}, '', '/');
 
         this.dom_rooms = document.getElementById("rooms");
         this.dom_tournament = document.getElementById("tournament");
@@ -302,7 +302,7 @@ export class Lobby
 		    if (this.main.login != ''){
            	    this.main.chat_socket.send(JSON.stringify({
                	    'type': 'connection',
-	                   'user': this.main.login,
+	                'user': this.main.login,
                	}));
 		    }
         };
@@ -310,7 +310,6 @@ export class Lobby
        	this.main.chat_socket.onmessage = (e) => {
        	    var data = JSON.parse(e.data);
             var list_user = document.getElementById('user_list');
-            console.log(data);
             if (data.type === 'update'){
                 this.main.refresh_user_list(data.users, data.pictures);
                 return;
