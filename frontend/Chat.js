@@ -13,12 +13,14 @@ export class Chat{
 
 	events(isPopState){
         if (!isPopState)
-            window.history.pushState({page: '/transchat/general_chat/'}, '', '/transchat/general_chat/');
+            window.history.pushState({page: '/transchat/general_chat'}, '', '/transchat/general_chat');
         this.dom_input = document.querySelector('#chat-message-input');
 		this.dom_chatlog = document.querySelector('#chat-log');
 		this.dom_submit = document.querySelector('#chat-message-submit');
+		this.dom_back = document.querySelector("#back");
 		this.dom_input.addEventListener('keydown', (event) => this.press_enter(event));
 		this.dom_submit.addEventListener("click", () => this.send_message())
+		this.dom_back.addEventListener("click", () => this.close());
 		this.dom_input.focus();
 		const socket = this.socket;
 		const login = this.main.login;
@@ -42,5 +44,9 @@ export class Chat{
 		if (e.keyCode === 13) {  // enter, return
 			this.dom_submit.click();
 		}
+	}
+
+	close(){
+		this.main.load('/lobby', () => this.main.lobby.events(false));
 	}
 }

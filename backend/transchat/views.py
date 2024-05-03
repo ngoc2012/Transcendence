@@ -40,9 +40,9 @@ def chatroom(request, room_name):
         room = Room.objects.get(room_name=room_name)
         room.users.add(user)
         room.save()
-        return render(request, "chatroom.html", {"room_name": room_name, "user":user, "users": room.users.all()})
+        return render(request, "chatroom.html")
     except Room.DoesNotExist:
         new_room = Room(room_name=room_name)
         new_room.users.add(user)
         new_room.save()
-        return render(request, "chatroom.html", {"room_name": room_name, "user":user.login, "users": room.users.all()})
+        return render(request, "chatroom.html")
