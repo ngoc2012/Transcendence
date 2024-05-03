@@ -31,8 +31,7 @@ function    reload(path, isPopState = false) {
         main.load('/tournament/local', () => main.lobby.tournament.eventsLocal(isPopState));
     } else if (path === '/tournament/local/start') {
         main.load('/tournament/local/start', () => main.lobby.tournament.localTournament.startEvents(isPopState));
-    }
-    else {
+    } else {
         main.load('/lobby', () => main.lobby.events(isPopState));
     }
 }
