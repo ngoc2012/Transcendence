@@ -11,7 +11,6 @@ export class Profile{
     }
 
     events(isPopState){
-        this.main.checkcsrf();
         if (this.main.lobby.game && this.main.lobby.game !== null)
         {
             this.main.lobby.game.close_room();
@@ -28,18 +27,12 @@ export class Profile{
         this.dom_login = document.getElementById("log_in");
         this.dom_name = document.getElementById("new_name");
         this.dom_cancel = document.getElementById("back");
-        if (this.dom_alias)
-            this.dom_alias.addEventListener("click", () => this.change_alias());
-        if (this.dom_friend)
-            this.dom_friend.addEventListener("click", () => this.add_friend());
-        if (this.dom_password)
-            this.dom_password.addEventListener("click", () => this.change_password());
-        if (this.dom_email)
-            this.dom_email.addEventListener("click", () => this.change_email());
-        if (this.dom_login)
-            this.dom_login.addEventListener("click", ()=> this.change_login());
-        if (this.dom_name)
-            this.dom_name.addEventListener("click", () => this.change_name());
+        this.dom_alias.addEventListener("click", () => this.change_alias());
+        this.dom_friend.addEventListener("click", () => this.add_friend());
+        this.dom_password.addEventListener("click", () => this.change_password());
+        this.dom_email.addEventListener("click", () => this.change_email());
+        this.dom_login.addEventListener("click", ()=> this.change_login());
+        this.dom_name.addEventListener("click", () => this.change_name());
         this.dom_cancel.addEventListener("click", () => this.backtolobby());
 
     }
@@ -291,7 +284,7 @@ export class Profile{
     }
 
     cn_cancel(){
-        this.main.load('/profile/' + this.login, () => this.main.profile.events(false));
+        this.main.load('/profile' + this.login, () => this.main.profile.events(false));
     }
 
     add_friend(){

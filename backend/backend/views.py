@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse, JsonResponse
-from django.views.decorators.csrf import csrf_exempt, csrf_protect
+from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from game.models import TournamentModel, TournamentMatchModel, RoomsModel
 from accounts.models import PlayersModel
@@ -138,7 +138,7 @@ def tournament_history(request):
 @csrf_exempt
 def get_tournament_data(request):
     try:
-        tournament_name = request.GET.get('name')
+        tournament_name = request.GET.get('name')        
         if not tournament_name:
             return JsonResponse({"error": "Tournament name is required"}, status=400)
         url = f"http://blockchain:9000/tournaments/{tournament_name}"
@@ -199,7 +199,7 @@ def generate_jwt_tokens(user_id):
         'exp': datetime.now(pytz.utc) + timedelta(days=7)
     }, JWT_REFRESH_SECRET_KEY, algorithm='HS256')
 
-    return access_token, refresh_token
+    return access_token, refresh_token  
 
 @csrf_exempt
 def new_player(request):
@@ -231,7 +231,7 @@ def new_player(request):
             enable2fa = ''
         user.secret_2fa = pyotp.random_base32() if enable2fa else ''
         user.save()
-
+        
         response_data = {
             'login': user.username,
             'name': user.name,
@@ -256,7 +256,7 @@ def log_in(request):
 
     username = request.POST.get('login')
     password = request.POST.get('password')
-
+    
     if not username or not password:
         return JsonResponse({'error': 'No login or password provided!'}, status=400)
 
@@ -301,7 +301,7 @@ def login42(request):
         authorize_url = f'https://api.intra.42.fr/oauth/authorize?client_id={client_id}&redirect_uri={redirect_uri}&response_type=code&state={state}'
 
         return JsonResponse({'url': authorize_url})
-
+    
     except KeyError as e:
         return JsonResponse({'error': f'Missing key in request: {str(e)}'}, status=400)
     except Exception as e:
@@ -329,7 +329,7 @@ def callback(request):
 
         user_data = user_response.json()
 
-#       essayer de connecter sinon creer :
+#       essayer de connecter sinon creer : 
         user = authenticate(username=user_data['login'], password='')
 
         if user is not None:
@@ -374,7 +374,7 @@ def callback(request):
         enable2fa = 'false'
         user.secret_2fa = pyotp.random_base32() if enable2fa else ''
         user.save()
-
+        
         response = {
             'my42login': user.username,
             'my42name': user.name,
@@ -424,94 +424,21 @@ def verify_qrcode(request):
 
 @csrf_exempt
 def profile(request, username):
-    if request.method == 'POST':
-        if 'requester' in request.POST and 'user' in request.POST:
-            if request.POST['requester'] == request.POST['user']:
-                user = PlayersModel.objects.filter(login=username).get(login=username)
-                context = {
-                    'ownprofile': True,
-                    'id': user.id,
-                    'login': user.login,
-                    'password': user.password,
-                    'name': user.name,
-                    'alias': user.tourn_alias,
-                    'history': user.history.all(),
-                    'email': user.email,
-                    'elo': user.elo,
-                    'friends': user.friends.all(),
-                    'url': user.avatar.url,
-                    'form': UploadFileForm()
-                }
-                return render(request, 'profile.html', context)
-            else:
-                user = PlayersModel.objects.filter(login=username).get(login=username)
-                context = {
-                    'ownprofile': False,
-                    'id': user.id,
-                    'login': user.login,
-                    'password': user.password,
-                    'name': user.name,
-                    'alias': user.tourn_alias,
-                    'history': user.history.all(),
-                    'email': user.email,
-                    'elo': user.elo,
-                    'friends': user.friends.all(),
-                    'url': user.avatar.url,
-                    'form': UploadFileForm()
-                }
-                return render(request, 'profile.html', context)
-    elif 'requester' in request.GET and 'user' in request.GET:
-        if request.GET['requester'] == request.GET['user']:
-            user = PlayersModel.objects.filter(login=username).get(login=username)
-            context = {
-                'ownprofile': True,
-                'id': user.id,
-                'login': user.login,
-                'password': user.password,
-                'name': user.name,
-                'alias': user.tourn_alias,
-                'history': user.history.all(),
-                'email': user.email,
-                'elo': user.elo,
-                'friends': user.friends.all(),
-                'url': user.avatar.url,
-                'form': UploadFileForm()
-            }
-            return render(request, 'profile.html', context)
-        else:
-            user = PlayersModel.objects.filter(login=username).get(login=username)
-            context = {
-                'ownprofile': False,
-                'id': user.id,
-                'login': user.login,
-                'password': user.password,
-                'name': user.name,
-                'alias': user.tourn_alias,
-                'history': user.history.all(),
-                'email': user.email,
-                'elo': user.elo,
-                'friends': user.friends.all(),
-                'url': user.avatar.url,
-                'form': UploadFileForm()
-            }
-            return render(request, 'profile.html', context)
-    else:
-        user = PlayersModel.objects.filter(login=username).get(login=username)
-        context = {
-            'ownprofile': True,
-            'id': user.id,
-            'login': user.login,
-            'password': user.password,
-            'name': user.name,
-            'alias': user.tourn_alias,
-            'history': user.history.all(),
-            'email': user.email,
-            'elo': user.elo,
-            'friends': user.friends.all(),
-            'url': user.avatar.url,
-            'form': UploadFileForm()
-        }
-        return render(request, 'profile.html', context)
+    user = PlayersModel.objects.filter(login=username).get(login=username)
+    context = {
+        'id': user.id,
+        'login': user.login,
+        'password': user.password,
+        'name': user.name,
+        'alias': user.tourn_alias,
+        'history': user.history.all(),
+        'email': user.email,
+        'elo': user.elo,
+        'friends': user.friends.all(),
+        'url': user.avatar.url,
+        'form': UploadFileForm()
+    }
+    return render(request, 'profile.html', context)
 
 @csrf_exempt
 def alias(request, username):
@@ -529,7 +456,7 @@ def alias(request, username):
             response = HttpResponse('Alias already in use')
             response.status_code = 401
             return response
-
+        
 @csrf_exempt
 def password(request, username):
     user= PlayersModel.objects.filter(login=username).get(login=username)
@@ -660,32 +587,7 @@ def avatar(request, username):
         user.save()
         return redirect(request)
     return redirect(request)
-
-def tournament_request(request):
-    try:
-        tournament = TournamentModel.objects.filter(
-            owner=request.user,
-            terminated=False
-        ).first()
-
-        if not tournament:
-            return JsonResponse({'status': 'not_found'}, status=200)
-
-        if not tournament.ready and not tournament.callback:
-            url = f"http://blockchain:9000/delete_tournament/{tournament.name}"
-            tournament.delete()
-            return JsonResponse({'status': 'not_found'}, status=200)
-
-        return JsonResponse({
-            'status': 'active',
-            'local': True,
-            'name': tournament.name,
-            'id': tournament.id
-        }, status=200)
-
-    except Exception as e:
-        return JsonResponse({'status': 'error', 'message': 'Internal server error'}, status=500)
-
+    
 
 @require_POST
 def new_tournament(request):
@@ -694,6 +596,7 @@ def new_tournament(request):
         if TournamentModel.objects.filter(name=name).exists():
             return JsonResponse({'error': 'A tournament with the same name already exists'}, status=400)
         else:
+            print(request.user)
             owner = request.user
             tournament = TournamentModel.objects.create(name=name, game='pong', owner=owner, newRound=True, local=True)
             tournament.participants.add(owner)
@@ -714,7 +617,7 @@ def auth_view(request):
 
     username = request.POST.get('login')
     password = request.POST.get('password')
-
+    
     if not username or not password:
         return JsonResponse({'error': 'No login or password provided!'}, status=400)
 

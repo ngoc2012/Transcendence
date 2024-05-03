@@ -14,35 +14,23 @@ export class Tournament {
         this.userAdded = []
     }
 
-    events(isPopState) {
-        if (!isPopState)
-            window.history.pushState({page: '/tournament'}, '', '/tournament');
-
+    events() {
         if (this.main.lobby.game && this.main.lobby.game !== null)
         {
             this.main.lobby.game.close_room();
             this.main.lobby.game = null;
         }
-
+        
         this.main.checkcsrf();
+        window.history.pushState({page: '/tournament'}, '', '/tournament');
         this.dom_tournamentForm = document.getElementById('tournamentForm');
         if (this.dom_tournamentForm)
             this.dom_tournamentForm.addEventListener('submit', (e) => this.tournamentSubmit(e));
     }
 
-    // Followup Tournament in progress or next
-    localBack() {
-        this.localTournament = new localTournament(this.main, this.id, this);
-        this.main.load('/tournament/local/start', () => this.localTournament.rematch(false));
-    }
-
-    nextMatch() {
-        this.main.load('/tournament/local/start', () => this.localTournament.getMatch(false));
-    }
-
     eventsTwoFA(login) {
         const csrftoken = this.main.getCookie('csrftoken');
-
+    
         if (csrftoken) {
             $.ajax({
                 url: '/game/tournament/local/2FAback',
@@ -57,6 +45,8 @@ export class Tournament {
                     this.id = response.id;
                     const participants = response.participants;
                     participants.forEach(participant => {this.userAdded.push(participant.login)})
+                    this.main.history_stack.push('/tournament/local');
+                    window.history.pushState({}, '', '/tournament/local');
                     this.main.load('/tournament/local', () => this.eventsLocal());
                 },
                 error: (xhr) => {
@@ -66,16 +56,13 @@ export class Tournament {
         }
     }
 
-    eventsLocal(isPopState) {
-        if (!isPopState)
-            window.history.pushState({page: '/tournament/local'}, '', '/tournament/local');
-
+    eventsLocal() {
         var userLogin = false;
-
+        
         var startBtn = document.getElementById('startTour');
         startBtn.disabled = true;
         this.checkAdded()
-
+    
         const addPlayerBtn = document.getElementById('addPlayer');
         const playerForm = document.getElementById('playerForm');
         addPlayerBtn.addEventListener('click', () => {
@@ -88,7 +75,7 @@ export class Tournament {
             passwordField.style.display = loginCheckbox.checked ? 'block' : 'none';
             userLogin = userLogin === false ? true : false;
         });
-
+    
         const submitBtn = document.getElementById('submitBtn');
         submitBtn.addEventListener('click', (event) => {
             event.preventDefault();
@@ -109,7 +96,7 @@ export class Tournament {
             }
         });
     }
-
+    
     addUser(login, password, userLogin) {
         const csrftoken = this.main.getCookie('csrftoken');
 
@@ -130,10 +117,14 @@ export class Tournament {
                 },
                 success: (response) => {
                     if (response.success == 'twofa') {
+                        this.main.history_stack.push('/twofa');
+                        window.history.pushState({}, '', '/twofa');
                         this.main.load('/twofa', () => this.main.twofa.eventsTour(this.id, response.login, response.name, response.email));
                     } else {
                         this.userAdded.push(response.login);
-                        this.main.load('/tournament/local', () => this.eventsLocal(false));
+                        this.main.history_stack.push('/tournament/local');
+                        window.history.pushState({}, '', '/tournament/local');
+                        this.main.load('/tournament/local', () => this.eventsLocal());
                     }
                 },
                 error: (xhr) => {
@@ -158,8 +149,8 @@ export class Tournament {
                 playerEntry.classList.add('text-center');
                 playerStack.appendChild(playerEntry);
             });
-
-
+            
+    
             var startBtn = document.getElementById('startTour');
             if (startBtn) {
                 startBtn.disabled = false;
@@ -168,15 +159,15 @@ export class Tournament {
                 });
             }
         }
-    }
+    }    
 
     startTournament() {
         const csrftoken = this.main.getCookie('csrftoken');
-
+    
         const formData = {
             id: this.id
         };
-
+    
         if (csrftoken) {
             $.ajax({
                 url: '/game/tournament/local/verify/',
@@ -195,8 +186,8 @@ export class Tournament {
                 }
             });
         }
-    }
-
+    }    
+    
     tournamentSubmit(event) {
         event.preventDefault();
 
@@ -220,7 +211,9 @@ export class Tournament {
                 success: (response) => {
                     this.name = response.name;
                     this.id = response.id;
-                    this.main.load('/tournament/local', () => this.eventsLocal(false));
+                    this.main.history_stack.push('/tournament/local');
+                    window.history.pushState({}, '', '/tournament/local');
+                    this.main.load('/tournament/local', () => this.eventsLocal(response.name));
                 },
                 error: (xhr, textStatus, errorThrown) => {
                     if (xhr.status === 400) {
@@ -231,7 +224,11 @@ export class Tournament {
                     }
                 }
             });
-        }
+        } else {
+            this.history_stack.push('/login');
+            window.history.pushState({page: '/login'}, '', '/login');
+            this.main.load('/pages/login', () => this.main.log_in.events());
+        }        
     }
 
     quitTournament(force) {
@@ -243,7 +240,9 @@ export class Tournament {
             this.id = -1;
             this.game = null;
             this.lobby.tournament = null;
-            this.main.load('/lobby', () => this.main.lobby.events(false));
+            this.main.history_stack.push('/');
+            window.history.pushState({}, '', '/');
+            this.main.load('/lobby', () => this.main.lobby.events());
         } else {
             const confirmQuit = confirm("Warning: Quitting the tournament will end tournament for every player. Are you sure?");
             if (confirmQuit) {
@@ -254,7 +253,9 @@ export class Tournament {
                     this.id = -1;
                     this.game = null;
                     this.lobby.tournament = null;
-                    this.main.load('/lobby', () => this.main.lobby.events(false));
+                    this.main.history_stack.push('/');
+                    window.history.pushState({}, '', '/');
+                    this.main.load('/lobby', () => this.main.lobby.events());
             }
         }
     }
@@ -264,6 +265,13 @@ export class Tournament {
             this.localTournament.game.stop();
             this.localTournament.game.preventWinBox = true;
         }
-        this.main.load('/lobby', () => this.main.lobby.events(false));
+        this.main.history_stack.push('/');
+        window.history.pushState({}, '', '/');
+        this.main.load('/lobby', () => this.main.lobby.events());
+    }
+
+    localBack() {
+        this.localTournament = new localTournament(this.main, this.id, this);
+        this.main.load('/tournament/local/start', () => this.localTournament.getMatch());
     }
 }

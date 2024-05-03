@@ -81,7 +81,6 @@ class ChatConsumer(WebsocketConsumer):
 
     # Receive message from WebSocket
     def receive(self, text_data):
-        print(text_data)
         if json.loads(text_data)["type"] == 'connection':
             if self.scope['state']['username'] == '':
                 if json.loads(text_data)['type'] == 'connection':
@@ -95,15 +94,13 @@ class ChatConsumer(WebsocketConsumer):
                         room.save()
                     async_to_sync(self.channel_layer.group_send)(self.room_group_name, {"type": "update"})
                     return
-        elif json.loads(text_data)["type"] == 'update':
-                async_to_sync(self.channel_layer.group_send)(self.room_group_name, {"type": "update"})
-                return
         data = {
             'text_data': json.loads(text_data),
             'message': json.loads(text_data)['message'],
             'username': json.loads(text_data)['user'],
             'user': PlayersModel.objects.get(login=json.loads(text_data)['user']),
             'msg_split': str(json.loads(text_data)['message']).split(" "),
+            'room': json.loads(text_data)['room'],
             'blockcmd': False,
             'unblockcmd': False,
             'whisper': False,
@@ -128,7 +125,7 @@ class ChatConsumer(WebsocketConsumer):
                     data['whisper'] = True
         # Send message to room group
         async_to_sync(self.channel_layer.group_send)(
-            self.room_group_name, {"type": "chat_message", "message": data['user'].login + ":\n" + data['message'], "user": data['user'].login}
+            self.room_group_name, {"type": "chat_message", "message": data['user'].login + ":\n" + data['message'], "user": data['user'].login, 'room': data['room']}
         )
 
 

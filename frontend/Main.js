@@ -56,7 +56,6 @@ export class Main
     }
 
     load(page, callback) {
-        this.checkTourSockets();
         $.ajax({
             url: page + '/',
             method: 'GET',
@@ -105,7 +104,7 @@ export class Main
     login_click() {
         this.load('/pages/login', () => this.log_in.events());
     }
-
+    
     set_status(s) {this.dom_status.innerHTML = s;}
 
     signup_click() {
@@ -139,13 +138,6 @@ export class Main
         return cookieValue;
     }
 
-    checkTourSockets() {
-        if (this.lobby.socketTour1) {
-            this.lobby.socketTour1.close();
-            this.lobby.socketTour2.close();
-        }
-    }
-
     checkcsrf() {
         if (!this.csrftoken) {
             fetch('/get-csrf/')
@@ -162,7 +154,7 @@ export class Main
             method: 'POST',
             headers: {
                 'X-CSRFToken': this.csrftoken,
-            },
+            },   
             success: (info) => {
                 if (typeof info === 'string')
                 {
@@ -216,24 +208,6 @@ export class Main
         });
     }
 
-    find_profile(requester, login){
-        var csrftoken = this.getCookie('csrftoken')
-        $.ajax({
-            url: '/profile/' + login + '/',
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': csrftoken,
-            },
-            data:{
-                'user': login,
-                'requester': requester
-            },
-            success: (info) => {
-                this.load_with_data('/profile/' + login, () => this.profile.events(false), {'user':login, 'requester': requester});
-            }
-        })
-    }
-
     refresh_user_list(users, pics){
         var user_list = document.getElementById('user-list');
         user_list.innerHTML = '';
@@ -246,12 +220,10 @@ export class Main
                 new_profile_pic.src = 'static/' + pics[i].avatar;
             new_profile_pic.className = "rounded-circle mx-2";
             new_profile_pic.style = "width: 40px; height: 40px;"
-            new_element.addEventListener("click", () => this.find_profile(this.login, users[i].login));
+            new_element.href = '/profile/' + users[i].login +'/';
             new_element.innerHTML = users[i].login + '<br>';
-            new_element.style = "cursor: pointer;"
             user_list.appendChild(new_profile_pic);
             user_list.appendChild(new_element);
         }
     }
-
 }

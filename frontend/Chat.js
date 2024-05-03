@@ -9,6 +9,7 @@ export class Chat{
 		this.main.checkcsrf();
 
 		this.chat_socket = this.main.chat_socket;
+		console.log('connecting chat')
 	}
 
 	events(isPopState){
@@ -17,6 +18,7 @@ export class Chat{
         this.dom_input = document.querySelector('#chat-message-input');
 		this.dom_chatlog = document.querySelector('#chat-log');
 		this.dom_submit = document.querySelector('#chat-message-submit');
+		this.roomName = JSON.parse(document.getElementById('room-name').textContent);
 		this.dom_input.addEventListener('keydown', (event) => this.press_enter(event));
 		this.dom_submit.addEventListener("click", () => this.send_message())
 		this.dom_input.focus();
