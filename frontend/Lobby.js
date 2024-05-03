@@ -65,7 +65,6 @@ export class Lobby
 
     // 2FA Tournament
     eventsCallback(tourid) {
-        console.log(tourid)
         this.tournament = new Tournament(this.main, tourid);
         this.main.load('/tournament/local/start', () => this.tournament.localBack(false));
     }
