@@ -35,7 +35,7 @@ export class Pong
 	init(isPopState) {
 
         if (!isPopState)
-            window.history.pushState({page: '/profile/' + this.login}, '', '/profile/' + this.login);
+            window.history.pushState({page: '/pong/' + this.room.id}, '', '/pong/' + this.room.id);
 
         this.dom_game_name = document.getElementById("game_name");
         this.dom_game_name.innerHTML = this.room.name;
@@ -137,7 +137,6 @@ export class Pong
                         if (this.power_play)
                             this.set_state(0, "right");
                         break;
-                    // change side
                     case 'Tab':
                         if (this.power_play)
                             this.set_state(0, "side");

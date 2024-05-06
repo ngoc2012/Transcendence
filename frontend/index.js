@@ -3,6 +3,8 @@ import { join_game } from './game.js';
 
 export var main = new Main();
 
+var reload_page = true;
+
 function    reload(path, isPopState = false) {
     if (main.lobby.game && main.lobby.game !== null)
     {
