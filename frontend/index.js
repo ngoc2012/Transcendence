@@ -66,6 +66,35 @@ if (my42login !== null && my42login !== "" && my42email !== "" && my42ws != "")
     }
 }
 
+
+
+var dom_tournament = document.getElementById("tournament");
+dom_tournament.addEventListener("click", () => main.lobby.tournament_click());
+var dom_tournament2 = document.getElementById("tournament2");
+dom_tournament2.addEventListener("click", () => main.lobby.tournament_click());
+
+var dom_tournament_history = document.getElementById("tournament_history");
+dom_tournament_history.addEventListener("click", () => main.lobby.tournament_history_click());
+var dom_tournament_history2 = document.getElementById("tournament_history2");
+dom_tournament_history2.addEventListener("click", () => main.lobby.tournament_history_click());
+
+var dom_pong = document.getElementById("pong");
+var dom_pong2 = document.getElementById("pong2");
+dom_pong.addEventListener("click", () => main.lobby.new_game("pong"));
+dom_pong2.addEventListener("click", () => main.lobby.new_game("pong"));
+
+var dom_homebar = document.getElementById("homebar");
+var dom_homebar2 = document.getElementById("homebar2");
+dom_homebar.addEventListener("click", () => main.lobby.homebar());
+dom_homebar2.addEventListener("click", () => main.lobby.homebar());
+
+var dom_chat = document.getElementById("chat");
+var dom_chat2 = document.getElementById("chat2");
+dom_chat.addEventListener("click", () => main.lobby.start_chat());
+dom_chat2.addEventListener("click", () => main.lobby.start_chat());
+
+
+
 window.addEventListener('popstate', (event) => {
     reload(event.state.page, true);
 });
