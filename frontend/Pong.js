@@ -32,7 +32,11 @@ export class Pong
         }
     }
 
-	init() {
+	init(isPopState) {
+
+        if (!isPopState)
+            window.history.pushState({page: '/pong/' + this.room.id}, '', '/pong/' + this.room.id);
+
         this.dom_game_name = document.getElementById("game_name");
         this.dom_game_name.innerHTML = this.room.name;
         this.dom_team0 = document.getElementById("team0");
@@ -133,7 +137,6 @@ export class Pong
                         if (this.power_play)
                             this.set_state(0, "right");
                         break;
-                    // change side
                     case 'Tab':
                         if (this.power_play)
                             this.set_state(0, "side");
