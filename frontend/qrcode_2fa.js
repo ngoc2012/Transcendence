@@ -91,8 +91,8 @@ export class qrcode_2fa
                                         }
     
                                         if (!this.tournament) {
-                                            this.main.history_stack.push('/');
-                                            window.history.pushState({}, '', '/');
+                                            // this.main.history_stack.push('/');
+                                            // window.history.pushState({}, '', '/');
                                             this.main.load('/lobby', () => this.main.lobby.events());
                                         } else {
                                             this.main.load('/tournament/local', () => this.main.lobby.tournament.eventsTwoFA(this.login));
@@ -130,8 +130,8 @@ export class qrcode_2fa
 
 
     cancel() {
-        this.main.history_stack.push('/');
-        window.history.pushState({}, '', '/');
+        // this.main.history_stack.push('/');
+        // window.history.pushState({}, '', '/');
         this.main.load('/lobby', () => this.main.lobby.events());
     }
 }

@@ -179,8 +179,8 @@ export class Profile{
                 this.main.set_status(info);
                 this.email = this.dom_cenewemail;
                 this.main.email = this.email;
-                this.main.history_stack.push('/profile/' + this.login + '/');
-                window.history.pushState({}, '', '/profile/' + this.login + '/');
+                // this.main.history_stack.push('/profile/' + this.login + '/');
+                // window.history.pushState({}, '', '/profile/' + this.login + '/');
                 this.main.load('/profile/' + this.login, () => this.main.profile.events());
             },
             error: (info) =>{
