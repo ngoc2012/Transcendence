@@ -1,4 +1,6 @@
 # TO DO
 
 ## Buttons
-- Profile buttons does not always work (return lobby, tournament...)
+- Fix login42 profile
+- Fix tournament socket check
+- Fix error tournament path console

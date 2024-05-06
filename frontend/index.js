@@ -48,6 +48,7 @@ if (my42login !== null && my42login !== "" && my42email !== "" && my42ws != "")
     main.lobby.ws = my42ws
     main.name = my42name;
     main.dom_name.innerHTML = main.name;
+    main.login42 = true;
     var dom_log_in = document.getElementById('login');
     if (dom_log_in) {
         dom_log_in.style.display = "none";

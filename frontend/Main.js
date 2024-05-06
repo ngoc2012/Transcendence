@@ -38,7 +38,8 @@ export class Main
         this.profile = new Profile(this);
         this.chatBox = new chatBox(this)
         this.chat = new Chat(this, this.lobby);
-        this.chat.init()
+        this.chat.init();
+        this.login42 = false;
 
         // this.dom_home = document.getElementById("home");
         this.dom_login = document.getElementById("login");

@@ -43,6 +43,14 @@ export class Profile{
             this.dom_name.addEventListener("click", () => this.change_name());
         if (this.dom_pp)
             this.dom_pp.addEventListener("click", () => this.togglepp());
+
+        console.log(this.main.login42)
+        if (this.main.login42) {
+            this.dom_password.style.display = 'none';
+            this.dom_email.style.display = 'none';
+            this.dom_login.style.display = 'none';
+            this.dom_name.style.display = 'none';
+        }
     }
 
     togglepp() {
