@@ -73,6 +73,7 @@ def new_game(request):
     room = RoomsModel(
         game=request.POST['game'],
         name=request.POST['name'],
+        owner=request.user,
     )
     room.player0 = PlayersModel.objects.get(login=request.POST['login'])
     room.save()
@@ -109,8 +110,6 @@ def join(request):
         return (HttpResponse("Error: No game id!"))
     if 'login' not in request.POST:
         return (HttpResponse("Error: No login!"))
-    if 'game_id' not in request.POST:
-        return (HttpResponse("Error: No game id!"))
     players = cache.get(str(request.POST['game_id']) + "_all")
     if players == None:
         players = []
@@ -126,36 +125,12 @@ def join(request):
     if player == None:
         return (HttpResponse("Error: Player with login " + request.POST['login'] + " does not exist!"))
     return (JsonResponse({
-        'id': str(room),
-        'game': room.game,
-        'name': room.name,
-        'player_id': player.id,
-        'data': get_data(room.game)
+            'id': str(room),
+            'game': room.game,
+            'name': room.name,
+            'player_id': player.id,
+            'data': get_data(room.game)
         }))
-
-def delete(request):
-    if 'game_id' not in request.POST:
-        return JsonResponse({'error': 'No game id!'}, status=400)
-    if 'login' not in request.POST:
-        return JsonResponse({'error': 'No login!'}, status=400)
-
-    try:
-        player = PlayersModel.objects.get(login=request.POST['login'])
-    except PlayersModel.DoesNotExist:
-        return JsonResponse({'error': "Login '{}' does not exist!".format(request.POST['login'])}, status=404)
-
-    try:
-        room = RoomsModel.objects.get(id=request.POST['game_id'])
-    except RoomsModel.DoesNotExist:
-        return JsonResponse({'error': "Room with id '{}' does not exist!".format(request.POST['game_id'])}, status=404)
-
-    s = "Room {} - {} deleted".format(room.name, room)
-
-    if room.owner != player:
-        return JsonResponse({'error': "Login '{}' is not the owner of '{}'!".format(request.POST['login'], request.POST['game_id'])}, status=401)
-
-    # if PlayerRoomModel.objects.filter(room=room.id).count() > 0:
-    #     return JsonResponse({'error': "Someone is still playing"}, status=401)
 
 from backend.asgi import channel_layer
 from asgiref.sync import async_to_sync

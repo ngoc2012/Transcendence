@@ -1,14 +1,14 @@
 // Description: Contains functions for game logic.
 export function join_game(main, game_id)
-{   
+{
     console.log("join_game", game_id);
     var csrftoken = main.getCookie('csrftoken');
 
-    if (csrftoken) {
+    if (!csrftoken) {
         main.load('/pages/login', () => main.log_in.events());
         return;
     }
-    
+
     console.log("join_game2", game_id);
     console.log("join_game3", main.login);
     $.ajax({

@@ -576,7 +576,8 @@ export class Pong
 
 
     winnerBox(data) {
-        if (this.preventWinBox || !window.location.href.includes('pong')) return;
+        // if (this.preventWinBox || !window.location.href.includes('pong')) return;
+        if (this.preventWinBox) return;
 
         if (this.localTournament) {
             this.localTournament.sendResult(data.score[0], data.score[1], this.room.id);

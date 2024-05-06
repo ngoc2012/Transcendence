@@ -8,7 +8,6 @@ export class tournament_history {
         if (!isPopState)
             window.history.pushState({ page: '/tournament_history' }, '', '/tournament_history');
         this.dom_proceed = document.querySelector("#proceed");
-        this.dom_proceed.addEventListener("click", () => this.proceed());
         this.dom_Select = document.querySelector("#Select");
         this.dom_Select.addEventListener("click", () => this.selectTournament());
 
@@ -48,7 +47,7 @@ export class tournament_history {
                         <ul>
                         ${contenders.map(contender => contender[0]).join(', ')}
                         </ul>
-                    
+
                         <h3>Matches:</h3>
                         <ul>
                         ${matches.map(match => `<li>Match number ${match[4]} : ${match[0][0]} vs ${match[1][0]} <br>Result : ${match[2]} - ${match[3]} | Winner : ${match[5]}</li>`).join('')}
@@ -76,11 +75,4 @@ export class tournament_history {
             }
         });
     }
-
-    proceed() {
-        // this.main.history_stack.push('/');
-        // window.history.pushState({}, '', '/');
-        this.main.load('/lobby', () => this.main.lobby.events());
-    }
-
 }

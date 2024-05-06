@@ -47,14 +47,12 @@ export class Lobby
         this.dom_pong2 = document.getElementById("pong2");
         this.dom_chat = document.querySelector("#chat");
         this.dom_chat2 = document.querySelector("#chat2");
-        this.dom_delete = document.querySelector("#delete");
         this.dom_profile = document.querySelector('#profile');
         this.dom_homebar = document.querySelector('#homebar');
         this.dom_homebar2 = document.querySelector('#homebar2');
         this.dom_pong.addEventListener("click", () => this.new_game("pong"));
         this.dom_pong2.addEventListener("click", () => this.new_game("pong"));
 
-        this.dom_delete.addEventListener("click", () => this.delete_game());
         this.dom_join.addEventListener("click", () => {
             if (this.dom_rooms.selectedIndex === -1) {
                 this.main.set_status('Please select a room to join');
@@ -166,65 +164,6 @@ export class Lobby
         this.main.load('/tournament_history', () => this.main.tournament_history.events(false));
     }
 
-    delete_game() {
-
-        if (this.main.login === '') {
-            this.main.set_status('Please login or sign up');
-            return;
-        }
-
-        if (this.dom_rooms.selectedIndex === -1) {
-            this.main.set_status('Select a game');
-            return;
-        }
-
-        var csrftoken = this.main.getCookie('csrftoken');
-
-        if (csrftoken) {
-            $.ajax({
-                url: '/game/delete',
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': csrftoken,
-                },
-                data: {
-                    'game_id': this.dom_rooms.options[this.dom_rooms.selectedIndex].value,
-                    'login': this.main.login,
-                },
-                success: (response) => {
-                    if (response.token) {
-                        sessionStorage.setItem('JWTToken', response.token);
-                    }
-                    if (response.error) {
-                        const message = response.message;
-                        this.main.set_status('Error: ' + message);
-                    } else if (response.message) {
-                        const message = response.message;
-                        this.main.set_status(message);
-                        if (this.socket !== -1) {
-                            this.socket.send(JSON.stringify({
-                            type: 'update'
-                        }));
-                        }
-                    }
-                    if (this.socket !== -1) {
-                        this.socket.send(JSON.stringify({
-                            type: 'update'
-                        }));
-                    }
-                },
-                error: (xhr, textStatus, errorThrown) => {
-                    let errorMessage = "Error: Can not delete game";
-                    if (xhr.responseJSON && xhr.responseJSON.error) {
-                        errorMessage = xhr.responseJSON.error;
-                    }
-                    this.main.set_status(errorMessage);
-                }
-            });
-        } else
-            this.main.load('/pages/login', () => this.main.log_in.events(false));
-    }
-
     pong_game(info) {
         this.quit();
         this.game = new Pong(this.main, this, info);
@@ -245,19 +184,13 @@ export class Lobby
                 type: "authenticate",
                 token: this.ws,
             }));
-            // this.socket.send(JSON.stringify({
-            //     type: 'tournament_registered',
-            // }));
         };
 
         this.socket.onmessage = (e) => {
             if (!('data' in e))
                 return;
             const data = JSON.parse(e.data);
-            if (data.type === 'tournament_local_found') {
-                this.displayTournamentLocalBack(data.id);
-            }
-            else if (data.type === 'friend_request_send'){
+            if (data.type === 'friend_request_send'){
                 this.main.profile.send_request(data);
             }
             else if (data.type === 'friend_request_receive'){
@@ -301,9 +234,6 @@ export class Lobby
                 type: "authenticate",
                 token: this.ws,
             }));
-            // this.socket.send(JSON.stringify({
-            //     type: 'tournament_registered',
-            // }));
         }
 
 
@@ -367,24 +297,6 @@ export class Lobby
             });
         }
     }
-
-    // displayTournamentLocalBack(tourID) {
-    //     let button = document.getElementById('tournament');
-
-    //     if (button) {
-    //         button = button.cloneNode(true);
-    //         button.textContent = 'Tournament';
-
-    //         button.onclick = () => {
-    //             if (this.main.login === '') {
-    //                 this.main.set_status('Please login or sign up');
-    //                 return;
-    //             }
-    //
-    //         };
-    //         document.getElementById('tournament').replaceWith(button);
-    //     }
-    // }
 
     checkLogin() {
         if (this.main.login != '') {

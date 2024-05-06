@@ -157,8 +157,14 @@ def tournament_local_get(request):
     except TournamentModel.DoesNotExist as e:
         return JsonResponse({'error': 'Tournament not found'}, status=404)
     except ValueError as e:
+        if tournament:
+            url = f"http://blockchain:9000/delete_tournament/{tournament.name}"
+            tournament.delete()
         return JsonResponse({'error': str(e)}, status=400)
     except Exception as e:
+        if tournament:
+            url = f"http://blockchain:9000/delete_tournament/{tournament.name}"
+            tournament.delete()
         return JsonResponse({'error': f'An error occurred: {str(e)}'}, status=500)
 
 @require_POST

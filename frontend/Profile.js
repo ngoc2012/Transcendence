@@ -20,7 +20,7 @@ export class Profile{
 
         if (!isPopState)
             window.history.pushState({page: '/profile/' + this.login}, '', '/profile/' + this.login);
-        
+
         this.dom_alias = document.getElementById("alias");
         this.dom_friend = document.getElementById("add_friend");
         this.dom_password = document.getElementById("password");
@@ -28,6 +28,7 @@ export class Profile{
         this.dom_login = document.getElementById("log_in");
         this.dom_name = document.getElementById("new_name");
         this.dom_cancel = document.getElementById("back");
+        this.dom_pp = document.getElementById("new_pp");
         if (this.dom_alias)
             this.dom_alias.addEventListener("click", () => this.change_alias());
         if (this.dom_friend)
@@ -40,18 +41,21 @@ export class Profile{
             this.dom_login.addEventListener("click", ()=> this.change_login());
         if (this.dom_name)
             this.dom_name.addEventListener("click", () => this.change_name());
-        this.dom_cancel.addEventListener("click", () => this.backtolobby());
-
+        if (this.dom_pp)
+            this.dom_pp.addEventListener("click", () => this.togglepp());
     }
 
-    backtolobby(){
-        this.main.load('/lobby', () => this.main.lobby.events(false));
+    togglepp() {
+        var uploadpp = document.getElementById("upload_pp");
+        if (uploadpp) {
+            uploadpp.style.display = uploadpp.style.display === 'block' ? 'none' : 'block';
+        }
     }
 
     change_alias(){
         this.main.load('/profile/' + this.login + '/alias', () => this.alias_events(false));
     }
-    
+
     alias_events(isPopState){
         if (!isPopState){
             window.history.pushState({page: '/profile/' + this.login + '/alias'}, '', '/profile/' + this.login + '/alias');
@@ -219,7 +223,7 @@ export class Profile{
             this.main.set_status('Passwords do not match');
             return;
         }
-        
+
         $.ajax({
             url: '/profile/' + this.login + '/change_login/',
             method: 'POST',
@@ -348,7 +352,7 @@ export class Profile{
             },
             success: (info)=>{
                 this.main.set_status(info);
-                this.main.load('/profile/' + this.login, () => this.main.profile.events(false));            
+                this.main.load('/profile/' + this.login, () => this.main.profile.events(false));
             },
             error: (info) =>{
                 this.main.set_status(info.responseText);

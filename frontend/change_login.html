@@ -1,21 +1,27 @@
-
-<head>
-    {% load static %}
-
-    <link rel="stylesheet" href="{% static 'style.css' %}">
-</head>
-<div class="form-group">
-    <label for="new_login">Enter your new login:</label>
-    <input type="text" class="form-control" id="log_in" name="new_login">
+<div class="row justify-content-center">
+    <div class="col-xs-12 col-md-8 col-lg-6 text-center">
+      <h2>Login Change</h2>
+    </div>
+</div>
+<div class="form-group row justify-content-center">
+  <div class="col-xs-12 col-md-8 col-lg-6 text-left">
+      <label for="new_login">New Login</label>
+      <input type="text" class="form-control" id="log_in" name="new_login">
   </div>
-  <div class="form-group">
-    <label for="password">Enter your password:</label>
+</div>
+<div class="form-group row justify-content-center">
+  <div class="col-xs-12 col-md-8 col-lg-6 text-left">
+    <label for="password">Password</label>
     <input type="password" class="form-control" id="password" name="password">
   </div>
-  <div class="form-group">
-    <label for="password_repeat">Confirm your password:</label>
+</div>
+<div class="form-group row justify-content-center">
+  <div class="col-xs-12 col-md-8 col-lg-6 text-left">
+    <label for="password_repeat">Password</label>
     <input type="password" class="form-control" id="password_repeat" name="password_repeat">
   </div>
-  <button type="button" class="btn btn-primary" id="confirm">Confirm</button>
-  <button type="button" class="btn btn-secondary" id="cancel">Cancel</button>
-  
+</div>
+<div class="form-group row justify-content-center">
+  <button type="button" class="btn btn-primary mr-2" id="confirm">Confirm</button>
+  <button type="button" class="btn btn-secondary mr-2" id="cancel">Cancel</button>
+</div>

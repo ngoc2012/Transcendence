@@ -1,13 +1,15 @@
-
-<head>
-    {% load static %}
-
-    <link rel="stylesheet" href="{% static 'style.css' %}">
-</head>
-<div class="form-group">
-    <label for="alias">New alias:</label>
-    <input type="text" class="form-control" name="alias" id="alias">
-  </div>
-  <button type="button" class="btn btn-primary" id="confirm">Confirm</button>
-  <button type="button" class="btn btn-secondary" id="cancel">Cancel</button>
-  
+<div class="row justify-content-center">
+      <div class="col-xs-12 col-md-8 col-lg-6 text-center">
+        <h2>Tournament Alias</h2>
+      </div>
+</div>
+<div class="form-group row justify-content-center">
+    <div class="col-xs-12 col-md-8 col-lg-6 text-left">
+        <label for="alias">New Tournament Alias</label>
+        <input type="text" class="form-control" name="alias" id="alias">
+    </div>
+</div>
+<div class="form-group row justify-content-center">
+  <button type="button" class="btn btn-primary mr-2" id="confirm">Confirm</button>
+  <button type="button" class="btn btn-secondary mr-2" id="cancel">Cancel</button>
+</div>
