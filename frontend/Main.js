@@ -144,8 +144,8 @@ export class Main
         if (this.lobby.socketTour1) {
             this.lobby.socketTour1.close();
             this.lobby.socketTour2.close();
-            this.lobby.tournament.localTournament.game.players[0].sk = -1;
-            this.lobby.tournament.localTournament.game.players[1].sk = -1;
+            // this.lobby.tournament.localTournament.game.players[0].sk = -1;
+            // this.lobby.tournament.localTournament.game.players[1].sk = -1;
         }
     }
 
