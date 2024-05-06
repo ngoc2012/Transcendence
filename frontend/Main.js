@@ -40,17 +40,17 @@ export class Main
         this.chat = new Chat(this, this.lobby);
         this.chat.init()
 
-        this.dom_home = document.getElementById("home");
+        // this.dom_home = document.getElementById("home");
         this.dom_login = document.getElementById("login");
-        this.dom_proceed = document.getElementById("proceed");
+        // this.dom_proceed = document.getElementById("proceed");
         this.dom_signup = document.getElementById("signup");
         this.dom_status = document.getElementById("status");
-        this.dom_tournament = document.getElementById("tournament");
+        // this.dom_tournament = document.getElementById("tournament");
         this.dom_name = document.getElementById("name");
         this.dom_name.innerHTML = "Anonyme";
-        this.dom_email = document.getElementById("email");
+        // this.dom_email = document.getElementById("email");
         this.dom_container = document.getElementById("main_container");
-        this.dom_login42 = document.getElementById("login42");
+        // this.dom_login42 = document.getElementById("login42");
         this.dom_signup.addEventListener("click", () => this.signup_click());
         this.dom_login.addEventListener("click", () => this.login_click());
     }

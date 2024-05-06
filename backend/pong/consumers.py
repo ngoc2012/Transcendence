@@ -210,7 +210,7 @@ class PongConsumer(AsyncWebsocketConsumer):
                     if self.room.tournamentRoom == False:
                         if score0 > score1 and cache.get(self.k_ai) == False:
                             match0 = MatchModel(id=MatchModel.objects.count(), opp=self.player1.login, score=str(str(score0) + '-' + str(score1)), date=datetime.date.today(), result='W')
-                            match1 = MatchModel(id=MatchModel.objects.count(), opp=self.player1.login, score=str(str(score0) + '-' + str(score1)), date=datetime.date.today(), result='L')
+                            match1 = MatchModel(id=MatchModel.objects.count(), opp=self.player0.login, score=str(str(score0) + '-' + str(score1)), date=datetime.date.today(), result='L')
                             match0.save()
                             match1.save()
                             self.player0.history.add(match0)
@@ -219,7 +219,7 @@ class PongConsumer(AsyncWebsocketConsumer):
                             self.player1.save()
                         elif cache.get(self.k_ai) == False:
                             match0 = MatchModel(id=MatchModel.objects.count(), opp=self.player1.login, score=str(str(score0) + '-' + str(score1)), date=datetime.date.today(), result='L')
-                            match1 = MatchModel(id=MatchModel.objects.count(), opp=self.player1.login, score=str(str(score0) + '-' + str(score1)), date=datetime.date.today(), result='W')
+                            match1 = MatchModel(id=MatchModel.objects.count(), opp=self.player0.login, score=str(str(score0) + '-' + str(score1)), date=datetime.date.today(), result='W')
                             match0.save()
                             match1.save()
                             self.player0.history.add(match0)
