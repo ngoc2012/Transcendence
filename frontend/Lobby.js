@@ -33,26 +33,9 @@ export class Lobby
         if (!isPopState)
             window.history.pushState({page: '/'}, '', '/');
 
-        if (this.listenersOK) {
-            return;
-        }
-
         this.dom_rooms = document.getElementById("rooms");
-        // this.dom_tournament = document.getElementById("tournament");
-        // this.dom_tournament_history = document.getElementById("tournament_history");
-        // this.dom_tournament2 = document.getElementById("tournament2");
-        // this.dom_tournament_history2 = document.getElementById("tournament_history2");
         this.dom_join = document.querySelector("#join");
-        // this.dom_pong = document.getElementById("pong");
-        // this.dom_pong2 = document.getElementById("pong2");
-        // this.dom_chat = document.querySelector("#chat");
-        // this.dom_chat2 = document.querySelector("#chat2");
         this.dom_delete = document.querySelector("#delete");
-        // this.dom_profile = document.querySelector('#profile');
-        // this.dom_homebar = document.querySelector('#homebar');
-        // this.dom_homebar2 = document.querySelector('#homebar2');
-        // this.dom_pong.addEventListener("click", () => this.new_game("pong"));
-        // this.dom_pong2.addEventListener("click", () => this.new_game("pong"));
 
         this.dom_join.addEventListener("click", () => {
             if (this.dom_rooms.selectedIndex === -1) {
@@ -61,18 +44,6 @@ export class Lobby
             }
             join_game(this.main, this.dom_rooms.options[this.dom_rooms.selectedIndex].value);
         });
-		// this.dom_chat.addEventListener("click", () => this.start_chat());
-        // this.dom_chat2.addEventListener("click", () => this.start_chat());
-
-        // this.dom_profile.addEventListener("click", () => this.profile(false));
-        // this.dom_homebar.addEventListener("click", () => this.homebar());
-        // this.dom_homebar2.addEventListener("click", () => this.homebar());
-        // this.dom_tournament.addEventListener("click", () => this.tournament_click());
-        // this.dom_tournament2.addEventListener("click", () => this.tournament_click());
-        // this.dom_tournament_history.addEventListener("click", () => this.tournament_history_click());
-        // this.dom_tournament_history2.addEventListener("click", () => this.tournament_history_click());
-
-        this.listenersOK = true;
     }
 
     // 2FA Tournament
@@ -112,6 +83,7 @@ export class Lobby
     }
 
     new_game(game) {
+        console.log('new game');
         if (this.main.login === '')
         {
             this.main.set_status('Please login or sign up');
@@ -146,7 +118,7 @@ export class Lobby
                     {
                         switch (info.game) {
                             case 'pong':
-                                this.pong_game(info);
+                                this.pong_game(info, false);
                                 break;
                         }
                     }
@@ -165,10 +137,69 @@ export class Lobby
         this.main.load('/tournament_history', () => this.main.tournament_history.events(false));
     }
 
-    pong_game(info) {
+    delete_game() {
+
+        if (this.main.login === '') {
+            this.main.set_status('Please login or sign up');
+            return;
+        }
+
+        if (this.dom_rooms.selectedIndex === -1) {
+            this.main.set_status('Select a game');
+            return;
+        }
+
+        var csrftoken = this.main.getCookie('csrftoken');
+
+        if (csrftoken) {
+            $.ajax({
+                url: '/game/delete',
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrftoken,
+                },
+                data: {
+                    'game_id': this.dom_rooms.options[this.dom_rooms.selectedIndex].value,
+                    'login': this.main.login,
+                },
+                success: (response) => {
+                    if (response.token) {
+                        sessionStorage.setItem('JWTToken', response.token);
+                    }
+                    if (response.error) {
+                        const message = response.message;
+                        this.main.set_status('Error: ' + message);
+                    } else if (response.message) {
+                        const message = response.message;
+                        this.main.set_status(message);
+                        if (this.socket !== -1) {
+                            this.socket.send(JSON.stringify({
+                            type: 'update'
+                        }));
+                        }
+                    }
+                    if (this.socket !== -1) {
+                        this.socket.send(JSON.stringify({
+                            type: 'update'
+                        }));
+                    }
+                },
+                error: (xhr, textStatus, errorThrown) => {
+                    let errorMessage = "Error: Can not delete game";
+                    if (xhr.responseJSON && xhr.responseJSON.error) {
+                        errorMessage = xhr.responseJSON.error;
+                    }
+                    this.main.set_status(errorMessage);
+                }
+            });
+        } else
+            this.main.load('/pages/login', () => this.main.log_in.events(false));
+    }
+
+    pong_game(info, isPopState) {
         this.quit();
         this.game = new Pong(this.main, this, info);
-        this.main.load('/pong', () => this.game.init());
+        this.main.load('/pong', () => this.game.init(isPopState));
     }
 
     rooms_update() {

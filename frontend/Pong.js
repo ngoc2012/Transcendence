@@ -32,7 +32,11 @@ export class Pong
         }
     }
 
-	init() {
+	init(isPopState) {
+
+        if (!isPopState)
+            window.history.pushState({page: '/profile/' + this.login}, '', '/profile/' + this.login);
+
         this.dom_game_name = document.getElementById("game_name");
         this.dom_game_name.innerHTML = this.room.name;
         this.dom_team0 = document.getElementById("team0");

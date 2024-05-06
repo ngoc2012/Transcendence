@@ -120,6 +120,8 @@ class RoomsConsumer(AsyncWebsocketConsumer):
             RoomsConsumer.connected_users.remove(user_id)
             await self.broadcast_user_list()
         user = await get_player_by_id(user_id)
+        if user is None:
+            return
         user.online_status = 'Offline'
         user.save()
 
