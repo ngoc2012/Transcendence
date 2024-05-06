@@ -13,8 +13,8 @@ export class Login
         if (!isPopState)
             window.history.pushState({page: '/login'}, '', '/login');
 
-        this.dom_login = document.querySelector("#login0");
-        this.dom_password = document.querySelector("#password0");
+        this.dom_login = document.getElementById("login0");
+        this.dom_password = document.getElementById("password0");
         this.dom_log_in = document.querySelector("#log_in");
         this.dom_cancel = document.querySelector("#cancel0");
         this.dom_log_in42 = document.querySelector("#log_in42");
