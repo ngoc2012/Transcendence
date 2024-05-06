@@ -48,7 +48,7 @@ export class Lobby
         // this.dom_chat = document.querySelector("#chat");
         // this.dom_chat2 = document.querySelector("#chat2");
         this.dom_delete = document.querySelector("#delete");
-        this.dom_profile = document.querySelector('#profile');
+        // this.dom_profile = document.querySelector('#profile');
         // this.dom_homebar = document.querySelector('#homebar');
         // this.dom_homebar2 = document.querySelector('#homebar2');
         // this.dom_pong.addEventListener("click", () => this.new_game("pong"));
@@ -65,7 +65,7 @@ export class Lobby
 		// this.dom_chat.addEventListener("click", () => this.start_chat());
         // this.dom_chat2.addEventListener("click", () => this.start_chat());
 
-        this.dom_profile.addEventListener("click", () => this.profile(false));
+        // this.dom_profile.addEventListener("click", () => this.profile(false));
         // this.dom_homebar.addEventListener("click", () => this.homebar());
         // this.dom_homebar2.addEventListener("click", () => this.homebar());
         // this.dom_tournament.addEventListener("click", () => this.tournament_click());
