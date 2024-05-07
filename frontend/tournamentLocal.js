@@ -46,8 +46,8 @@ export class localTournament {
                         this.displayResults(info.results)
                     }
                     else {
-                        tournamentInfosDiv.textContent = `Tournament - ${info.name} - Round ${info.round} - Match ${info.match}`;
-                        matchInfosDiv.textContent = `${info.player1} vs ${info.player2}`;
+                        tournamentInfosDiv.textContent = `Tournament ${info.name}`;
+                        matchInfosDiv.textContent = `Round ${info.round} - Match ${info.match}`;
                     }
                     if (!this.dom_quit_tournament)
                         this.startEvents();
