@@ -656,8 +656,7 @@ def friend(request, username):
 def avatar(request, username):
     user = PlayersModel.objects.get(login=username)
     print(request.POST)
-    # print("request POST = " + str(request.POST))
-    print(request.FILES)
+    print(request.FILES['id_file'])
     user.avatar = request.FILES['id_file']
     user.save()
     return JsonResponse({"new_pp": True, "url": user.avatar.url})

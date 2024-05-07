@@ -5,3 +5,4 @@
 ~~- upload a new profile picture refresh the website (but work well)~~
 - /transchat/ cleanup
 -  random profil url that does not exist (ex https://127.0.0.1:8080/profile/dwqddwq) in direct access from url break the website
+- Add as friend button on other users profiles

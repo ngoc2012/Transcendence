@@ -296,8 +296,16 @@ export class Lobby
                 // this.main.refresh_user_list(data.users, data.pictures);
                 return;
             }
-            else
-		        document.querySelector('#chat-log').value += (data.message + '\n');
+            else{
+                let new_element = document.createElement("a");
+                new_element.addEventListener("click", () => this.main.find_profile(this.main.login, data.user));
+                new_element.style = "cursor:pointer; color: rgb(0, 128, 255); text-decoration: underline;";
+                new_element.innerHTML = data.user + ":";
+                let new_message = document.createElement("p");
+                new_message.innerHTML = data.message;
+		        document.querySelector('#chat-log').appendChild(new_element);
+                new_element.insertAdjacentHTML('afterend', "<p>" + data.message + "</p>");
+            }
        	};
         var chat_area = document.getElementById('chat_area');
         this.main.make_chat(chat_area);
