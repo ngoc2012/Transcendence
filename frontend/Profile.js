@@ -43,7 +43,6 @@ export class Profile{
             this.dom_name.addEventListener("click", () => this.change_name());
         if (this.dom_pp)
             this.dom_pp.addEventListener("click", () => this.togglepp());
-
         if (this.main.getCookie('login42')) {
             this.dom_password.style.display = 'none';
             this.dom_email.style.display = 'none';
@@ -56,10 +55,36 @@ export class Profile{
         var uploadpp = document.getElementById("upload_pp");
         if (uploadpp) {
             uploadpp.style.display = uploadpp.style.display === 'block' ? 'none' : 'block';
-            window.history.pushState({page: '/lobby'}, '', '/lobby');
         }
+        let new_form = document.createElement("form");
+        let input = document.createElement('input')
+        let button = document.createElement('input');
+        button.type = "submit";
+        button.id = 'submit_button';
+        button.className = "btn btn-primary";
+        button.value = "Submit a new profile picture";
+        input.type = 'file';
+        input.name = 'id_file';
+        input.required = true;
+        input.id = "id_file";
+        new_form.enctype = "multipart/form-data"
+        new_form.appendChild(input);
+        new_form.appendChild(button);
+        uploadpp.appendChild(new_form);
+        new_form.addEventListener('submit', (event) => this.submit_pp(event));
     }
 
+    submit_pp(event){
+        event.preventDefault();
+        var i = $(' #id_file ');
+        var form = new FormData();
+        var input = i[0].files[0];
+        form.append('id_file', input);
+        fetch('/profile/' + this.main.login + '/change_avatar/', {
+            method: 'POST',
+            body: form
+        }).then( response => response.json()).then(response => document.getElementById('picture').src = response.url.replace('/app/frontend', '/static')).then( this.main.load('/profile/' + this.main.login, () => this.main.profile.events(false)));
+    }
     change_alias(){
         this.main.load('/profile/' + this.login + '/alias', () => this.alias_events(false));
     }
