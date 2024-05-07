@@ -42,6 +42,7 @@ export class Main
         this.chat = new Chat(this, this.lobby);
         this.chat.init();
         this.tournament = new Tournament(this);
+        this.lobby.tournament = this.tournament;
         this.localTournament = new localTournament(this, null, this.tournament);
 
         // this.dom_home = document.getElementById("home");

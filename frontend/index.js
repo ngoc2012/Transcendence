@@ -62,7 +62,7 @@ if (my42login !== null && my42login !== "" && my42email !== "" && my42ws != "")
 
     var dom_logout = document.getElementById('logoutButton');
     if (dom_logout) {
-        dom_logout.addEventListener('click', () => this.reload());
+        dom_logout.addEventListener('click', () => reload());
     }
 }
 
