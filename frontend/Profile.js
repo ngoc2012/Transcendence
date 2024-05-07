@@ -76,14 +76,20 @@ export class Profile{
 
     submit_pp(event){
         event.preventDefault();
-        var i = $(' #id_file ');
+        var i = $('#id_file');
         var form = new FormData();
         var input = i[0].files[0];
         form.append('id_file', input);
         fetch('/profile/' + this.main.login + '/change_avatar/', {
             method: 'POST',
             body: form
-        }).then( response => response.json()).then(response => document.getElementById('picture').src = response.url.replace('/app/frontend', '/static')).then( this.main.load('/profile/' + this.main.login, () => this.main.profile.events(false)));
+        }).then(response => response.json())
+          .then(response => {
+              const newUrl = response.url.replace('/app/frontend', '/static');
+              document.getElementById('picture').src = newUrl;
+              document.getElementById('profile_picture').src = newUrl;
+          })
+          .then(this.main.load('/profile/' + this.main.login, () => this.main.profile.events(true)));
     }
     change_alias(){
         this.main.load('/profile/' + this.login + '/alias', () => this.alias_events(false));
