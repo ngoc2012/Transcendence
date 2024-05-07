@@ -64,7 +64,7 @@ export class twofa
                 }
             },
             error: (xhr, status, error) => {
-                console.error('Error:', error);
+                // console.error('Error:', error);
             }
         });
     }

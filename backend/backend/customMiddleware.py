@@ -6,6 +6,8 @@ from datetime import datetime, timedelta
 import jwt, pytz
 from django.core.cache import cache
 from django.http import HttpResponseRedirect
+from django.core.exceptions import ObjectDoesNotExist
+
 
 User = get_user_model()
 
@@ -34,6 +36,11 @@ class JWTMiddleware(MiddlewareMixin):
             return self.handle_refresh_token(request)
         except jwt.InvalidTokenError:
             return HttpResponseRedirect('/login/')
+        
+    def process_exception(self, request, exception):
+        print('exception')
+        if isinstance(exception, ObjectDoesNotExist):
+            return HttpResponseRedirect('/')
 
     def get_user(self, user_id):
         user = cache.get(f'user_{user_id}')

@@ -71,7 +71,6 @@ export class Lobby
 			}
 		});
 		this.main.chat = new Chat(this.main, this.main.lobby);
-        this.main.load('transchat/general_chat', () => this.main.chat.events(false));
 	}
 
     profile(){
