@@ -62,13 +62,14 @@ export class Profile{
         button.type = "submit";
         button.id = 'submit_button';
         button.className = "btn btn-primary";
-        button.value = "Submit";
+        button.value = "Submit your new profile picture";
         input.type = 'file';
         input.name = 'id_file';
         input.required = true;
         input.id = "id_file";
         new_form.enctype = "multipart/form-data"
         new_form.appendChild(input);
+        new_form.appendChild(document.createElement("br"));
         new_form.appendChild(button);
         uploadpp.appendChild(new_form);
         new_form.addEventListener('submit', (event) => this.submit_pp(event));
@@ -80,6 +81,10 @@ export class Profile{
         var form = new FormData();
         var input = i[0].files[0];
         form.append('id_file', input);
+        if (input.type.search('image') === -1){
+            this.main.set_status("Invalid image format");
+            return;
+        }
         fetch('/profile/' + this.main.login + '/change_avatar/', {
             method: 'POST',
             body: form
