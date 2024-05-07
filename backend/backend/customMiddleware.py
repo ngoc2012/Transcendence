@@ -35,10 +35,10 @@ class JWTMiddleware(MiddlewareMixin):
         except jwt.ExpiredSignatureError:
             return self.handle_refresh_token(request)
         except jwt.InvalidTokenError:
-            return HttpResponseRedirect('/login/')
+            return HttpResponseRedirect('/')
         
     def process_exception(self, request, exception):
-        print('exception')
+        print(f'Error at {request.path}: {exception}')
         if isinstance(exception, ObjectDoesNotExist):
             return HttpResponseRedirect('/')
 
@@ -69,11 +69,11 @@ class JWTMiddleware(MiddlewareMixin):
                 request.user = user
                 return None
             else:
-                return HttpResponseRedirect('/login/')
+                return HttpResponseRedirect('/')
         except jwt.ExpiredSignatureError:
-            return HttpResponseRedirect('/login/')
+            return HttpResponseRedirect('/')
         except jwt.InvalidTokenError:
-            return HttpResponseRedirect('/login/')
+            return HttpResponseRedirect('/')
 
     def generate_jwt_tokens(self, user_id):
         access_token = jwt.encode({

@@ -62,7 +62,7 @@ export class Profile{
         button.type = "submit";
         button.id = 'submit_button';
         button.className = "btn btn-primary";
-        button.value = "Submit your new profile picture";
+        button.value = "Submit";
         input.type = 'file';
         input.name = 'id_file';
         input.required = true;
