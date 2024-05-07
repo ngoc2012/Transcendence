@@ -3,6 +3,7 @@
 
 <head>
     {% load static %}
+    {% load replace_url %}
 
     <link rel="stylesheet" href="{% static 'bootstrap-4.0.0-dist/css/bootstrap.css' %}">
     <link rel="stylesheet" href="{% static 'style.css' %}">
@@ -331,8 +332,8 @@
 
   <div id="user-sidebar">
     <div class="p-3">
-        <h5 class="text-center">Online Users</h5>
-        <ul id="user-list" class="list-unstyled">
+        <h5 class="text-center">Chat</h5>
+        <ul id="chat_area" class="list-unstyled">
         </ul>
     </div>
   </div>

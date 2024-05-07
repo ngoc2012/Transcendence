@@ -29,7 +29,10 @@ export class Lobby
         if (this.main.login != '') {
             this.rooms_update();
         }
-
+        else {
+            var chat_area = document.getElementById('chat_area');
+            chat_area.innerHTML = "<p>You must be logged<br>to chat</p>";
+        }
         if (!isPopState)
             window.history.pushState({page: '/'}, '', '/');
 
@@ -289,12 +292,14 @@ export class Lobby
        	    var data = JSON.parse(e.data);
             var list_user = document.getElementById('user_list');
             if (data.type === 'update'){
-                this.main.refresh_user_list(data.users, data.pictures);
+                // this.main.refresh_user_list(data.users, data.pictures);
                 return;
             }
             else
 		        document.querySelector('#chat-log').value += (data.message + '\n');
        	};
+        var chat_area = document.getElementById('chat_area');
+        this.main.make_chat(chat_area);
     }
 
     tournament_click() {
@@ -337,9 +342,9 @@ export class Lobby
     }
 
     quit() {
-        var user_list = document.getElementById('user-list');
-        if (user_list){
-            user_list.innerHTML = "<p>You must be logged<br>to see online users</p>";
+        var chat_area = document.getElementById('chat_area');
+        if (chat_area){
+            chat_area.innerHTML = "<p>You must be logged<br>to chat</p>";
         }
         if (this.socket !== -1)
         {
