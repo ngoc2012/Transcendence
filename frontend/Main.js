@@ -9,6 +9,8 @@ import {display_2fa} from './display_2fa.js'
 import {tournament_history} from './tournament_history.js'
 import {chatBox} from './chatBox.js'
 import {Chat} from './Chat.js'
+import { Tournament } from './Tournament.js'
+import { localTournament } from './tournamentLocal.js'
 
 export class Main
 {
@@ -39,7 +41,8 @@ export class Main
         this.chatBox = new chatBox(this)
         this.chat = new Chat(this, this.lobby);
         this.chat.init();
-        this.login42 = false;
+        this.tournament = new Tournament(this);
+        this.localTournament = new localTournament(this, null, this.tournament);
 
         // this.dom_home = document.getElementById("home");
         this.dom_login = document.getElementById("login");

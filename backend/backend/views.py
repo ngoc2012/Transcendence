@@ -355,6 +355,7 @@ def callback(request):
             response = render(request, 'index.html', response)
             response.set_cookie('refresh_token', refresh_token, httponly=True, samesite='Lax', secure=True)
             response.set_cookie('access_token', access_token, httponly=True, samesite='Lax', secure=True)
+            response.set_cookie('login42', secure=True)
             cache.delete(f'user_{user.id}')
             return response
 
@@ -405,6 +406,7 @@ def logout(request):
     response.delete_cookie('access_token')
     response.delete_cookie('refresh_token')
     response.delete_cookie('sessionid')
+    response.delete_cookie('login42')
     return response
 
 

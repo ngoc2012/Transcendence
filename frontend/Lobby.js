@@ -33,6 +33,8 @@ export class Lobby
         if (!isPopState)
             window.history.pushState({page: '/'}, '', '/');
 
+        this.tournament = new Tournament(this.main);
+
         this.dom_rooms = document.getElementById("rooms");
         this.dom_join = document.querySelector("#join");
         this.dom_delete = document.querySelector("#delete");
@@ -314,7 +316,6 @@ export class Lobby
                     'X-CSRFToken': csrftoken,
                 },
                 success: (response) => {
-                    console.log(response.status);
                     if (response.status === 'not_found') {
                         this.tournament = new Tournament(this.main);
                         this.main.load('/tournament', () => this.tournament.events(false));
@@ -324,7 +325,6 @@ export class Lobby
                     }
                 },
                 error: () => {
-                    console.log('error');
                 }
             });
         }

@@ -44,8 +44,7 @@ export class Profile{
         if (this.dom_pp)
             this.dom_pp.addEventListener("click", () => this.togglepp());
 
-        console.log(this.main.login42)
-        if (this.main.login42) {
+        if (this.main.getCookie('login42')) {
             this.dom_password.style.display = 'none';
             this.dom_email.style.display = 'none';
             this.dom_login.style.display = 'none';

@@ -567,7 +567,8 @@ export class Pong
         startButton.textContent = 'Start';
         startButton.classList.add('btn', 'btn-primary');
         startButton.onclick = () => {
-            document.getElementById('pongCanvas').style.filter = '';
+            if (document.getElementById('pongCanvas'))
+                document.getElementById('pongCanvas').style.filter = '';
             document.body.removeChild(backdrop);
             document.body.removeChild(matchBox);
             this.pmBox = false;
