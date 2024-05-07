@@ -45,6 +45,10 @@ clean:
 	-docker rmi -f $$(docker images -qa)
 	-docker volume rm $$(docker volume ls -q)
 	-docker network rm $$(docker network ls -q)
+	gio trash -f backend/game/migrations/[!__init__.py]*
+	gio trash -f backend/accounts/migrations/[!__init__.py]*
+	gio trash -f backend/pong/migrations/[!__init__.py]*
+	gio trash -f backend/transchat/migrations/[!__init__.py]*
 
 	
 # gitf: git in final
