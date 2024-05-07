@@ -16,7 +16,7 @@ export class tournament_history {
     selectTournament() {
 
         const tournament_name = document.getElementById('tournamentSelect').value
-        console.log(tournament_name)
+        // console.log(tournament_name)
         const selectedTournamentElement = document.getElementById("selectedTournamentName");
         selectedTournamentElement.innerText = "Selected Tournament: " + tournament_name;
 

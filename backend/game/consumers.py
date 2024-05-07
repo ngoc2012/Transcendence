@@ -43,7 +43,7 @@ def room_list(rooms):
 
 @sync_to_async
 def close_connection(data):
-    print(data['login_id'])
+    # print(data['login_id'])
     return json.dumps({
         "type": 'close',
         "login_id": data['login_id']

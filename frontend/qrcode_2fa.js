@@ -36,7 +36,7 @@ export class qrcode_2fa
             return;
         }
         const csrftoken = this.main.getCookie('csrftoken');
-        console.log(csrftoken)
+        // console.log(csrftoken)
         if (csrftoken) {
             $.ajax({
                 url: '/verify_qrcode/',
@@ -122,7 +122,7 @@ export class qrcode_2fa
                 error: (data) => this.main.set_status(data.error)
             });
         } else {
-            console.log('no token')
+            // console.log('no token')
             // console.log('Login required');
             // this.main.load('/pages/login', () => this.main.log_in.events());
         }

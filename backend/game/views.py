@@ -77,7 +77,7 @@ def new_game(request):
     )
     room.player0 = PlayersModel.objects.get(login=request.POST['login'])
     room.save()
-    print("new_game player0 debug = " + room.player0.login)
+    # print("new_game player0 debug = " + room.player0.login)
     if room.game == 'pong':
         cache.set(str(room.id) + "_x", pong_data['PADDLE_WIDTH'] + pong_data['RADIUS'])
         cache.set(str(room.id) + "_y", pong_data['HEIGHT'] / 2)

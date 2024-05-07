@@ -16,7 +16,7 @@ function    reload(path, isPopState = false) {
     } else if (path === '/signup') {
         main.load('/pages/signup', () => main.signup.events(isPopState));
     } else if (path === '/lobby') {
-        console.log(isPopState);
+        // console.log(isPopState);
         main.load('/lobby', () => main.lobby.events(isPopState));
     } else if (path === '/') {
         main.load('/lobby', () => main.lobby.events(isPopState));

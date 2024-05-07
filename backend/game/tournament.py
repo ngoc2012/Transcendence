@@ -261,7 +261,7 @@ def tournament_local_verify(request):
     except TournamentModel.DoesNotExist:
         return JsonResponse({'error': 'Tournament not found'}, status=400)
     except requests.exceptions.RequestException as e:
-        print(f"Error calling add_tournament_route: {e}")
+        # print(f"Error calling add_tournament_route: {e}")
         return JsonResponse({'error': 'Failed to interact with blockchain'}, status=500)
     except ObjectDoesNotExist:
         return JsonResponse({'error': 'Owner not found'}, status=404)
@@ -402,7 +402,8 @@ def move_player_to_waitlist(tournament, player_login):
             tournament.waitlist.add(user)
             tournament.save()
         except User.DoesNotExist:
-            print(f"User with login {player_login} not found.")
+            pass
+            # print(f"User with login {player_login} not found.")
 
 def fetch_matches(tournament):
     matches = TournamentMatchModel.objects.filter(tournament=tournament)

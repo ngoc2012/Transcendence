@@ -122,7 +122,7 @@ export class Signup
                 }
             });
         } else {
-            console.log('Login required');
+            // console.log('Login required');
             this.main.load('/pages/login', () => this.main.log_in.events());
         }
     }
