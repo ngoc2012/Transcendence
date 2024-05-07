@@ -235,28 +235,13 @@ export class Tournament {
     }
 
     quitTournament(force) {
-        if (force) {
-            this.main.lobby.socket.send(JSON.stringify({
-                type: 'tournament-quit',
-                tour_id: this.id,
-            }));
-            this.id = -1;
-            this.game = null;
-            this.lobby.tournament = null;
-            this.main.load('/lobby', () => this.main.lobby.events(false));
-        } else {
-            const confirmQuit = confirm("Warning: Quitting the tournament will end tournament for every player. Are you sure?");
-            if (confirmQuit) {
-                    this.main.lobby.socket.send(JSON.stringify({
-                        type: 'tournament-quit',
-                        tour_id: this.id,
-                    }));
-                    this.id = -1;
-                    this.game = null;
-                    this.lobby.tournament = null;
-                    this.main.load('/lobby', () => this.main.lobby.events(false));
-            }
-        }
+        this.main.lobby.socket.send(JSON.stringify({
+            type: 'tournament-quit',
+            tour_id: this.id,
+        }));
+        this.id = -1;
+        this.game = null;
+        this.main.load('/lobby', () => this.main.lobby.events(false));
     }
 
     backToLobby() {

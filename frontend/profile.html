@@ -70,14 +70,14 @@ Your friends: <br> {% for i in friends %} {{ i.login }} - {{ i.online_status }} 
       </form>
   </div>
   <h2 class="text-center mb-4">{{ name }} Profile</h2>
-  <p>Your name: {{ name }} <i class="fa fa-pencil" aria-hidden="true" id="new_name"></i></p>
-  <p>Your login: {{ login }} <i class="fa fa-pencil" aria-hidden="true" id="log_in"></i></p>
-  <p>Your email: {{ email }} <i class="fa fa-pencil" aria-hidden="true" id="email"></i></p>
+  <p>Your Name: {{ name }} <i class="fa fa-pencil" aria-hidden="true" id="new_name"></i></p>
+  <p>Your Login: {{ login }} <i class="fa fa-pencil" aria-hidden="true" id="log_in"></i></p>
+  <p>Your Email: {{ email }} <i class="fa fa-pencil" aria-hidden="true" id="email"></i></p>
   {% if context != '' %}
     {% if alias %}
-      <p>Tournament alias: {{ alias }} <i class="fa fa-pencil" aria-hidden="true" id="alias"></i></p>
+      <p>Tournament Alias: {{ alias }} <i class="fa fa-pencil" aria-hidden="true" id="alias"></i></p>
     {% else %}
-      <p>Tournament alias: None <i class="fa fa-pencil" aria-hidden="true" id="alias"></i></p>
+      <p>Tournament Alias: None <i class="fa fa-pencil" aria-hidden="true" id="alias"></i></p>
     {% endif %}
   {% endif %}
   <button id="password" class="btn btn-primary">Password Change</button>
@@ -103,23 +103,21 @@ Your friends: <br> {% for i in friends %} {{ i.login }} - {{ i.online_status }} 
   </div>
   <hr>
 {% else %}
-  <div class="container mt-5">
-    <div class="row">
-      <div class="col-md-6 offset-md-3 mb-4">
-          <img src="{{ url|change_url }}" id="picture" alt="User Icon" class="rounded-circle profile-picture">
-          <h1 class="text-center mb-4">{{ name }} Profile</h1>
-        <p>Name: {{ name }}</p>
-        <p>Login: {{ login }}</p>
-        {% if context != '' %}
-          {% if alias %}
-            <p>Alias: {{ alias }}</p>
-          {% endif %}
-        {% endif %}
-        <p>Match history: {% if history %} {% for i in history %} {% if i.result == 'W' %} Win {% else %} Lose {% endif %} {{ i.score}} VS {{ i.opp }} | {{ i.date }} <br> {% endfor %} {% else %} No recent matches {% endif %}</p>
-      </div>
+<div class="container">
+  <div class="justify-content-center">
+    <img src="{{ url|change_url }}" id="picture" alt="User Icon" class="rounded-circle profile-picture">
+    <h2 class="text-center mb-4">{{ name }} Profile</h2>
+    <p>Name: {{ name }}</p>
+    <p>Login: {{ login }}</p>
+    {% if context != '' %}
+      {% if alias %}
+        <p>Alias: {{ alias }}</p>
+      {% endif %}
+    {% endif %}
+    <hr>
+    <div>
+      <h5>Match History</h5>
+      <p>Match history: {% if history %} {% for i in history %} {% if i.result == 'W' %} Win {% else %} Lose {% endif %} {{ i.score}} VS {{ i.opp }} | {{ i.date }} <br> {% endfor %} {% else %} No recent matches {% endif %}</p>
     </div>
-  </div>
 {% endif %}
-</div>
-</div>
 </body>
