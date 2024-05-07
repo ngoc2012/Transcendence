@@ -49,7 +49,7 @@ def hit_position(x, p0, p1):
 import requests
 
 def ai_listener(room_id, player_id):
-    print(f"AI process started for room {room_id} and player {player_id}.")
+    # print(f"AI process started for room {room_id} and player {player_id}.")
     pos = []
     delay = 0.03
     max_steps = 10
@@ -61,14 +61,14 @@ def ai_listener(room_id, player_id):
         url = "http://django:8000/pong/" + room_id + '/' + player_id + '/state'
         with requests.get(url, headers=headers, verify=False) as response:
             if response.status_code != 200:
-                print("Request failed with status code:", response.status_code)
+                # print("Request failed with status code:", response.status_code)
                 break
             if response.text == "NULL":
-                print("Room does not exist.")
+                # print("Room does not exist.")
                 break
             state = response.json()
             if int(player_id) not in state['team0'] and int(player_id) not in state['team1']:
-                print("No AI player found.")
+                # print("No AI player found.")
                 break
             if not state['started']:
                 if len(pos) > 1:
@@ -92,10 +92,10 @@ def ai_listener(room_id, player_id):
                             url = "http://django:8000/pong/" + room_id + '/' + player_id + '/' + com
                             with requests.get(url, headers=headers, verify=False) as response:
                                 if response.status_code != 200:
-                                    print("Request failed with status code:", response.status_code)
+                                    # print("Request failed with status code:", response.status_code)
                                     break
                                 if response.text == "NULL":
-                                    print("Room does not exist.")
+                                    # print("Room does not exist.")
                                     break
                                 state = response.json()
                             time.sleep(delay)
@@ -110,22 +110,22 @@ def ai_listener(room_id, player_id):
                     url = "http://django:8000/pong/" + room_id + '/' + player_id + '/' + com
                     with requests.get(url, headers=headers, verify=False) as response:
                         if response.status_code != 200:
-                            print("Request failed with status code:", response.status_code)
+                            # print("Request failed with status code:", response.status_code)
                             break
                         if response.text == "NULL":
-                            print("Room does not exist.")
+                            # print("Room does not exist.")
                             break
                         state = response.json()
                     time.sleep(delay)
                     n += 1
         if not state['ai_player']:
-            print("AI player is not active.")
+            # print("AI player is not active.")
             break
         if room_id not in ai_processus:
-            print("AI process does not exist.")
+            # print("AI process does not exist.")
             break
         time.sleep(1.0 - n * delay)
-    print(f"AI process ended for room {room_id} and player {player_id}.")
+    # print(f"AI process ended for room {room_id} and player {player_id}.")
 
 @app.route('/ai/new', methods=['POST', 'GET'])
 def new():
@@ -143,7 +143,7 @@ def delete():
     player_id = request.form.get('player_id')
     # ai_processus[room_id].join()
     del ai_processus[room_id]
-    print("AI process ended.")
+    # print("AI process ended.")
     return "Deleted " + str(room_id) + "/" + str(player_id)
 
 if __name__ == "__main__":

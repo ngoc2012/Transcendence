@@ -17,7 +17,7 @@ from django.core.cache import cache
 @database_sync_to_async
 def rematch(self):
     try:
-        print('entering rematch')
+        # print('entering rematch')
         tournament = TournamentModel.objects.get(id=self.tour_id)
         if tournament.rematchIP:
             return
@@ -44,9 +44,11 @@ def rematch(self):
         match.delete()
     
     except TournamentMatchModel.DoesNotExist:
-        print("Match not found")
+        pass
+        # print("Match not found")
     except Exception as e:
-        print(f"An error occurred: {e}")
+        pass
+        # print(f"An error occurred: {e}")
 
 
 class PongConsumer(AsyncWebsocketConsumer):
@@ -93,7 +95,7 @@ class PongConsumer(AsyncWebsocketConsumer):
         # 1008: Policy violation.
         # 1011: Internal error.
         self.disconnected = True
-        print(f"Player {self.player_id} disconnected with code {close_code}.")
+        # print(f"Player {self.player_id} disconnected with code {close_code}.")
         score0 = cache.get(self.k_score0)
         score1 = cache.get(self.k_score1)
         await self.channel_layer.group_send(self.room_id, {'type': 'teams_data'})
@@ -187,7 +189,7 @@ class PongConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=win)
 
     async def game_loop(self):
-        print("Game in room {self.room_id} started.")
+        # print("Game in room {self.room_id} started.")
         cache.set(self.k_started, True)
         while True:
             await asyncio.sleep(0.02)

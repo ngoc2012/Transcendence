@@ -353,7 +353,7 @@
     function handleStatusChange(mutationsList, observer) {
       for(let mutation of mutationsList) {
         if (mutation.type === 'childList' && mutation.target.id === 'status') {
-          console.log('Status changed:', mutation.target.innerText);
+          // console.log('Status changed:', mutation.target.innerText);
           $('#status').stop(true, true);
           $('#status').fadeIn().delay(200).fadeOut(3000);
 

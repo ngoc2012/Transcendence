@@ -130,7 +130,7 @@ def tournament_history(request):
         return render(request, 'tournament_history.html', {'names' : tournament_names})
 
     except requests.exceptions.RequestException as e:
-        print(f"Error retrieving tournament history: {e}")
+        # print(f"Error retrieving tournament history: {e}")
         context = {'error_message': 'Failed to retrieve tournament history.'}
         return render(request, 'tournament_history.html', context)
 
@@ -156,7 +156,7 @@ def get_tournament_data(request):
 def mail_2fa(request):
     sender_email = EMAIL_SENDER
     recipient_email = request.GET.get('email')
-    print(recipient_email)
+    # print(recipient_email)
     code = ""
     for _ in range(6):
         digit = random.randint(0, 9)
@@ -170,12 +170,13 @@ def mail_2fa(request):
     try:
         sg = SendGridAPIClient(SENDGRID_API_KEY)
         response = sg.send(message)
-        print('Email sent successfully')
-        print(response.status_code)
-        print(response.body)
-        print(response.headers)
+        # print('Email sent successfully')
+        # print(response.status_code)
+        # print(response.body)
+        # print(response.headers)
     except Exception as e:
-        print('Error sending email:', str(e))
+        pass
+        # print('Error sending email:', str(e))
     return JsonResponse({'code': code})
 
 # verify the email code
@@ -263,7 +264,7 @@ def log_in(request):
     user = authenticate(request, username=username, password=password)
 
     if user is not None:
-        print(user.secret_2fa)
+        # print(user.secret_2fa)
         enable2fa = 'true' if getattr(user, 'secret_2fa', '') else 'false'
 
         access_token, refresh_token = generate_jwt_tokens(user.id)
@@ -391,7 +392,7 @@ def callback(request):
 
         return response
     except Exception as e:
-        print(f"An error occurred: {e}")
+        # print(f"An error occurred: {e}")
         return HttpResponse("An error occurred.")
 
 
@@ -416,9 +417,9 @@ def verify_qrcode(request):
     if not PlayersModel.objects.filter(login=request.POST['login']).exists():
         return (HttpResponse("Error: Login '" + request.POST['login'] + "' does not exist!"))
     player = PlayersModel.objects.get(login=request.POST['login'])
-    print(player.login)
-    print(player.secret_2fa)
-    print(input_code)
+    # print(player.login)
+    # print(player.secret_2fa)
+    # print(input_code)
     totp = pyotp.TOTP(player.secret_2fa)
     if totp.verify(input_code):
         return JsonResponse({'result': '1'})
@@ -653,10 +654,10 @@ def friend(request, username):
 @csrf_exempt
 def avatar(request, username):
     user = PlayersModel.objects.get(login=username)
-    print(request)
+    # print(request)
     form = UploadFileForm(request.POST, request.FILES)
-    print(request.POST)
-    print(request.FILES)
+    # print(request.POST)
+    # print(request.FILES)
     if form.is_valid():
         user.avatar = request.FILES['file']
         user.save()

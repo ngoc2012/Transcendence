@@ -14,7 +14,7 @@ def add_tournament_blockchain(name):
         with open('/app/blockchain/build/contracts/TournamentRegistry.json') as f:
             contract_data = json.load(f)
             contract_abi = contract_data['abi']
-        print("name in blockchain : ", name)
+        # print("name in blockchain : ", name)
         latest_network_id = max(contract_data['networks'].keys())
         contract_address = contract_data['networks'][latest_network_id]['address']
         
@@ -25,16 +25,16 @@ def add_tournament_blockchain(name):
         tournament_index = TournamentRegistry.functions.getTournamentIndex(tournament_name).call()
 
         if tournament_index == -1:
-            print("on le crée bien le tournament dans la blockchain 1")
+            # print("on le crée bien le tournament dans la blockchain 1")
             TournamentRegistry.functions.addTournament(tournament_name).transact({'from': chosen_account})
-            print("on le crée bien le tournament dans la blockchain 2")
+            # print("on le crée bien le tournament dans la blockchain 2")
             tournament_index = TournamentRegistry.functions.getTournamentIndex(tournament_name).call()
-            print("on le crée bien le tournament dans la blockchain 3")
+            # print("on le crée bien le tournament dans la blockchain 3")
 
         TournamentRegistry.functions.setTournamentPending(tournament_index, True).transact({'from': chosen_account})
 
     except Exception as e:
-        print("Error:", e)
+        # print("Error:", e)
         return -1
 
 
@@ -58,7 +58,7 @@ def add_player_to_tournament_blockchain(name, player, elo):
         tournament_index = TournamentRegistry.functions.getTournamentIndex(tournament_name).call()
 
         if tournament_index == -1:
-            print("Error:", e)
+            # print("Error:", e)
             return -1
 
         players = [
@@ -68,7 +68,7 @@ def add_player_to_tournament_blockchain(name, player, elo):
             TournamentRegistry.functions.addPlayer(tournament_index, player_data['name'], player_data['elo']).transact({'from': chosen_account})
 
     except Exception as e:
-        print("Error:", e)
+        # print("Error:", e)
         return -1
 
 
@@ -88,7 +88,7 @@ def tournament_history():
         return {'names' : tournament_names}
 
     except Exception as e:
-        print("Error:", e)
+        # print("Error:", e)
         return -1
 
 def get_tournament_data(tournament_name):
@@ -141,14 +141,14 @@ def add_winner_to_tournament_blockchain(name, tournament_winner):
         tournament_name = name
         tournament_index = TournamentRegistry.functions.getTournamentIndex(tournament_name).call()
         if tournament_index == -1:
-            print("Error:", e)
+            # print("Error:", e)
             return -1
 
         TournamentRegistry.functions.setTournamentWinner(tournament_index, tournament_winner).transact({'from': chosen_account})
         TournamentRegistry.functions.setTournamentPending(tournament_index, False).transact({'from': chosen_account})
 
     except Exception as e:
-        print("Error:", e)
+        # print("Error:", e)
         return -1
 
 def add_match_to_tournament_blockchain(match, player1, player2):
@@ -200,7 +200,7 @@ def add_match_to_tournament_blockchain(match, player1, player2):
                 match_data['winner']
             ).transact({'from': chosen_account})
     except Exception as e:
-        print("Error:", e)
+        # print("Error:", e)
         return -1
 
 
@@ -218,12 +218,12 @@ def delete_tournament(name):
         tournament_name = name
         tournament_index = TournamentRegistry.functions.getTournamentIndex(tournament_name).call()
         if tournament_index == -1:
-            print("Error:", e)
+            # print("Error:", e)
             return -1
         TournamentRegistry.functions.deleteTournament(tournament_name).transact({'from': chosen_account})
-        print("well deleted !")
+        # print("well deleted !")
     except Exception as e:
-        print("Error:", e)
+        # print("Error:", e)
         return -1
 
 
@@ -233,7 +233,7 @@ def delete_tournament_route(tournament_name):
         data = delete_tournament(tournament_name)
         return jsonify(data)
     except Exception as e:
-        print(f"Error retrieving tournament data: {e}")
+        # print(f"Error retrieving tournament data: {e}")
         return HttpResponseBadRequest(json.dumps({"error": "Internal server error."}))
 
 
@@ -277,7 +277,7 @@ def get_tournament_data_route(tournament_name):
             return HttpResponseBadRequest(json.dumps({"error": "Tournament not found."}))  # Keep JSON for error responses
         return jsonify(data)
     except Exception as e:
-        print(f"Error retrieving tournament data: {e}")
+        # print(f"Error retrieving tournament data: {e}")
         return HttpResponseBadRequest(json.dumps({"error": "Internal server error."}))
 
 
@@ -290,7 +290,7 @@ def tournament_history_route():
         else:
             return jsonify(tournament_data)
     except Exception as e:
-        print("Unexpected error:", e)
+        # print("Unexpected error:", e)
         return jsonify({"message": "Internal server error"}), 500
 
 
@@ -305,7 +305,7 @@ def add_tournament_route(tournament_name):
             return jsonify({"message": "Tournament added successfully"}), 201
 
     except Exception as e:
-        print(f"Error adding tournament: {e}")
+        # print(f"Error adding tournament: {e}")
         return jsonify({"message": "Internal server error"}), 500
 
 

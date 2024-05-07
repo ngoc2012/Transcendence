@@ -1,7 +1,5 @@
 # TO DO
-
-## Buttons
-- Fix login42 profile
-- Fix tournament socket check
-- Fix error tournament path console
-- a user that try to login with 2FA but cancel the login appear in online users (sidebar)
+- change login do not update front login display -> relogin still return old login to the front but new login is needed to log (so it work)
+- logout button do not appear after 2FA signup
+- login 2FA after email change gives auth_view error : {"error": "Invalid login credentials!"} (2FA works anyway)
+- upload a new profile picture refresh the website (but work well)

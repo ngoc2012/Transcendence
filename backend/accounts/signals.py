@@ -17,11 +17,13 @@ def create_user(username):
         try:
             hashed_password = make_password(password)
             User.objects.create_user(username, '', hashed_password)
-            print(f"User created successfully.")
+            # print(f"User created successfully.")
         except IntegrityError as e:
-            print(f"Failed to create user {username}: {e}")
+            pass
+            # print(f"Failed to create user {username}: {e}")
         except Exception as e:
-            print(f"An error occurred while creating user {username}: {e}")
+            pass
+            # print(f"An error occurred while creating user {username}: {e}")
 
 @receiver(post_migrate)
 def signal_create_users(sender, **kwargs):

@@ -85,7 +85,7 @@ export class Lobby
     }
 
     new_game(game) {
-        console.log('new game');
+        // console.log('new game');
         if (this.main.login === '')
         {
             this.main.set_status('Please login or sign up');

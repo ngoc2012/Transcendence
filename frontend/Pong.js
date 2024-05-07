@@ -59,7 +59,7 @@ export class Pong
         });
 
         window.addEventListener("beforeunload", () => {
-            console.log("Are you sure you want to leave this page?");
+            // console.log("Are you sure you want to leave this page?");
         });
 
         this.pongThreeJS = document.getElementById('pongThreeJS');

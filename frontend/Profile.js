@@ -135,11 +135,12 @@ export class Profile{
                 'oldpwd': this.dom_oldvalue.value,
                 'newpwd': this.dom_newvalue.value,
             },
-            success: ()=>{
+            success: (info) => {
+                console.log('ok')
                 this.main.set_status(info);
                 this.main.load('/profile/' + this.main.login, () => this.main.profile.events(false));
             },
-            error: (info) =>{
+            error: (info) => {
                 this.main.set_status(info.responseText);
                 this.dom_newvalue.value = '';
                 this.dom_newvaluerepeat.value = '';
@@ -240,7 +241,7 @@ export class Profile{
                 "password": this.dom_clpassword.value
             },
             success: (info)=>{
-                console.log(info);
+                // console.log(info);
                 this.login = this.dom_cllogin.value;
                 this.main.login = this.login;
                 this.main.set_status(info);
@@ -396,7 +397,7 @@ export class Profile{
     }
 
     accept_request(data){
-        console.log('on accepte pour ' + this.login);
+        // console.log('on accepte pour ' + this.login);
         $.ajax({
             url: '/profile/' + data.sender + '/add_friend/',
             method: 'POST',

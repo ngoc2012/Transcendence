@@ -54,8 +54,8 @@ export class Login
                     this.main.login = info.login;
                     this.main.name = info.name;
                     this.main.load('/twofa', () => this.main.twofa.events());
-                    if (this.state == 2)
-                        console.log("finished")
+                    // if (this.state == 2)
+                    //     console.log("finished")
                 }
                 else
                 {
@@ -116,7 +116,7 @@ export class Login
             error: (xhr, textStatus, errorThrown) => {
                 if (xhr.responseJSON && xhr.responseJSON.error) {
                     this.main.set_status(xhr.responseJSON.error);
-                    console.log( "erreur = ", xhr.responseJSON.error)
+                    // console.log( "erreur = ", xhr.responseJSON.error)
                 } else {
                     this.main.set_status('An error occurred during the request.');
                 }
