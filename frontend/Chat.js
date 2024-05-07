@@ -14,7 +14,7 @@ export class Chat{
 	events(isPopState){
         if (!isPopState)
             window.history.pushState({page: '/transchat/general_chat'}, '', '/transchat/general_chat');
-        this.dom_input = document.querySelector('#chat-message-input');
+        this.dom_input = document.getElementById('chat-message-input');
 		this.dom_chatlog = document.querySelector('#chat-log');
 		this.dom_submit = document.querySelector('#chat-message-submit');
 		this.dom_back = document.querySelector("#back");
@@ -28,21 +28,21 @@ export class Chat{
 
 
 	}
-	send_message(){
+	send_message(msg, div){
 		const room = this.roomName;
-		const message = this.dom_input.value;
+		const message = msg;
 		this.main.chat_socket.send(JSON.stringify({
 			'message': message,
 			'user': this.main.login,
             'room' : room,
             'type': 'chat_message'
 		}));
-		this.dom_input.value = '';
+        div.value = '';
 	}
 
-	press_enter(e){
+	press_enter(e, div){
 		if (e.keyCode === 13) {  // enter, return
-			this.dom_submit.click();
+			div.click();
 		}
 	}
 

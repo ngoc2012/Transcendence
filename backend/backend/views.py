@@ -33,7 +33,7 @@ EMAIL_SENDER = os.environ.get('EMAIL_SENDER')
 
 
 def redirect(request):
-	return (render(request, 'index.html'))
+	return (render(request, 'iredirectndex.html'))
 
 def index(request):
 	return (render(request, 'index.html'))
@@ -660,8 +660,8 @@ def avatar(request, username):
     if form.is_valid():
         user.avatar = request.FILES['file']
         user.save()
-        return redirect(request)
-    return redirect(request)
+        return lobby(request)
+    return lobby(request)
 
 def tournament_request(request):
     try:

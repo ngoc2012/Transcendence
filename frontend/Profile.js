@@ -56,6 +56,7 @@ export class Profile{
         var uploadpp = document.getElementById("upload_pp");
         if (uploadpp) {
             uploadpp.style.display = uploadpp.style.display === 'block' ? 'none' : 'block';
+            window.history.pushState({page: '/lobby'}, '', '/lobby');
         }
     }
 
