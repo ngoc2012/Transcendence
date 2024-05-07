@@ -241,24 +241,52 @@ export class Main
         })
     }
 
-    refresh_user_list(users, pics){
-        var user_list = document.getElementById('user-list');
-        user_list.innerHTML = '';
-        for (let i = 0; users[i]; i++){
-            let new_profile_pic = document.createElement("img");
-            let new_element = document.createElement("a");
-            if (pics[i].avatar.startsWith('/') == false)
-                new_profile_pic.src = 'static/' + pics[i].avatar;
-            else
-                new_profile_pic.src = 'static/' + pics[i].avatar;
-            new_profile_pic.className = "rounded-circle mx-2";
-            new_profile_pic.style = "width: 40px; height: 40px;"
-            new_element.addEventListener("click", () => this.find_profile(this.login, users[i].login));
-            new_element.innerHTML = users[i].login + '<br>';
-            new_element.style = "cursor: pointer;"
-            user_list.appendChild(new_profile_pic);
-            user_list.appendChild(new_element);
-        }
+    make_chat(chat_area){
+        chat_area.innerHTML = '';
+        let new_element = document.createElement("div");
+        let new_chatbox = document.createElement("div");
+        let new_textarea = document.createElement('textarea');
+        let new_input = document.createElement('input');
+        let new_button = document.createElement('button');
+        new_button.id = 'chat-message-submit';
+        new_button.type = 'button';
+        new_button.class = "btn btn-primary";
+        new_button.innerHTML = 'Send';
+        new_input.id = "chat-message-input";
+        new_input.type = "text";
+        new_input.size = "35";
+        new_textarea.id ='chat-log';
+        new_textarea.cols = "20";
+        new_textarea.rows = "20";
+        new_textarea.readOnly = "yes";
+        new_textarea.style = "border-radius: 10px; border: 2px solid rgba(255, 255, 255, 0.75); color: #ffffff; background-color: rgba(66, 66, 66, 0.5); resize:none;"
+        new_chatbox.id = "chatbox";
+        new_element.id = "chat";
+        new_element.className = "container mt-5";
+        new_input.addEventListener('keydown', (event) => this.chat.press_enter(event, new_button));
+        new_button.addEventListener("click", () => this.chat.send_message(new_input.value, new_input));
+        new_chatbox.appendChild(new_textarea);
+        new_chatbox.appendChild(new_input);
+        new_chatbox.appendChild(new_button);
+        new_element.appendChild(new_chatbox);
+        chat_area.appendChild(new_element);
+        // var user_list = document.getElementById('user-list');
+        // user_list.innerHTML = '';
+        // for (let i = 0; users[i]; i++){
+        //     let new_profile_pic = document.createElement("img");
+        //     let new_element = document.createElement("a");
+        //     if (pics[i].avatar.startsWith('/') == false)
+        //         new_profile_pic.src = 'static/' + pics[i].avatar;
+        //     else
+        //         new_profile_pic.src = 'static/' + pics[i].avatar;
+        //     new_profile_pic.className = "rounded-circle mx-2";
+        //     new_profile_pic.style = "width: 40px; height: 40px;"
+        //     new_element.addEventListener("click", () => this.find_profile(this.login, users[i].login));
+        //     new_element.innerHTML = users[i].login + '<br>';
+        //     new_element.style = "cursor: pointer;"
+        //     user_list.appendChild(new_profile_pic);
+        //     user_list.appendChild(new_element);
+        // }
     }
 
 }

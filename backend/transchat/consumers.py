@@ -83,7 +83,6 @@ class ChatConsumer(WebsocketConsumer):
 
     # Receive message from WebSocket
     def receive(self, text_data):
-        # print(text_data)
         if json.loads(text_data)["type"] == 'connection':
             if self.scope['state']['username'] == '':
                 if json.loads(text_data)['type'] == 'connection':

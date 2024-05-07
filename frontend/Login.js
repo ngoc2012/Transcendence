@@ -81,6 +81,7 @@ export class Login
                                 this.main.name = info.name;
                                 this.main.dom_name.innerHTML = info.name;
                                 this.main.lobby.ws = info.ws;
+                                this.main.picture = info.avatar;
                                 var dom_log_in = document.getElementById('login');
                                 if (dom_log_in) {
                                     dom_log_in.style.display = "none";
@@ -99,6 +100,10 @@ export class Login
                                 var dom_picture = document.getElementById('picture');
                                 if (dom_picture){
                                     dom_picture.src = this.main.picture.replace('/app/frontend/', '/static/');
+                                }
+                                var dom_chatarea = document.getElementById('chat_area');
+                                if (dom_chatarea){
+                                    this.main.make_chat(dom_chatarea);
                                 }
                                 this.main.load('/lobby', () => this.main.lobby.events(false));
                             }

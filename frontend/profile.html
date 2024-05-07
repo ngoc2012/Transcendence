@@ -60,14 +60,9 @@ Your friends: <br> {% for i in friends %} {{ i.login }} - {{ i.online_status }} 
 <body>
 {% if ownprofile %}
 <div class="justify-content-center">
-  <img src="{{ url|change_url }}" id="picture" alt="User Icon" class="rounded-circle profile-picture">
+  <img src="{{ url|change_url }}" id="profile_picture" alt="User Icon" class="rounded-circle profile-picture">
   <p>Profile Picture <i class="fa fa-pencil" aria-hidden="true" id="new_pp"></i></p>
   <div id="upload_pp">
-      <form action="/profile/{{ login }}/change_avatar/" enctype="multipart/form-data" method="post">
-        {% csrf_token %}
-        {{ form }}
-        <input type="submit" class="btn btn-primary" value="Submit">
-      </form>
   </div>
   <h2 class="text-center mb-4">{{ name }} Profile</h2>
   <p>Your Name: {{ name }} <i class="fa fa-pencil" aria-hidden="true" id="new_name"></i></p>
@@ -105,7 +100,7 @@ Your friends: <br> {% for i in friends %} {{ i.login }} - {{ i.online_status }} 
 {% else %}
 <div class="container">
   <div class="justify-content-center">
-    <img src="{{ url|change_url }}" id="picture" alt="User Icon" class="rounded-circle profile-picture">
+    <img src="{{ url|change_url }}" id="profile_picture" alt="User Icon" class="rounded-circle profile-picture">
     <h2 class="text-center mb-4">{{ name }} Profile</h2>
     <p>Name: {{ name }}</p>
     <p>Login: {{ login }}</p>

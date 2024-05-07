@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from django.views.decorators.http import require_POST
 from game.models import TournamentModel, TournamentMatchModel, RoomsModel
@@ -8,7 +8,7 @@ from accounts.forms import UploadFileForm
 from django.utils import timezone
 from transchat.models import Room
 from django.shortcuts import redirect
-import json
+from django.urls import reverse
 from django.conf import settings
 import requests, pyotp, secrets, os, random, jwt, string, pytz, uuid
 from urllib.parse import quote
@@ -654,15 +654,14 @@ def friend(request, username):
 @csrf_exempt
 def avatar(request, username):
     user = PlayersModel.objects.get(login=username)
-    # print(request)
-    form = UploadFileForm(request.POST, request.FILES)
-    # print(request.POST)
-    # print(request.FILES)
-    if form.is_valid():
-        user.avatar = request.FILES['file']
-        user.save()
-        return redirect(request)
-    return redirect(request)
+    print(request.POST)
+    # print("request POST = " + str(request.POST))
+    print(request.FILES)
+    user.avatar = request.FILES['id_file']
+    user.save()
+    return JsonResponse({"new_pp": True, "url": user.avatar.url})
+    # return redirect(request)
+    return JsonResponse({"new_pp": True, "url": user.avatar.url})
 
 def tournament_request(request):
     try:
