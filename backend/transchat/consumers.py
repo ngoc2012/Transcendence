@@ -80,6 +80,8 @@ class ChatConsumer(WebsocketConsumer):
         async_to_sync(self.channel_layer.group_send)(
             self.room_group_name, {"type": "whisper", "message": msg, "receiver": receiver.username, 'sender': data['username']}
         )
+    
+
 
     # Receive message from WebSocket
     def receive(self, text_data):
@@ -129,9 +131,15 @@ class ChatConsumer(WebsocketConsumer):
                     data['whisper'] = True
         # Send message to room group
         if data['message'] != '':
-            async_to_sync(self.channel_layer.group_send)(
-                self.room_group_name, {"type": "chat_message", "message": data['user'].login + ":\n" + data['message'], "user": data['user'].login}
-            )
+            if len(data['message']) > 20:
+                new_msg = self.split_message(data['message'])
+                async_to_sync(self.channel_layer.group_send)(
+                    self.room_group_name, {"type": "chat_message", "message": new_msg, "user": data['user'].login}
+                )
+            else:
+                async_to_sync(self.channel_layer.group_send)(
+                    self.room_group_name, {"type": "chat_message", "message": data['message'], "user": data['user'].login}
+                )
 
 
     # Receive message from room group
@@ -163,3 +171,15 @@ class ChatConsumer(WebsocketConsumer):
         user = event['sender']
         if self.scope['state']['username'] == receiver:
             self.send(json.dumps({"type": "whisper", "message": user + " whispered :\n" + message, 'user': receiver}))
+    
+    def split_message(self, str):
+        msg = ""
+        count = 0
+        for i in str:
+            if count == 19:
+                msg += '<br>'
+                count = 0
+            else:
+                msg += i
+                count += 1
+        return msg

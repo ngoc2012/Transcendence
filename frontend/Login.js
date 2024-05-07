@@ -103,6 +103,7 @@ export class Login
                                 }
                                 var dom_chatarea = document.getElementById('chat_area');
                                 if (dom_chatarea){
+                                    dom_chatarea.innerHTML = '';
                                     this.main.make_chat(dom_chatarea);
                                 }
                                 this.main.load('/lobby', () => this.main.lobby.events(false));
