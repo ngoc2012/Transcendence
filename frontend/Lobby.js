@@ -311,7 +311,6 @@ export class Lobby
                     }
                 }
                 // this.main.refresh_user_list(data.users, data.pictures);
-                this.displayUsers(data);
             }
             else if (data.type === 'chat_message'){
                 let new_element = document.createElement("a");
@@ -364,6 +363,7 @@ export class Lobby
 		        document.querySelector('#chat-log').appendChild(new_element);
                 new_element.insertAdjacentHTML('afterend', "<p>" + data.message + "</p>");
             }
+            this.displayUsers(data);
        	};
         var chat_area = document.getElementById('chat_area');
         if (this.main.login != '')
@@ -384,12 +384,18 @@ export class Lobby
                     '<div style="display: flex; align-items: center; margin-bottom: 10px;">' +
                     '<img src="' + 'static/' + userPic + '" alt="Profile Picture" style="width: 40px; height: 40px; border-radius: 50%; margin-right: 10px;">' +                    
                     '<span style="flex-grow: 1;">' + user.login + '</span>' +
-                    '<button class="btn btn-success btn-sm" type="button">Add Friend</button>' +
+                    '<button id="' + user.login + '_add-friend" class="btn btn-success btn-sm" type="button">Add Friend</button>' +
                     '<button class="btn btn-info btn-sm" type="button">Invite</button>' +
                     '</div>'
                 );
                 container.append(userContent);
-            });
+                var button = document.getElementById(user.login + '_add-friend');
+                button.addEventListener('click', () => this.main.lobby.socket.send(JSON.stringify({
+                    'sender': this.main.login,
+                    'friend': user.login,
+                    'type': 'friend_request_send'
+                })));
+            }, this);
         }
     }    
     
