@@ -290,7 +290,7 @@ export class Lobby
        	this.main.chat_socket.onmessage = (e) => {
        	    var data = JSON.parse(e.data);
             var list_user = document.getElementById('user_list');
-            console.log(data)
+            // console.log(data)
             if (data.type === 'update_divs'){
                 let divs = document.getElementsByClassName('user_chat');
                 for (let i = 0; divs[i] != undefined; i++){

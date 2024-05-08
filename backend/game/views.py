@@ -9,6 +9,8 @@ from django.views.decorators.http import require_POST
 from django.core.cache import cache
 from django.utils import timezone
 
+from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
+
 User = get_user_model()
 
 def get_data(game):
@@ -112,8 +114,20 @@ def join(request):
     players = cache.get(str(request.POST['game_id']) + "_all")
     if players == None:
         players = []
-    player = PlayersModel.objects.get(login=request.POST['login'])
-    room = RoomsModel.objects.get(id=request.POST['game_id'])
+    player_login = request.POST['login']
+    room_id = request.POST['game_id']
+    try:
+        player = PlayersModel.objects.get(login=player_login)
+    except ObjectDoesNotExist:
+        return (HttpResponse(f"Error: Player {player_login} does not exist."))
+    except MultipleObjectsReturned:
+        return (HttpResponse(f"Error: Many players with ID {player_login} exist."))
+    try:
+        room = RoomsModel.objects.get(id=room_id)
+    except ObjectDoesNotExist:
+        return (HttpResponse(f"Error: Room with ID {room_id} does not exist."))
+    except MultipleObjectsReturned:
+        return (HttpResponse(f"Error: Many rooms with ID {room_id} exist."))
     room.player1 = player
     room.save()
     if player.id in players:

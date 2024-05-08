@@ -17,9 +17,9 @@ export function join_game(main, game_id, isPopState)
             "game_id": game_id
         },
         success: (info) => {
-            // console.log(info);
             if (typeof info === 'string') {
                 main.set_status(info);
+                main.load('/lobby', () => main.lobby.events(false));
             } else {
                 switch (info.game) {
                     case 'pong':
