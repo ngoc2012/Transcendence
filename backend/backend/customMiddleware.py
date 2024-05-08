@@ -18,6 +18,10 @@ class JWTMiddleware(MiddlewareMixin):
 
         if request.headers.get('X-Internal-Request') == 'true' or request.path in self.get_unauthenticated_paths() or '/game/close/' in request.path or '/admin/' in request.path:
             return None
+        
+        if '/media/' in request.path:
+            print('ok')
+            return None 
 
         access_token = request.COOKIES.get('access_token')
         if not access_token:

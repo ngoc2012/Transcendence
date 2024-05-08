@@ -49,13 +49,11 @@ export class Profile{
             this.dom_login.style.display = 'none';
             this.dom_name.style.display = 'none';
         }
+        this.create_submit_pp();
     }
 
-    togglepp() {
+    create_submit_pp() {
         var uploadpp = document.getElementById("upload_pp");
-        if (uploadpp) {
-            uploadpp.style.display = uploadpp.style.display === 'block' ? 'none' : 'block';
-        }
         let new_form = document.createElement("form");
         let input = document.createElement('input')
         let button = document.createElement('input');
@@ -72,7 +70,15 @@ export class Profile{
         new_form.appendChild(document.createElement("br"));
         new_form.appendChild(button);
         uploadpp.appendChild(new_form);
-        new_form.addEventListener('submit', (event) => this.submit_pp(event));
+        if (new_form)
+            new_form.addEventListener('submit', (event) => this.submit_pp(event));
+    }
+
+    togglepp() {
+        var uploadpp = document.getElementById("upload_pp");
+        if (uploadpp) {
+            uploadpp.style.display = uploadpp.style.display === 'block' ? 'none' : 'block';
+        }
     }
 
     submit_pp(event){
