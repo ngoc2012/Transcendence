@@ -3,14 +3,7 @@ export class Profile{
         this.main = m;
     }
 
-    init(isPopState){
-        this.login = this.main.login;
-        this.email = this.main.email;
-        this.name = this.main.name;
-        this.events(isPopState);
-    }
-
-    events(isPopState){
+    events(isPopState, l){
         this.main.checkcsrf();
         if (this.main.lobby.game && this.main.lobby.game !== null)
         {
@@ -19,7 +12,7 @@ export class Profile{
         }
 
         if (!isPopState)
-            window.history.pushState({page: '/profile/' + this.login}, '', '/profile/' + this.login);
+            window.history.pushState({page: '/profile/' + l}, '', '/profile/' + l);
 
         this.dom_alias = document.getElementById("alias");
         this.dom_friend = document.getElementById("add_friend");
@@ -94,16 +87,16 @@ export class Profile{
               document.getElementById('picture').src = newUrl;
               document.getElementById('profile_picture').src = newUrl;
           })
-          .then(this.main.load('/profile/' + this.main.login, () => this.main.profile.events(true)));
+          .then(this.main.load('/profile/' + this.main.login, () => this.main.profile.events(true, this.main.login)));
     }    
 
     change_alias(){
-        this.main.load('/profile/' + this.login + '/alias', () => this.alias_events(false));
+        this.main.load('/profile/' + this.main.login + '/alias', () => this.alias_events(false));
     }
 
     alias_events(isPopState){
         if (!isPopState){
-            window.history.pushState({page: '/profile/' + this.login + '/alias'}, '', '/profile/' + this.login + '/alias');
+            window.history.pushState({page: '/profile/' + this.main.login + '/alias'}, '', '/profile/' + this.main.login + '/alias');
         }
         this.dom_textfield = document.querySelector('#alias');
         this.dom_aliasconfirm = document.querySelector("#confirm");
@@ -126,7 +119,7 @@ export class Profile{
                 },
                 success: (info) =>{
                     this.main.set_status(info);
-                    this.main.load('/profile/' + this.main.login, () => this.main.profile.events(false));
+                    this.main.load('/profile/' + this.main.login, () => this.main.profile.events(false, this.main.login));
                 },
                 error: (info) =>{
                     this.main.set_status(info.responseText);
@@ -136,17 +129,17 @@ export class Profile{
     }
 
     alias_cancel(){
-        this.main.load('/profile/' + this.main.login, () => this.main.profile.events(false));
+        this.main.load('/profile/' + this.main.login, () => this.main.profile.events(false, this.main.login));
     }
 
     change_password(){
-        this.main.load('/profile/' + this.login + '/change_password', () => this.cp_events(false));
+        this.main.load('/profile/' + this.main.login + '/change_password', () => this.cp_events(false));
     }
 
 
     cp_events(isPopState){
         if (!isPopState){
-            window.history.pushState({page: '/profile/' + this.login + '/change_password'}, '', '/profile/' + this.login + '/change_password');
+            window.history.pushState({page: '/profile/' + this.main.login + '/change_password'}, '', '/profile/' + this.main.login + '/change_password');
         }
         this.dom_oldvalue = document.querySelector("#oldpwd")
         this.dom_newvalue = document.querySelector("#newpwd");
@@ -176,7 +169,7 @@ export class Profile{
             success: (info) => {
                 console.log('ok')
                 this.main.set_status(info);
-                this.main.load('/profile/' + this.main.login, () => this.main.profile.events(false));
+                this.main.load('/profile/' + this.main.login, () => this.main.profile.events(false, this.main.login));
             },
             error: (info) => {
                 this.main.set_status(info.responseText);
@@ -188,7 +181,7 @@ export class Profile{
     }
 
     cp_cancel(){
-        this.main.load('/profile/' + this.main.login, () => this.main.profile.events(false));
+        this.main.load('/profile/' + this.main.login, () => this.main.profile.events(false, this.main.login));
     }
 
     change_email(){
@@ -197,7 +190,7 @@ export class Profile{
 
     ce_events(isPopState){
         if (!isPopState){
-            window.history.pushState({page: '/profile/' + this.login + '/change_email'}, '', '/profile/' + this.login + '/change_email');
+            window.history.pushState({page: '/profile/' + this.main.login + '/change_email'}, '', '/profile/' + this.main.login + '/change_email');
         }
         this.dom_cenewemail = document.querySelector('#new_email');
         this.dom_cepassword =document.querySelector('#password');
@@ -218,10 +211,10 @@ export class Profile{
             return;
         }
         $.ajax({
-            url: '/profile/' + this.login + '/change_email/',
+            url: '/profile/' + this.main.login + '/change_email/',
             method: 'POST',
             data: {
-                "login": this.login,
+                "login": this.main.login,
                 "password": this.dom_cepassword.value,
                 "email": this.dom_cenewemail.value,
             },
@@ -229,9 +222,9 @@ export class Profile{
                 this.main.set_status(info);
                 this.email = this.dom_cenewemail;
                 this.main.email = this.email;
-                // this.main.history_stack.push('/profile/' + this.login + '/');
-                // window.history.pushState({}, '', '/profile/' + this.login + '/');
-                this.main.load('/profile/' + this.login, () => this.main.profile.events());
+                // this.main.history_stack.push('/profile/' + this.main.login + '/');
+                // window.history.pushState({}, '', '/profile/' + this.main.login + '/');
+                this.main.load('/profile/' + this.main.login, () => this.main.profile.events(false, this.main.login));
             },
             error: (info) =>{
                 this.main.set_status(info.responseText);
@@ -240,16 +233,16 @@ export class Profile{
     }
 
     ce_cancel(){
-        this.main.load('/profile/' + this.login, () => this.main.profile.events(false));
+        this.main.load('/profile/' + this.main.login, () => this.main.profile.events(false, this.main.login));
     }
 
     change_login(){
-        this.main.load('/profile/' + this.login + '/change_login', () => this.cl_events(false));
+        this.main.load('/profile/' + this.main.login + '/change_login', () => this.cl_events(false));
     }
 
     cl_events(isPopState){
         if (!isPopState){
-            window.history.pushState({page: '/profile/' + this.login + '/change_login'}, '', '/profile/' + this.login + '/change_login');
+            window.history.pushState({page: '/profile/' + this.main.login + '/change_login'}, '', '/profile/' + this.main.login + '/change_login');
         }
         this.dom_cllogin = document.querySelector("#log_in");
         this.dom_clpassword = document.querySelector("#password");
@@ -271,19 +264,22 @@ export class Profile{
         }
 
         $.ajax({
-            url: '/profile/' + this.login + '/change_login/',
+            url: '/profile/' + this.main.login + '/change_login/',
             method: 'POST',
             data:{
-                "login": this.login,
+                "login": this.main.login,
                 "new_login": this.dom_cllogin.value,
                 "password": this.dom_clpassword.value
             },
             success: (info)=>{
-                // console.log(info);
-                this.login = this.dom_cllogin.value;
-                this.main.login = this.login;
                 this.main.set_status(info);
-                this.main.load('/profile/' + this.login, () => this.main.profile.events(false));
+                this.main.chat_socket.send(JSON.stringify({
+                    'type': 'connection_update',
+                    'old_user': this.main.login,
+                    'new_user': this.dom_cllogin.value
+                }));
+                this.main.login = this.dom_cllogin.value;
+                this.main.load('/profile/' + this.main.login, () => this.main.profile.events(false, this.main.login));
             },
             error: (info) =>{
                 this.main.set_status(info.responseText);
@@ -292,16 +288,16 @@ export class Profile{
     }
 
     cl_cancel(){
-        this.main.load('/profile/' + this.login, () => this.main.profile.events(false));
+        this.main.load('/profile/' + this.main.login, () => this.main.profile.events(false, this.main.login));
     }
 
     change_name(){
-        this.main.load('/profile/' + this.login + '/change_name', () => this.cn_events(false));
+        this.main.load('/profile/' + this.main.login + '/change_name', () => this.cn_events(false));
     }
 
     cn_events(isPopState){
         if (!isPopState){
-            window.history.pushState({page: '/profile/' + this.login + '/change_name'}, '', '/profile/' + this.login + '/change_name');
+            window.history.pushState({page: '/profile/' + this.main.login + '/change_name'}, '', '/profile/' + this.main.login + '/change_name');
         }
         this.dom_cn_name = document.querySelector("#newname");
         this.dom_cn_password = document.querySelector("#password");
@@ -322,17 +318,21 @@ export class Profile{
             return;
         }
         $.ajax({
-            url: '/profile/' + this.login + '/change_name/',
+            url: '/profile/' + this.main.login + '/change_name/',
             method: 'POST',
             data:{
-                'login': this.login,
+                'login': this.main.login,
                 "name": this.dom_cn_name.value,
                 "password": this.dom_cn_password.value
             },
             success: (info)=>{
                 this.main.set_status(info);
-                this.main.name = this.dom_cn_name;
-                this.main.load('/profile/' + this.login, () => this.main.profile.events(false));
+                this.main.name = this.dom_cn_name.value;
+                let name = document.getElementById('name');
+                if (name){
+                    name.innerHTML = this.main.name;
+                }
+                this.main.load('/profile/' + this.main.login, () => this.main.profile.events(false, this.main.login));
             },
             error: (info)=>{
                 this.main.set_status(info.responseText);
@@ -341,16 +341,16 @@ export class Profile{
     }
 
     cn_cancel(){
-        this.main.load('/profile/' + this.login, () => this.main.profile.events(false));
+        this.main.load('/profile/' + this.main.login, () => this.main.profile.events(false, this.main.login));
     }
 
     add_friend(){
-        this.main.load('/profile/' + this.login + '/add_friend', () => this.friend_events(false));
+        this.main.load('/profile/' + this.main.login + '/add_friend', () => this.friend_events(false));
     }
 
     friend_events(isPopState){
         if (!isPopState){
-            window.history.pushState({page: '/profile/' + this.login + '/add_friend'}, '', '/profile/' + this.login + '/add_friend');
+            window.history.pushState({page: '/profile/' + this.main.login + '/add_friend'}, '', '/profile/' + this.main.login + '/add_friend');
         }
         this.dom_friend_name = document.querySelector("#friend");
         this.dom_af_confirm = document.querySelector("#confirm");
@@ -379,7 +379,7 @@ export class Profile{
                     'type': 'friend_request_send'
                 }));
                 this.main.set_status(info);
-                this.main.load('/profile/' + this.login, () => this.friend_events(false));
+                this.main.load('/profile/' + this.main.login, () => this.friend_events(false));
             },
             error: (info)=>{
                 this.main.set_status(info.responseText);
@@ -398,7 +398,7 @@ export class Profile{
             },
             success: (info)=>{
                 this.main.set_status(info);
-                this.main.load('/profile/' + this.login, () => this.main.profile.events(false));
+                this.main.load('/profile/' + this.main.login, () => this.main.profile.events(false, this.main.login));
             },
             error: (info) =>{
                 this.main.set_status(info.responseText);
@@ -435,7 +435,7 @@ export class Profile{
     }
 
     accept_request(data){
-        // console.log('on accepte pour ' + this.login);
+        // console.log('on accepte pour ' + this.main.login);
         $.ajax({
             url: '/profile/' + data.sender + '/add_friend/',
             method: 'POST',
@@ -473,6 +473,6 @@ export class Profile{
     }
 
     af_cancel(){
-        this.main.load('/profile/' + this.login, () => this.main.profile.events(false));
+        this.main.load('/profile/' + this.main.login, () => this.main.profile.events(false, this.main.login));
     }
 }

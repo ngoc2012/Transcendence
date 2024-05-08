@@ -236,7 +236,7 @@ export class Main
                 'requester': requester
             },
             success: (info) => {
-                this.load_with_data('/profile/' + login, () => this.profile.events(false), {'user':login, 'requester': requester});
+                this.load_with_data('/profile/' + login, () => this.profile.events(false, login), {'user':login, 'requester': requester});
             }
         })
     }
@@ -259,7 +259,7 @@ export class Main
         new_input.type = "text";
         new_input.size = "11";
         new_textarea.id ='chat-log';
-        new_textarea.style = "border-radius: 10px; border: 2px solid rgba(255, 255, 255, 0.75); color: #ffffff; background-color: rgba(66, 66, 66, 0.5); resize:none;"
+        new_textarea.style = "border-radius: 10px; border: 2px solid rgba(255, 255, 255, 0.75); color: #ffffff; background-color: rgba(66, 66, 66, 0.5); resize:none; overflow:auto;"
         new_chatbox.id = "chatbox";
         new_element.id = "chat";
         new_element.className = "container mt-5";

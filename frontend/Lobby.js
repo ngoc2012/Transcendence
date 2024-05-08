@@ -79,7 +79,7 @@ export class Lobby
             this.main.set_status('You must be logged in to see your profile');
             return ;
         }
-        this.main.load_with_data('/profile/' + this.main.login, () => this.main.profile.init(false), {'requester': this.main.login, 'user': this.main.login});
+        this.main.load_with_data('/profile/' + this.main.login, () => this.main.profile.events(false, this.main.login), {'requester': this.main.login, 'user': this.main.login});
     }
 
     homebar() {
@@ -292,19 +292,67 @@ export class Lobby
        	this.main.chat_socket.onmessage = (e) => {
        	    var data = JSON.parse(e.data);
             var list_user = document.getElementById('user_list');
-            if (data.type === 'update'){
+            if (data.type === 'update_divs'){
+                let divs = document.getElementsByClassName('user_chat');
+                for (let i = 0; divs[i] != undefined; i++){
+                    if (divs[i].innerHTML === data.old_user + ':'){
+                        divs[i].innerHTML = data.new_user + ':';
+                        let new_element = divs[i].cloneNode(true);
+                        new_element.addEventListener("click", () => this.main.find_profile(this.main.login, data.new_user));
+                        divs[i].parentNode.replaceChild(new_element, divs[i]);
+                    }
+                }
+                let whispers = document.getElementsByClassName('user_chat_whisper');
+                for (let i = 0; whispers[i] != undefined; i++){
+                    if (whispers[i].innerHTML === data.old_user + ':'){
+                        whispers[i].innerHTML = data.new_user + ':';
+                        let new_element = whispers[i].cloneNode(true);
+                        new_element.addEventListener("click", () => this.main.find_profile(this.main.login, data.new_user));
+                        whispers[i].parentNode.replaceChild(new_element, whispers[i]);
+                    }
+                }
                 // this.main.refresh_user_list(data.users, data.pictures);
                 return;
             }
-            else{
+            else if (data.type === 'chat_message'){
                 let new_element = document.createElement("a");
                 new_element.addEventListener("click", () => this.main.find_profile(this.main.login, data.user));
                 new_element.style = "cursor:pointer; color: rgb(0, 128, 255); text-decoration: underline;";
                 new_element.innerHTML = data.user + ":";
+                new_element.className = 'user_chat';
                 let new_message = document.createElement("p");
                 new_message.innerHTML = data.message;
 		        document.querySelector('#chat-log').appendChild(new_element);
                 new_element.insertAdjacentHTML('afterend', "<p>" + data.message + "</p>");
+                return;
+            }
+            else if (data.type === 'whisper'){
+                if (data.sender === this.main.login){
+                    // show you whispered to user
+                    let new_element = document.createElement("a");
+                    new_element.innerHTML = "You whispered to ";
+                    let new_recv = document.createElement("a");
+                    new_recv.addEventListener("click", () => this.main.find_profile(this.main.login, data.receiver));
+                    new_recv.innerHTML = data.receiver +":";
+                    new_recv.style = "cursor:pointer; color: rgb(0, 128, 255); text-decoration: underline;";
+                    let new_message = document.createElement("p");
+                    new_message.innerHTML = data.message;
+                    document.querySelector('#chat-log').appendChild(new_element);
+                    new_element.insertAdjacentElement('afterend', new_recv);
+                    new_recv.insertAdjacentHTML('afterend', "<p><strong>" + data.message + "</strong></p>");
+                }
+                else{
+                    let new_element = document.createElement("a");
+                    new_element.addEventListener("click", () => this.main.find_profile(this.main.login, data.receiver));
+                    new_element.style = "cursor:pointer; color: rgb(0, 128, 255); text-decoration: underline;";
+                    new_element.innerHTML = data.user + ":";
+                    new_element.className = 'user_chat_whisper';
+                    let new_message = document.createElement("p");
+                    new_message.innerHTML = data.message;
+		            document.querySelector('#chat-log').appendChild(new_element);
+                    new_element.insertAdjacentHTML('afterend', "<p><strong>" + data.message + "</strong></p>");
+                    return;
+                }
             }
        	};
         var chat_area = document.getElementById('chat_area');

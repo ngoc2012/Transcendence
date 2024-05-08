@@ -25,7 +25,7 @@ function    reload(path, isPopState = false) {
     } else if (path === '/transchat/general_chat'){
         main.load('transchat/general_chat', () => main.chat.events(isPopState));
     } else if (path.startsWith('/profile/')){
-        main.load('/profile/' + path.substring(9), () => main.profile.init(isPopState));
+        main.load('/profile/' + path.substring(9), () => main.profile.events(isPopState, path.substring(9)));
     } else if (path === '/tournament') {
         main.load('/tournament', () => main.lobby.tournament.events(isPopState));
     } else if (path === '/tournament/local') {

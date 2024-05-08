@@ -61,8 +61,9 @@ class ChatConsumer(WebsocketConsumer):
 
     def send_whisper(self, huh, data, value):
         msg = ' '.join(data['msg_split'][2::])
+        print(self.scope['state']['username'])
         if value == data['username']:
-            self.send(text_data=json.dumps({"message": "You can't whisper yourself.", 'user': data['username']}))
+            self.send(text_data=json.dumps({"message": self.split_message("You can't whisper yourself."), 'user': data['username']}))
             return
         try:
             PlayersModel.objects.get(login=value)
@@ -77,6 +78,7 @@ class ChatConsumer(WebsocketConsumer):
         if msg == receiver.login:
             self.send(text_data=json.dumps({"message": "You can't send empty whispers.", "user": data['username']}))
             return
+        self.send(text_data=json.dumps({'type': 'whisper', 'message': msg, 'receiver': receiver.username, 'sender': data['username']}))
         async_to_sync(self.channel_layer.group_send)(
             self.room_group_name, {"type": "whisper", "message": msg, "receiver": receiver.username, 'sender': data['username']}
         )
@@ -85,7 +87,8 @@ class ChatConsumer(WebsocketConsumer):
 
     # Receive message from WebSocket
     def receive(self, text_data):
-        if json.loads(text_data)["type"] == 'connection':
+        print(text_data)
+        if json.loads(text_data)["type"] == 'connection' or json.loads(text_data)['type'] == 'connection_update':
             if self.scope['state']['username'] == '':
                 if json.loads(text_data)['type'] == 'connection':
                     self.scope['state']['username'] = json.loads(text_data)['user']
@@ -97,6 +100,11 @@ class ChatConsumer(WebsocketConsumer):
                         room.users.add(PlayersModel.objects.get(login=self.scope['state']['username']))
                         room.save()
                     async_to_sync(self.channel_layer.group_send)(self.room_group_name, {"type": "update"})
+                    return
+            else:
+                if json.loads(text_data)['type'] == 'connection_update':
+                    self.scope['state']['username'] = json.loads(text_data)['new_user']
+                    async_to_sync(self.channel_layer.group_send)(self.room_group_name, {"type": "update_divs", 'old_user': json.loads(text_data)['old_user'], 'new_user': json.loads(text_data)['new_user']})
                     return
         elif json.loads(text_data)["type"] == 'update':
                 async_to_sync(self.channel_layer.group_send)(self.room_group_name, {"type": "update"})
@@ -137,6 +145,7 @@ class ChatConsumer(WebsocketConsumer):
                     self.room_group_name, {"type": "chat_message", "message": new_msg, "user": data['user'].login}
                 )
             else:
+                print("c parceke on va la dedans ?")
                 async_to_sync(self.channel_layer.group_send)(
                     self.room_group_name, {"type": "chat_message", "message": data['message'], "user": data['user'].login}
                 )
@@ -150,7 +159,7 @@ class ChatConsumer(WebsocketConsumer):
         try:
             user.blocked_users.get(login=msg_user)
         except PlayersModel.DoesNotExist:
-            self.send(text_data=json.dumps({"message": message, "user": msg_user}))
+            self.send(text_data=json.dumps({'type': 'chat_message', "message": message, "user": msg_user}))
 
     def update(self, event):
         type = event['type']
@@ -160,7 +169,7 @@ class ChatConsumer(WebsocketConsumer):
                 room.users.get(login=self.scope['state']['username'])
             except PlayersModel.DoesNotExist:
                 room.users.add(PlayersModel.objects.get(login=self.scope['state']['username']))
-                room.save();
+                room.save()
         queryset = Room.objects.get(room_name=self.room_name).users.all()
         queryseturl = Room.objects.get(room_name=self.room_name).users.all().values("avatar")
         self.send(json.dumps({'type': 'update', 'users': list(queryset.values("login")), 'pictures': list(queryseturl)}))
@@ -170,15 +179,21 @@ class ChatConsumer(WebsocketConsumer):
         receiver = event['receiver']
         user = event['sender']
         if self.scope['state']['username'] == receiver:
-            self.send(json.dumps({"type": "whisper", "message": user + " whispered :\n" + message, 'user': receiver}))
+            self.send(json.dumps({"type": "whisper", "user": user, "message": message, 'receiver': receiver}))
     
+    def update_divs(self, event):
+        old_user = event['old_user']
+        new_user = event['new_user']
+        self.send(json.dumps({'type': "update_divs", 'old_user': old_user, 'new_user': new_user}))
+
     def split_message(self, str):
         msg = ""
         count = 0
         for i in str:
             if count == 19:
                 msg += '<br>'
-                count = 0
+                msg += i
+                count = 1
             else:
                 msg += i
                 count += 1
