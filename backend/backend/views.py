@@ -22,6 +22,9 @@ from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.middleware.csrf import get_token
 from django.contrib.auth import authenticate, login as auth_login, get_user_model, logout as auth_logout
 from django.core.cache import cache
+from cryptography.fernet import Fernet
+
+
 
 API_PUBLIC = os.environ.get('API_PUBLIC')
 API_SECRET = os.environ.get('API_SECRET')
@@ -32,6 +35,26 @@ JWT_REFRESH_SECRET_KEY = os.environ.get('JWT_REFRESH_SECRET_KEY')
 SENDGRID_API_KEY = os.environ.get('SENDGRID_API_KEY')
 EMAIL_SENDER = os.environ.get('EMAIL_SENDER')
 
+
+ENCRYPT_KEY = os.environ.get('ENCRYPT_KEY')
+
+def encrypt(message):
+  try:
+    fernet = Fernet(ENCRYPT_KEY)
+    encrypted_text = fernet.encrypt(message.encode()).decode()
+    return encrypted_text
+  except Exception as e:
+    print("Error during encryption:", e)
+    return None
+
+def decrypt(encrypted_text):
+  try:
+    fernet = Fernet(ENCRYPT_KEY)
+    decrypted_text = fernet.decrypt(encrypted_text.encode()).decode()
+    return decrypted_text
+  except Exception as e:
+    print("Error during decryption:", e)
+    return None
 
 def redirect(request):
 	return (render(request, 'index.html'))
@@ -71,10 +94,8 @@ def display_2fa(request):
 
     email = request.POST['email']
     secret = request.POST['secret']
-    # response = requests.get("http://blockchain:9000/print_me")
-    # data = response.json()
-    # print("data est egal a = ", data)
-    return render(request, 'display_2fa.html', {'email': email, 'secret_key': secret})
+
+    return render(request, 'display_2fa.html', {'email': email, 'secret_key': decrypt(secret)})
 
 def qrcode_2fa(request):
 	return (render(request, 'qrcode_2fa.html'))
@@ -231,7 +252,11 @@ def new_player(request):
         enable2fa = request.POST.get('enable2fa')
         if (enable2fa == 'false'):
             enable2fa = ''
-        user.secret_2fa = pyotp.random_base32() if enable2fa else ''
+
+        temp_secret = pyotp.random_base32()
+        hashed_secret = encrypt(temp_secret)
+
+        user.secret_2fa = hashed_secret if enable2fa else ''
         user.save()
 
         response_data = {
@@ -419,10 +444,8 @@ def verify_qrcode(request):
     if not PlayersModel.objects.filter(login=request.POST['login']).exists():
         return (HttpResponse("Error: Login '" + request.POST['login'] + "' does not exist!"))
     player = PlayersModel.objects.get(login=request.POST['login'])
-    # print(player.login)
-    # print(player.secret_2fa)
-    # print(input_code)
-    totp = pyotp.TOTP(player.secret_2fa)
+
+    totp = pyotp.TOTP(decrypt(player.secret_2fa))
     if totp.verify(input_code):
         return JsonResponse({'result': '1'})
     return JsonResponse({'result': '0'})
