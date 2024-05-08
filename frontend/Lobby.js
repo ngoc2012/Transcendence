@@ -200,7 +200,7 @@ export class Lobby
     }
 
     pong_game(info, isPopState) {
-        this.quit();
+        this.quit('pong');
         this.game = new Pong(this.main, this, info);
         this.main.load('/pong', () => this.game.init(isPopState));
     }
@@ -372,7 +372,7 @@ export class Lobby
     }
     
     displayUsers(data) {
-        if (data.type === "update") {
+        if (data.type === "update" && this.socket.readyState === 1) {
             var users = data.users;
             var pictures = data.pictures;
             var container = $(".user-box");
@@ -437,22 +437,24 @@ export class Lobby
         }
     }
 
-    quit() {
-        var chat_area = document.getElementById('chat_area');
-        if (chat_area){
-            chat_area.innerHTML = "<p>You must be logged<br>to chat</p>";
+    quit(action) {
+        if (action === 'logout'){
+            var chat_area = document.getElementById('chat_area');
+            if (chat_area){
+                chat_area.innerHTML = "<p>You must be logged<br>to chat</p>";
+            }
+            if (this.main.chat_socket !== -1){
+                this.main.chat_socket.send(JSON.stringify({
+                    'type': 'update'
+                }));
+                this.main.chat_socket.close();
+                this.main.chat_socket = -1; 
+            }
         }
         if (this.socket !== -1)
         {
             this.socket.close();
             this.socket = -1;
-        }
-        if (this.main.chat_socket !== -1){
-            this.main.chat_socket.send(JSON.stringify({
-                'type': 'update'
-            }));
-            this.main.chat_socket.close();
-            this.main.chat_socket = -1; 
         }
     }
 }

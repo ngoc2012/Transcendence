@@ -165,7 +165,7 @@ export class Main
                 }
                 else
                 {
-                    this.lobby.quit()
+                    this.lobby.quit('logout')
 
                     this.email = '';
                     this.login = '';
