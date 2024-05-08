@@ -390,11 +390,16 @@ export class Lobby
                 );
                 container.append(userContent);
                 var button = document.getElementById(user.login + '_add-friend');
-                button.addEventListener('click', () => this.main.lobby.socket.send(JSON.stringify({
-                    'sender': this.main.login,
-                    'friend': user.login,
-                    'type': 'friend_request_send'
-                })));
+                if (this.main.login === user.login){
+                    button.addEventListener('click', () => this.main.set_status("You wanna be friend with... Yourself ? Come on..."));
+                }
+                else{
+                    button.addEventListener('click', () => this.main.lobby.socket.send(JSON.stringify({
+                        'sender': this.main.login,
+                        'friend': user.login,
+                        'type': 'friend_request_send'
+                    })));
+                }
                 var profile = document.getElementById(user.login + '_profile');
                 profile.addEventListener('click', () => this.main.find_profile(this.main.login, user.login));
             }, this);
