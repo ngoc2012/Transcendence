@@ -383,7 +383,7 @@ export class Lobby
                 var userContent = $(
                     '<div style="display: flex; align-items: center; margin-bottom: 10px;">' +
                     '<img src="' + 'static/' + userPic + '" alt="Profile Picture" style="width: 40px; height: 40px; border-radius: 50%; margin-right: 10px;">' +                    
-                    '<span style="flex-grow: 1;">' + user.login + '</span>' +
+                    '<span id ="' + user.login + '_profile" style="flex-grow: 1; cursor:pointer; text-decoration:underline;">' + user.login + '</span>' +
                     '<button id="' + user.login + '_add-friend" class="btn btn-success btn-sm" type="button">Add Friend</button>' +
                     '<button class="btn btn-info btn-sm" type="button">Invite</button>' +
                     '</div>'
@@ -395,6 +395,8 @@ export class Lobby
                     'friend': user.login,
                     'type': 'friend_request_send'
                 })));
+                var profile = document.getElementById(user.login + '_profile');
+                profile.addEventListener('click', () => this.main.find_profile(this.main.login, user.login));
             }, this);
         }
     }    
