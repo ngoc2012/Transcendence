@@ -620,10 +620,10 @@ export class Pong
             this.quit();
         };
         winBox.appendChild(backButton);
-
+        
         if (this.tournament) {
             const nextMatchButton = document.createElement('button');
-            nextMatchButton.textContent = 'Next Match';
+            nextMatchButton.textContent = 'Continue';
             nextMatchButton.classList.add('btn', 'btn-primary');
             nextMatchButton.style.marginLeft = '10px';
             nextMatchButton.onclick = () => {

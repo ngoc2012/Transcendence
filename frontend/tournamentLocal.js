@@ -40,8 +40,8 @@ export class localTournament {
                     var tournamentInfos2Div = document.getElementById('tournament-infos2');
                     var matchInfosDiv = document.getElementById('match-infos');
                     if (info.round === 'Terminated') {
-                        tournamentInfosDiv.textContent = `Tournament - ${info.name}`;
-                        tournamentInfos2Div.textContent = `${info.round}`;
+                        tournamentInfosDiv.textContent = `Tournament ${info.name}`;
+                        tournamentInfos2Div.textContent = ` `;
                         matchInfosDiv.textContent = `Congratulations ${info.tourwinner}!`;
                         this.displayResults(info.results)
                     }
