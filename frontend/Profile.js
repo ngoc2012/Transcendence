@@ -16,6 +16,7 @@ export class Profile{
 
         this.dom_alias = document.getElementById("alias");
         this.dom_friend = document.getElementById("add_friend");
+        this.dom_add_friend = document.getElementById('add_user_as_friend');
         this.dom_password = document.getElementById("password");
         this.dom_email = document.getElementById("email");
         this.dom_login = document.getElementById("log_in");
@@ -36,6 +37,11 @@ export class Profile{
             this.dom_name.addEventListener("click", () => this.change_name());
         if (this.dom_pp)
             this.dom_pp.addEventListener("click", () => this.togglepp());
+        if (this.dom_add_friend)
+            {
+                console.log(l);
+                this.dom_add_friend.addEventListener("click", () => this.main.lobby.socket.send(JSON.stringify({'type': 'friend_request_send', 'sender': this.main.login, 'friend': l})));
+            }
         if (this.main.getCookie('login42')) {
             this.dom_password.style.display = 'none';
             this.dom_email.style.display = 'none';
@@ -62,7 +68,8 @@ export class Profile{
         new_form.appendChild(input);
         new_form.appendChild(document.createElement("br"));
         new_form.appendChild(button);
-        uploadpp.appendChild(new_form);
+        if (uploadpp)
+            uploadpp.appendChild(new_form);
         if (new_form)
             new_form.addEventListener('submit', (event) => this.submit_pp(event));
     }

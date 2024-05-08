@@ -80,15 +80,13 @@ Your friends: <br> {% for i in friends %} {{ i.login }} - {{ i.online_status }} 
 <hr>
 <div class="container">
   <h5>Friends</h5>
-  <ul>
     {% if friends %}
         {% for i in friends %}
-            <li>{{ i.login }} - {{ i.online_status }}</li>
+            <div>{{ i.login }} - {{ i.online_status }}</div>
         {% endfor %}
     {% else %}
         <p>You don't have friends (sadge)</p>
     {% endif %}
-  </ul>
   <button id="add_friend" class="btn btn-primary">Add Friends</button>
 </div>
   <hr>
@@ -101,6 +99,9 @@ Your friends: <br> {% for i in friends %} {{ i.login }} - {{ i.online_status }} 
 <div class="container">
   <div class="justify-content-center">
     <img src="{{ url|change_url }}" id="profile_picture" alt="User Icon" class="rounded-circle profile-picture">
+    {% if isfriend == False and ownprofile == False %}
+        <button id="add_user_as_friend" class="btn btn-primary">Add this user as friend</button>
+    {% endif %}
     <h2 class="text-center mb-4">{{ name }} Profile</h2>
     <p>Name: {{ name }}</p>
     <p>Login: {{ login }}</p>

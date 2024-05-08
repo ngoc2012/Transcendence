@@ -463,6 +463,7 @@ def profile(request, username):
                     return response
                 context = {
                     'ownprofile': True,
+                    'isfriend': False,
                     'id': user.id,
                     'login': user.login,
                     'password': user.password,
@@ -483,8 +484,28 @@ def profile(request, username):
                     response = HttpResponse("User not found")
                     response.status_code = 404
                     return response
+                try:
+                    friend = PlayersModel.objects.get(login=username).friends.get(login=request.POST['request'])
+                except PlayersModel.DoesNotExist:
+                    context = {
+                        'ownprofile': False,
+                        'isfriend': False,
+                        'id': user.id,
+                        'login': user.login,
+                        'password': user.password,
+                        'name': user.name,
+                        'alias': user.tourn_alias,
+                        'history': user.history.all(),
+                        'email': user.email,
+                        'elo': user.elo,
+                        'friends': user.friends.all(),
+                        'url': user.avatar.url,
+                        'form': UploadFileForm()
+                    }
+                    return render(request, 'profile.html', context)
                 context = {
                     'ownprofile': False,
+                    'isfriend': True,
                     'id': user.id,
                     'login': user.login,
                     'password': user.password,
@@ -508,6 +529,7 @@ def profile(request, username):
                 return response
             context = {
                 'ownprofile': True,
+                'isfriend': False,
                 'id': user.id,
                 'login': user.login,
                 'password': user.password,
@@ -528,8 +550,28 @@ def profile(request, username):
                 response = HttpResponse("User not found")
                 response.status_code = 404
                 return response
+            try:
+                friend = PlayersModel.objects.get(login=username).friends.get(login=request.GET['requester'])
+            except PlayersModel.DoesNotExist:
+                context = {
+                    'ownprofile': False,
+                    'isfriend': False,
+                    'id': user.id,
+                    'login': user.login,
+                    'password': user.password,
+                    'name': user.name,
+                    'alias': user.tourn_alias,
+                    'history': user.history.all(),
+                    'email': user.email,
+                    'elo': user.elo,
+                    'friends': user.friends.all(),
+                    'url': user.avatar.url,
+                    'form': UploadFileForm()
+                }
+                return render(request, 'profile.html', context)
             context = {
                 'ownprofile': False,
+                'isfriend': True,
                 'id': user.id,
                 'login': user.login,
                 'password': user.password,
@@ -552,6 +594,7 @@ def profile(request, username):
             return response
         context = {
             'ownprofile': True,
+            'isfriend': False,
             'id': user.id,
             'login': user.login,
             'password': user.password,
