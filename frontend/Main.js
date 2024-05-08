@@ -117,18 +117,6 @@ export class Main
         this.load('/pages/signup', () => this.signup.events());
     }
 
-    set_chat(l) {
-        if (this.login != ''){
-            $.ajax({
-                url: '/transchat/chat_lobby/',
-                method: 'POST',
-                data: {
-                    'username': l
-                }
-            })
-        }
-    }
-
     getCookie(name) {
         let cookieValue = null;
         if (document.cookie && document.cookie !== '') {
@@ -226,7 +214,7 @@ export class Main
     find_profile(requester, login){
         var csrftoken = this.getCookie('csrftoken')
         $.ajax({
-            url: '/profile/' + login + '/',
+            url: '/profile/',
             method: 'POST',
             headers: {
                 'X-CSRFToken': csrftoken,
@@ -237,8 +225,10 @@ export class Main
             },
             success: (info) => {
                 this.load_with_data('/profile/' + login, () => this.profile.events(false, login), {'user':login, 'requester': requester});
+                return true;
             }
         })
+        return false;
     }
 
     make_chat(chat_area){

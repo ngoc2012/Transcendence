@@ -106,13 +106,6 @@ export class code_2fa
                                 }
                             }
                         });
-                        $.ajax({
-                            url: '/transchat/chat_lobby/',
-                            method: 'POST',
-                            data: {
-                                'username': this.main.log_in.dom_login.value
-                            }
-                        })
                     } else {
                         this.main.set_status('Wrong code, please try again');
                     }

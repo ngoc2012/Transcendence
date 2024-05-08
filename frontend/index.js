@@ -16,7 +16,6 @@ function    reload(path, isPopState = false) {
     } else if (path === '/signup') {
         main.load('/pages/signup', () => main.signup.events(isPopState));
     } else if (path === '/lobby') {
-        // console.log(isPopState);
         main.load('/lobby', () => main.lobby.events(isPopState));
     } else if (path === '/') {
         main.load('/lobby', () => main.lobby.events(isPopState));
@@ -25,7 +24,7 @@ function    reload(path, isPopState = false) {
     } else if (path === '/transchat/general_chat'){
         main.load('transchat/general_chat', () => main.chat.events(isPopState));
     } else if (path.startsWith('/profile/')){
-        main.load('/profile/' + path.substring(9), () => main.profile.events(isPopState, path.substring(9)));
+        main.load_with_data('/profile/' + path.substring(9), () => main.profile.events(isPopState, path.substring(9)), {'user':path.substring(9), 'requester': main.login});
     } else if (path === '/tournament') {
         main.load('/tournament', () => main.lobby.tournament.events(isPopState));
     } else if (path === '/tournament/local') {

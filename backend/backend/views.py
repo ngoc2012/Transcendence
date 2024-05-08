@@ -7,6 +7,7 @@ from accounts.models import PlayersModel
 from accounts.forms import UploadFileForm
 from django.utils import timezone
 from transchat.models import Room
+import json
 from django.shortcuts import redirect
 from django.urls import reverse
 from django.conf import settings
@@ -431,7 +432,12 @@ def profile(request, username):
     if request.method == 'POST':
         if 'requester' in request.POST and 'user' in request.POST:
             if request.POST['requester'] == request.POST['user']:
-                user = PlayersModel.objects.filter(login=username).get(login=username)
+                try:
+                    user = PlayersModel.objects.filter(login=username).get(login=username)
+                except PlayersModel.DoesNotExist:
+                    response = HttpResponse("User not found")
+                    response.status_code = 404
+                    return response
                 context = {
                     'ownprofile': True,
                     'id': user.id,
@@ -448,7 +454,12 @@ def profile(request, username):
                 }
                 return render(request, 'profile.html', context)
             else:
-                user = PlayersModel.objects.filter(login=username).get(login=username)
+                try:
+                    user = PlayersModel.objects.filter(login=username).get(login=username)
+                except PlayersModel.DoesNotExist:
+                    response = HttpResponse("User not found")
+                    response.status_code = 404
+                    return response
                 context = {
                     'ownprofile': False,
                     'id': user.id,
@@ -466,7 +477,12 @@ def profile(request, username):
                 return render(request, 'profile.html', context)
     elif 'requester' in request.GET and 'user' in request.GET:
         if request.GET['requester'] == request.GET['user']:
-            user = PlayersModel.objects.filter(login=username).get(login=username)
+            try:
+                user = PlayersModel.objects.filter(login=username).get(login=username)
+            except PlayersModel.DoesNotExist:
+                response = HttpResponse("User not found")
+                response.status_code = 404
+                return response
             context = {
                 'ownprofile': True,
                 'id': user.id,
@@ -483,7 +499,12 @@ def profile(request, username):
             }
             return render(request, 'profile.html', context)
         else:
-            user = PlayersModel.objects.filter(login=username).get(login=username)
+            try:
+                user = PlayersModel.objects.filter(login=username).get(login=username)
+            except PlayersModel.DoesNotExist:
+                response = HttpResponse("User not found")
+                response.status_code = 404
+                return response
             context = {
                 'ownprofile': False,
                 'id': user.id,
@@ -500,7 +521,12 @@ def profile(request, username):
             }
             return render(request, 'profile.html', context)
     else:
-        user = PlayersModel.objects.filter(login=username).get(login=username)
+        try:
+            user = PlayersModel.objects.filter(login=username).get(login=username)
+        except PlayersModel.DoesNotExist:
+            response = HttpResponse("User not found")
+            response.status_code = 404
+            return response
         context = {
             'ownprofile': True,
             'id': user.id,
@@ -516,6 +542,8 @@ def profile(request, username):
             'form': UploadFileForm()
         }
         return render(request, 'profile.html', context)
+
+    
 
 @csrf_exempt
 def alias(request, username):
@@ -659,8 +687,6 @@ def avatar(request, username):
     print(request.FILES['id_file'])
     user.avatar = request.FILES['id_file']
     user.save()
-    return JsonResponse({"new_pp": True, "url": user.avatar.url})
-    # return redirect(request)
     return JsonResponse({"new_pp": True, "url": user.avatar.url})
 
 def tournament_request(request):

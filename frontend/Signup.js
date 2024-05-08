@@ -86,16 +86,7 @@ export class Signup
                 this.main.set_status('Registration failed: ' + errorThrown);
             }
         });
-
-        $.ajax({
-            url: '/transchat/chat_lobby/',
-            method: 'POST',
-            data: {
-                'username': this.dom_login.value
-            }
-        })
     }
-
     display2FASetup(secret) {
         let csrftoken = this.main.getCookie('csrftoken');
 

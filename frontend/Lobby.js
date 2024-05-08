@@ -25,7 +25,6 @@ export class Lobby
 
         this.main.checkcsrf();
 
-        this.main.set_chat(this.main.login);
         if (this.main.login != '') {
             this.rooms_update();
         }
@@ -272,7 +271,6 @@ export class Lobby
             }));
         }
 
-
         if (this.main.chat_socket === -1){
             this.main.chat_socket = new WebSocket(
                 'wss://'
@@ -292,6 +290,7 @@ export class Lobby
        	this.main.chat_socket.onmessage = (e) => {
        	    var data = JSON.parse(e.data);
             var list_user = document.getElementById('user_list');
+            console.log(data)
             if (data.type === 'update_divs'){
                 let divs = document.getElementsByClassName('user_chat');
                 for (let i = 0; divs[i] != undefined; i++){
@@ -353,6 +352,17 @@ export class Lobby
                     new_element.insertAdjacentHTML('afterend', "<p><strong>" + data.message + "</strong></p>");
                     return;
                 }
+            }
+            else if (data.type != 'update' && data.type != 'connection'){
+                let new_element = document.createElement("a");
+                new_element.addEventListener("click", () => this.main.find_profile(this.main.login, data.user));
+                new_element.style = "cursor:pointer; color: rgb(0, 128, 255); text-decoration: underline;";
+                new_element.innerHTML = data.user + ":";
+                new_element.className = 'user_chat';
+                let new_message = document.createElement("p");
+                new_message.innerHTML = data.message;
+		        document.querySelector('#chat-log').appendChild(new_element);
+                new_element.insertAdjacentHTML('afterend', "<p>" + data.message + "</p>");
             }
        	};
         var chat_area = document.getElementById('chat_area');
