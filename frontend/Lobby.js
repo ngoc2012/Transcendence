@@ -363,7 +363,7 @@ export class Lobby
                 'type': 'update'
             }));
             this.main.chat_socket.close();
-            this.main.chat_socket = -1;
+            this.main.chat_socket = -1; 
         }
     }
 }
