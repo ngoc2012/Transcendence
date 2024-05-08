@@ -71,7 +71,7 @@ export class tournament_history {
                 }
             },
             error: (xhr, status, error) => {
-                console.error('Error:', error);
+                // console.error('Error:', error);
             }
         });
     }

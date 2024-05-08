@@ -389,6 +389,7 @@ def callback(request):
         response = render(request, 'index.html', response)
         response.set_cookie('refresh_token', refresh_token, httponly=True, samesite='Lax', secure=True)
         response.set_cookie('access_token', access_token, httponly=True, samesite='Lax', secure=True)
+        response.set_cookie('login42', secure=True)
 
         return response
     except Exception as e:

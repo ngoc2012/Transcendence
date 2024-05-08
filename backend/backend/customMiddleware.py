@@ -6,6 +6,8 @@ from datetime import datetime, timedelta
 import jwt, pytz
 from django.core.cache import cache
 from django.http import HttpResponseRedirect
+from django.core.exceptions import ObjectDoesNotExist
+
 
 User = get_user_model()
 
@@ -33,7 +35,12 @@ class JWTMiddleware(MiddlewareMixin):
         except jwt.ExpiredSignatureError:
             return self.handle_refresh_token(request)
         except jwt.InvalidTokenError:
-            return HttpResponseRedirect('/login/')
+            return HttpResponseRedirect('/')
+        
+    def process_exception(self, request, exception):
+        print(f'Error at {request.path}: {exception}')
+        if isinstance(exception, ObjectDoesNotExist):
+            return HttpResponseRedirect('/')
 
     def get_user(self, user_id):
         user = cache.get(f'user_{user_id}')
@@ -62,11 +69,11 @@ class JWTMiddleware(MiddlewareMixin):
                 request.user = user
                 return None
             else:
-                return HttpResponseRedirect('/login/')
+                return HttpResponseRedirect('/')
         except jwt.ExpiredSignatureError:
-            return HttpResponseRedirect('/login/')
+            return HttpResponseRedirect('/')
         except jwt.InvalidTokenError:
-            return HttpResponseRedirect('/login/')
+            return HttpResponseRedirect('/')
 
     def generate_jwt_tokens(self, user_id):
         access_token = jwt.encode({

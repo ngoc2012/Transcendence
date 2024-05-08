@@ -62,7 +62,7 @@ if (my42login !== null && my42login !== "" && my42email !== "" && my42ws != "")
 
     var dom_logout = document.getElementById('logoutButton');
     if (dom_logout) {
-        dom_logout.addEventListener('click', () => reload());
+        dom_logout.addEventListener('click', () => main.logout());
     }
 }
 
@@ -211,11 +211,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     return null;
                 }
             } else {
-                console.error('Session validation request failed:', response.statusText);
+                // console.error('Session validation request failed:', response.statusText);
                 return null;
             }
         } catch (error) {
-            console.error('Error during session validation:', error);
+            // console.error('Error during session validation:', error);
             return null;
         }
     }

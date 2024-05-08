@@ -559,8 +559,8 @@ export class Pong
         instruct2.style.cssText = 'font-family: "Poppins", sans-serif; font-weight: 400; font-style: normal; color: white;';
         matchBox.appendChild(instruct2);
         let instruct3 = document.createElement('p');
-        instruct2.textContent = `Press 'space' to launch the ball`;
-        instruct2.style.cssText = 'font-family: "Poppins", sans-serif; font-weight: 400; font-style: normal; color: white;';
+        instruct3.textContent = `Press 'space' to launch the ball`;
+        instruct3.style.cssText = 'font-family: "Poppins", sans-serif; font-weight: 400; font-style: normal; color: white;';
         matchBox.appendChild(instruct3);
 
         let startButton = document.createElement('button');
@@ -574,7 +574,6 @@ export class Pong
             this.pmBox = false;
         };
         matchBox.appendChild(startButton);
-
         document.body.appendChild(matchBox);
     }
 
