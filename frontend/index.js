@@ -99,11 +99,6 @@ document.addEventListener('DOMContentLoaded', () => {
     dom_homebar.addEventListener("click", () => main.lobby.homebar());
     dom_homebar2.addEventListener("click", () => main.lobby.homebar());
 
-    var dom_chat = document.getElementById("chat");
-    var dom_chat2 = document.getElementById("chat2");
-    dom_chat.addEventListener("click", () => main.lobby.start_chat());
-    dom_chat2.addEventListener("click", () => main.lobby.start_chat());
-
     var dom_profile = document.getElementById('profile');
     dom_profile.addEventListener("click", () => main.lobby.profile(false));
 

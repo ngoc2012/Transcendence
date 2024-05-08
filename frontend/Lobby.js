@@ -311,7 +311,7 @@ export class Lobby
                     }
                 }
                 // this.main.refresh_user_list(data.users, data.pictures);
-                return;
+                this.displayUsers(data);
             }
             else if (data.type === 'chat_message'){
                 let new_element = document.createElement("a");
@@ -370,6 +370,29 @@ export class Lobby
             chat_area.innerHTML = '';        
         this.main.make_chat(chat_area);
     }
+    
+    displayUsers(data) {
+        if (data.type === "update") {
+            var users = data.users;
+            var pictures = data.pictures;
+            var container = $(".user-box");
+            container.empty();
+    
+            users.forEach(function(user, index) {
+                var userPic = pictures[index].avatar;
+                var userContent = $(
+                    '<div style="display: flex; align-items: center; margin-bottom: 10px;">' +
+                    '<img src="' + 'static/' + userPic + '" alt="Profile Picture" style="width: 40px; height: 40px; border-radius: 50%; margin-right: 10px;">' +                    
+                    '<span style="flex-grow: 1;">' + user.login + '</span>' +
+                    '<button class="btn btn-success btn-sm" type="button">Add Friend</button>' +
+                    '<button class="btn btn-info btn-sm" type="button">Invite</button>' +
+                    '</div>'
+                );
+                container.append(userContent);
+            });
+        }
+    }    
+    
 
     tournament_click() {
         if (this.main.login === '')
