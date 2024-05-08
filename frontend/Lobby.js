@@ -366,6 +366,8 @@ export class Lobby
             }
        	};
         var chat_area = document.getElementById('chat_area');
+        if (this.main.login != '')
+            chat_area.innerHTML = '';        
         this.main.make_chat(chat_area);
     }
 
