@@ -38,10 +38,7 @@ export class Profile{
         if (this.dom_pp)
             this.dom_pp.addEventListener("click", () => this.togglepp());
         if (this.dom_add_friend)
-            {
-                console.log(l);
-                this.dom_add_friend.addEventListener("click", () => this.main.lobby.socket.send(JSON.stringify({'type': 'friend_request_send', 'sender': this.main.login, 'friend': l})));
-            }
+            this.dom_add_friend.addEventListener("click", () => this.main.lobby.socket.send(JSON.stringify({'type': 'friend_request_send', 'sender': this.main.login, 'friend': l})));
         if (this.main.getCookie('login42')) {
             this.dom_password.style.display = 'none';
             this.dom_email.style.display = 'none';
@@ -376,6 +373,10 @@ export class Profile{
         if (this.dom_friend_name.value === ''){
             this.main.set_status('All fields are required');
             return;
+        }
+        if (this.dom_friend_name.value === this.main.login){
+            this.main.set_status("You can't add yourself as friend");
+            return ;
         }
         $.ajax({
             url: '/profile/' + this.main.login + '/add_friend/',
