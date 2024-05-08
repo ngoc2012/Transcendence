@@ -184,7 +184,7 @@
           overflow: hidden;
           border-radius: 10px;
           display: flex; 
-          justify-content: space-between;
+          justify-content: center;
           align-items: center;
           margin-left: auto;
           margin-right: auto;
@@ -192,11 +192,9 @@
       }
 
       .mobile-sidebar myicon {
-            flex: 0 0 auto;
-            display: flex;
+            /* flex: 0 0 auto; */
+            /* display: flex; */
             justify-content: center;
-            width: 40px;
-            /* height: 40px; */
             margin: 0;
             padding: 0;
             color: #ffffff;
@@ -206,6 +204,9 @@
         #mobile-sidebar .nav-item {
           text-align: center;
           justify-content: center;
+          width: 20%;
+          margin-left: 4%;
+          border-radius: 0;
         }
 
 
@@ -316,24 +317,24 @@
   <div id="mobile-sidebar" class="mobile-sidebar"  style="transform: scale(0.8);">
     <div class="p-3">
         <ul class="nav flex-row">
-          <li class="nav-item mr-3">
+          <li class="nav-item">
             <button id="homebar2" class="btn btn-secondary btn-block mb-2" type="button">
-                <myicon><i class="fas fa-house-user" style="margin-right: 5px;"></i></myicon>
+                <myicon><i class="fas fa-house-user" ></i></myicon>
             </button>
           </li>
-          <li class="nav-item mr-3">
+          <li class="nav-item">
               <button id="pong2" class="btn btn-success btn-block mb-2" type="button">
-                  <myicon><i class="fas fa-table-tennis" style="margin-right: 5px;"></i></myicon>
+                  <myicon><i class="fas fa-table-tennis" ></i></myicon>
               </button>
           </li>
-          <li class="nav-item mr-3">
+          <li class="nav-item">
               <button id="tournament2" class="btn btn-warning btn-block mb-2" type="button">
-                  <myicon><i class="fas fa-trophy" style="margin-right: 5px;"></i></myicon>
+                  <myicon><i class="fas fa-trophy" ></i></myicon>
               </button>
           </li>
-          <li class="nav-item mr-3">
-              <button id="tournament_history2" class="btn btn-secondary btn-block mb-2" type="button">
-                  <myicon><i class="fab fa-ethereum" style="margin-right: 5px;"></i></myicon>
+          <li class="nav-item">
+              <button id="tournament_history2" class="btn btn-info btn-block mb-2" type="button">
+                  <myicon><i class="fab fa-ethereum" ></i></myicon>
               </button>
           </li>
         </ul>
