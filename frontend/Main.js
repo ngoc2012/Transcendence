@@ -232,7 +232,7 @@ export class Main
     }
 
     make_chat(chat_area){
-        if (this.login == '')
+        if (this.login === '')
             chat_area.innerHTML = '';
         if (document.getElementById('chat-log'))
             return;

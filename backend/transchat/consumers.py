@@ -92,7 +92,11 @@ class ChatConsumer(WebsocketConsumer):
                 if json.loads(text_data)['type'] == 'connection':
                     self.scope['state']['username'] = json.loads(text_data)['user']
                     self.scope['state']['room'] = 'general_chat'
-                    room = Room.objects.get(room_name='general_chat')
+                    try:
+                        room = Room.objects.get(room_name='general_chat')
+                    except Room.DoesNotExist:
+                        room = Room(room_name='general_chat')
+                        room.save()
                     try:
                         room.users.get(login=self.scope['state']['username'])
                     except PlayersModel.DoesNotExist:
