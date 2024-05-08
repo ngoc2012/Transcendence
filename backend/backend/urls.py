@@ -46,7 +46,6 @@ urlpatterns = [
     path('validate-session/', views.validate_session, name='validate_session'),
     path('login42/', views.login42, name='login42'),
     re_path(r'^.*$', views.redirect, name='redirect'),
-    path('profile-picture/<url>', views.serve_profile_picture, name='profile-picture'),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

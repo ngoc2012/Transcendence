@@ -735,18 +735,4 @@ def auth_view(request):
         return response
     else:
         return JsonResponse({'error': 'Invalid login credentials!'}, status=401)
-    
-def serve_profile_picture(request, url):
-    print('in')
-    picture_path = os.path.join(settings.BASE_DIR, 'app', 'frontend', 'media', url)
-
-    # Check if the file exists
-    if os.path.exists(picture_path):
-        # Open the file in binary mode
-        with open(picture_path, 'rb') as picture_file:
-            # Return the picture as HttpResponse
-            return HttpResponse(picture_file.read(), content_type='image/png')
-    else:
-        # Return a 404 error if the file does not exist
-        return HttpResponse(status=404)
 
