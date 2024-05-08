@@ -14,34 +14,17 @@
   <style>
   
 
-
-  .container {
-        margin-top: 0;
-        margin-left: 0;
-        padding-left: 0;
-        margin-right: 0;
-        padding-right: 0;
-        text-align: center;
-    }
-
     .score {
       font-family: 'Courier New', Courier, monospace;
       font-size: 48px;
       color: #ffffff;
       text-align: center;
     }
-    #row {
-      border: 1px solid white;
-    }
+
     #pongCanvas {
         border: 1px solid white;
     }
-    #pongThreeJS {
-        margin-left: 0;
-        padding-left: 0;
-        margin-right: 0;
-        padding-right: 0;
-    }
+
     .button-container {
       text-align: center;
     }
@@ -51,8 +34,6 @@
 </head>
 <body>
 
-
-  <div class="container">
 
     <div class="row justify-content-between align-items-center mt-3 ml-0">
       <div class="col-4">
@@ -69,8 +50,12 @@
     </div>
 
     <div id="game_name" style="display: none;"></div>
-    <div id="pongThreeJS" style="display: none;"></div>
-    <canvas id="pongCanvas"></canvas>
+
+    <div class="row justify-content-center align-items-center">
+      <div id="pongThreeJS" style="display: none;"></div>
+      <canvas id="pongCanvas"></canvas>
+    </div>
+
     <div id="display_board" style="display: none; transform: scale(0.6);">
       <form>
           <div class="form-row">
@@ -143,7 +128,6 @@
     <div class="d-flex justify-content-center align-items-center">
       <button id="toggle_display_board" type="button" style="display: none;" class="btn btn-custom mb-4">Show display board</button>
     </div>
-  </div>
 
 
   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
