@@ -44,7 +44,7 @@ class ChatConsumer(WebsocketConsumer):
         data['user'].save()
         self.send(text_data=json.dumps({"message": "User " + block_user.login + " blocked succesfully.", 'user': data['username']}))
         return
-    
+
     def unblock_user(self, huh, data, str):
         if str == data['username']:
             self.send(text_data=json.dumps({"message": "You can't unblock yourself.", 'user': data['username']}))
@@ -82,7 +82,7 @@ class ChatConsumer(WebsocketConsumer):
         async_to_sync(self.channel_layer.group_send)(
             self.room_group_name, {"type": "whisper", "message": msg, "receiver": receiver.username, 'sender': data['username']}
         )
-    
+
 
 
     # Receive message from WebSocket
@@ -111,8 +111,8 @@ class ChatConsumer(WebsocketConsumer):
                     async_to_sync(self.channel_layer.group_send)(self.room_group_name, {"type": "update_divs", 'old_user': json.loads(text_data)['old_user'], 'new_user': json.loads(text_data)['new_user']})
                     return
         elif json.loads(text_data)["type"] == 'update':
-                async_to_sync(self.channel_layer.group_send)(self.room_group_name, {"type": "update"})
-                return
+            async_to_sync(self.channel_layer.group_send)(self.room_group_name, {"type": "update"})
+            return
         data = {
             'text_data': json.loads(text_data),
             'message': json.loads(text_data)['message'],
@@ -178,7 +178,7 @@ class ChatConsumer(WebsocketConsumer):
         user = event['sender']
         if self.scope['state']['username'] == receiver:
             self.send(json.dumps({"type": "whisper", "user": user, "message": message, 'receiver': receiver}))
-    
+
     def update_divs(self, event):
         old_user = event['old_user']
         new_user = event['new_user']

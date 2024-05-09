@@ -1,6 +1,6 @@
 // Description: Contains functions for game logic.
-export function join_game(main, game_id, isPopState)
-{   
+export function join_game(main, game_id, isPopState, joined = false)
+{
     var csrftoken = main.getCookie('csrftoken');
     if (csrftoken === null) {
         main.load('/pages/login', () => main.log_in.events());
@@ -23,6 +23,9 @@ export function join_game(main, game_id, isPopState)
             } else {
                 switch (info.game) {
                     case 'pong':
+                        if (joined)
+                            main.lobby.pong_game(info, isPopState, true);
+                        else
                         main.lobby.pong_game(info, isPopState);
                         break;
                 }
