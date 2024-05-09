@@ -361,9 +361,7 @@ def callback(request):
 
         if user is not None:
             enable2fa = 'true' if getattr(user, 'secret_2fa', '') else 'false'
-
             access_token, refresh_token = generate_jwt_tokens(user.id)
-
             user.acc = access_token
             user.ref = refresh_token
             user.save()
@@ -419,8 +417,15 @@ def callback(request):
 
         return response
     except Exception as e:
-        # print(f"An error occurred: {e}")
-        return HttpResponse("An error occurred.")
+        if 'duplicate key value violates unique constraint "accounts_playersmodel_username_key"' in str(e):
+                response = {
+                    'error_user': "Login already taken",
+                }
+                response = render(request, 'index.html', response)
+                return response
+        else:
+            return render(request, 'index.html', {'error_user': "An error occured"})
+
 
 
 def logout(request):
