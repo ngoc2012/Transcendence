@@ -66,16 +66,17 @@ export class Signup
                     var dom_signup = document.getElementById('signup');
                     if (dom_signup) {
                         dom_signup.style.display = "none";
-                        dom_logout = document.getElementById('logoutButton');
-                        if (!dom_logout) {
-                            dom_signup.insertAdjacentHTML('afterend', '<button id="logoutButton" class="btn btn-danger">Log Out</button>');
+                        dom_signup.insertAdjacentHTML('afterend', '<button id="logoutButton" class="btn btn-danger">Log Out</button>');
+                        var dom_logout = document.getElementById('logoutButton');
+                        if (dom_logout) {
+                            dom_logout.addEventListener('click', () => this.main.logout());
                         }
                     }
 
-                    var dom_logout = document.getElementById('logoutButton');
-                    if (dom_logout) {
-                        dom_logout.addEventListener('click', () => this.main.logout());
-                    }
+                    // var dom_logout = document.getElementById('logoutButton');
+                    // if (dom_logout) {
+                    //     dom_logout.addEventListener('click', () => this.main.logout());
+                    // }
                     if (checkbox)
                         this.display2FASetup(info.secret);
                     else

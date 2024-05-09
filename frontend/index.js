@@ -79,6 +79,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+
     var dom_tournament = document.getElementById("tournament");
     dom_tournament.addEventListener("click", () => main.lobby.tournament_click());
     var dom_tournament2 = document.getElementById("tournament2");

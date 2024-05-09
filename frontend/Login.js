@@ -91,12 +91,13 @@ export class Login
                                 if (dom_signup) {
                                     dom_signup.style.display = "none";
                                     dom_signup.insertAdjacentHTML('afterend', '<button id="logoutButton" class="btn btn-danger">Log Out</button>');
+                                    var dom_logout = document.getElementById('logoutButton');
+                                    if (dom_logout) {
+                                        dom_logout.addEventListener('click', () => this.main.logout());
+                                    }
                                 }
 
-                                var dom_logout = document.getElementById('logoutButton');
-                                if (dom_logout) {
-                                    dom_logout.addEventListener('click', () => this.main.logout());
-                                }
+
                                 var dom_picture = document.getElementById('picture');
                                 if (dom_picture){
                                     dom_picture.src = this.main.picture.replace('/app/frontend/', '/static/');

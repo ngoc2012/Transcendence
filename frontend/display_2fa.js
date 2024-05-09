@@ -27,10 +27,10 @@ export class display_2fa {
             dom_signup.style.display = "none";
         }
 
-        var dom_logout = document.getElementById('logoutButton');
-        if (dom_logout) {
-            dom_logout.addEventListener('click', () => this.main.logout());
-        }
+        // var dom_logout = document.getElementById('logoutButton');
+        // if (dom_logout) {
+        //     dom_logout.addEventListener('click', () => this.main.logout());
+        // }
         // this.main.history_stack.push('/');
         // window.history.pushState({}, '', '/');
         this.main.load('/lobby', () => this.main.lobby.events());
