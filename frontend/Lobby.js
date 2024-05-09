@@ -239,22 +239,24 @@ export class Lobby
                 const rooms = data.room;
                 const selectElement = document.getElementById('rooms');
 
-                for (let i = selectElement.options.length - 1; i >= 0; i--) {
-                    selectElement.remove(i);
-                }
+                if (selectElement){
+                    for (let i = selectElement.options.length - 1; i >= 0; i--) {
+                        selectElement.remove(i);
+                    }
 
-                if (rooms && rooms.length > 0) {
-                    rooms.forEach((room) => {
-                        var option = document.createElement("option");
-                        option.value = room.id;
-                        let string = room.id.substring(0, 5);
-                        option.text = `${room.name} - ${string}... - ${room.owner}`;
-                        selectElement.add(option);
-                    });
-                } else {
-                    var noRoomsOption = document.createElement("option");
-                    noRoomsOption.text = "No rooms available";
-                    selectElement.add(noRoomsOption);
+                    if (rooms && rooms.length > 0) {
+                        rooms.forEach((room) => {
+                            var option = document.createElement("option");
+                            option.value = room.id;
+                            let string = room.id.substring(0, 5);
+                            option.text = `${room.name} - ${string}... - ${room.owner}`;
+                            selectElement.add(option);
+                        });
+                    } else {
+                        var noRoomsOption = document.createElement("option");
+                        noRoomsOption.text = "No rooms available";
+                        selectElement.add(noRoomsOption);
+                    }
                 }
             }
         }
@@ -413,8 +415,11 @@ export class Lobby
                                     'type': 'friend_request_send'
                                 }));
                             },
+                            success: (info) =>{
+                                this.main.set_status(info);
+                            },
                             error: (info) =>{
-                                this.main.set_status(info.responseText);
+                                this.main.set_status(info.responseText)
                             }
                         })
                     );

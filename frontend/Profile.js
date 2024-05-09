@@ -37,8 +37,10 @@ export class Profile{
             this.dom_name.addEventListener("click", () => this.change_name());
         if (this.dom_pp)
             this.dom_pp.addEventListener("click", () => this.togglepp());
-        if (this.dom_add_friend)
+        if (this.dom_add_friend){
             this.dom_add_friend.addEventListener("click", () => this.main.lobby.socket.send(JSON.stringify({'type': 'friend_request_send', 'sender': this.main.login, 'friend': l})));
+            this.dom_add_friend.addEventListener("click", () => this.dom_add_friend.parentNode.removeChild(this.dom_add_friend));
+        }
         if (this.main.getCookie('login42')) {
             this.dom_password.style.display = 'none';
             this.dom_email.style.display = 'none';
@@ -116,26 +118,20 @@ export class Profile{
     }
 
     alias_confirm(){
-        if (this.dom_textfield.value === ''){
-            this.main.set_status('You must enter a value.');
-            return;
-        }
-        else{
-            $.ajax({
-                url: '/profile/' + this.main.login + '/alias/',
-                method: 'POST',
-                data:{
-                    'alias': this.dom_textfield.value
-                },
-                success: (info) =>{
-                    this.main.set_status(info);
-                    this.main.load('/profile/' + this.main.login, () => this.main.profile.events(false, this.main.login));
-                },
-                error: (info) =>{
-                    this.main.set_status(info.responseText);
-                }
-            });
-        }
+        $.ajax({
+            url: '/profile/' + this.main.login + '/alias/',
+            method: 'POST',
+            data:{
+                'alias': this.dom_textfield.value
+            },
+            success: (info) =>{
+                this.main.set_status(info);
+                this.main.load('/profile/' + this.main.login, () => this.main.profile.events(false, this.main.login));
+            },
+            error: (info) =>{
+                this.main.set_status(info.responseText);
+            }
+        });
     }
 
     alias_cancel(){
@@ -232,8 +228,6 @@ export class Profile{
                 this.main.set_status(info);
                 this.email = this.dom_cenewemail;
                 this.main.email = this.email;
-                // this.main.history_stack.push('/profile/' + this.main.login + '/');
-                // window.history.pushState({}, '', '/profile/' + this.main.login + '/');
                 this.main.load('/profile/' + this.main.login, () => this.main.profile.events(false, this.main.login));
             },
             error: (info) =>{
@@ -365,8 +359,10 @@ export class Profile{
         this.dom_friend_name = document.querySelector("#friend");
         this.dom_af_confirm = document.querySelector("#confirm");
         this.dom_af_cancel = document.querySelector("#cancel");
-        this.dom_af_confirm.addEventListener("click", () => this.af_confirm());
-        this.dom_af_cancel.addEventListener("click", () => this.af_cancel());
+        if (this.dom_af_confirm)
+            this.dom_af_confirm.addEventListener("click", () => this.af_confirm());
+        if (this.dom_af_cancel)
+            this.dom_af_cancel.addEventListener("click", () => this.af_cancel());
     }
 
     af_confirm(){
