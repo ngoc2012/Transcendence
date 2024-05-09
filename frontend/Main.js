@@ -243,11 +243,12 @@ export class Main
         let new_button = document.createElement('button');
         new_button.id = 'chat-message-submit';
         new_button.type = 'button';
-        new_button.class = "btn btn-primary";
+        new_button.className = "btn btn-primary";
         new_button.innerHTML = 'Send';
         new_input.id = "chat-message-input";
         new_input.type = "text";
-        new_input.size = "11";
+        new_input.size = "13";
+        new_input.className = "form-chat";
         new_textarea.id ='chat-log';
         new_chatbox.id = "chatbox";
         new_element.id = "chat";

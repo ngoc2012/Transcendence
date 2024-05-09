@@ -616,15 +616,27 @@ def alias(request, username):
         return(render(request, 'alias.html'))
     if request.method == 'POST':
         if 'alias' in request.POST:
-            try:
-                check_alias = PlayersModel.objects.get(tourn_alias=request.POST['alias'])
-            except PlayersModel.DoesNotExist:
-                user.tourn_alias = request.POST['alias']
-                user.save()
-                return HttpResponse('Tournament alias succesfully changed')
-            response = HttpResponse('Alias already in use')
-            response.status_code = 401
-            return response
+            if request.POST['alias'] != '' :
+                try:
+                    check_alias = PlayersModel.objects.get(tourn_alias=request.POST['alias'])
+                except PlayersModel.DoesNotExist:
+                    user.tourn_alias = request.POST['alias']
+                    user.save()
+                    return HttpResponse('Tournament alias succesfully changed')
+                response = HttpResponse('Alias already in use')
+                response.status_code = 401
+                return response
+            else:
+                if user.tourn_alias != '':
+                    user.tourn_alias = ''
+                    user.save()
+                    response = HttpResponse("Tournament alias deleted")
+                    response.status_code = 200
+                    return response
+                else:
+                    response = HttpResponse("You must enter a value")
+                    response.status_code = 403
+                    return response
 
 @csrf_exempt
 def password(request, username):
