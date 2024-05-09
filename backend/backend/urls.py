@@ -46,6 +46,7 @@ urlpatterns = [
     path('validate-session/', views.validate_session, name='validate_session'),
     path('login42/', views.login42, name='login42'),
     re_path(r'^.*$', views.redirect, name='redirect'),
+    path('game/invite/', views.game_invite, name='game_invite'),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

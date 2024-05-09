@@ -269,6 +269,7 @@ def new_player(request):
         response = JsonResponse(response_data)
         response.set_cookie('refresh_token', refresh_token, httponly=True, samesite='Lax', secure=True)
         response.set_cookie('access_token', access_token, httponly=True, samesite='Lax', secure=True)
+        response.delete_cookie('login42')
         return response
 
     except IntegrityError:
@@ -312,6 +313,7 @@ def log_in(request):
         response = JsonResponse(response_data)
         response.set_cookie('refresh_token', refresh_token, httponly=True, samesite='Lax', secure=True)
         response.set_cookie('access_token', access_token, httponly=True, samesite='Lax', secure=True)
+        response.delete_cookie('login42')
         return response
 
     else:
@@ -361,9 +363,7 @@ def callback(request):
 
         if user is not None:
             enable2fa = 'true' if getattr(user, 'secret_2fa', '') else 'false'
-
             access_token, refresh_token = generate_jwt_tokens(user.id)
-
             user.acc = access_token
             user.ref = refresh_token
             user.save()
@@ -419,8 +419,15 @@ def callback(request):
 
         return response
     except Exception as e:
-        # print(f"An error occurred: {e}")
-        return HttpResponse("An error occurred.")
+        if 'duplicate key value violates unique constraint "accounts_playersmodel_username_key"' in str(e):
+                response = {
+                    'error_user': "Login already taken",
+                }
+                response = render(request, 'index.html', response)
+                return response
+        else:
+            return render(request, 'index.html', {'error_user': "An error occured"})
+
 
 
 def logout(request):
@@ -608,6 +615,8 @@ def profile(request, username):
             'form': UploadFileForm()
         }
         return render(request, 'profile.html', context)
+
+
 
 @csrf_exempt
 def alias(request, username):
@@ -837,4 +846,8 @@ def auth_view(request):
         return response
     else:
         return JsonResponse({'error': 'Invalid login credentials!'}, status=401)
+
+def game_invite(request):
+    sender = request.POST.get('sender')
+    response = request.POST.get('response')
 
