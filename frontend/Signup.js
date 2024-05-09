@@ -6,7 +6,6 @@ export class Signup
 
     events(isPopState) {
         this.main.checkcsrf();
-        this.main.set_status('');
         if (!isPopState)
             window.history.pushState({page: '/signup'}, '', '/signup');
 
@@ -126,7 +125,6 @@ export class Signup
     }
 
     cancel() {
-        this.main.set_status('');
         this.main.load('/lobby', () => this.main.lobby.events());
     }
 }

@@ -57,7 +57,6 @@ export class Lobby
     }
 
 	start_chat(){
-		this.main.set_status('')
 		if (this.main.login === ''){
 			this.main.set_status('You must be logged in to chat.');
 			return;

@@ -266,7 +266,7 @@
     <base href="/">
   </head>
 
-<body>
+  <body>
     <div id="dynamic-bg"></div>
 
     <div class="background-wrapper">
@@ -376,7 +376,7 @@
         if (mutation.type === 'childList' && mutation.target.id === 'status') {
           // console.log('Status changed:', mutation.target.innerText);
           $('#status').stop(true, true);
-          $('#status').fadeIn().delay(200).fadeOut(3000);
+          $('#status').fadeIn().delay(200).fadeOut(2000);
 
         }
       }
