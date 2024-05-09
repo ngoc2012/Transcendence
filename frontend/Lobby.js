@@ -414,8 +414,6 @@ export class Lobby
                                     'friend': user.login,
                                     'type': 'friend_request_send'
                                 }));
-                            },
-                            success: (info) =>{
                                 this.main.set_status(info);
                             },
                             error: (info) =>{
