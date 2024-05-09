@@ -142,16 +142,10 @@ class ChatConsumer(WebsocketConsumer):
                     data['whisper'] = True
         # Send message to room group
         if data['message'] != '':
-            if len(data['message']) > 20:
-                new_msg = self.split_message(data['message'])
-                async_to_sync(self.channel_layer.group_send)(
-                    self.room_group_name, {"type": "chat_message", "message": new_msg, "user": data['user'].login}
-                )
-            else:
-                print("c parceke on va la dedans ?")
-                async_to_sync(self.channel_layer.group_send)(
-                    self.room_group_name, {"type": "chat_message", "message": data['message'], "user": data['user'].login}
-                )
+            print("c parceke on va la dedans ?")
+            async_to_sync(self.channel_layer.group_send)(
+                self.room_group_name, {"type": "chat_message", "message": data['message'], "user": data['user'].login}
+            )
 
 
     # Receive message from room group
@@ -191,13 +185,26 @@ class ChatConsumer(WebsocketConsumer):
 
     def split_message(self, str):
         msg = ""
+        msg_split = str.split(' ')
         count = 0
-        for i in str:
-            if count == 19:
+        for i in msg_split:
+            if count + len(i) < 20:
+                msg += i + ' '
+                count += len(i) + 1
+            elif len(i) < 20:
                 msg += '<br>'
-                msg += i
-                count = 1
+                msg += i + ' '
+                count = len(i) + 1
             else:
-                msg += i
-                count += 1
+                print(i)
+                subcount = count
+                for n in i:
+                    if subcount < 19:
+                        msg += n
+                        subcount += 1
+                    else:
+                        msg += '<br>'
+                        subcount = 0
+                    print(subcount)
+                count = 0
         return msg

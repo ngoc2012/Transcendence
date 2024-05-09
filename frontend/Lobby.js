@@ -321,7 +321,7 @@ export class Lobby
                 let new_message = document.createElement("p");
                 new_message.innerHTML = data.message;
 		        document.querySelector('#chat-log').appendChild(new_element);
-                new_element.insertAdjacentHTML('afterend', "<p>" + data.message + "</p>");
+                new_element.insertAdjacentHTML('afterend', "<br><m>" + data.message + "</m><br>");
                 return;
             }
             else if (data.type === 'whisper'){
@@ -333,11 +333,12 @@ export class Lobby
                     new_recv.addEventListener("click", () => this.main.find_profile(this.main.login, data.receiver));
                     new_recv.innerHTML = data.receiver +":";
                     new_recv.style = "cursor:pointer; color: rgb(0, 128, 255); text-decoration: underline;";
-                    let new_message = document.createElement("p");
+                    new_recv.className = "user_chat_whisper";
+                    let new_message = document.createElement("m");
                     new_message.innerHTML = data.message;
                     document.querySelector('#chat-log').appendChild(new_element);
                     new_element.insertAdjacentElement('afterend', new_recv);
-                    new_recv.insertAdjacentHTML('afterend', "<p><strong>" + data.message + "</strong></p>");
+                    new_recv.insertAdjacentHTML('afterend', "<br><m><strong>" + data.message + "</strong></m><br>");
                 }
                 else{
                     let new_element = document.createElement("a");
@@ -345,10 +346,10 @@ export class Lobby
                     new_element.style = "cursor:pointer; color: rgb(0, 128, 255); text-decoration: underline;";
                     new_element.innerHTML = data.user + ":";
                     new_element.className = 'user_chat_whisper';
-                    let new_message = document.createElement("p");
+                    let new_message = document.createElement("m");
                     new_message.innerHTML = data.message;
 		            document.querySelector('#chat-log').appendChild(new_element);
-                    new_element.insertAdjacentHTML('afterend', "<p><strong>" + data.message + "</strong></p>");
+                    new_element.insertAdjacentHTML('afterend', "<br><m><strong>" + data.message + "</strong></m><br>");
                     return;
                 }
             }
@@ -361,7 +362,7 @@ export class Lobby
                 let new_message = document.createElement("p");
                 new_message.innerHTML = data.message;
 		        document.querySelector('#chat-log').appendChild(new_element);
-                new_element.insertAdjacentHTML('afterend', "<p>" + data.message + "</p>");
+                new_element.insertAdjacentHTML('afterend', "<br><m>" + data.message + "</m><br>");
             }
             this.displayUsers(data);
        	};
@@ -394,11 +395,30 @@ export class Lobby
                     button.addEventListener('click', () => this.main.set_status("You wanna be friend with... Yourself ? Come on..."));
                 }
                 else{
-                    button.addEventListener('click', () => this.main.lobby.socket.send(JSON.stringify({
-                        'sender': this.main.login,
-                        'friend': user.login,
-                        'type': 'friend_request_send'
-                    })));
+                    button.addEventListener('click', () =>
+                        $.ajax({
+                            url: '/profile/' + this.main.login + '/add_friend/',
+                            method: 'POST',
+                            headers: {
+                                'X-CSRFToken': this.main.getCookie('csrftoken')
+                            },
+                            data:{
+                                'sender': this.main.login,
+                                'friend': user.login,
+                                'type': 'send',
+                            },
+                            success: (info) =>{
+                                this.main.lobby.socket.send(JSON.stringify({
+                                    'sender': this.main.login,
+                                    'friend': user.login,
+                                    'type': 'friend_request_send'
+                                }));
+                            },
+                            error: (info) =>{
+                                this.main.set_status(info.responseText);
+                            }
+                        })
+                    );
                 }
                 var profile = document.getElementById(user.login + '_profile');
                 profile.addEventListener('click', () => this.main.find_profile(this.main.login, user.login));

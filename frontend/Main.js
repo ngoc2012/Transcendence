@@ -249,7 +249,6 @@ export class Main
         new_input.type = "text";
         new_input.size = "11";
         new_textarea.id ='chat-log';
-        new_textarea.style = "border-radius: 10px; border: 2px solid rgba(255, 255, 255, 0.75); color: #ffffff; background-color: rgba(66, 66, 66, 0.5); resize:none; overflow:auto;"
         new_chatbox.id = "chatbox";
         new_element.id = "chat";
         new_element.className = "container mt-5";
@@ -261,5 +260,4 @@ export class Main
         new_element.appendChild(new_chatbox);
         chat_area.appendChild(new_element);
     }
-
 }

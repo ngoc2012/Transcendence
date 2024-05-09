@@ -609,8 +609,6 @@ def profile(request, username):
         }
         return render(request, 'profile.html', context)
 
-    
-
 @csrf_exempt
 def alias(request, username):
     user = PlayersModel.objects.filter(login=username).get(login=username)
