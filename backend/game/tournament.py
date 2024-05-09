@@ -251,7 +251,7 @@ def tournament_local_verify(request):
         response.raise_for_status()
 
         for participant in tournament.participants.all():
-            add_player_to_blockchain(tournament.name, participant.login)
+            add_player_to_blockchain(tournament.name, check_alias_from_login(participant.login))
 
         for participant in tournament.participantsLocal:
             add_player_to_blockchain(tournament.name, participant)
@@ -275,6 +275,13 @@ def tournament_local_verify(request):
     return JsonResponse({'message': 'Done', 'id': tournament.id})
 
 # SECONDARY METHODS
+
+def check_alias_from_login(login):
+    user = User.objects.get(login=login)
+    if user.tourn_alias:
+        return user.tourn_alias
+    else:
+        return user
 
 def get_player_name(player, is_local, local_name, tourn_alias):
         if is_local:
@@ -549,26 +556,37 @@ def update_match(match, score1, score2):
             winblock = match.player1Local
         else:
             match.winner = match.player1
-            winblock = match.player1.login
+            if match.player1.tourn_alias:
+                winblock = match.player1.tourn_alias
+            else:
+                winblock = match.player1.login
     else:
         if match.player2isLocal:
             match.winnerLocal = match.player2Local
             winblock = match.player2Local
-
         else:
             match.winner = match.player2
-            winblock = match.player2.login
+            if match.player2.tourn_alias:
+                winblock = match.player2.tourn_alias
+            else:
+                winblock = match.player2.login
 
     match.save()
     if match.player1isLocal:
         blockplayer1 = match.player1Local
     else:
-        blockplayer1 = match.player1.login
+        if match.player1.tourn_alias:
+            blockplayer1 = match.player1.tourn_alias
+        else:
+            blockplayer1 = match.player1.login
 
     if match.player2isLocal:
         blockplayer2 = match.player2Local
     else:
-        blockplayer2 = match.player2.login
+        if match.player2.tourn_alias:
+            blockplayer2 = match.player2.tourn_alias
+        else:
+            blockplayer2 = match.player2.login
 
     player1_data = {
         'id': 0,
@@ -585,7 +603,7 @@ def update_match(match, score1, score2):
     match_data = {
         'name': match.tournament.name,
         'winner': winblock,
-        'round': match.round_number,
+        'round': match.match_number,
     }
     url = f"http://blockchain:9000/add_match/"
     data = {"match": match_data, "player1": player1_data, "player2": player2_data}

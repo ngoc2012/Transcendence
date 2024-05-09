@@ -847,7 +847,3 @@ def auth_view(request):
     else:
         return JsonResponse({'error': 'Invalid login credentials!'}, status=401)
 
-def game_invite(request):
-    sender = request.POST.get('sender')
-    response = request.POST.get('response')
-
