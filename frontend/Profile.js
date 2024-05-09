@@ -98,7 +98,7 @@ export class Profile{
               document.getElementById('profile_picture').src = newUrl;
           })
           .then(this.main.load('/profile/' + this.main.login, () => this.main.profile.events(true, this.main.login)));
-    }    
+    }
 
     change_alias(){
         this.main.load('/profile/' + this.main.login + '/alias', () => this.alias_events(false));

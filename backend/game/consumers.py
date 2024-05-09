@@ -22,6 +22,14 @@ def get_user_from_login(login):
         return None
 
 @database_sync_to_async
+def get_user_id_from_login(login):
+    try:
+        user = get_user_model().objects.get(login=login)
+        return user.id
+    except(get_user_model().DoesNotExist) as e:
+        return None
+
+@database_sync_to_async
 def get_user_from_token(token):
     try:
         user = get_user_model().objects.get(ws_token=token)
@@ -172,6 +180,26 @@ class RoomsConsumer(AsyncWebsocketConsumer):
                 await self.send_friend_request(data)
             elif data.get('type') == 'friend_request_receive':
                 await self.friend_request_receive(data)
+            elif data.get('type') == 'game_invite':
+                await self.game_invite(data)
+            elif data.get('type') == 'game_invite_accepted':
+                await self.game_invite_accepted(data)
+            elif data.get('type') == 'game_invite_declined':
+                await self.game_invite_declined(data)
+            elif data.get('type') == 'game_invite_ready':
+                await self.game_invite_ready(data)
+
+    async def game_invite_ready(self, data):
+        await self.send_message_to_user(data.get('invited'), 'game_invite_ready', data.get('id'))
+
+    async def game_invite_accepted(self, data):
+        await self.send_message_to_user(data.get('sender'), 'game_invite_ok', data.get('invited'))
+
+    async def game_invite_declined(self, data):
+        await self.send_message_to_user(data.get('sender'), 'game_invite_null', data.get('invited'))
+
+    async def game_invite(self, data):
+        await self.send_message_to_user(data.get('friend'), 'game_invite', data.get('sender'))
 
     async def send_friend_request(self, data):
         await self.channel_layer.group_send(self.group_name,{'type': 'friend_request_receive', "sender": data.get('sender'), 'receiver': data.get('friend')})
@@ -195,7 +223,7 @@ class RoomsConsumer(AsyncWebsocketConsumer):
             self.login = user.login
             self.user.online_status = 'Online'
             self.user.save()
-            unique_group_name = f"user_{self.user_id}"
+            unique_group_name = f"user_{self.login}"
             await self.channel_layer.group_add(unique_group_name, self.channel_name)
             RoomsConsumer.connected_users.add(self.user_id)
             await self.broadcast_user_list()
