@@ -20,6 +20,7 @@ export class Pong
         this.id = id;
         this.preventWinBox = true;
         this.pmBox = false;
+        this.joined = false;
     }
 
     reset_ratio() {
@@ -264,6 +265,19 @@ export class Pong
                 },
                 error: () => this.main.set_status('Error: Can not join game')
             });
+        }
+
+        if (this.joined) {
+            this.dom_toggle_AI.style.display = "none";
+            this.dom_local_player.style.display = "none";
+            this.dom_power_play.style.display = "none";
+            this.dom_new_local_player.style.display = "none";
+            this.dom_login_local.style.display = "none";
+            this.dom_password_local.style.display = "none";
+            this.dom_join_local.style.display = "none";
+            this.dom_close_local.style.display = "none";
+            this.dom_keyboard_layout.style.display = "none";
+            this.dom_toggle_display.style.display = 'none';
         }
 	}
 
@@ -620,7 +634,7 @@ export class Pong
             this.quit();
         };
         winBox.appendChild(backButton);
-        
+
         if (this.tournament) {
             const nextMatchButton = document.createElement('button');
             nextMatchButton.textContent = 'Continue';

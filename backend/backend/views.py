@@ -269,6 +269,7 @@ def new_player(request):
         response = JsonResponse(response_data)
         response.set_cookie('refresh_token', refresh_token, httponly=True, samesite='Lax', secure=True)
         response.set_cookie('access_token', access_token, httponly=True, samesite='Lax', secure=True)
+        response.delete_cookie('login42')
         return response
 
     except IntegrityError:
@@ -312,6 +313,7 @@ def log_in(request):
         response = JsonResponse(response_data)
         response.set_cookie('refresh_token', refresh_token, httponly=True, samesite='Lax', secure=True)
         response.set_cookie('access_token', access_token, httponly=True, samesite='Lax', secure=True)
+        response.delete_cookie('login42')
         return response
 
     else:
@@ -614,6 +616,8 @@ def profile(request, username):
         }
         return render(request, 'profile.html', context)
 
+
+
 @csrf_exempt
 def alias(request, username):
     user = PlayersModel.objects.filter(login=username).get(login=username)
@@ -842,4 +846,8 @@ def auth_view(request):
         return response
     else:
         return JsonResponse({'error': 'Invalid login credentials!'}, status=401)
+
+def game_invite(request):
+    sender = request.POST.get('sender')
+    response = request.POST.get('response')
 

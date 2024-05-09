@@ -46,8 +46,11 @@ export class Lobby
                 this.main.set_status('Please select a room to join');
                 return;
             }
-            join_game(this.main, this.dom_rooms.options[this.dom_rooms.selectedIndex].value);
+            join_game(this.main, this.dom_rooms.options[this.dom_rooms.selectedIndex].value, true);
         });
+
+        var userbox = document.querySelector(".user-box");
+        userbox.innerHTML = "<h>Please Log In to see online users</h>";
     }
 
     // 2FA Tournament
@@ -198,9 +201,11 @@ export class Lobby
             this.main.load('/pages/login', () => this.main.log_in.events(false));
     }
 
-    pong_game(info, isPopState) {
+    pong_game(info, isPopState, join = false) {
         this.quit('pong');
         this.game = new Pong(this.main, this, info);
+        if (join)
+            this.game.joined = true;
         this.main.load('/pong', () => this.game.init(isPopState));
     }
 
@@ -234,6 +239,18 @@ export class Lobby
             }
             else if (data.type === 'users_list'){
                 // Je ne sais pas si on doit faire quelque chose ici
+            }
+            else if (data.type === 'game_invite') {
+                this.displayGameInvite(data.message);
+            }
+            else if (data.type === 'game_invite_ok') {
+                this.startInvitePong(data.message);
+            }
+            else if (data.type === 'game_invite_ready') {
+                this.joinInvitePong(data.message);
+            }
+            else if (data.type === 'game_invite_null') {
+                this.main.set_status('Game invitation declined')
             }
             else if (data.type === 'rooms') {
                 const rooms = data.room;
@@ -287,6 +304,14 @@ export class Lobby
                	}));
 		    }
         };
+
+        if (this.main.chat_socket.readyState === 1) {
+            this.main.chat_socket.send(JSON.stringify(
+                {
+                    type:"update",
+                }
+            ));
+        }
 
        	this.main.chat_socket.onmessage = (e) => {
        	    var data = JSON.parse(e.data);
@@ -365,71 +390,178 @@ export class Lobby
 		        document.querySelector('#chat-log').appendChild(new_element);
                 new_element.insertAdjacentHTML('afterend', "<br><m>" + data.message + "</m><br>");
             }
-            this.displayUsers(data);
+            else if (data.type === "update") {
+                // console.log('update received')
+                this.displayUsers(data);
+            }
        	};
         var chat_area = document.getElementById('chat_area');
         if (this.main.login != '')
-            chat_area.innerHTML = '';        
+            chat_area.innerHTML = '';
         this.main.make_chat(chat_area);
     }
-    
-    displayUsers(data) {
-        if (data.type === "update" && this.socket.readyState === 1) {
-            var users = data.users;
-            var pictures = data.pictures;
-            var container = $(".user-box");
-            container.empty();
-    
-            users.forEach(function(user, index) {
-                var userPic = pictures[index].avatar;
-                var userContent = $(
-                    '<div style="display: flex; align-items: center; margin-bottom: 10px;">' +
-                    '<img src="' + 'static/' + userPic + '" alt="Profile Picture" style="width: 40px; height: 40px; border-radius: 50%; margin-right: 10px;">' +                    
-                    '<span id ="' + user.login + '_profile" style="flex-grow: 1; cursor:pointer; text-decoration:underline;">' + user.login + '</span>' +
-                    '<button id="' + user.login + '_add-friend" class="btn btn-success btn-sm" type="button">Add Friend</button>' +
-                    '<button class="btn btn-info btn-sm" type="button">Invite</button>' +
-                    '</div>'
-                );
-                container.append(userContent);
-                var button = document.getElementById(user.login + '_add-friend');
-                if (this.main.login === user.login){
-                    button.addEventListener('click', () => this.main.set_status("You wanna be friend with... Yourself ? Come on..."));
-                }
-                else{
-                    button.addEventListener('click', () =>
-                        $.ajax({
-                            url: '/profile/' + this.main.login + '/add_friend/',
-                            method: 'POST',
-                            headers: {
-                                'X-CSRFToken': this.main.getCookie('csrftoken')
-                            },
-                            data:{
-                                'sender': this.main.login,
-                                'friend': user.login,
-                                'type': 'send',
-                            },
-                            success: (info) =>{
-                                this.main.lobby.socket.send(JSON.stringify({
-                                    'sender': this.main.login,
-                                    'friend': user.login,
-                                    'type': 'friend_request_send'
-                                }));
-                            },
-                            success: (info) =>{
-                                this.main.set_status(info);
-                            },
-                            error: (info) =>{
-                                this.main.set_status(info.responseText)
-                            }
-                        })
-                    );
-                }
-                var profile = document.getElementById(user.login + '_profile');
-                profile.addEventListener('click', () => this.main.find_profile(this.main.login, user.login));
-            }, this);
+
+    joinInvitePong(id) {
+        join_game(this.main, id, false, true);
+    }
+
+    startInvitePong(data) {
+        var csrftoken = this.main.getCookie('csrftoken');
+
+        if (csrftoken) {
+            $.ajax({
+                url: '/game/new',
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrftoken,
+                },
+                data: {
+                    'name': 'PONG',
+                    'game': 'pong',
+                    'login': this.main.login
+                },
+                success: (info) => {
+                    // exclude this room !!!!
+                    // if (this.socket !== -1)
+                    //     this.socket.send(JSON.stringify({
+                    //         type: 'update'
+                    //     }));
+                    if (typeof info === 'string')
+                    {
+                        this.main.set_status(info);
+                        this.rooms_update();
+                    }
+                    else
+                    {
+                        this.socket.send(JSON.stringify(
+                        {
+                            type: "game_invite_ready",
+                            sender: this.main.login,
+                            invited: data,
+                            id: info.id,
+                        }));
+                        switch (info.game) {
+                            case 'pong':
+                                this.pong_game(info, false, true);
+                                break;
+                        }
+                    }
+                },
+                error: () => this.main.set_status('Error: Can not create game')
+            });
         }
-    }    
-    
+    }
+
+    displayGameInvite(sender) {
+        let inviteContainer = document.getElementById('inviteContainer');
+        if (!inviteContainer) {
+            inviteContainer = document.createElement('div');
+            inviteContainer.id = 'inviteContainer';
+            document.body.appendChild(inviteContainer);
+        }
+
+        const inviteNotification = document.createElement('div');
+        inviteNotification.classList.add('invite-notification');
+        inviteNotification.innerHTML = `
+            <p>${sender} sent you a game request !</p>
+            <button id="acceptInviteBtn">Accept</button>
+            <button id="declineInviteBtn">Decline</button>
+        `;
+
+        inviteContainer.appendChild(inviteNotification);
+
+        document.getElementById('acceptInviteBtn').addEventListener('click', () => {
+            this.gameRequestResponse('accepted', sender);
+            inviteContainer.removeChild(inviteNotification);
+        });
+        document.getElementById('declineInviteBtn').addEventListener('click', () => {
+            this.gameRequestResponse('declined', sender);
+            inviteContainer.removeChild(inviteNotification);
+        });
+    }
+
+    gameRequestResponse(status, sender) {
+        if (status === 'accepted' ) {
+            this.socket.send(JSON.stringify(
+            {
+                type: "game_invite_accepted",
+                invited: this.main.login,
+                sender: sender,
+            }));
+        } else {
+            this.socket.send(JSON.stringify(
+            {
+                type: "game_invite_declined",
+                invited: this.main.login,
+                sender: sender,
+            }));
+        }
+    }
+
+    displayUsers(data) {
+        var users = data.users;
+        var pictures = data.pictures;
+        var container = document.getElementById('user-box');
+        var counter = 0;
+
+        if (container) {
+            container.innerHTML = '';
+            users.forEach((user, index) => {
+                if (user.login === this.main.login) {
+                    return;
+                }
+                const userPic = pictures[index].avatar;
+                const userHtml = `
+                    <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                        <img src="static/${userPic}" alt="Profile Picture" style="width: 40px; height: 40px; border-radius: 50%; margin-right: 10px;">
+                        <span id="${user.login}_profile" style="flex-grow: 1; cursor:pointer; text-decoration:underline;">${user.login}</span>
+                        <button id="${user.login}_add-friend" class="btn btn-success btn-sm ml-2" type="button">Add Friend</button>
+                        <button id="${user.login}_invite" class="btn btn-info btn-sm ml-2" type="button">Invite</button>
+                    </div>
+                `;
+
+
+                container.innerHTML += userHtml;
+
+                
+                const addButton = document.getElementById(user.login + '_add-friend');
+                const inviteButton = document.getElementById(user.login + '_invite');
+                const profileLink = document.getElementById(user.login + '_profile');
+
+                if (addButton) {
+                    addButton.addEventListener('click', () => {
+                        this.main.lobby.socket.send(JSON.stringify({
+                            'sender': this.main.login,
+                            'friend': user.login,
+                            'type': 'friend_request_send'
+                        }));
+                    });
+                }
+                if (inviteButton) {
+                    inviteButton.addEventListener('click', () => {
+                        this.main.lobby.socket.send(JSON.stringify({
+                            'sender': this.main.login,
+                            'friend': user.login,
+                            'type': 'game_invite'
+                        }));
+                    });
+                }
+                if (profileLink) {
+                    profileLink.addEventListener('click', () => {
+                        this.main.find_profile(this.main.login, user.login);
+                    });
+                }
+                counter++;
+            });
+
+
+            if (counter === 0) {
+                var userbox = document.querySelector(".user-box");
+                userbox.innerHTML = "<h>No Users Online</h>";
+            }
+        }
+    }
+
 
     tournament_click() {
         if (this.main.login === '')
@@ -479,7 +611,7 @@ export class Lobby
                     'type': 'update'
                 }));
                 this.main.chat_socket.close();
-                this.main.chat_socket = -1; 
+                this.main.chat_socket = -1;
             }
         }
         if (this.socket !== -1)
