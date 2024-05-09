@@ -143,7 +143,8 @@ class PongConsumer(AsyncWebsocketConsumer):
         elif text_data == 'teams':
             await self.channel_layer.group_send(self.room_id, {'type': 'teams_data'})
         elif text_data == 'server':
-            await change_server_async(self)
+            if not cache.get(self.k_started):
+                await change_server_async(self)
         elif text_data == 'stop':
             self.terminated = True
         elif text_data.startswith('tour_id:'):
@@ -199,7 +200,7 @@ class PongConsumer(AsyncWebsocketConsumer):
                 await self.channel_layer.group_send(self.room_id, {'type': 'teams_data'})
                 return
             x = await update_ball(self)
-            if x <= 0 or x >= pong_data['WIDTH']:
+            if x is not None and (x <= 0 or x >= pong_data['WIDTH']):
                 await end_game(self)
                 await self.channel_layer.group_send(self.room_id, {'type': 'score_data'})
                 await self.channel_layer.group_send(self.room_id, {'type': 'group_data'})
