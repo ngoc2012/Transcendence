@@ -316,6 +316,8 @@ export class Lobby
        	this.main.chat_socket.onmessage = (e) => {
        	    var data = JSON.parse(e.data);
             var list_user = document.getElementById('user_list');
+            var chat_log = document.querySelector('#chat-log');
+            chat_log.scrollTop
             if (data.type === 'update_divs'){
                 let divs = document.getElementsByClassName('user_chat');
                 for (let i = 0; divs[i] != undefined; i++){
@@ -410,6 +412,7 @@ export class Lobby
             }
        	};
         var chat_area = document.getElementById('chat_area');
+        
         if (this.main.login != '')
             chat_area.innerHTML = '';
         this.main.make_chat(chat_area);

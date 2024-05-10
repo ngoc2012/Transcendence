@@ -3,6 +3,7 @@ from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from .models import Room, User
 from accounts.models import PlayersModel
+from accounts.forms import ChatMessageForm
 
 @csrf_exempt
 def lobby(request):
@@ -46,3 +47,13 @@ def chatroom(request, room_name):
         new_room.users.add(user)
         new_room.save()
         return render(request, "chatroom.html")
+    
+def verify(request):
+    form = ChatMessageForm(type='chat_message', user=request.POST['user'], message=request.POST['message'])
+    if form.is_valid():
+        response = HttpResponse("Valid data")
+        response.status_code = 200
+        return response
+    response = HttpResponse("Invalid data")
+    response.status_code = 400
+    return response

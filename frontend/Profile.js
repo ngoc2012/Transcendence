@@ -122,6 +122,9 @@ export class Profile{
         $.ajax({
             url: '/profile/' + this.main.login + '/alias/',
             method: 'POST',
+            headers:{
+				'X-CSRFToken': this.main.getCookie('csrftoken')
+			},
             data:{
                 'alias': this.dom_textfield.value
             },
@@ -169,6 +172,9 @@ export class Profile{
         $.ajax({
             url: '/profile/' + this.main.login + '/change_password/',
             method: 'POST',
+            headers:{
+				'X-CSRFToken': this.main.getCookie('csrftoken')
+			},
             data:{
                 'oldpwd': this.dom_oldvalue.value,
                 'newpwd': this.dom_newvalue.value,
@@ -219,6 +225,9 @@ export class Profile{
         $.ajax({
             url: '/profile/' + this.main.login + '/change_email/',
             method: 'POST',
+            headers:{
+				'X-CSRFToken': this.main.getCookie('csrftoken')
+			},
             data: {
                 "login": this.main.login,
                 "password": this.dom_cepassword.value,
@@ -270,6 +279,9 @@ export class Profile{
         $.ajax({
             url: '/profile/' + this.main.login + '/change_login/',
             method: 'POST',
+            headers:{
+				'X-CSRFToken': this.main.getCookie('csrftoken')
+			},
             data:{
                 "login": this.main.login,
                 "new_login": this.dom_cllogin.value,
@@ -324,6 +336,9 @@ export class Profile{
         $.ajax({
             url: '/profile/' + this.main.login + '/change_name/',
             method: 'POST',
+            headers:{
+				'X-CSRFToken': this.main.getCookie('csrftoken')
+			},
             data:{
                 'login': this.main.login,
                 "name": this.dom_cn_name.value,
@@ -377,6 +392,9 @@ export class Profile{
         $.ajax({
             url: '/profile/' + this.main.login + '/add_friend/',
             method: 'POST',
+            headers:{
+				'X-CSRFToken': this.main.getCookie('csrftoken')
+			},
             data:{
                 'sender': this.main.login,
                 'friend': this.dom_friend_name.value,
@@ -392,7 +410,7 @@ export class Profile{
                 this.main.load('/profile/' + this.main.login, () => this.friend_events(false));
             },
             error: (info)=>{
-                this.main.set_status(info.responseText, true);
+                this.main.set_status(info.responseText, false);
             }
         });
     }
@@ -401,6 +419,9 @@ export class Profile{
         $.ajax({
             url: '/profile/' + data.sender + '/add_friend/',
             method: 'POST',
+            headers:{
+				'X-CSRFToken': this.main.getCookie('csrftoken')
+			},
             data:{
                 'sender': data.sender,
                 'friend': data.friend,
@@ -450,6 +471,9 @@ export class Profile{
         $.ajax({
             url: '/profile/' + data.sender + '/add_friend/',
             method: 'POST',
+            headers:{
+				'X-CSRFToken': this.main.getCookie('csrftoken')
+			},
             data:{
                 'type': 'receive',
                 'sender': data.sender,
@@ -469,6 +493,9 @@ export class Profile{
         $.ajax({
             url: '/profile/' + data.sender +'/add_friend/',
             method: 'POST',
+            headers:{
+				'X-CSRFToken': this.main.getCookie('csrftoken')
+			},
             data:{
                 'type': 'receive',
                 'sender': data.sender,

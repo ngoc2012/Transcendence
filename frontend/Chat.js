@@ -25,18 +25,33 @@ export class Chat{
 		const socket = this.socket;
 		const login = this.main.login;
 		const room = this.roomName;
-
-
 	}
+
 	send_message(msg, div){
 		const room = this.roomName;
 		const message = msg;
-		this.main.chat_socket.send(JSON.stringify({
-			'message': message,
-			'user': this.main.login,
-            'room' : room,
-            'type': 'chat_message'
-		}));
+		$.ajax({
+			url: '/chat/check_message',
+			method: 'POST',
+			headers:{
+				'X-CSRFToken': this.main.getCookie('csrftoken')
+			},
+			data:{
+				'message': message,
+				'user': this.main.login
+			},
+			success: (info) => {
+				this.main.chat_socket.send(JSON.stringify({
+					'message': message,
+					'user': this.main.login,
+					'room' : room,
+					'type': 'chat_message'
+				}));
+			},
+			error: (info) =>{
+				console.error('Invalid data sent');
+			}
+		});
         div.value = '';
 	}
 
