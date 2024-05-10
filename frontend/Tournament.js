@@ -132,8 +132,13 @@ export class Tournament {
                     if (response.success == 'twofa') {
                         this.main.load('/twofa', () => this.main.twofa.eventsTour(this.id, response.login, response.name, response.email));
                     } else {
-                        this.userAdded.push(response.login);
-                        this.main.load('/tournament/local', () => this.eventsLocal(false));
+                        console.log(response.error)
+                        if (response.error) {
+                            this.main.set_status(response.error)
+                        } else {
+                            this.userAdded.push(response.login);
+                            this.main.load('/tournament/local', () => this.eventsLocal(false));
+                        }
                     }
                 },
                 error: (xhr) => {
