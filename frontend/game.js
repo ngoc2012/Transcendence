@@ -32,7 +32,7 @@ export function join_game(main, game_id, isPopState, joined = false)
             }
         },
         error: (info) => {
-            main.set_status('Error: Can not join game');
+            main.set_status('Error: Can not join game', false);
         }
     });
 }
