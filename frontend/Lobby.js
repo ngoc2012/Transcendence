@@ -46,6 +46,9 @@ export class Lobby
                 this.main.set_status('Please select a room to join', false);
                 return;
             }
+            else if (this.dom_rooms.options[this.dom_rooms.selectedIndex].text === 'No rooms available') {
+                return;
+            }
             join_game(this.main, this.dom_rooms.options[this.dom_rooms.selectedIndex].value, true);
         });
 

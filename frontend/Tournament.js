@@ -116,8 +116,8 @@ export class Tournament {
         const formData = {
             'login': login,
             'password': password,
-            'userLogin': userLogin.toString() ,
-            'id': this.id
+            'userLogin': userLogin.toString(),
+            'tournament_id': this.id
         }
 
         if (csrftoken) {

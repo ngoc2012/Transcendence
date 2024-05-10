@@ -46,14 +46,6 @@ def ai_player(consumer):
     except PlayersModel.DoesNotExist:
         hashed_password = make_password('password_ai')
         mysecret = pyotp.random_base32()
-        # player = PlayersModel(
-        #     login='ai',
-        #     password=hashed_password,
-        #     name='AI player',
-        #     email='',
-        #     secret_2fa = mysecret
-        # )
-        # player.save()
         User = get_user_model()
         player = User.objects.create_user(
             username='ai',

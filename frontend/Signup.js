@@ -50,7 +50,15 @@ export class Signup
             },
             success: (info) => {
                 if (info.error) {
-                    this.main.set_status(info.error, false);
+                    let errors = JSON.parse(info.error);
+                    let firstErrorMessage = '';
+                    for (let field in errors) {
+                        if (errors[field].length > 0) {
+                            firstErrorMessage = errors[field][0].message;
+                            break;
+                        }
+                    }
+                    this.main.set_status('Error: ' + firstErrorMessage, false);
                 } else {
                     this.main.email = info.email;
                     this.main.login = info.login;
@@ -71,11 +79,6 @@ export class Signup
                             dom_logout.addEventListener('click', () => this.main.logout());
                         }
                     }
-
-                    // var dom_logout = document.getElementById('logoutButton');
-                    // if (dom_logout) {
-                    //     dom_logout.addEventListener('click', () => this.main.logout());
-                    // }
                     if (checkbox)
                         this.display2FASetup(info.secret);
                     else
@@ -83,10 +86,24 @@ export class Signup
                 }
             },
             error: (jqXHR, textStatus, errorThrown) => {
-                this.main.set_status('Registration failed: ' + errorThrown, false);
+                let response = JSON.parse(jqXHR.responseText);
+                let message = 'Registration failed: ';
+                if (response && response.error) {
+                    let errors = JSON.parse(response.error);
+                    for (let field in errors) {
+                        if (errors[field].length > 0) {
+                            message += errors[field][0].message;
+                            break;
+                        }
+                    }
+                } else {
+                    message += textStatus;
+                }
+                this.main.set_status(message, false);
             }
         });
     }
+
     display2FASetup(secret) {
         let csrftoken = this.main.getCookie('csrftoken');
 
