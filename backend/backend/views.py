@@ -23,7 +23,7 @@ from django.middleware.csrf import get_token
 from django.contrib.auth import authenticate, login as auth_login, get_user_model, logout as auth_logout
 from django.core.cache import cache
 from cryptography.fernet import Fernet
-from .validation import NewPlayerForm, TournamentNameForm, verifyQrCodeForm, verifyLoginForm
+from .validation import NewPlayerForm, TournamentNameForm, verifyQrCodeForm, verifyLoginForm, verifyCodeForm
 
 API_PUBLIC = os.environ.get('API_PUBLIC')
 API_SECRET = os.environ.get('API_SECRET')
@@ -208,9 +208,9 @@ def verify(request):
     if not form.is_valid():
         return JsonResponse({'error': 'Invalid data', 'details': form.errors}, status=400)
 
-    input_code = form.cleaned_data['code']
+    input_code = form.cleaned_data['input_code']
 
-    if (input_code == settings.CODE):
+    if (input_code == int(settings.CODE)):
         return JsonResponse({'result': '1'})
     return JsonResponse({'result': '0'})
 
@@ -446,12 +446,10 @@ def logout(request):
 
 def verify_qrcode(request):
     form = verifyQrCodeForm(request.POST)
-
     if not form.is_valid():
         return JsonResponse({'error': 'Invalid data', 'details': form.errors}, status=400)
 
-    input_code = form.cleaned_data['code']
-
+    input_code = form.cleaned_data['input_code']
     if not PlayersModel.objects.filter(login=request.POST['login']).exists():
         return (HttpResponse("Error: Login '" + request.POST['login'] + "' does not exist!"))
     player = PlayersModel.objects.get(login=request.POST['login'])

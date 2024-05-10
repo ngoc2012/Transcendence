@@ -8,13 +8,13 @@ export class qrcode_2fa
         this.main = m;
     }
 
-    events() {
+    events(login) {
         this.main.checkcsrf();
 
         this.dom_code = document.querySelector("#code");
         this.dom_confirm = document.querySelector("#confirm");
         this.dom_cancel = document.querySelector("#cancel0");
-        this.dom_confirm.addEventListener("click", () => this.confirm());
+        this.dom_confirm.addEventListener("click", () => this.confirm(login));
         this.dom_cancel.addEventListener("click", () => this.cancel());
         this.dom_code.addEventListener("keypress", (e) => {
             if (e.key === "Enter") {
@@ -30,7 +30,7 @@ export class qrcode_2fa
         this.events();
     }
 
-    confirm() {
+    confirm(login) {
         if (this.dom_code.value === '') {
             this.main.set_status('Field must not be empty', false);
             return;
@@ -46,7 +46,7 @@ export class qrcode_2fa
                 },
                 data: {
                     "input_code": this.dom_code.value,
-                    'login': this.tournament ? this.login : this.main.login,
+                    'login': this.tournament ? this.login : login,
                 },
                 success: (info) => {
                     if (typeof info === 'string') {

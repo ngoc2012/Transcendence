@@ -50,10 +50,10 @@ export class Login
 
                 if (info.enable2fa == 'true')
                 {
-                    this.main.email = info.email;
-                    this.main.login = info.login;
-                    this.main.name = info.name;
-                    this.main.load('/twofa', () => this.main.twofa.events());
+                    // this.main.email = info.email;
+                    // this.main.login = info.login;
+                    // this.main.name = info.name;
+                    this.main.load('/twofa', () => this.main.twofa.events(info.email, info.login, info.name ));
                 }
                 else
                 {
