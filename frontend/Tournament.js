@@ -60,7 +60,7 @@ export class Tournament {
                     this.main.load('/tournament/local', () => this.eventsLocal());
                 },
                 error: (xhr) => {
-                    this.main.set_status(xhr.responseJSON.error);
+                    this.main.set_status(xhr.responseJSON.error, false);
                 }
             });
         }
@@ -98,14 +98,14 @@ export class Tournament {
             const isLoginTaken = this.userAdded.some(user => user.login === login) || login === this.main.login;
 
             if (isLoginTaken) {
-                this.main.set_status(`The login ${login} is already in use.`);
+                this.main.set_status(`The login ${login} is already in use.`, false);
                 return;
             }
 
             if ((userLogin && password !== "" && login !== "") || (!userLogin && login !== "")) {
                 this.addUser(login, password, userLogin);
             } else {
-                this.main.set_status('Please fill all required fields');
+                this.main.set_status('Please fill all required fields', false);
             }
         });
     }
@@ -133,7 +133,7 @@ export class Tournament {
                         this.main.load('/twofa', () => this.main.twofa.eventsTour(this.id, response.login, response.name, response.email));
                     } else {
                         if (response.error) {
-                            this.main.set_status(response.error)
+                            this.main.set_status(response.error, false)
                         } else {
                             this.userAdded.push(response.login);
                             this.main.load('/tournament/local', () => this.eventsLocal(false));
@@ -141,7 +141,7 @@ export class Tournament {
                     }
                 },
                 error: (xhr) => {
-                    this.main.set_status(xhr.responseJSON.error);
+                    this.main.set_status(xhr.responseJSON.error, false);
                 }
             });
         }
@@ -194,7 +194,7 @@ export class Tournament {
                     this.main.load('/tournament/local/start', () => this.localTournament.getMatch());
                 },
                 error: (xhr) => {
-                    this.main.set_status(xhr.responseJSON.error);
+                    this.main.set_status(xhr.responseJSON.error, false);
                     this.quitTournament('force');
                 }
             });
@@ -229,9 +229,9 @@ export class Tournament {
                 error: (xhr, textStatus, errorThrown) => {
                     if (xhr.status === 400) {
                     var errorResponse = JSON.parse(xhr.responseText);
-                    this.main.set_status('Error: ' + errorResponse.error);
+                    this.main.set_status('Error: ' + errorResponse.error, false);
                     } else {
-                        this.main.set_status('Error: Could not create tournament');
+                        this.main.set_status('Error: Could not create tournament', false);
                     }
                 }
             });

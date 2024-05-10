@@ -30,7 +30,7 @@ export class Login
     login() {
         if (this.dom_login.value === '' || this.dom_password.value === '')
         {
-            this.main.set_status('Field must not be empty');
+            this.main.set_status('Field must not be empty', false);
             return;
         }
 
@@ -72,7 +72,7 @@ export class Login
                         success: (info) => {
                             if (typeof info === 'string')
                             {
-                                this.main.set_status(info);
+                                this.main.set_status(info, true);
                             }
                             else
                             {
@@ -112,9 +112,9 @@ export class Login
                         },
                         error: (xhr, textStatus, errorThrown) => {
                             if (xhr.responseJSON && xhr.responseJSON.error) {
-                                this.main.set_status(xhr.responseJSON.error);
+                                this.main.set_status(xhr.responseJSON.error, false);
                             } else {
-                                this.main.set_status('An error occurred during the request.');
+                                this.main.set_status('An error occurred during the request.', false);
                             }
                         }
                     });
@@ -122,10 +122,10 @@ export class Login
             },
             error: (xhr, textStatus, errorThrown) => {
                 if (xhr.responseJSON && xhr.responseJSON.error) {
-                    this.main.set_status(xhr.responseJSON.error);
+                    this.main.set_status(xhr.responseJSON.error, false);
                     // console.log( "erreur = ", xhr.responseJSON.error)
                 } else {
-                    this.main.set_status('An error occurred during the request.');
+                    this.main.set_status('An error occurred during the request.', false);
                 }
             }
         });
@@ -151,7 +151,7 @@ export class Login
                     window.location.href = response.url;
                 },
                 error: (xhr, textStatus, errorThrown) => {
-                    this.main.set_status('Error');
+                    this.main.set_status('Error', false);
                 }
             })
         } else {

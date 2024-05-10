@@ -111,7 +111,16 @@ export class Main
         this.load('/pages/login', () => this.log_in.events());
     }
 
-    set_status(s) {this.dom_status.innerHTML = s;}
+    set_status(s, valid) {
+        if (valid === false){
+            this.dom_status.innerHTML = s;
+            this.dom_status.style.backgroundColor = '#dc3545';
+            return;
+        }
+        this.dom_status.innerHTML = s;
+        this.dom_status.style.backgroundColor = '#28a745';
+        return;
+    }
 
     signup_click() {
         this.load('/pages/signup', () => this.signup.events());

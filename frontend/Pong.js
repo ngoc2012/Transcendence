@@ -247,7 +247,7 @@ export class Pong
                 },
                 success: (info) => {
                     if (typeof info === 'string')
-                        this.main.set_status(info);
+                        this.main.set_status(info, true);
                     else
                     {
                         this.players.push({
@@ -264,7 +264,7 @@ export class Pong
                         this.preMatchBox(this.localTournament.player1, this.localTournament.player2);
                     }
                 },
-                error: () => this.main.set_status('Error: Can not join game')
+                error: () => this.main.set_status('Error: Can not join game', false)
             });
         }
 
@@ -316,22 +316,22 @@ export class Pong
     local_player_login() {
         if (this.dom_login_local.value === '' || this.dom_password_local.value === '')
         {
-            this.main.set_status('Field must not be empty');
+            this.main.set_status('Field must not be empty', false);
             return;
         }
         if (this.dom_keyboard_layout.value.length !== 4)
         {
-            this.main.set_status('Keyboard layout must be 4 characters');
+            this.main.set_status('Keyboard layout must be 4 characters', false);
             return;
         }
         if (this.charExists(this.dom_keyboard_layout.value, this.keyboard_layout))
         {
-            this.main.set_status('Keyboard layout must not contain already used1` characters');
+            this.main.set_status('Keyboard layout must not contain already used1` characters', false);
             return;
         }
         if (this.isAlphabetic(this.dom_keyboard_layout.value) === false)
         {
-            this.main.set_status('Keyboard layout must contain only alphabetic characters');
+            this.main.set_status('Keyboard layout must contain only alphabetic characters', false);
             return;
         }
         let csrftoken = this.main.getCookie('csrftoken');
@@ -347,15 +347,15 @@ export class Pong
             },
             success: (info) => {
                 if (typeof info === 'string')
-                    this.main.set_status(info);
+                    this.main.set_status(info, true);
                 else
                     this.join_local_player(info);
             },
             error: (xhr, textStatus, errorThrown) => {
                 if (xhr.responseJSON && xhr.responseJSON.error) {
-                    this.main.set_status(xhr.responseJSON.error);
+                    this.main.set_status(xhr.responseJSON.error, false);
                 } else {
-                    this.main.set_status('An error occurred during the request.');
+                    this.main.set_status('An error occurred during the request.', false);
                 }
             }
         });
@@ -375,7 +375,7 @@ export class Pong
             },
             success: (info) => {
                 if (typeof info === 'string')
-                    this.main.set_status(info);
+                    this.main.set_status(info, true);
                 else
                 {
                     this.playerLocal = true;
@@ -392,7 +392,7 @@ export class Pong
                     }
                 }
             },
-            error: () => this.main.set_status('Error: Can not join game')
+            error: () => this.main.set_status('Error: Can not join game', false)
         });
     }
 
