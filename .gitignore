@@ -8,8 +8,8 @@ backend/db.sqlite3
 backend/game/migrations/*.py
 backend/accounts/migrations/*.py
 backend/transchat/migrations/*.py
-backend/CLI/*.crt
-backend/CLI/*.key
+backend/CLI/minh-ngu.crt
+backend/CLI/minh-ngu.key
 backend/transchat/migrations/*.py
 backend/venv
 backend/db.sqlite3
