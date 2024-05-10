@@ -14,6 +14,7 @@ from pong.data import pong_data
 from urllib.parse import quote
 import random
 from game.views import add_player_to_room
+from backend.validation import AddTournamentUserForm
 
 User = get_user_model()
 
@@ -175,11 +176,15 @@ def tournament_local_get(request):
 def tournament_add_user(request):
     try:
         data = json.loads(request.body)
+        form = AddTournamentUserForm(data)
 
-        login = data.get('login')
-        password = data.get('password')
-        userLogin = data.get('userLogin', 'false')
-        tournament_id = data.get('id')
+        if not form.is_valid():
+            return JsonResponse({'error': 'Invalid data', 'details': form.errors}, status=400)
+
+        login = form.cleaned_data['login']
+        password = form.cleaned_data['password']
+        userLogin = form.cleaned_data['userLogin']
+        tournament_id = data.get('tournament_id')
 
         try:
             tournament = TournamentModel.objects.get(id=tournament_id)

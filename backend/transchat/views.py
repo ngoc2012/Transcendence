@@ -3,8 +3,9 @@ from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from .models import Room, User
 from accounts.models import PlayersModel
+from django.views.decorators.csrf import csrf_exempt, csrf_protect
 
-@csrf_exempt
+@csrf_protect
 def lobby(request):
     if request.method == 'GET':
         if 'username' in request.GET:
@@ -28,7 +29,7 @@ def lobby(request):
             request.session['user'] = username
             return HttpResponse("User ready to chat")
 
-@csrf_exempt
+@csrf_protect
 def chatroom(request, room_name):
     try:
         room = Room.objects.get(room_name=room_name)

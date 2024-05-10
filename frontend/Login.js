@@ -54,8 +54,6 @@ export class Login
                     this.main.login = info.login;
                     this.main.name = info.name;
                     this.main.load('/twofa', () => this.main.twofa.events());
-                    // if (this.state == 2)
-                    //     console.log("finished")
                 }
                 else
                 {

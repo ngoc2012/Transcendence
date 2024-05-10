@@ -8,6 +8,7 @@ from django.contrib.auth import authenticate, login as auth_login, get_user_mode
 from django.views.decorators.http import require_POST
 from django.core.cache import cache
 from django.utils import timezone
+from django.views.decorators.csrf import csrf_exempt, csrf_protect
 
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 
@@ -61,8 +62,7 @@ def add_player_to_room(game_id, login):
         cache.set(k_player_y, pong_data['HEIGHT'] / 2 - pong_data['PADDLE_HEIGHT'] / 2)
     return room, player
 
-
-@csrf_exempt
+@csrf_protect
 def new_game(request):
     if 'game' not in request.POST:
         return (HttpResponse("Error: No game!"))
@@ -91,8 +91,7 @@ def new_game(request):
         'data': get_data(room.game)
         }))
 
-
-@csrf_exempt
+@csrf_protect
 def update(request):
     data = {
         "rooms": [
@@ -105,7 +104,7 @@ def update(request):
     }
     return JsonResponse(data, safe=False)
 
-@csrf_exempt
+@csrf_protect
 def join(request):
     if 'game_id' not in request.POST:
         return (HttpResponse("Error: No game id!"))
@@ -148,7 +147,7 @@ def join(request):
 from backend.asgi import channel_layer
 from asgiref.sync import async_to_sync
 
-@csrf_exempt
+@csrf_protect
 def close_connection(request, login_id):
     async_to_sync(channel_layer.group_send)(
         "rooms",
@@ -159,7 +158,7 @@ def close_connection(request, login_id):
     )
     return HttpResponse("done")
 
-@csrf_exempt
+@csrf_protect
 def need_update(request):
     async_to_sync(channel_layer.group_send)(
         "rooms",
