@@ -126,6 +126,7 @@ def new_game(login):
                 print("Request failed with status code:", response.status_code)
                 return None
             if "error" in response.text.lower():
+                print(response.text)
                 return None
         return json.loads(response.text)
     except requests.exceptions.SSLError as e:
@@ -194,7 +195,7 @@ def sign_up():
             }, 
             cert=(certfile, keyfile),
             verify=False) as response:
-            if response.status_code != 200:
+            if response.status_code != 200 and response.status_code != 409:
                 return False
             if "error" in response.text.lower():
                 print(response.text)
