@@ -115,7 +115,7 @@
 
         #chat-log{
             width: 200px;
-            height: 550px;
+            height: 600px;
             border-radius: 10px;
             border: 2px solid rgba(255, 255, 255, 0.75);
             color: #ffffff;
@@ -291,6 +291,23 @@
           padding: 10px;
           display: inline-block;
       }
+
+
+      #chat-message-input {
+
+        border-radius: 10px;
+        border: 2px solid rgba(255, 255, 255, 0.75);
+        color: #ffffff;
+        background-color: rgba(66, 66, 66, 0.5);
+        }
+
+        #chat-message-input:hover {
+        border-radius: 10px;
+        border: 2px solid rgba(255, 255, 255, 0.90);
+        color: #ffffff;
+        background-color: rgba(66, 66, 66, 0.7);
+        }
+
     </style>
     <base href="/">
   </head>
@@ -381,8 +398,8 @@
 
   <div id="user-sidebar">
     <div class="p-3">
-        <h5 class="text-center">Chat</h5>
-        <ul id="chat_area" class="list-unstyled">
+        <h5 class="text-center mb-0">Chat</h5>
+        <ul id="chat_area" class="list-unstyled mt-0">
         </ul>
     </div>
   </div>

@@ -340,11 +340,17 @@ export class Lobby
             else if (data.type === 'chat_message'){
                 let new_element = document.createElement("a");
                 new_element.addEventListener("click", () => this.main.find_profile(this.main.login, data.user));
-                new_element.style = "cursor:pointer; color: rgb(0, 128, 255); text-decoration: underline;";
-                new_element.innerHTML = data.user + ":";
+
+                if (data.user === this.main.login) {
+                    new_element.style = "cursor:pointer; color: rgb(255, 255, 255); background-color: rgba(0, 0, 0, 0.4); border-radius: 10px; padding-left: 10px; padding-right: 10px; margin-top: 5px;";
+                } else {
+                    new_element.style = "cursor:pointer; color: rgb(0, 0, 0); background-color: rgba(255, 255, 255, 0.8); border-radius: 10px; padding-left: 10px; padding-right: 10px; margin-top: 5px;";
+                }
+                new_element.innerHTML = data.user;
                 new_element.className = 'user_chat';
                 let new_message = document.createElement("p");
                 new_message.innerHTML = data.message;
+                new_message.style = "padding-left: 100px;"
 		        document.querySelector('#chat-log').appendChild(new_element);
                 new_element.insertAdjacentHTML('afterend', "<br><m>" + data.message + "</m><br>");
                 return;
