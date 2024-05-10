@@ -27,7 +27,7 @@ export class code_2fa
     confirm() {
         if (this.dom_code.value === '')
         {
-            this.main.set_status('Field must not be empty');
+            this.main.set_status('Field must not be empty', false);
             return;
         }
         
@@ -48,7 +48,7 @@ export class code_2fa
                 },
                 success: (info) => {
                     if (typeof info === 'string') {
-                        this.main.set_status(info);
+                        this.main.set_status(info, true);
                     } else if (info.result === '1') {      
                         $.ajax({
                             url: 'log_in/',
@@ -63,7 +63,7 @@ export class code_2fa
                             success: (info) => {
                                 if (typeof info === 'string')
                                 {
-                                    this.main.set_status(info);
+                                    this.main.set_status(info, true);
                                 }
                                 else
                                 {
@@ -100,17 +100,17 @@ export class code_2fa
                             },
                             error: (xhr, textStatus, errorThrown) => {
                                 if (xhr.responseJSON && xhr.responseJSON.error) {
-                                    this.main.set_status(xhr.responseJSON.error);
+                                    this.main.set_status(xhr.responseJSON.error, false);
                                 } else {
-                                    this.main.set_status('An error occurred during the request.');
+                                    this.main.set_status('An error occurred during the request.', false);
                                 }
                             }
                         });
                     } else {
-                        this.main.set_status('Wrong code, please try again');
+                        this.main.set_status('Wrong code, please try again', false);
                     }
                 },
-                error: (data) => this.main.set_status(data.error)
+                error: (data) => this.main.set_status(data.error, false)
             });
         }
     }
@@ -128,16 +128,16 @@ export class code_2fa
                 },
                 success: (info) => {
                     if (typeof info === 'string') {
-                        this.main.set_status(info);
+                        this.main.set_status(info, true);
                     } else if (info.result === '1') {     
                         // this.main.history_stack.push('/tournament/local');
                         // window.history.pushState({}, '', '/tournament/local');
                         this.main.load('/tournament/local', () => this.main.lobby.tournament.eventsTwoFA(this.login));
                     } else {
-                        this.main.set_status('Wrong code, please try again');
+                        this.main.set_status('Wrong code, please try again', true);
                     }
                 },
-                error: (data) => this.main.set_status(data.error)
+                error: (data) => this.main.set_status(data.error, false)
             });
         }
     }

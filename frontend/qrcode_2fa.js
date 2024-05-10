@@ -32,7 +32,7 @@ export class qrcode_2fa
 
     confirm() {
         if (this.dom_code.value === '') {
-            this.main.set_status('Field must not be empty');
+            this.main.set_status('Field must not be empty', false);
             return;
         }
         const csrftoken = this.main.getCookie('csrftoken');
@@ -50,7 +50,7 @@ export class qrcode_2fa
                 },
                 success: (info) => {
                     if (typeof info === 'string') {
-                        this.main.set_status(info);
+                        this.main.set_status(info, true);
                         this.main.login.state = 2;
                     } else if (info.result === '1') {
                         if (this.tournament) {
@@ -69,7 +69,7 @@ export class qrcode_2fa
                                 },
                                 success: (info) => {
                                     if (typeof info === 'string') {
-                                        this.main.set_status(info);
+                                        this.main.set_status(info, true);
                                     } else {
                                         this.main.email = info.email;
                                         this.main.login = info.login;
@@ -97,19 +97,19 @@ export class qrcode_2fa
                                 },
                                 error: (xhr, textStatus, errorThrown) => {
                                     if (xhr.responseJSON && xhr.responseJSON.error) {
-                                        this.main.set_status(xhr.responseJSON.error);
+                                        this.main.set_status(xhr.responseJSON.error, false);
                                     } else {
-                                        this.main.set_status('An error occurred during the request.');
+                                        this.main.set_status('An error occurred during the request.', false);
                                     }
                                 }
                             });
                         }
                     } else {
-                        this.main.set_status('Wrong code, please try again');
+                        this.main.set_status('Wrong code, please try again', false);
                     }
                 },
                 error: (xhr) => {
-                    this.main.set_status(xhr.responseJSON && xhr.responseJSON.error ? xhr.responseJSON.error : 'An error occurred during the request.');
+                    this.main.set_status(xhr.responseJSON && xhr.responseJSON.error ? xhr.responseJSON.error : 'An error occurred during the request.', false);
                 }
             });
         }

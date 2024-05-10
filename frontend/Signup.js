@@ -28,7 +28,7 @@ export class Signup
 
     signup() {
         if (this.dom_login.value === '' || this.dom_password.value === '' || this.dom_name.value === '' || this.dom_email.value === '') {
-            this.main.set_status('All fields must be filled.');
+            this.main.set_status('Field must not be empty', false);
             return;
         }
 
@@ -58,7 +58,7 @@ export class Signup
                             break;
                         }
                     }
-                    this.main.set_status('Error: ' + firstErrorMessage);
+                    this.main.set_status('Error: ' + firstErrorMessage, false);
                 } else {
                     this.main.email = info.email;
                     this.main.login = info.login;
@@ -99,7 +99,7 @@ export class Signup
                 } else {
                     message += textStatus;
                 }
-                this.main.set_status(message);
+                this.main.set_status(message, false);
             }
         });
     }
@@ -126,7 +126,7 @@ export class Signup
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
                     // console.error('Error setting up 2FA: ', errorThrown);
-                    this.main.set_status('Error setting up 2FA: ' + errorThrown);
+                    this.main.set_status('Error setting up 2FA: ' + errorThrown, false);
                 }
             });
         } else {

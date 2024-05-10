@@ -87,7 +87,7 @@ export class Profile{
         var input = i[0].files[0];
         form.append('id_file', input);
         if (input.type.search('image') === -1){
-            this.main.set_status("Invalid image format");
+            this.main.set_status("Invalid image format", false);
             return;
         }
         fetch('/profile/' + this.main.login + '/change_avatar/', {
@@ -98,6 +98,7 @@ export class Profile{
               const newUrl = response.url.replace('/app/frontend', '/static');
               document.getElementById('picture').src = newUrl;
               document.getElementById('profile_picture').src = newUrl;
+              this.main.set_status("Profile picture changed.", true);
           })
           .then(this.main.load('/profile/' + this.main.login, () => this.main.profile.events(true, this.main.login)));
     }
@@ -125,11 +126,11 @@ export class Profile{
                 'alias': this.dom_textfield.value
             },
             success: (info) =>{
-                this.main.set_status(info);
+                this.main.set_status(info, true);
                 this.main.load('/profile/' + this.main.login, () => this.main.profile.events(false, this.main.login));
             },
             error: (info) =>{
-                this.main.set_status(info.responseText);
+                this.main.set_status(info.responseText, false);
             }
         });
     }
@@ -158,11 +159,11 @@ export class Profile{
 
     cp_change_password(){
         if (this.dom_oldvalue.value === '' || this.dom_newvalue.value === '' || this.dom_newvaluerepeat.value === ''){
-            this.main.set_status('You must fill all field');
+            this.main.set_status('You must fill all field', false);
             return;
         }
         else if (this.dom_newvaluerepeat.value != this.dom_newvalue.value){
-            this.main.set_status("Passwords do not match");
+            this.main.set_status("Passwords do not match", false);
             return;
         }
         $.ajax({
@@ -173,11 +174,11 @@ export class Profile{
                 'newpwd': this.dom_newvalue.value,
             },
             success: (info) => {
-                this.main.set_status(info);
+                this.main.set_status(info, true);
                 this.main.load('/profile/' + this.main.login, () => this.main.profile.events(false, this.main.login));
             },
             error: (info) => {
-                this.main.set_status(info.responseText);
+                this.main.set_status(info.responseText, false);
                 this.dom_newvalue.value = '';
                 this.dom_newvaluerepeat.value = '';
                 this.dom_oldvalue.value = '';
@@ -208,11 +209,11 @@ export class Profile{
 
     ce_change_email(){
         if (this.dom_cenewemail.value === '' || this.dom_ceconfirmemail.value === '' || this.dom_cepassword.value === ''){
-            this.main.set_status('All fields are required.');
+            this.main.set_status('All fields are required.', false);
             return;
         }
         if (this.dom_cenewemail.value != this.dom_ceconfirmemail.value){
-            this.main.set_status('Emails do not match.');
+            this.main.set_status('Emails do not match.', false);
             return;
         }
         $.ajax({
@@ -224,13 +225,13 @@ export class Profile{
                 "email": this.dom_cenewemail.value,
             },
             success: (info)=>{
-                this.main.set_status(info);
+                this.main.set_status(info, true);
                 this.email = this.dom_cenewemail;
                 this.main.email = this.email;
                 this.main.load('/profile/' + this.main.login, () => this.main.profile.events(false, this.main.login));
             },
             error: (info) =>{
-                this.main.set_status(info.responseText);
+                this.main.set_status(info.responseText, false);
             }
         })
     }
@@ -258,11 +259,11 @@ export class Profile{
 
     cl_confirm(){
         if (this.dom_cllogin.value === '' || this.dom_clpassword.value === '' || this.dom_clpasswordrepeat.value === ''){
-            this.main.set_status("All fiels are required");
+            this.main.set_status("All fiels are required", false);
             return;
         }
         else if (this.dom_clpassword.value != this.dom_clpasswordrepeat.value){
-            this.main.set_status('Passwords do not match');
+            this.main.set_status('Passwords do not match', false);
             return;
         }
 
@@ -275,7 +276,7 @@ export class Profile{
                 "password": this.dom_clpassword.value
             },
             success: (info)=>{
-                this.main.set_status(info);
+                this.main.set_status(info, true);
                 this.main.chat_socket.send(JSON.stringify({
                     'type': 'connection_update',
                     'old_user': this.main.login,
@@ -285,7 +286,7 @@ export class Profile{
                 this.main.load('/profile/' + this.main.login, () => this.main.profile.events(false, this.main.login));
             },
             error: (info) =>{
-                this.main.set_status(info.responseText);
+                this.main.set_status(info.responseText, false);
             }
         })
     }
@@ -313,11 +314,11 @@ export class Profile{
 
     cn_confirm(){
         if (this.dom_cn_name.value === '' || this.dom_cn_password.value === '' || this.dom_cn_pwd_repeat.value === '' ){
-            this.main.set_status('All fields are required');
+            this.main.set_status('All fields are required', false);
             return;
         }
         if (this.dom_cn_password.value != this.dom_cn_pwd_repeat.value){
-            this.main.set_status("Passwords do not match");
+            this.main.set_status("Passwords do not match", false);
             return;
         }
         $.ajax({
@@ -329,7 +330,7 @@ export class Profile{
                 "password": this.dom_cn_password.value
             },
             success: (info)=>{
-                this.main.set_status(info);
+                this.main.set_status(info, true);
                 this.main.name = this.dom_cn_name.value;
                 let name = document.getElementById('name');
                 if (name){
@@ -338,7 +339,7 @@ export class Profile{
                 this.main.load('/profile/' + this.main.login, () => this.main.profile.events(false, this.main.login));
             },
             error: (info)=>{
-                this.main.set_status(info.responseText);
+                this.main.set_status(info.responseText, false);
             }
         })
     }
@@ -366,11 +367,11 @@ export class Profile{
 
     af_confirm(){
         if (this.dom_friend_name.value === ''){
-            this.main.set_status('All fields are required');
+            this.main.set_status('All fields are required', false);
             return;
         }
         if (this.dom_friend_name.value === this.main.login){
-            this.main.set_status("You can't add yourself as friend");
+            this.main.set_status("You can't add yourself as friend", false);
             return ;
         }
         $.ajax({
@@ -387,11 +388,11 @@ export class Profile{
                     'friend': this.dom_friend_name.value,
                     'type': 'friend_request_send'
                 }));
-                this.main.set_status(info);
+                this.main.set_status(info, true);
                 this.main.load('/profile/' + this.main.login, () => this.friend_events(false));
             },
             error: (info)=>{
-                this.main.set_status(info.responseText);
+                this.main.set_status(info.responseText, true);
             }
         });
     }
@@ -406,11 +407,11 @@ export class Profile{
                 'type': 'send'
             },
             success: (info)=>{
-                this.main.set_status(info);
+                this.main.set_status(info, true);
                 this.main.load('/profile/' + this.main.login, () => this.main.profile.events(false, this.main.login));
             },
             error: (info) =>{
-                this.main.set_status(info.responseText);
+                this.main.set_status(info.responseText, false);
             }
         })
     }
@@ -456,10 +457,10 @@ export class Profile{
                 'friend': this.main.login
             },
             success: (info)=>{
-                this.main.set_status(info);
+                this.main.set_status(info, true);
             },
             error: (info)=>{
-                this.main.set_status(info.responseText);
+                this.main.set_status(info.responseText, false);
             }
         })
     }
@@ -474,10 +475,10 @@ export class Profile{
                 'response': 'decline'
             },
             success: (info)=>{
-                this.main.set_status(info);
+                this.main.set_status(info, true);
             },
             error: (info) => {
-                this.main.set_status(info.responseText);
+                this.main.set_status(info.responseText, false);
             }
         })
     }

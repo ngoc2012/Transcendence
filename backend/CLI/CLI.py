@@ -21,27 +21,25 @@ team1 = []
 import multiprocessing
 main_queue = multiprocessing.Queue()
 
+ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+ssl_context.check_hostname = False
+ssl_context.verify_mode = ssl.CERT_NONE
 
 async def rooms_listener():
     global main_queue
     uri = "wss://" + host + "/ws/game/rooms/"
-    print(f"Connecting to {uri}...")
-
-    ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
-    ssl_context.load_verify_locations(certfile)
-    ssl_context.load_cert_chain(certfile, keyfile=keyfile)
+    #print(f"Connecting to {uri}...")
 
     try:
         async with websockets.connect(uri, ssl=ssl_context) as rooms_socket:
             while True:
                 response = await rooms_socket.recv()
-                rooms = json.loads(response)
-                if isinstance(rooms, list):
-                    main_queue.put(('rooms', rooms))
-                elif 'type' in rooms.keys():
-                    if rooms['type'] == 'close' and rooms['login_id'] == login:
+                resp = json.loads(response)
+                if 'type' in resp.keys():
+                    if resp['type'] == 'rooms':
+                        main_queue.put(('rooms', resp['room']))
+                    elif resp['type'] == 'close' and resp['login_id'] == login:
                         break
-            # print("Rooms listener close")
             await rooms_socket.close()
     except websockets.exceptions.ConnectionClosedOK:
         print("Connection closed gracefully.")
@@ -51,17 +49,12 @@ async def rooms_listener():
         print(f"An unexpected error occurred: {e}")
     finally:
         print("Rooms websocket connection closed.")
-    # print("Rooms listener end")
 
 async def pong_listener(room):
     global main_queue
     
     uri = "wss://" + host + "/ws/pong/" + room['id'] + '/' + str(room['player_id']) + '/'
-    print(f"Connecting to {uri}...")
-
-    ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
-    ssl_context.load_verify_locations(certfile)
-    ssl_context.load_cert_chain(certfile, keyfile=keyfile)
+    # print(f"Connecting to {uri}...")
 
     try:
         async with websockets.connect(uri, ssl=ssl_context) as pong_socket:
@@ -74,8 +67,6 @@ async def pong_listener(room):
                     elif response['type'] == 'start':
                         await pong_socket.send('start')
                 main_queue.put(('pong', response))
-            # print("Pong listener close")
-            # await pong_socket.close()
     except ws_exceptions.ConnectionClosedOK:
         print("Connection closed gracefully.")
     except ws_exceptions.ConnectionClosedError as e:
@@ -89,9 +80,7 @@ def join(game_id, login):
     try:
         with requests.post("https://" + host + "/game/join",
             data={"login": login, "game_id": game_id}, 
-            cert=(certfile, keyfile),
             verify=False) as response:
-            # print(response)
             if response.status_code != 200:
                 print("Request failed with status code:", response.status_code)
                 return None
@@ -115,9 +104,7 @@ def new_game(login):
                 'game': 'pong',
                 'login': login
             },
-            cert=(certfile, keyfile),
             verify=False) as response:
-            # print(response)
             if response.status_code != 200:
                 print("Request failed with status code:", response.status_code)
                 return None
@@ -140,7 +127,6 @@ def keyboard_listener():
         key_event = keyboard.read_event(suppress=True)
         if key_event.event_type == keyboard.KEY_DOWN:
             key = key_event.name
-            # print('Key:', key)
             main_queue.put(('key', key))
             if key == 'esc':
                 break
@@ -150,12 +136,9 @@ def log_in():
     global login, name
     login = input("Login: ")
     password = getpass.getpass("Password: ")
-    # login = "admin"
-    # password = "admin"
     try:
         with requests.post("https://" + host + "/log_in/",
             data={"login": login, "password": password}, 
-            cert=(certfile, keyfile),
             verify=False) as response:
             if response.status_code != 200:
                 return False
@@ -189,9 +172,8 @@ def sign_up():
                 "email": email,
                 "enable2fa": False
             }, 
-            cert=(certfile, keyfile),
             verify=False) as response:
-            if response.status_code != 200:
+            if response.status_code != 200 and response.status_code != 409:
                 return False
             if "error" in response.text.lower():
                 print(response.text)
@@ -306,18 +288,11 @@ if __name__ == "__main__":
     room = None
     playing = False
 
-#     room: {'id': '8242ffeb-386b-4080-bfba-00b265295405', 'game': 'pong', 'name': 'Stars war', 'player_id': '8d8d3127-7a3a-4463-a29c-62e95959a0e8', 'data': {'HEIGHT': 400, 'WIDTH': 800, 'RADIUS': 10, 'STEP': 20, 'STEP_X': 20, 'DX': 5, 'DY': 5, 'PADDLE_WIDTH': 10, 'PADDLE_HEIGHT': 60, 'PADDLE_STEP': 5, 'PADDLE_DISTANCE': 20}}
-# Connecting to wss://127.0.0.1:8080/ws/pong/8242ffeb-386b-4080-bfba-00b265295405/8d8d3127-7a3a-4463-a29c-62e95959a0e8/...
-# Pong: {'team0': ['sdafsdaf'], 'team1': ['dfgdsfg']}
-# Pong: {'score': [0, 0]}
-# Pong: {'ball': {'x': 20, 'y': 200}, 'players': [{'x': 0, 'y': 170}, {'x': 790, 'y': 170}]}
-# Pong: {'ball': {'x': 20, 'y': 180}, 'players': [{'x': 790, 'y': 170}, {'x': 0, 'y': 150}]}
-# Pong: {'ball': {'x': 40, 'y': 180}, 'players': [{'x': 790, 'y': 170}, {'x': 20, 'y': 150}]}
     while True:
         p, data = main_queue.get()
         if p == 'rooms':
             rooms = data
-            # print('\033c')
+            print('\033c')
             print("[0..9]: join game | n: new game | u: update | Esc: quit program", flush=True)
             for i, r in enumerate(rooms):
                 print(str(i) + ' - ' + r['name'] + ' - ' + r['id'])
@@ -335,7 +310,6 @@ if __name__ == "__main__":
                 if room != None:
                     if rooms_process != None:
                         with requests.get("https://" + host + "/game/close/" + login,
-                        cert=(certfile, keyfile),
                         verify=False) as response:
                             if response.status_code != 200:
                                 print("Request failed with status code:", response.status_code)
@@ -349,8 +323,7 @@ if __name__ == "__main__":
                 if playing:
                     curses.endwin()
                 if pong_process != None:
-                    with requests.get("https://" + host + "/pong/close/" + room['id'] + '/' + room['player_id'],
-                    cert=(certfile, keyfile),
+                    with requests.get("https://" + host + "/pong/close/" + room['id'] + '/' + str(room['player_id']),
                     verify=False) as response:
                         if response.status_code != 200:
                             print("Request failed with status code:", response.status_code)
@@ -359,7 +332,6 @@ if __name__ == "__main__":
                     pong_process = None
                     playing = False
                     with requests.get("https://" + host + "/game/need_update",
-                        cert=(certfile, keyfile),
                         verify=False) as response:
                         next
                 if rooms_process == None:
@@ -368,20 +340,18 @@ if __name__ == "__main__":
             elif data == 'ctrl':
                 if pong_process != None:
                     with requests.get("https://" + host + "/pong/start/" + room['id'],
-                    cert=(certfile, keyfile),
                     verify=False) as response:
                         next
             elif data == 'u':
                 with requests.get("https://" + host + "/game/need_update",
-                cert=(certfile, keyfile),
                 verify=False) as response:
                     next
             elif data == 'n':
                 room = new_game(login)
+                # print(room)
                 if room != None:
                     if rooms_process != None:
                         with requests.get("https://" + host + "/game/close/" + login,
-                        cert=(certfile, keyfile),
                         verify=False) as response:
                             if response.status_code != 200:
                                 print("Request failed with status code:", response.status_code)
@@ -395,9 +365,9 @@ if __name__ == "__main__":
                         verify=False) as response:
                         next
                     playing = True
-            elif data in ['up', 'down', 'left', 'right'] and playing:
-                with requests.get("https://" + host + "/pong/" + room['id'] + '/' + room['player_id'] + '/' + data,
-                cert=(certfile, keyfile),
+            # elif data in ['up', 'down', 'left', 'right'] and playing:
+            elif data in ['up', 'down'] and playing:
+                with requests.get("https://" + host + "/pong/" + room['id'] + '/' + str(room['player_id']) + '/' + data,
                 verify=False) as response:
                     if response.status_code != 200:
                         print("Request failed with status code:", response.status_code)
@@ -414,22 +384,19 @@ if __name__ == "__main__":
     # 
     if rooms_process != None:
         with requests.get("https://" + host + "/game/close/" + login,
-        cert=(certfile, keyfile),
         verify=False) as response:
             if response.status_code != 200:
                 print("Request failed with status code:", response.status_code)
                 exit(1)
         rooms_process.join()
     if pong_process != None:
-        with requests.get("https://" + host + "/pong/close/" + room['id'] + '/' + room['player_id'],
-        cert=(certfile, keyfile),
+        with requests.get("https://" + host + "/pong/close/" + room['id'] + '/' + str(room['player_id']),
         verify=False) as response:
             if response.status_code != 200:
                 print("Request failed with status code:", response.status_code)
                 exit(1)
         pong_process.join()
         with requests.get("https://" + host + "/game/need_update",
-            cert=(certfile, keyfile),
             verify=False) as response:
             next
     keys_process.join()

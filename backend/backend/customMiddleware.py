@@ -16,7 +16,7 @@ class JWTMiddleware(MiddlewareMixin):
         if '/callback/' in request.path:
             return self.process_callback(request)
 
-        if request.headers.get('X-Internal-Request') == 'true' or request.path in self.get_unauthenticated_paths() or '/game/close/' in request.path or '/admin/' in request.path:
+        if request.headers.get('X-Internal-Request') == 'true' or request.path in self.get_unauthenticated_paths() or '/game/close/' in request.path or '/admin/' in request.path or '/pong/' in request.path:
             return None
 
         if '/media/' in request.path:
@@ -110,6 +110,7 @@ class JWTMiddleware(MiddlewareMixin):
             '/lobby',
             '/admin/',
             '/admin/login/',
+            '/game/new',
             '/game/update',
             '/game/need_update',
             '/game/join',

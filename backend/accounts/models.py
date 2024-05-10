@@ -8,7 +8,7 @@ class PlayersModel(AbstractUser):
     id = models.AutoField(primary_key=True)
     login = models.CharField(default='', max_length=255, unique=True)
     name = models.CharField(max_length=255)
-    secret_2fa = models.TextField(default='', blank=True)
+    secret_2fa = models.TextField(default='', null=True, blank=True)
     session_id = models.CharField(max_length=40, null=True, blank=True)
     elo = models.IntegerField(default=1500)
     history = models.ManyToManyField(MatchModel, symmetrical=False, blank=True)

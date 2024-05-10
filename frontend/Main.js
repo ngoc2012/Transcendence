@@ -111,7 +111,16 @@ export class Main
         this.load('/pages/login', () => this.log_in.events());
     }
 
-    set_status(s) {this.dom_status.innerHTML = s;}
+    set_status(s, valid) {
+        if (valid === false){
+            this.dom_status.innerHTML = s;
+            this.dom_status.style.backgroundColor = '#dc3545';
+            return;
+        }
+        this.dom_status.innerHTML = s;
+        this.dom_status.style.backgroundColor = '#28a745';
+        return;
+    }
 
     signup_click() {
         this.load('/pages/signup', () => this.signup.events());
@@ -231,6 +240,7 @@ export class Main
         return false;
     }
 
+
     make_chat(chat_area){
         if (this.login === '')
             chat_area.innerHTML = '';
@@ -243,22 +253,27 @@ export class Main
         let new_button = document.createElement('button');
         new_button.id = 'chat-message-submit';
         new_button.type = 'button';
-        new_button.className = "btn btn-primary";
+        new_button.className = "btn btn-primary mt-1";
         new_button.innerHTML = 'Send';
+
+        new_button.style.margin = "0 auto";
         new_input.id = "chat-message-input";
         new_input.type = "text";
         new_input.size = "13";
-        new_input.className = "form-chat";
+        new_input.className = "form-chat  mt-1";
         new_textarea.id ='chat-log';
+        new_textarea.style = 'text-align: left; padding: 5%';
         new_chatbox.id = "chatbox";
+        new_chatbox.style = " margin-top: 0; padding-top: 0;"
         new_element.id = "chat";
-        new_element.className = "container mt-5";
+        new_element.className = "container mt-3";
         new_input.addEventListener('keydown', (event) => this.chat.press_enter(event, new_button));
         new_button.addEventListener("click", () => this.chat.send_message(new_input.value, new_input));
         new_chatbox.appendChild(new_textarea);
         new_chatbox.appendChild(new_input);
-        new_chatbox.appendChild(new_button);
+
         new_element.appendChild(new_chatbox);
+        new_chatbox.appendChild(new_button);        
         chat_area.appendChild(new_element);
     }
 }

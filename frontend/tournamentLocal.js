@@ -53,7 +53,7 @@ export class localTournament {
                         this.startEvents();
                     this.joinMatch(info.room_id);
                 },
-                error: () => this.main.set_status('Error: Can not join game')
+                error: () => this.main.set_status('Error: Can not join game', false)
             });
         }
     }
@@ -122,7 +122,7 @@ export class localTournament {
                             break;
                     }
                 },
-                error: () => this.main.set_status('Error: Can not join game')
+                error: () => this.main.set_status('Error: Can not join game', false)
             });
         }
     }

@@ -72,10 +72,13 @@ def new_game(request):
         return (HttpResponse("Error: No name!"))
     if not PlayersModel.objects.filter(login=request.POST['login']).exists():
         return (HttpResponse("Error: Login '" + request.POST['login'] + "' does not exist!"))
+    owner = request.user
+    if owner is not PlayersModel:
+        owner = PlayersModel.objects.get(login=request.POST['login'])
     room = RoomsModel(
         game=request.POST['game'],
         name=request.POST['name'],
-        owner=request.user,
+        owner=owner,
     )
     room.player0 = PlayersModel.objects.get(login=request.POST['login'])
     room.save()

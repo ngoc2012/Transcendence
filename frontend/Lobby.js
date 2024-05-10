@@ -43,7 +43,7 @@ export class Lobby
 
         this.dom_join.addEventListener("click", () => {
             if (this.dom_rooms.selectedIndex === -1) {
-                this.main.set_status('Please select a room to join');
+                this.main.set_status('Please select a room to join', false);
                 return;
             }
             join_game(this.main, this.dom_rooms.options[this.dom_rooms.selectedIndex].value, true);
@@ -61,7 +61,7 @@ export class Lobby
 
 	start_chat(){
 		if (this.main.login === ''){
-			this.main.set_status('You must be logged in to chat.');
+			this.main.set_status('You must be logged in to chat.', false);
 			return;
 		}
         $.ajax({
@@ -77,7 +77,7 @@ export class Lobby
     profile(){
 
         if (this.main.login === ''){
-            this.main.set_status('You must be logged in to see your profile');
+            this.main.set_status('You must be logged in to see your profile', false);
             return ;
         }
         this.main.load_with_data('/profile/' + this.main.login, () => this.main.profile.events(false, this.main.login), {'requester': this.main.login, 'user': this.main.login});
@@ -91,7 +91,7 @@ export class Lobby
         // console.log('new game');
         if (this.main.login === '')
         {
-            this.main.set_status('Please login or sign up');
+            this.main.set_status('Please login or sign up', false);
             return;
         }
 
@@ -116,7 +116,7 @@ export class Lobby
                         }));
                     if (typeof info === 'string')
                     {
-                        this.main.set_status(info);
+                        this.main.set_status(info, true);
                         this.rooms_update();
                     }
                     else
@@ -128,7 +128,7 @@ export class Lobby
                         }
                     }
                 },
-                error: () => this.main.set_status('Error: Can not create game')
+                error: () => this.main.set_status('Error: Can not create game', false)
             });
         } else
             this.main.load('/pages/login', () => this.main.log_in.events(false));
@@ -136,7 +136,7 @@ export class Lobby
 
     tournament_history_click() {
         if (this.main.login === ''){
-			this.main.set_status('You must be logged to see the tournament history.');
+			this.main.set_status('You must be logged to see the tournament history.', false);
 			return;
 		}
         this.main.load('/tournament_history', () => this.main.tournament_history.events(false));
@@ -145,12 +145,12 @@ export class Lobby
     delete_game() {
 
         if (this.main.login === '') {
-            this.main.set_status('Please login or sign up');
+            this.main.set_status('Please login or sign up', false);
             return;
         }
 
         if (this.dom_rooms.selectedIndex === -1) {
-            this.main.set_status('Select a game');
+            this.main.set_status('Select a game', false);
             return;
         }
 
@@ -173,10 +173,10 @@ export class Lobby
                     }
                     if (response.error) {
                         const message = response.message;
-                        this.main.set_status('Error: ' + message);
+                        this.main.set_status('Error: ' + message, false);
                     } else if (response.message) {
                         const message = response.message;
-                        this.main.set_status(message);
+                        this.main.set_status(message, true);
                         if (this.socket !== -1) {
                             this.socket.send(JSON.stringify({
                             type: 'update'
@@ -194,7 +194,7 @@ export class Lobby
                     if (xhr.responseJSON && xhr.responseJSON.error) {
                         errorMessage = xhr.responseJSON.error;
                     }
-                    this.main.set_status(errorMessage);
+                    this.main.set_status(errorMessage, false);
                 }
             });
         } else
@@ -250,7 +250,7 @@ export class Lobby
                 this.joinInvitePong(data.message);
             }
             else if (data.type === 'game_invite_null') {
-                this.main.set_status('Game invitation declined')
+                this.main.set_status('Game invitation declined', false)
             }
             else if (data.type === 'rooms') {
                 const rooms = data.room;
@@ -340,11 +340,17 @@ export class Lobby
             else if (data.type === 'chat_message'){
                 let new_element = document.createElement("a");
                 new_element.addEventListener("click", () => this.main.find_profile(this.main.login, data.user));
-                new_element.style = "cursor:pointer; color: rgb(0, 128, 255); text-decoration: underline;";
-                new_element.innerHTML = data.user + ":";
+
+                if (data.user === this.main.login) {
+                    new_element.style = "cursor:pointer; color: rgb(255, 255, 255); background-color: rgba(0, 0, 0, 0.4); border-radius: 10px; padding-left: 10px; padding-right: 10px; margin-top: 5px;";
+                } else {
+                    new_element.style = "cursor:pointer; color: rgb(0, 0, 0); background-color: rgba(255, 255, 255, 0.8); border-radius: 10px; padding-left: 10px; padding-right: 10px; margin-top: 5px;";
+                }
+                new_element.innerHTML = data.user;
                 new_element.className = 'user_chat';
                 let new_message = document.createElement("p");
                 new_message.innerHTML = data.message;
+                new_message.style = "padding-left: 100px;"
 		        document.querySelector('#chat-log').appendChild(new_element);
                 new_element.insertAdjacentHTML('afterend', "<br><m>" + data.message + "</m><br>");
                 return;
@@ -429,7 +435,7 @@ export class Lobby
                 container.append(userContent);
                 var button = document.getElementById(user.login + '_add-friend');
                 if (this.main.login === user.login){
-                    button.addEventListener('click', () => this.main.set_status("You wanna be friend with... Yourself ? Come on..."));
+                    button.addEventListener('click', () => this.main.set_status("You wanna be friend with... Yourself ? Come on...", false));
                 }
                 else{
                     button.addEventListener('click', () =>
@@ -450,10 +456,10 @@ export class Lobby
                                     'friend': user.login,
                                     'type': 'friend_request_send'
                                 }));
-                                this.main.set_status(info);
+                                this.main.set_status(info, true);
                             },
                             error: (info) =>{
-                                this.main.set_status(info.responseText)
+                                this.main.set_status(info.responseText, false)
                             }
                         })
                     );
@@ -491,7 +497,7 @@ export class Lobby
                     //     }));
                     if (typeof info === 'string')
                     {
-                        this.main.set_status(info);
+                        this.main.set_status(info, true);
                         this.rooms_update();
                     }
                     else
@@ -510,7 +516,7 @@ export class Lobby
                         }
                     }
                 },
-                error: () => this.main.set_status('Error: Can not create game')
+                error: () => this.main.set_status('Error: Can not create game', false)
             });
         }
     }
@@ -628,7 +634,7 @@ export class Lobby
     tournament_click() {
         if (this.main.login === '')
         {
-            this.main.set_status('Please login or sign up');
+            this.main.set_status('Please login or sign up', false);
             return;
         }
 
