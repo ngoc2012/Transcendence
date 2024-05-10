@@ -30,7 +30,7 @@ class ChatConsumer(WebsocketConsumer):
             self.room_group_name, self.channel_name
         )
 
-    def block_user(self, huh, data, str):
+    def block_user(self, data, str):
         print("on enter")
         if str == data['username']:
             self.send(text_data=json.dumps({"message": "You can't block yourself.", 'user': data['user']}))
@@ -45,7 +45,7 @@ class ChatConsumer(WebsocketConsumer):
         self.send(text_data=json.dumps({"message": "User " + block_user.login + " blocked succesfully.", 'user': data['username']}))
         return
 
-    def unblock_user(self, huh, data, str):
+    def unblock_user(self, data, str):
         if str == data['username']:
             self.send(text_data=json.dumps({"message": "You can't unblock yourself.", 'user': data['username']}))
             return
@@ -59,9 +59,9 @@ class ChatConsumer(WebsocketConsumer):
         self.send(text_data=json.dumps({"message": "User " + block_user.username + " unblocked succesfully.", 'user': data['username']}))
         return
 
-    def send_whisper(self, huh, data, value):
+    def send_whisper(self, data, value):
         msg = ' '.join(data['msg_split'][2::])
-        print(self.scope['state']['username'])
+        print(self)
         if value == data['username']:
             self.send(text_data=json.dumps({"message": self.split_message("You can't whisper yourself."), 'user': data['username']}))
             return
@@ -122,17 +122,21 @@ class ChatConsumer(WebsocketConsumer):
             'blockcmd': False,
             'unblockcmd': False,
             'whisper': False,
+            'invite': False,
             'type': json.loads(text_data)['type']
         }
         for i in data['msg_split']:
             if i and data['blockcmd'] == True:
-                self.block_user(self, data, i)
+                self.block_user(data, i)
                 return
             if i and data['unblockcmd'] == True:
-                self.unblock_user(self, data, i)
+                self.unblock_user(data, i)
                 return
             if i and data['whisper'] == True:
-                self.send_whisper(self, data, i)
+                self.send_whisper(data, i)
+                return
+            if i and data['invite'] == True:
+                self.send_invite(data, i)
                 return
             if i:
                 if i == '/block' or i == '/BLOCK' or i == '/b' or i == '/B':
@@ -141,14 +145,18 @@ class ChatConsumer(WebsocketConsumer):
                     data['unblockcmd'] = True
                 if i == '/whisper' or i == '/WHISPER' or i == '/w' or i == '/W':
                     data['whisper'] = True
+                if i == '/invite' or i == '/i' or i == '/INVITE' or i == '/I':
+                    data['invite'] = True
         # Send message to room group
         if data['message'] != '':
-            print("c parceke on va la dedans ?")
             async_to_sync(self.channel_layer.group_send)(
                 self.room_group_name, {"type": "chat_message", "message": data['message'], "user": data['user'].login}
             )
 
-
+    def send_invite(self, data, value):
+        async_to_sync(self.channel_layer.group_send)(
+                self.room_group_name, {'type' : 'game_invite', 'sender': self.scope['state']['username'], 'friend': value}
+                )
     # Receive message from room group
     def chat_message(self, event):
         message = event["message"]
@@ -184,28 +192,6 @@ class ChatConsumer(WebsocketConsumer):
         new_user = event['new_user']
         self.send(json.dumps({'type': "update_divs", 'old_user': old_user, 'new_user': new_user}))
 
-    def split_message(self, str):
-        msg = ""
-        msg_split = str.split(' ')
-        count = 0
-        for i in msg_split:
-            if count + len(i) < 20:
-                msg += i + ' '
-                count += len(i) + 1
-            elif len(i) < 20:
-                msg += '<br>'
-                msg += i + ' '
-                count = len(i) + 1
-            else:
-                print(i)
-                subcount = count
-                for n in i:
-                    if subcount < 19:
-                        msg += n
-                        subcount += 1
-                    else:
-                        msg += '<br>'
-                        subcount = 0
-                    print(subcount)
-                count = 0
-        return msg
+    def game_invite(self, event):
+        if self.scope['state']['username'] == event['friend']:
+            self.send(json.dumps({'type': 'game_invite_receive', 'sender': event['sender'], 'friend': event['friend']}))
