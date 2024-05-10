@@ -103,6 +103,10 @@ export class Pong
             this.dom_close_local = document.getElementById('close_local');
             this.dom_keyboard_layout = document.getElementById('keyboard_layout');
         }
+        else {
+            this.dom_quit_tournament = document.getElementById('quit-tournament');
+            this.dom_quit_tournament.addEventListener('click', () => this.tournament.quitTournament());
+        }
 
         document.addEventListener('keydown', (event) => {
             if (event.key === ' ') {
