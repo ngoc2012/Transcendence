@@ -361,6 +361,9 @@ export class Lobby
                 new_message.style = "padding-left: 100px;"
 		        document.querySelector('#chat-log').appendChild(new_element);
                 new_element.insertAdjacentHTML('afterend', "<br><m>" + data.message + "</m><br>");
+                let chatLog = document.getElementById("chat-log");
+                chatLog.scrollTop = chatLog.scrollHeight;
+                
                 return;
             }
             else if (data.type === 'whisper'){
@@ -378,8 +381,10 @@ export class Lobby
                     document.querySelector('#chat-log').appendChild(new_element);
                     new_element.insertAdjacentElement('afterend', new_recv);
                     new_recv.insertAdjacentHTML('afterend', "<br><m><strong>" + data.message + "</strong></m><br>");
+                    let chatLog = document.getElementById("chat-log");
+                    chatLog.scrollTop = chatLog.scrollHeight;
                 }
-                else{
+                else {
                     let new_element = document.createElement("a");
                     new_element.addEventListener("click", () => this.main.find_profile(this.main.login, data.receiver));
                     new_element.style = "cursor:pointer; color: rgb(0, 128, 255); text-decoration: underline;";
@@ -389,6 +394,8 @@ export class Lobby
                     new_message.innerHTML = data.message;
 		            document.querySelector('#chat-log').appendChild(new_element);
                     new_element.insertAdjacentHTML('afterend', "<br><m><strong>" + data.message + "</strong></m><br>");
+                    let chatLog = document.getElementById("chat-log");
+                    chatLog.scrollTop = chatLog.scrollHeight;
                     return;
                 }
             }
