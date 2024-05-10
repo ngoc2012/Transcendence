@@ -72,10 +72,12 @@ export class localTournament {
         match.innerHTML = '<h4>Match History</h4>';
 
         var container = document.getElementById('tournament-matches');
-
+        
         container.innerHTML = '';
-
+        
         results.forEach((match, index) => {
+            var top = document.getElementById('tournament-infos');
+            let windowtop = window.scrollY, topPosition = top.scrollTop;
             const matchElement = document.createElement('div');
             matchElement.className = 'match-info';
             matchElement.innerHTML = `
@@ -86,6 +88,7 @@ export class localTournament {
                 <p>Winner: ${match.winner}</p>`;
 
             container.appendChild(matchElement);
+            top.scrollTop = topPosition
 
             if (index < results.length - 1) {
                 const hr = document.createElement('hr');

@@ -316,7 +316,6 @@ export class Lobby
        	this.main.chat_socket.onmessage = (e) => {
        	    var data = JSON.parse(e.data);
             var list_user = document.getElementById('user_list');
-            // console.log(data)
             if (data.type === 'update_divs'){
                 let divs = document.getElementsByClassName('user_chat');
                 for (let i = 0; divs[i] != undefined; i++){
@@ -379,7 +378,7 @@ export class Lobby
                     return;
                 }
             }
-            else if (data.type != 'update' && data.type != 'connection'){
+            else if (data.type != 'update' && data.type != 'connection' && data.type != 'game_invite_receive'){
                 let new_element = document.createElement("a");
                 new_element.addEventListener("click", () => this.main.find_profile(this.main.login, data.user));
                 new_element.style = "cursor:pointer; color: rgb(0, 128, 255); text-decoration: underline;";
@@ -393,6 +392,15 @@ export class Lobby
             else if (data.type === "update") {
                 // console.log('update received')
                 this.displayUsers(data);
+            }
+            else if (data.type === 'game_invite_receive'){
+                if (data.friend === this.main.login){
+                    this.main.lobby.socket.send(JSON.stringify({
+                        'type': 'game_invite',
+                        'sender': data.sender,
+                        'friend': data.friend
+                    }));
+                }
             }
        	};
         var chat_area = document.getElementById('chat_area');
