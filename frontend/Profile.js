@@ -427,9 +427,9 @@ export class Profile{
         const inviteNotification = document.createElement('div');
         inviteNotification.classList.add('invite-notification');
         inviteNotification.innerHTML = `
-            <p>${data.sender} sent you a friend request !</p>
-            <button id="acceptInviteBtn">Accept</button>
-            <button id="declineInviteBtn">Decline</button>
+            <p><strong>${data.sender} sent you a friend request !</strong></p>
+            <button id="acceptInviteBtn" class="btn btn-primary">Accept</button>
+            <button id="declineInviteBtn" class="btn btn-primary">Decline</button>
         `;
 
         inviteContainer.appendChild(inviteNotification);
@@ -437,10 +437,12 @@ export class Profile{
         document.getElementById('acceptInviteBtn').addEventListener('click', () => {
             this.accept_request(data);
             inviteContainer.removeChild(inviteNotification);
+            inviteContainer.parentNode.removeChild(inviteContainer);
         });
         document.getElementById('declineInviteBtn').addEventListener('click', () => {
             this.decline_request(data);
             inviteContainer.removeChild(inviteNotification);
+            inviteContainer.parentNode.removeChild(inviteContainer);
         });
     }
 
