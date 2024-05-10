@@ -25,7 +25,7 @@ main_queue = multiprocessing.Queue()
 async def rooms_listener():
     global main_queue
     uri = "wss://" + host + "/ws/game/rooms/"
-    print(f"Connecting to {uri}...")
+    #print(f"Connecting to {uri}...")
 
     ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
     #ssl_context.load_verify_locations(certfile)
@@ -38,7 +38,7 @@ async def rooms_listener():
             while True:
                 response = await rooms_socket.recv()
                 resp = json.loads(response)
-                print(resp)
+                #print(resp)
                 if 'type' in resp.keys():
                     if resp['type'] == 'rooms':
                         main_queue.put(('rooms', resp['room']))
@@ -122,12 +122,10 @@ def new_game(login):
             },
             cert=(certfile, keyfile),
             verify=False) as response:
-            # print(response)
             if response.status_code != 200:
                 print("Request failed with status code:", response.status_code)
                 return None
             if "error" in response.text.lower():
-                print(response.text)
                 return None
         return json.loads(response.text)
     except requests.exceptions.SSLError as e:
@@ -222,6 +220,7 @@ def run_pong_listener(room):
 import curses
 
 def draw_pong(room, state):
+    #print("draw pong", room, state)
     ZX = 5
     ZY = 10
     DY = 1
@@ -354,7 +353,7 @@ if __name__ == "__main__":
                 if playing:
                     curses.endwin()
                 if pong_process != None:
-                    with requests.get("https://" + host + "/pong/close/" + room['id'] + '/' + room['player_id'],
+                    with requests.get("https://" + host + "/pong/close/" + room['id'] + '/' + str(room['player_id']),
                     cert=(certfile, keyfile),
                     verify=False) as response:
                         if response.status_code != 200:
@@ -383,6 +382,7 @@ if __name__ == "__main__":
                     next
             elif data == 'n':
                 room = new_game(login)
+                # print(room)
                 if room != None:
                     if rooms_process != None:
                         with requests.get("https://" + host + "/game/close/" + login,
@@ -400,8 +400,9 @@ if __name__ == "__main__":
                         verify=False) as response:
                         next
                     playing = True
-            elif data in ['up', 'down', 'left', 'right'] and playing:
-                with requests.get("https://" + host + "/pong/" + room['id'] + '/' + room['player_id'] + '/' + data,
+            # elif data in ['up', 'down', 'left', 'right'] and playing:
+            elif data in ['up', 'down'] and playing:
+                with requests.get("https://" + host + "/pong/" + room['id'] + '/' + str(room['player_id']) + '/' + data,
                 cert=(certfile, keyfile),
                 verify=False) as response:
                     if response.status_code != 200:
@@ -426,7 +427,7 @@ if __name__ == "__main__":
                 exit(1)
         rooms_process.join()
     if pong_process != None:
-        with requests.get("https://" + host + "/pong/close/" + room['id'] + '/' + room['player_id'],
+        with requests.get("https://" + host + "/pong/close/" + room['id'] + '/' + str(room['player_id']),
         cert=(certfile, keyfile),
         verify=False) as response:
             if response.status_code != 200:
