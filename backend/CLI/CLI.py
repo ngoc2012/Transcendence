@@ -28,18 +28,21 @@ async def rooms_listener():
     print(f"Connecting to {uri}...")
 
     ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
-    ssl_context.load_verify_locations(certfile)
-    ssl_context.load_cert_chain(certfile, keyfile=keyfile)
+    #ssl_context.load_verify_locations(certfile)
+    #ssl_context.load_cert_chain(certfile, keyfile=keyfile)
+    ssl_context.check_hostname = False
+    ssl_context.verify_mode = ssl.CERT_NONE
 
     try:
         async with websockets.connect(uri, ssl=ssl_context) as rooms_socket:
             while True:
                 response = await rooms_socket.recv()
-                rooms = json.loads(response)
-                if isinstance(rooms, list):
-                    main_queue.put(('rooms', rooms))
-                elif 'type' in rooms.keys():
-                    if rooms['type'] == 'close' and rooms['login_id'] == login:
+                resp = json.loads(response)
+                print(resp)
+                if 'type' in resp.keys():
+                    if resp['type'] == 'rooms':
+                        main_queue.put(('rooms', resp['room']))
+                    elif resp['type'] == 'close' and resp['login_id'] == login:
                         break
             # print("Rooms listener close")
             await rooms_socket.close()
@@ -60,8 +63,10 @@ async def pong_listener(room):
     print(f"Connecting to {uri}...")
 
     ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
-    ssl_context.load_verify_locations(certfile)
-    ssl_context.load_cert_chain(certfile, keyfile=keyfile)
+    #ssl_context.load_verify_locations(certfile)
+    #ssl_context.load_cert_chain(certfile, keyfile=keyfile)
+    ssl_context.check_hostname = False
+    ssl_context.verify_mode = ssl.CERT_NONE
 
     try:
         async with websockets.connect(uri, ssl=ssl_context) as pong_socket:
