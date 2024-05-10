@@ -70,6 +70,9 @@ export class Lobby
         $.ajax({
 			url: '/transchat/chat_lobby/',
 			method: 'POST',
+            headers:{
+				'X-CSRFToken': this.main.getCookie('csrftoken')
+			},
 			data:{
 				'username': this.main.login
 			}
