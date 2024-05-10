@@ -28,8 +28,6 @@ async def rooms_listener():
     #print(f"Connecting to {uri}...")
 
     ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
-    #ssl_context.load_verify_locations(certfile)
-    #ssl_context.load_cert_chain(certfile, keyfile=keyfile)
     ssl_context.check_hostname = False
     ssl_context.verify_mode = ssl.CERT_NONE
 
@@ -63,8 +61,6 @@ async def pong_listener(room):
     print(f"Connecting to {uri}...")
 
     ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
-    #ssl_context.load_verify_locations(certfile)
-    #ssl_context.load_cert_chain(certfile, keyfile=keyfile)
     ssl_context.check_hostname = False
     ssl_context.verify_mode = ssl.CERT_NONE
 
@@ -154,8 +150,6 @@ def log_in():
     global login, name
     login = input("Login: ")
     password = getpass.getpass("Password: ")
-    # login = "admin"
-    # password = "admin"
     try:
         with requests.post("https://" + host + "/log_in/",
             data={"login": login, "password": password}, 
@@ -311,13 +305,6 @@ if __name__ == "__main__":
     room = None
     playing = False
 
-#     room: {'id': '8242ffeb-386b-4080-bfba-00b265295405', 'game': 'pong', 'name': 'Stars war', 'player_id': '8d8d3127-7a3a-4463-a29c-62e95959a0e8', 'data': {'HEIGHT': 400, 'WIDTH': 800, 'RADIUS': 10, 'STEP': 20, 'STEP_X': 20, 'DX': 5, 'DY': 5, 'PADDLE_WIDTH': 10, 'PADDLE_HEIGHT': 60, 'PADDLE_STEP': 5, 'PADDLE_DISTANCE': 20}}
-# Connecting to wss://127.0.0.1:8080/ws/pong/8242ffeb-386b-4080-bfba-00b265295405/8d8d3127-7a3a-4463-a29c-62e95959a0e8/...
-# Pong: {'team0': ['sdafsdaf'], 'team1': ['dfgdsfg']}
-# Pong: {'score': [0, 0]}
-# Pong: {'ball': {'x': 20, 'y': 200}, 'players': [{'x': 0, 'y': 170}, {'x': 790, 'y': 170}]}
-# Pong: {'ball': {'x': 20, 'y': 180}, 'players': [{'x': 790, 'y': 170}, {'x': 0, 'y': 150}]}
-# Pong: {'ball': {'x': 40, 'y': 180}, 'players': [{'x': 790, 'y': 170}, {'x': 20, 'y': 150}]}
     while True:
         p, data = main_queue.get()
         if p == 'rooms':
