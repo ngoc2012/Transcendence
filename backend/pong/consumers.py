@@ -21,12 +21,12 @@ def rematch(self):
         tournament = TournamentModel.objects.get(id=self.tour_id)
         if tournament.rematchIP:
             return
-        
+
         tournament.rematchIP = True
         tournament.save()
 
         match = TournamentMatchModel.objects.filter(tournament=tournament).order_by('-match_number').first()
-        
+
         new_room =  RoomsModel.objects.create(
             game=tournament.game,
             name=f"{tournament.name} - Match {tournament.total_matches}",
@@ -42,7 +42,7 @@ def rematch(self):
 
         new_match = TournamentMatchModel.objects.create(**match_data)
         match.delete()
-    
+
     except TournamentMatchModel.DoesNotExist:
         pass
         # print("Match not found")
@@ -67,7 +67,7 @@ class PongConsumer(AsyncWebsocketConsumer):
             setattr(self, "k_" + i, str(self.room_id) + "_" + i)
         for i in ['x', 'y']:
             setattr(self, "k_player_" + i, str(self.room_id) + "_" + str(self.player_id) + "_" + i)
-        
+
         check = await get_info(self)
         if self.player0:
             self.player0.online_status = 'In-game'
@@ -152,7 +152,7 @@ class PongConsumer(AsyncWebsocketConsumer):
         await self.channel_layer.group_send(self.room_id, {'type': 'group_data'})
         self.player0: PlayersModel = await get_player0(self.room)
         self.player1: PlayersModel = await get_player1(self.room)
-    
+
     async def close_connection(self, data):
         await self.send(text_data=json.dumps({
             "type": 'close',
@@ -170,7 +170,7 @@ class PongConsumer(AsyncWebsocketConsumer):
             self.disconnect(1011)
             return
         await self.send(text_data=room_data)
-    
+
     async def teams_data(self, event):
         teams = await get_teams_data(self, self.room_id)
         if teams is None:
@@ -196,6 +196,7 @@ class PongConsumer(AsyncWebsocketConsumer):
             await asyncio.sleep(0.02)
             players = cache.get(self.k_all)
             if players == None or len(players) == 0:
+                print('here')
                 await quit(self)
                 await self.channel_layer.group_send(self.room_id, {'type': 'teams_data'})
                 return

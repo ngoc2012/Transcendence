@@ -30,7 +30,7 @@ class JWTMiddleware(MiddlewareMixin):
             decoded = jwt.decode(access_token, settings.JWT_SECRET_KEY, algorithms=["HS256"])
             user = self.get_user(decoded.get('user_id'))
             if not user:
-                return return_lobby(request)
+                return self.return_lobby(request)
 
             if decoded == jwt.decode(user.acc, settings.JWT_SECRET_KEY, algorithms=["HS256"]):
                 request.user = user
@@ -38,11 +38,11 @@ class JWTMiddleware(MiddlewareMixin):
         except jwt.ExpiredSignatureError:
             return self.handle_refresh_token(request)
         except jwt.InvalidTokenError:
-            return return_lobby(request)
+            return self.return_lobby(request)
 
     def process_exception(self, request, exception):
         if isinstance(exception, ObjectDoesNotExist):
-            return return_lobby(request)
+            return self.return_lobby(request)
 
     def get_user(self, user_id):
         user = cache.get(f'user_{user_id}')
@@ -57,7 +57,7 @@ class JWTMiddleware(MiddlewareMixin):
     def handle_refresh_token(self, request):
         refresh_token = request.COOKIES.get('refresh_token')
         if not refresh_token:
-            return return_lobby(request)
+            return self.return_lobby(request)
 
         try:
             decoded = jwt.decode(refresh_token, settings.JWT_REFRESH_SECRET_KEY, algorithms=["HS256"])
@@ -74,11 +74,11 @@ class JWTMiddleware(MiddlewareMixin):
                 request.user = user
                 return None
             else:
-                return return_lobby(request)
+                return self.return_lobby(request)
         except jwt.ExpiredSignatureError:
-            return return_lobby(request)
+            return self.return_lobby(request)
         except jwt.InvalidTokenError:
-           return return_lobby(request)
+           return self.return_lobby(request)
 
     def generate_jwt_tokens(self, user_id):
         access_token = jwt.encode({
@@ -133,6 +133,7 @@ class JWTMiddleware(MiddlewareMixin):
             return  HttpResponseRedirect('/login/')
 
     def return_lobby(self, request):
+        print('return lobby')
         response = HttpResponseRedirect('/')
         response.delete_cookie('access_token')
         response.delete_cookie('refresh_token')

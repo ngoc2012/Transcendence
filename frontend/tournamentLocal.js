@@ -13,8 +13,6 @@ export class localTournament {
     startEvents(isPopState) {
         this.dom_quit_tournament = document.getElementById('quit-tournament');
         this.dom_quit_tournament.addEventListener('click', () => this.tournament.quitTournament());
-        // this.dom_lobby_tournament = document.getElementById('Lobby');
-        // this.dom_lobby_tournament.style.display = 'none';
     }
 
     rematch(isPopState) {
@@ -72,9 +70,9 @@ export class localTournament {
         match.innerHTML = '<h4>Match History</h4>';
 
         var container = document.getElementById('tournament-matches');
-        
+
         container.innerHTML = '';
-        
+
         results.forEach((match, index) => {
             var top = document.getElementById('tournament-infos');
             let windowtop = window.scrollY, topPosition = top.scrollTop;

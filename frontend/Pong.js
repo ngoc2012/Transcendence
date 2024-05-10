@@ -250,6 +250,7 @@ export class Pong
                         this.main.set_status(info, true);
                     else
                     {
+                        this.playerLocal = true;
                         this.players.push({
                             'id': info.player_id,
                             'sk': -1
@@ -259,7 +260,6 @@ export class Pong
                         if (this.players[i].sk !== -1)
                         {
                             this.keyboard_layout += 'olpk';
-                            this.lobby.socketTour2 = this.players[i].sk;
                         }
                         this.preMatchBox(this.localTournament.player1, this.localTournament.player2);
                     }
@@ -483,7 +483,6 @@ export class Pong
         this.players[i].sk.onopen = (e) => {
             if (this.id) {
                 this.players[i].sk.send('tour_id:' + this.id);
-                this.lobby.socketTour1 = this.players[i].sk;
             }
         };
 

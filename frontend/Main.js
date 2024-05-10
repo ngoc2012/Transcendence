@@ -61,7 +61,6 @@ export class Main
     }
 
     load(page, callback) {
-        this.checkTourSockets();
         $.ajax({
             url: page + '/',
             method: 'GET',
@@ -141,14 +140,14 @@ export class Main
         return cookieValue;
     }
 
-    checkTourSockets() {
-        if (this.lobby.socketTour1) {
-            this.lobby.socketTour1.close();
-            this.lobby.socketTour2.close();
-            // this.lobby.tournament.localTournament.game.players[0].sk = -1;
-            // this.lobby.tournament.localTournament.game.players[1].sk = -1;
-        }
-    }
+    // checkTourSockets() {
+    //     if (this.lobby.socketTour1) {
+    //         this.lobby.socketTour1.close();
+    //         this.lobby.socketTour2.close();
+    //         this.lobby.socketTour1 = -1;
+    //         this.lobby.socketTour2 = -1;
+    //     }
+    // }
 
     checkcsrf() {
         if (!this.csrftoken) {
@@ -273,7 +272,7 @@ export class Main
         new_chatbox.appendChild(new_input);
 
         new_element.appendChild(new_chatbox);
-        new_chatbox.appendChild(new_button);        
+        new_chatbox.appendChild(new_button);
         chat_area.appendChild(new_element);
     }
 }

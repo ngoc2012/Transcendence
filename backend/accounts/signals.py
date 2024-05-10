@@ -16,7 +16,7 @@ def create_user(username):
         password = generate_secure_password()
         try:
             hashed_password = make_password(password)
-            User.objects.create_user(username, '', hashed_password)
+            User.objects.create_user(username, '', hashed_password, login=username)
             # print(f"User created successfully.")
         except IntegrityError as e:
             pass

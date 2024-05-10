@@ -12,8 +12,6 @@ export class Lobby
         this.game = null;
         this.tournament = null;
         this.ws = null;
-        this.socketTour1 = null;
-        this.socketTour2 = null;
     }
 
     events(isPopState) {

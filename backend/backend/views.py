@@ -858,7 +858,6 @@ def new_tournament(request):
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
-
 def auth_view(request):
     if request.method != 'POST':
         return JsonResponse({'error': 'Only POST requests are allowed'}, status=405)

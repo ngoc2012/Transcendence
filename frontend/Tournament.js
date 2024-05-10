@@ -195,7 +195,7 @@ export class Tournament {
                 },
                 error: (xhr) => {
                     this.main.set_status(xhr.responseJSON.error, false);
-                    this.quitTournament('force');
+                    this.quitTournament();
                 }
             });
         }
@@ -238,7 +238,7 @@ export class Tournament {
         }
     }
 
-    quitTournament(force) {
+    quitTournament() {
         this.main.lobby.socket.send(JSON.stringify({
             type: 'tournament-quit',
             tour_id: this.id,

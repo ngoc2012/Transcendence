@@ -28,35 +28,69 @@ def tournament_local_join_setup(request):
     if not player2:
         return HttpResponse("Error: No player id")
 
-    players_key = f"{game_id}_all"
-    players = cache.get(players_key) or []
-
+    players = cache.get(str(request.POST['game_id']) + "_all")
+    if players == None:
+        players = []
+    player_login = player2
+    room_id = game_id
     try:
-        TournamentMatchModel.objects.get(room_uuid=game_id)
-    except TournamentMatchModel.DoesNotExist:
-        return HttpResponse("Error: Room with id " + game_id + " does not exist")
-
+        player = User.objects.get(login=player_login)
+    except ObjectDoesNotExist:
+        player = User.objects.get(login=localTournament2)
+    except MultipleObjectsReturned:
+        return (HttpResponse(f"Error: Many players with ID {player_login} exist."))
     try:
-        player = PlayersModel.objects.get(login=player2)
-    except PlayersModel.DoesNotExist:
-        player = PlayersModel.objects.get(login='localTournament2')
-
+        room = RoomsModel.objects.get(id=room_id)
+    except ObjectDoesNotExist:
+        return (HttpResponse(f"Error: Room with ID {room_id} does not exist."))
+    except MultipleObjectsReturned:
+        return (HttpResponse(f"Error: Many rooms with ID {room_id} exist."))
+    room.player1 = player
+    room.save()
     if player.id in players:
-        return HttpResponse(f"Error: Player with login {player.login} is already in the room")
+        return (HttpResponse("Error: Player with login " + request.POST['login'] + " is already in the room!"))
+    room, player = add_player_to_room(request.POST['game_id'], player.login)
+    if room == None:
+        return (HttpResponse("Error: Room with id " + request.POST['game_id'] + " does not exist!"))
+    if player == None:
+        return (HttpResponse("Error: Player with login " + request.POST['login'] + " does not exist!"))
+    return (JsonResponse({
+            'id': str(room),
+            'game': room.game,
+            'name': room.name,
+            'player_id': player.id,
+            'data': get_data(room.game)
+        }))
 
-    room, player = add_player_to_room(game_id, player.login)
-    if not room:
-        return HttpResponse("Error: Room with id " + game_id + " does not exist")
-    if not player:
-        return HttpResponse(f"Error: Player with login {player2} does not exist")
+# players_key = f"{game_id}_all"
+# players = cache.get(players_key) or []
 
-    return JsonResponse({
-        'id': str(room),
-        'game': room.game,
-        'name': room.name,
-        'player_id': player.id,
-        'data': get_data(room.game)
-    })
+# try:
+#     TournamentMatchModel.objects.get(room_uuid=game_id)
+# except TournamentMatchModel.DoesNotExist:
+#     return HttpResponse("Error: Room with id " + game_id + " does not exist")
+
+# try:
+#     player = PlayersModel.objects.get(login=player2)
+# except PlayersModel.DoesNotExist:
+#     player = PlayersModel.objects.get(login='localTournament2')
+
+# if player.id in players:
+#     return HttpResponse(f"Error: Player with login {player.login} is already in the room")
+
+# room, player = add_player_to_room(game_id, player.login)
+# if not room:
+#     return HttpResponse("Error: Room with id " + game_id + " does not exist")
+# if not player:
+#     return HttpResponse(f"Error: Player with login {player2} does not exist")
+
+# return JsonResponse({
+#     'id': str(room),
+#     'game': room.game,
+#     'name': room.name,
+#     'player_id': player.id,
+#     'data': get_data(room.game)
+# })
 
 @require_POST
 def tournament_local_join(request):
@@ -141,7 +175,7 @@ def tournament_local_get(request):
 
         all_participants = update_status(tournament, all_participants, all_waitlist)
         all_participants, player1, player2 = prepare_round(tournament, all_participants)
-        room = gen_room(tournament)
+        room = gen_room(tournament, player1)
         match = gen_match(tournament, room, player1, player2)
 
         move_player_to_waitlist(tournament, player1)
@@ -351,16 +385,23 @@ def update_status(tournament, all_participants, all_waitlist):
     tournament.save()
     return all_participants
 
-def gen_room(tournament):
+def gen_room(tournament, player1):
+    try:
+        user = User.objects.get(login=player1)
+    except ObjectDoesNotExist:
+        user = User.objects.get(username=localTournament1)
     room = RoomsModel.objects.create(
             game=tournament.game,
             name=f"{tournament.name} - Match {tournament.total_matches}",
             owner=tournament.owner,
-            tournamentRoom=True
+            tournamentRoom=True,
+            player0 = user
     )
     if room.game == 'pong':
         cache.set(str(room.id) + "_x", pong_data['PADDLE_WIDTH'] + pong_data['RADIUS'])
         cache.set(str(room.id) + "_y", pong_data['HEIGHT'] / 2)
+        add_player_to_room(room.id, user.login)
+    room.save()
     return room
 
 def prepare_round(tournament, all_participants):
