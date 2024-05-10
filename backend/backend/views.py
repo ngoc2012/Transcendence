@@ -4,7 +4,7 @@ from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from django.views.decorators.http import require_POST
 from game.models import TournamentModel, TournamentMatchModel, RoomsModel
 from accounts.models import PlayersModel
-from accounts.forms import UploadFileForm
+from accounts.forms import UploadFileForm, PlayerChangeNameForm, PlayerChangeLoginForm, PlayerChangeEmailForm, PlayerChangeAliasForm, PlayerChangePasswordForm, PlayerAddFriendForm
 from django.utils import timezone
 from transchat.models import Room
 import json
@@ -621,15 +621,14 @@ def profile(request, username):
 @csrf_exempt
 def alias(request, username):
     user = PlayersModel.objects.filter(login=username).get(login=username)
-    if request.method == 'GET':
-        return(render(request, 'alias.html'))
     if request.method == 'POST':
-        if 'alias' in request.POST:
+        form = PlayerChangeAliasForm(request.POST)
+        if form.is_valid():
             if request.POST['alias'] != '' :
                 try:
-                    check_alias = PlayersModel.objects.get(tourn_alias=request.POST['alias'])
+                    check_alias = PlayersModel.objects.get(tourn_alias=form.cleaned_data['alias'])
                 except PlayersModel.DoesNotExist:
-                    user.tourn_alias = request.POST['alias']
+                    user.tourn_alias = form.cleaned_data['alias']
                     user.save()
                     return HttpResponse('Tournament alias succesfully changed')
                 response = HttpResponse('Alias already in use')
@@ -646,123 +645,154 @@ def alias(request, username):
                     response = HttpResponse("You must enter a value")
                     response.status_code = 403
                     return response
+        else:
+            response = HttpResponse("Invalid data")
+            response.status_code = 400
+            return response
+    return(render(request, 'alias.html'))
 
 @csrf_exempt
 def password(request, username):
     user= PlayersModel.objects.filter(login=username).get(login=username)
     if request.method == 'POST':
-        if 'oldpwd' in request.POST and 'newpwd' in request.POST:
-            oldpwd = request.POST['oldpwd']
-            newpwd = request.POST['newpwd']
-            if check_password(oldpwd, user.password) == True:
-                new = make_password(newpwd)
-                user.password = new
-                user.save()
-                response = HttpResponse('Password changed succesfully')
-                response.status_code = 200
-                return response
-            else:
-                response = HttpResponse('Incorrect password')
-                response.status_code = 401
-                return response
+        form = PlayerChangePasswordForm(request.POST)
+        if form.is_valid():
+                if check_password(form.cleaned_data['oldpwd'], user.password) == True:
+                    new = make_password(form.cleaned_data['newpwd'])
+                    user.password = new
+                    user.save()
+                    response = HttpResponse('Password changed succesfully')
+                    response.status_code = 200
+                    return response
+                else:
+                    response = HttpResponse('Incorrect password')
+                    response.status_code = 401
+                    return response
+        else:
+            response = HttpResponse("Invalid data")
+            response.status_code = 400
+            return response
     return render(request, 'change_password.html')
 
 @csrf_exempt
 def email(request, username):
     user = PlayersModel.objects.filter(login=username).get(login=username)
     if request.method == 'POST':
-        if 'password' in request.POST:
-            if check_password(request.POST['password'], user.password) == False:
+        form = PlayerChangeEmailForm(request.POST)
+        if form.is_valid():
+            if check_password(form.cleaned_data['password'], user.password) == False:
                 response = HttpResponse('Invalid password')
                 response.status_code = 401
                 return response
             else:
-                user.email = request.POST['email']
+                user.email = form.cleaned_data['email']
                 user.save()
                 response = HttpResponse('Email changed succesfully')
                 response.status_code = 200
                 return response
+        else:
+            response = HttpResponse("Invalid data")
+            response.status_code = 400
+            return response
     return render(request, 'change_email.html')
 
 @csrf_exempt
 def change_login(request, username):
     user = PlayersModel.objects.get(login=username)
     if request.method == 'POST':
-        if check_password(request.POST['password'], user.password) == False:
-            response = HttpResponse('Invalid password.')
+        form = PlayerChangeLoginForm(request.POST)
+        if form.is_valid():
+            if check_password(form.cleaned_data['password'], user.password) == False:
+                response = HttpResponse('Invalid password.')
+                response.status_code = 401
+                return response
+            try:
+                check_login = PlayersModel.objects.get(login=form.cleaned_data['new_login'])
+            except PlayersModel.DoesNotExist:
+                user.login = form.cleaned_data['new_login']
+                user.username = form.cleaned_data['new_login']
+                user.save()
+                response = HttpResponse('Login changed succesfully')
+                response.status_code = 200
+                return response
+            response = HttpResponse('Login not available')
             response.status_code = 401
             return response
-        try:
-            check_login = PlayersModel.objects.get(login=request.POST['new_login'])
-        except PlayersModel.DoesNotExist:
-            new_username = request.POST['new_login']
-            user.login = new_username
-            user.username = new_username
-            user.save()
-            response = HttpResponse('Login changed succesfully')
-            response.status_code = 200
+        else:
+            response = HttpResponse("Invalid data")
+            response.status_code = 400
             return response
-        response = HttpResponse('Login not available')
-        response.status_code = 401
-        return response
     return render(request, 'change_login.html')
 
 @csrf_exempt
 def name(request, username):
     user = PlayersModel.objects.get(login=username)
     if request.method == 'POST':
-        if check_password(request.POST['password'], user.password) == False:
-            response = HttpResponse('Invalid password')
-            response.status_code = 401
+        form = PlayerChangeNameForm(request.POST)
+        if form.is_valid():
+            if check_password(form.cleaned_data['password'], user.password) == False:
+                response = HttpResponse('Invalid password')
+                response.status_code = 401
+                return response
+            user.name = form.cleaned_data['name']
+            user.save()
+            response = HttpResponse('Name changed succesfully')
+            response.status_code = 200
             return response
-        user.name = request.POST['name']
-        user.save()
-        response = HttpResponse('Name changed succesfully')
-        response.status_code = 200
-        return response
+        else:
+            response = HttpResponse("Invalid data")
+            response.status_code = 400
+            return response
     return render(request, 'change_name.html')
 
 @csrf_exempt
 def friend(request, username):
     user = PlayersModel.objects.get(login=username)
     if request.method == 'POST':
-        if request.POST['type'] == 'send':
-            if request.POST['friend'] == username:
-                response = HttpResponse('You cannnot be friend with yourself')
-                response.status_code = 403
+        form = PlayerAddFriendForm(request.POST)
+        print(form)
+        if form.is_valid():
+            if request.POST['type'] == 'send':
+                if form.cleaned_data['friend'] == username:
+                    response = HttpResponse('You cannnot be friend with yourself')
+                    response.status_code = 403
+                    return response
+                try:
+                    new_friend = PlayersModel.objects.get(login=form.cleaned_data['friend'])
+                except PlayersModel.DoesNotExist:
+                    response = HttpResponse(form.cleaned_data['friend'] + ' does not exist')
+                    response.status_code = 404
+                    return response
+                try:
+                    friend_exist = user.friends.get(login=form.cleaned_data['friend'])
+                except PlayersModel.DoesNotExist:
+                    response = HttpResponse('Friend request sent to ' + form.cleaned_data['friend'])
+                    response.status_code = 200
+                    return response
+                response = HttpResponse('You are already friend with ' + form.cleaned_data['friend'])
+                response.status_code = 401
                 return response
-            try:
-                new_friend = PlayersModel.objects.get(login=request.POST['friend'])
-            except PlayersModel.DoesNotExist:
-                response = HttpResponse(request.POST['friend'] + ' does not exist')
-                response.status_code = 404
-                return response
-            try:
-                friend_exist = user.friends.get(login=request.POST['friend'])
-            except PlayersModel.DoesNotExist:
-                response = HttpResponse('Friend request sent to ' + request.POST['friend'])
-                response.status_code = 200
-                return response
-            response = HttpResponse('You are already friend with ' + request.POST['friend'])
-            response.status_code = 401
+            if request.POST['type'] == 'receive':
+                if request.POST['response'] == 'accept':
+                    sender = PlayersModel.objects.get(login=form.cleaned_data['sender'])
+                    if form.cleaned_data['friend']:
+                        friend = PlayersModel.objects.get(login=form.cleaned_data['friend'])
+                    sender.friends.add(friend)
+                    friend.friends.add(sender)
+                    sender.save()
+                    friend.save()
+                    response = HttpResponse('You accepted ' + form.cleaned_data['sender'] + ' friend request. You are now friends.')
+                    response.status_code = 200
+                    return response
+                if request.POST['response'] == 'decline':
+                    sender = PlayersModel.objects.get(login=form.cleaned_data['sender'])
+                    response = HttpResponse('You declined ' + form.cleaned_data['sender'] + ' friend request.')
+                    response.status_code = 200
+                    return response
+        else:
+            response = HttpResponse("Invalid data")
+            response.status_code = 400
             return response
-        if request.POST['type'] == 'receive':
-            if request.POST['response'] == 'accept':
-                sender = PlayersModel.objects.get(login=request.POST['sender'])
-                if request.POST['friend']:
-                    friend = PlayersModel.objects.get(login=request.POST['friend'])
-                sender.friends.add(friend)
-                friend.friends.add(sender)
-                sender.save()
-                friend.save()
-                response = HttpResponse('You accepted ' + request.POST['sender'] + ' friend request. You are now friends.')
-                response.status_code = 200
-                return response
-            if request.POST['response'] == 'decline':
-                sender = PlayersModel.objects.get(login=request.POST['sender'])
-                response = HttpResponse('You declined ' + request.POST['sender'] + ' friend request.')
-                response.status_code = 200
-                return response
     return render(request, 'add_friend.html')
 
 @csrf_exempt
