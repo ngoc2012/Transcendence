@@ -250,16 +250,12 @@ def new_player(request):
 
         ws_token = user.generate_ws_token()
         enable2fa = request.POST.get('enable2fa')
-        print(enable2fa == 'false')
         if enable2fa == 'false':
             enable2fa = ''
 
         temp_secret = pyotp.random_base32()
-        print("temp_secret", temp_secret)
         hashed_secret = encrypt(temp_secret)
-        print("hashed_secret", hashed_secret)
         user.secret_2fa = hashed_secret if enable2fa else ''
-        print(user.secret_2fa)
         user.save()
 
         response_data = {
