@@ -7,7 +7,7 @@ export class qrcode_2fa
     constructor(m) {
         this.main = m;
     }
-    
+
     events() {
         this.main.checkcsrf();
 
@@ -52,8 +52,11 @@ export class qrcode_2fa
                     if (typeof info === 'string') {
                         this.main.set_status(info);
                         this.main.login.state = 2;
-                    } else {
-                        if (info.result === '1') {
+                    } else if (info.result === '1') {
+                        if (this.tournament) {
+                            this.main.load('/tournament/local', () => this.main.lobby.tournament.eventsTwoFA(this.login));
+                            return;
+                        } else {
                             $.ajax({
                                 url: '/log_in/',
                                 method: 'POST',
@@ -78,7 +81,7 @@ export class qrcode_2fa
                                         if (dom_log_in) {
                                             dom_log_in.style.display = "none";
                                         }
-                    
+
                                         var dom_signup = document.getElementById('signup');
                                         if (dom_signup) {
                                             dom_signup.style.display = "none";
@@ -88,19 +91,8 @@ export class qrcode_2fa
                                                 dom_logout.addEventListener('click', () => this.main.logout());
                                             }
                                         }
-                    
-                                        // var dom_logout = document.getElementById('logoutButton');
-                                        // if (dom_logout) {
-                                        //     dom_logout.addEventListener('click', () => this.main.logout());
-                                        // }
-    
-                                        if (!this.tournament) {
-                                            // this.main.history_stack.push('/');
-                                            // window.history.pushState({}, '', '/');
-                                            this.main.load('/lobby', () => this.main.lobby.events());
-                                        } else {
-                                            this.main.load('/tournament/local', () => this.main.lobby.tournament.eventsTwoFA(this.login));
-                                        }
+
+                                        this.main.load('/lobby', () => this.main.lobby.events());
                                     }
                                 },
                                 error: (xhr, textStatus, errorThrown) => {
@@ -112,23 +104,19 @@ export class qrcode_2fa
                                 }
                             });
                         }
-                        else
-                            this.main.set_status('Wrong code, please try again');
+                    } else {
+                        this.main.set_status('Wrong code, please try again');
                     }
                 },
-                error: (data) => this.main.set_status(data.error)
+                error: (xhr) => {
+                    this.main.set_status(xhr.responseJSON && xhr.responseJSON.error ? xhr.responseJSON.error : 'An error occurred during the request.');
+                }
             });
-        } else {
-            // console.log('no token')
-            // console.log('Login required');
-            // this.main.load('/pages/login', () => this.main.log_in.events());
         }
     }
 
 
     cancel() {
-        // this.main.history_stack.push('/');
-        // window.history.pushState({}, '', '/');
         this.main.load('/lobby', () => this.main.lobby.events());
     }
 }

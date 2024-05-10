@@ -44,7 +44,7 @@ def encrypt(message):
     encrypted_text = fernet.encrypt(message.encode()).decode()
     return encrypted_text
   except Exception as e:
-    print("Error during encryption:", e)
+    # print("Error during encryption:", e)
     return None
 
 def decrypt(encrypted_text):
@@ -53,7 +53,7 @@ def decrypt(encrypted_text):
     decrypted_text = fernet.decrypt(encrypted_text.encode()).decode()
     return decrypted_text
   except Exception as e:
-    print("Error during decryption:", e)
+    # print("Error during decryption:", e)
     return None
 
 def redirect(request):
@@ -768,8 +768,8 @@ def friend(request, username):
 @csrf_exempt
 def avatar(request, username):
     user = PlayersModel.objects.get(login=username)
-    print(request.POST)
-    print(request.FILES['id_file'])
+    # print(request.POST)
+    # print(request.FILES['id_file'])
     user.avatar = request.FILES['id_file']
     user.save()
     return JsonResponse({"new_pp": True, "url": user.avatar.url})
@@ -784,7 +784,7 @@ def tournament_request(request):
         if not tournament:
             return JsonResponse({'status': 'not_found'}, status=200)
 
-        if not tournament.ready and not tournament.callback:
+        if not tournament.ready:
             url = f"http://blockchain:9000/delete_tournament/{tournament.name}"
             tournament.delete()
             return JsonResponse({'status': 'not_found'}, status=200)

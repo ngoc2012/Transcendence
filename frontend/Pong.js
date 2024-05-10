@@ -21,6 +21,7 @@ export class Pong
         this.preventWinBox = true;
         this.pmBox = false;
         this.joined = false;
+        this.playerLocal = false;
     }
 
     reset_ratio() {
@@ -308,7 +309,7 @@ export class Pong
     }
 
     isAlphabetic(str) {
-        const regex = /^[a-zA-Z]+$/;
+        const regex = /^[a-zA-Z]+$/;this.playerLocal
         return regex.test(str);
     }
 
@@ -377,6 +378,7 @@ export class Pong
                     this.main.set_status(info);
                 else
                 {
+                    this.playerLocal = true;
                     this.players.push({
                         'id': info.player_id,
                         'sk': -1
@@ -424,6 +426,10 @@ export class Pong
     start() {
         if (this.players[0].sk !== -1)
             this.players[0].sk.send('start');
+        if (this.playerLocal) {
+            if (this.players[1].sk !== -1)
+                this.players[1].sk.send('start');
+        }
     }
 
     startLocal() {

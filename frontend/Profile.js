@@ -41,7 +41,7 @@ export class Profile{
             this.dom_add_friend.addEventListener("click", () => this.main.lobby.socket.send(JSON.stringify({'type': 'friend_request_send', 'sender': this.main.login, 'friend': l})));
             this.dom_add_friend.addEventListener("click", () => this.dom_add_friend.parentNode.removeChild(this.dom_add_friend));
         }
-        if (this.main.getCookie('login42')) {
+        if (this.main.getCookie('login42') && this.main.login === l) {
             this.dom_password.style.display = 'none';
             this.dom_email.style.display = 'none';
             this.dom_login.style.display = 'none';
@@ -173,7 +173,6 @@ export class Profile{
                 'newpwd': this.dom_newvalue.value,
             },
             success: (info) => {
-                console.log('ok')
                 this.main.set_status(info);
                 this.main.load('/profile/' + this.main.login, () => this.main.profile.events(false, this.main.login));
             },
@@ -418,32 +417,31 @@ export class Profile{
 
     receive_request(data){
         let inviteContainer = document.getElementById('inviteContainer');
-        if (!inviteContainer) {
-            inviteContainer = document.createElement('div');
-            inviteContainer.id = 'inviteContainer';
-            document.body.appendChild(inviteContainer);
+        if (inviteContainer) {
+            inviteContainer.innerHTML = '';
+            inviteContainer.style.display = 'block';
+
+            const inviteNotification = document.createElement('div');
+            inviteNotification.classList.add('invite-notification');
+            inviteNotification.innerHTML = `
+                <p>${data.sender} sent you a friend request !</p>
+                <button id="acceptInviteBtn" class="btn btn-primary">Accept</button>
+                <button id="declineInviteBtn" class="btn btn-primary">Decline</button>
+            `;
+
+            inviteContainer.appendChild(inviteNotification);
+
+            document.getElementById('acceptInviteBtn').addEventListener('click', () => {
+                this.accept_request(data);
+                inviteContainer.removeChild(inviteNotification);
+                inviteContainer.style.display = 'none';
+            });
+            document.getElementById('declineInviteBtn').addEventListener('click', () => {
+                this.decline_request(data);
+                inviteContainer.removeChild(inviteNotification);
+                inviteContainer.style.display = 'none';
+            });
         }
-
-        const inviteNotification = document.createElement('div');
-        inviteNotification.classList.add('invite-notification');
-        inviteNotification.innerHTML = `
-            <p><strong>${data.sender} sent you a friend request !</strong></p>
-            <button id="acceptInviteBtn" class="btn btn-primary">Accept</button>
-            <button id="declineInviteBtn" class="btn btn-primary">Decline</button>
-        `;
-
-        inviteContainer.appendChild(inviteNotification);
-
-        document.getElementById('acceptInviteBtn').addEventListener('click', () => {
-            this.accept_request(data);
-            inviteContainer.removeChild(inviteNotification);
-            inviteContainer.parentNode.removeChild(inviteContainer);
-        });
-        document.getElementById('declineInviteBtn').addEventListener('click', () => {
-            this.decline_request(data);
-            inviteContainer.removeChild(inviteNotification);
-            inviteContainer.parentNode.removeChild(inviteContainer);
-        });
     }
 
     accept_request(data){

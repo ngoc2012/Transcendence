@@ -31,7 +31,7 @@ class ChatConsumer(WebsocketConsumer):
         )
 
     def block_user(self, huh, data, str):
-        print("on enter")
+        # print("on enter")
         if str == data['username']:
             self.send(text_data=json.dumps({"message": "You can't block yourself.", 'user': data['user']}))
             return
@@ -61,7 +61,7 @@ class ChatConsumer(WebsocketConsumer):
 
     def send_whisper(self, huh, data, value):
         msg = ' '.join(data['msg_split'][2::])
-        print(self.scope['state']['username'])
+        # print(self.scope['state']['username'])
         if value == data['username']:
             self.send(text_data=json.dumps({"message": self.split_message("You can't whisper yourself."), 'user': data['username']}))
             return
@@ -87,7 +87,7 @@ class ChatConsumer(WebsocketConsumer):
 
     # Receive message from WebSocket
     def receive(self, text_data):
-        print(text_data)
+        # print(text_data)
         if json.loads(text_data)["type"] == 'connection' or json.loads(text_data)['type'] == 'connection_update':
             if self.scope['state']['username'] == '':
                 if json.loads(text_data)['type'] == 'connection':
@@ -143,7 +143,6 @@ class ChatConsumer(WebsocketConsumer):
                     data['whisper'] = True
         # Send message to room group
         if data['message'] != '':
-            print("c parceke on va la dedans ?")
             async_to_sync(self.channel_layer.group_send)(
                 self.room_group_name, {"type": "chat_message", "message": data['message'], "user": data['user'].login}
             )
@@ -197,7 +196,7 @@ class ChatConsumer(WebsocketConsumer):
                 msg += i + ' '
                 count = len(i) + 1
             else:
-                print(i)
+                # print(i)
                 subcount = count
                 for n in i:
                     if subcount < 19:
@@ -206,6 +205,6 @@ class ChatConsumer(WebsocketConsumer):
                     else:
                         msg += '<br>'
                         subcount = 0
-                    print(subcount)
+                    # print(subcount)
                 count = 0
         return msg

@@ -127,6 +127,10 @@ def tournament_local_get(request):
         if tournament.ready == False:
             return JsonResponse({'error': 'not ready'})
 
+        if tournament.callback:
+            tournament.callback = False;
+            tournament.save();
+
         all_participants, all_waitlist = get_tournament_data(tournament)
 
         if len(all_participants) == 1 and not all_waitlist:
@@ -231,7 +235,6 @@ def add_player_to_blockchain(tournament_name, login):
 @require_POST
 def tournament_local_verify(request):
     try:
-        print('in')
         data = json.loads(request.body)
         id = data.get('id')
 
@@ -252,8 +255,6 @@ def tournament_local_verify(request):
 
         for participant in tournament.participants.all():
             add_player_to_blockchain(tournament.name, check_alias_from_login(participant.login))
-
-        print('ok')
 
         for participant in tournament.participantsLocal:
             add_player_to_blockchain(tournament.name, participant)

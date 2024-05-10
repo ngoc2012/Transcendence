@@ -18,10 +18,9 @@ class JWTMiddleware(MiddlewareMixin):
 
         if request.headers.get('X-Internal-Request') == 'true' or request.path in self.get_unauthenticated_paths() or '/game/close/' in request.path or '/admin/' in request.path:
             return None
-        
+
         if '/media/' in request.path:
-            print('ok')
-            return None 
+            return None
 
         access_token = request.COOKIES.get('access_token')
         if not access_token:
@@ -40,9 +39,9 @@ class JWTMiddleware(MiddlewareMixin):
             return self.handle_refresh_token(request)
         except jwt.InvalidTokenError:
             return HttpResponseRedirect('/')
-        
+
     def process_exception(self, request, exception):
-        print(f'Error at {request.path}: {exception}')
+        # print(f'Error at {request.path}: {exception}')
         if isinstance(exception, ObjectDoesNotExist):
             return HttpResponseRedirect('/')
 
@@ -57,7 +56,7 @@ class JWTMiddleware(MiddlewareMixin):
         refresh_token = request.COOKIES.get('refresh_token')
         if not refresh_token:
             return JsonResponse({'error': 'Authentication credentials were not provided or are expired.'}, status=401)
-        
+
         try:
             decoded = jwt.decode(refresh_token, settings.JWT_REFRESH_SECRET_KEY, algorithms=["HS256"])
             user = self.get_user(decoded.get('user_id'))
@@ -91,7 +90,7 @@ class JWTMiddleware(MiddlewareMixin):
         }, settings.JWT_REFRESH_SECRET_KEY, algorithm='HS256')
 
         return access_token, refresh_token
-    
+
     def get_unauthenticated_paths(self):
         return [
             '/',
@@ -129,7 +128,7 @@ class JWTMiddleware(MiddlewareMixin):
             return None
         else:
             return  HttpResponseRedirect('/login/')
-    
+
 class TokenRefreshResponseMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response

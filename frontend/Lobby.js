@@ -400,19 +400,19 @@ export class Lobby
             chat_area.innerHTML = '';
         this.main.make_chat(chat_area);
     }
-    
+
     displayUsers(data) {
         if (data.type === "update" && this.socket.readyState === 1) {
             var users = data.users;
             var pictures = data.pictures;
             var container = $(".user-box");
             container.empty();
-    
+
             users.forEach(function(user, index) {
                 var userPic = pictures[index].avatar;
                 var userContent = $(
                     '<div style="display: flex; align-items: center; margin-bottom: 10px;">' +
-                    '<img src="' + 'static/' + userPic + '" alt="Profile Picture" style="width: 40px; height: 40px; border-radius: 50%; margin-right: 10px;">' +                    
+                    '<img src="' + 'static/' + userPic + '" alt="Profile Picture" style="width: 40px; height: 40px; border-radius: 50%; margin-right: 10px;">' +
                     '<span id ="' + user.login + '_profile" style="flex-grow: 1; cursor:pointer; text-decoration:underline;">' + user.login + '</span>' +
                     '<button id="' + user.login + '_add-friend" class="btn btn-success btn-sm" type="button">Add Friend</button>' +
                     '<button class="btn btn-info btn-sm" type="button">Invite</button>' +
@@ -509,30 +509,29 @@ export class Lobby
 
     displayGameInvite(sender) {
         let inviteContainer = document.getElementById('inviteContainer');
-        if (!inviteContainer) {
-            inviteContainer = document.createElement('div');
-            inviteContainer.id = 'inviteContainer';
-            document.body.appendChild(inviteContainer);
+        if (inviteContainer) {
+            inviteContainer.innerHTML = '';
+            inviteContainer.style.display = 'block';
+
+            const inviteNotification = document.createElement('div');
+            inviteNotification.classList.add('invite-notification');
+            inviteNotification.innerHTML = `
+                <p>${sender} sent you a game request !</p>
+                <button id="acceptInviteBtn" class="btn btn-primary">Accept</button>
+                <button id="declineInviteBtn" class="btn btn-primary">Decline</button>
+            `;
+
+            inviteContainer.appendChild(inviteNotification);
+
+            document.getElementById('acceptInviteBtn').addEventListener('click', () => {
+                this.gameRequestResponse('accepted', sender);
+                inviteContainer.style.display = 'none';
+            });
+            document.getElementById('declineInviteBtn').addEventListener('click', () => {
+                this.gameRequestResponse('declined', sender);
+                inviteContainer.style.display = 'none';
+            });
         }
-
-        const inviteNotification = document.createElement('div');
-        inviteNotification.classList.add('invite-notification');
-        inviteNotification.innerHTML = `
-            <p>${sender} sent you a game request !</p>
-            <button id="acceptInviteBtn">Accept</button>
-            <button id="declineInviteBtn">Decline</button>
-        `;
-
-        inviteContainer.appendChild(inviteNotification);
-
-        document.getElementById('acceptInviteBtn').addEventListener('click', () => {
-            this.gameRequestResponse('accepted', sender);
-            inviteContainer.removeChild(inviteNotification);
-        });
-        document.getElementById('declineInviteBtn').addEventListener('click', () => {
-            this.gameRequestResponse('declined', sender);
-            inviteContainer.removeChild(inviteNotification);
-        });
     }
 
     gameRequestResponse(status, sender) {
@@ -578,7 +577,7 @@ export class Lobby
 
                 container.innerHTML += userHtml;
 
-                
+
                 const addButton = document.getElementById(user.login + '_add-friend');
                 const inviteButton = document.getElementById(user.login + '_invite');
                 const profileLink = document.getElementById(user.login + '_profile');

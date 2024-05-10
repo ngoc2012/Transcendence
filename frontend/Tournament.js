@@ -132,7 +132,6 @@ export class Tournament {
                     if (response.success == 'twofa') {
                         this.main.load('/twofa', () => this.main.twofa.eventsTour(this.id, response.login, response.name, response.email));
                     } else {
-                        console.log(response.error)
                         if (response.error) {
                             this.main.set_status(response.error)
                         } else {
