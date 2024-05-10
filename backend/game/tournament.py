@@ -231,12 +231,12 @@ def add_player_to_blockchain(tournament_name, login):
 @require_POST
 def tournament_local_verify(request):
     try:
+        print('in')
         data = json.loads(request.body)
         id = data.get('id')
 
         if not id:
             return JsonResponse({'error': 'Missing id'}, status=400)
-
 
         tournament = TournamentModel.objects.get(id=id)
         tournament.ready = True
@@ -252,6 +252,8 @@ def tournament_local_verify(request):
 
         for participant in tournament.participants.all():
             add_player_to_blockchain(tournament.name, check_alias_from_login(participant.login))
+
+        print('ok')
 
         for participant in tournament.participantsLocal:
             add_player_to_blockchain(tournament.name, participant)
@@ -281,7 +283,7 @@ def check_alias_from_login(login):
     if user.tourn_alias:
         return user.tourn_alias
     else:
-        return user
+        return user.login
 
 def get_player_name(player, is_local, local_name, tourn_alias):
         if is_local:
@@ -507,14 +509,14 @@ def gen_match(tournament, room, player1, player2):
 def add_local_player(tournament, login):
     try:
         user = User.objects.get(login=login)
-        if login in tournament.participantsLocal:
-            return JsonResponse({'error': f'Player {login} already added to the tournament'}, status=400)
         return JsonResponse({'error': f'Player {login} already exists'}, status=400)
 
     except User.DoesNotExist:
         if login not in tournament.participantsLocal:
             tournament.participantsLocal.append(login)
             tournament.save()
+        else:
+            return JsonResponse({'error': f'Player {login} already added to the tournament'}, status=400)
 
     return JsonResponse({'success': True, 'login': login, 'local': True})
 
