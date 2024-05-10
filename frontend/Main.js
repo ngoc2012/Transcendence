@@ -66,13 +66,10 @@ export class Main
             url: page + '/',
             method: 'GET',
             success: (html) => {
-                // console.log(html);
                 this.dom_container.innerHTML = html;
-                //pas oublier de changer ca
                 if (callback && typeof callback === 'function') {
                     callback();
                 }
-                // callback();  // fait erreur "callback is not a function"
             },
             error: (jqXHR, textStatus, errorThrown) => {
                 if (jqXHR.status === 401) {
