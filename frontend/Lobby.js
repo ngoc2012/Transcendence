@@ -319,8 +319,8 @@ export class Lobby
             if (data.type === 'update_divs'){
                 let divs = document.getElementsByClassName('user_chat');
                 for (let i = 0; divs[i] != undefined; i++){
-                    if (divs[i].innerHTML === data.old_user + ':'){
-                        divs[i].innerHTML = data.new_user + ':';
+                    if (divs[i].innerHTML === data.old_user){
+                        divs[i].innerHTML = data.new_user;
                         let new_element = divs[i].cloneNode(true);
                         new_element.addEventListener("click", () => this.main.find_profile(this.main.login, data.new_user));
                         divs[i].parentNode.replaceChild(new_element, divs[i]);
@@ -328,8 +328,8 @@ export class Lobby
                 }
                 let whispers = document.getElementsByClassName('user_chat_whisper');
                 for (let i = 0; whispers[i] != undefined; i++){
-                    if (whispers[i].innerHTML === data.old_user + ':'){
-                        whispers[i].innerHTML = data.new_user + ':';
+                    if (whispers[i].innerHTML === data.old_user){
+                        whispers[i].innerHTML = data.new_user;
                         let new_element = whispers[i].cloneNode(true);
                         new_element.addEventListener("click", () => this.main.find_profile(this.main.login, data.new_user));
                         whispers[i].parentNode.replaceChild(new_element, whispers[i]);
