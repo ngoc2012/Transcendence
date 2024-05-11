@@ -157,7 +157,7 @@ export class Main
             success: (info) => {
                 if (typeof info === 'string')
                 {
-                    this.set_status(info);
+                    this.set_status(info, true);
                 }
                 else
                 {
@@ -199,9 +199,9 @@ export class Main
             },
             error: (xhr, textStatus, errorThrown) => {
                 if (xhr.responseJSON && xhr.responseJSON.error) {
-                    this.set_status(xhr.responseJSON.error);
+                    this.set_status(xhr.responseJSON.error, false);
                 } else {
-                    this.set_status('An error occurred during the request.');
+                    this.set_status('An error occurred during the request.', false);
                 }
             }
         });
