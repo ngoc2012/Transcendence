@@ -17,4 +17,5 @@ urlpatterns = [
     path('tournament/local/result/', tournament.tournament_local_result, name='tournament_local_result'),
     path('tournament/local/adduser/', tournament.tournament_add_user, name='tournament_add_user'),
     path('tournament/local/2FAback', tournament.tournament_2FAback, name='tournament_2FAback'),
+    path('tournament/local/delete', tournament.tournament_quit, name='tournament_quit'),
 ]

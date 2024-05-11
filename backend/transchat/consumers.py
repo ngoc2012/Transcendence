@@ -87,7 +87,7 @@ class ChatConsumer(WebsocketConsumer):
 
     # Receive message from WebSocket
     def receive(self, text_data):
-        print(text_data)
+        # print(text_data)
         if json.loads(text_data)["type"] == 'connection' or json.loads(text_data)['type'] == 'connection_update':
             if self.scope['state']['username'] == '':
                 if json.loads(text_data)['type'] == 'connection':
@@ -113,7 +113,7 @@ class ChatConsumer(WebsocketConsumer):
         elif json.loads(text_data)["type"] == 'update':
             async_to_sync(self.channel_layer.group_send)(self.room_group_name, {"type": "update"})
             return
-        
+
         data = {
             'text_data': json.loads(text_data),
             'message': json.loads(text_data)['message'],

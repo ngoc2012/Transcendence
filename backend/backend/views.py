@@ -750,7 +750,7 @@ def friend(request, username):
     user = PlayersModel.objects.get(login=username)
     if request.method == 'POST':
         form = PlayerAddFriendForm(request.POST)
-        print(form)
+        # print(form)
         if form.is_valid():
             if request.POST['type'] == 'send':
                 if form.cleaned_data['friend'] == username:

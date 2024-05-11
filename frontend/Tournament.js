@@ -239,10 +239,22 @@ export class Tournament {
     }
 
     quitTournament() {
-        this.main.lobby.socket.send(JSON.stringify({
-            type: 'tournament-quit',
-            tour_id: this.id,
-        }));
+        $.ajax({
+            url: '/game/tournament/local/delete',
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': this.main.getCookie('csrftoken')
+            },
+            data:{
+                'id':this.id,
+            },
+            success: (info) =>{
+                this.main.set_status(info.status, true)
+            },
+            error: (info) =>{
+                this.main.set_status(info.error, false)
+            }
+        });
         this.lobby.game.close_room()
         this.main.load('/lobby', () => this.main.lobby.events(false));
     }
