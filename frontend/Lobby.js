@@ -389,6 +389,8 @@ export class Lobby
                 new_message.innerHTML = data.message;
 		        document.querySelector('#chat-log').appendChild(new_element);
                 new_element.insertAdjacentHTML('afterend', "<br><m>" + data.message + "</m><br>");
+                let chatLog = document.getElementById("chat-log");
+                chatLog.scrollTop = chatLog.scrollHeight;
             }
             else if (data.type === "update") {
                 // console.log('update received')
