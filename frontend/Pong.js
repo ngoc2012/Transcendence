@@ -18,7 +18,7 @@ async function closeSocket(websocket) {
         websocket.close();
         await waitForWebSocketClose(websocket);
     }
-        
+
 }
 
 export class Pong
@@ -298,7 +298,7 @@ export class Pong
                 },
                 success: (info) => {
                     if (typeof info === 'string')
-                        this.main.set_status(info, true);
+                        this.main.set_status(info, false);
                     else
                     {
                         this.players.push({
@@ -397,7 +397,7 @@ export class Pong
             },
             success: (info) => {
                 if (typeof info === 'string')
-                    this.main.set_status(info, true);
+                    this.main.set_status(info, false);
                 else
                     this.join_local_player(info);
             },
@@ -425,7 +425,7 @@ export class Pong
             },
             success: (info) => {
                 if (typeof info === 'string')
-                    this.main.set_status(info, true);
+                    this.main.set_status(info, false);
                 else
                 {
                     this.playerLocal = true;
@@ -666,6 +666,7 @@ export class Pong
             canvas.style.filter = '';
             document.body.removeChild(backdrop);
             document.body.removeChild(matchBox);
+            this.pmBox = false;
         };
         matchBox.appendChild(startButton);
     }
