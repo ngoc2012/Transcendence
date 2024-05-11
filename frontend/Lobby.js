@@ -358,9 +358,10 @@ export class Lobby
                     new_element.innerHTML = "You whispered to ";
                     let new_recv = document.createElement("a");
                     new_recv.addEventListener("click", () => this.main.find_profile(this.main.login, data.receiver));
-                    new_recv.innerHTML = data.receiver +":";
-                    new_recv.style = "cursor:pointer; color: rgb(0, 128, 255); text-decoration: underline;";
+                    new_recv.innerHTML = data.receiver;
+                    new_recv.style = "cursor:pointer; color: rgb(0, 0, 0); background-color: rgba(255, 255, 255, 0.8); border-radius: 10px; padding-left: 10px; padding-right: 10px; margin-top: 5px;";
                     new_recv.className = "user_chat_whisper";
+                    
                     let new_message = document.createElement("m");
                     new_message.innerHTML = data.message;
                     document.querySelector('#chat-log').appendChild(new_element);
@@ -372,8 +373,8 @@ export class Lobby
                 else {
                     let new_element = document.createElement("a");
                     new_element.addEventListener("click", () => this.main.find_profile(this.main.login, data.receiver));
-                    new_element.style = "cursor:pointer; color: rgb(0, 128, 255); text-decoration: underline;";
-                    new_element.innerHTML = data.user + ":";
+                    new_element.style = "cursor:pointer; color: rgb(255, 255, 255); background-color: rgba(255, 153, 255, 0.6); border-radius: 10px; padding-left: 10px; padding-right: 10px; margin-top: 5px;";
+                    new_element.innerHTML = data.user;
                     new_element.className = 'user_chat_whisper';
                     let new_message = document.createElement("m");
                     new_message.innerHTML = data.message;
