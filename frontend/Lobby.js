@@ -343,6 +343,35 @@ export class Lobby
                         whispers[i].parentNode.replaceChild(new_element, whispers[i]);
                     }
                 }
+                let pic = document.getElementById(data.old_user + '_pic');
+                let user_profile = document.getElementById(data.old_user+ '_profile');
+                let new_user = user_profile.cloneNode(user_profile);
+                let add_button = document.getElementById(data.old_user + '_add-friend');
+                let new_add = add_button.cloneNode(add_button);
+                let invite_button = document.getElementById(data.old_user + '_invite');
+                let new_invite = invite_button.cloneNode(invite_button);
+                console.log(pic.parentElement)
+                console.log(add_button)
+                console.log(new_add)
+                pic.src = data.pic.replace('/app/frontend/', 'static/');
+                new_user.id = data.new_user + '_profile';
+                new_user.innerHTML = data.new_user;
+                new_user.addEventListener('click', () => this.main.find_profile(this.main.login, data.new_user));
+                user_profile.parentElement.replaceChild(new_user, user_profile);
+                new_add.id = data.new_user +'_add-friend';
+                new_add.addEventListener('click', () => this.main.lobby.socket.send(JSON.stringify({
+                    'sender': this.main.login,
+                    'friend': data.new_user,
+                    'type': 'friend_request_send'
+                })));
+                add_button.parentNode.replaceChild(new_add, add_button);
+                new_invite.id = data.new_user + '_invite';
+                new_invite.addEventListener('click', () => this.main.lobby.socket(JSON.stringify({
+                    'sender': this.main.login,
+                    'friend': data.new_user,
+                    'type': 'game_invite'
+                })));
+                invite_button.parentElement.replaceChild(new_invite, invite_button);
                 // this.main.refresh_user_list(data.users, data.pictures);
             }
             else if (data.type === 'chat_message'){
@@ -593,8 +622,8 @@ export class Lobby
                 }
                 const userPic = pictures[index].avatar;
                 const userHtml = `
-                    <div style="display: flex; align-items: center; margin-bottom: 10px;">
-                        <img src="static/${userPic}" alt="Profile Picture" style="width: 40px; height: 40px; border-radius: 50%; margin-right: 10px;">
+                    <div id="${user.login}_display" style="display: flex; align-items: center; margin-bottom: 10px;">
+                        <img id="${user.login}_pic" src="static/${userPic}" alt="Profile Picture" style="width: 40px; height: 40px; border-radius: 50%; margin-right: 10px;">
                         <span id="${user.login}_profile" style="flex-grow: 1; cursor:pointer; text-decoration:underline;">${user.login}</span>
                         <button id="${user.login}_add-friend" class="btn btn-success btn-sm ml-2" type="button">Add Friend</button>
                         <button id="${user.login}_invite" class="btn btn-info btn-sm ml-2" type="button">Invite</button>

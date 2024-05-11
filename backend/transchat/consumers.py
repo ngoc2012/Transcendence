@@ -31,7 +31,7 @@ class ChatConsumer(WebsocketConsumer):
             self.room_group_name, self.channel_name
         )
 
-    def block_user(self, huh, data, str):
+    def block_user(self, data, str):
         # print("on enter")
         if str == data['username']:
             self.send(text_data=json.dumps({"message": "You can't block yourself.", 'user': data['user']}))
@@ -192,7 +192,7 @@ class ChatConsumer(WebsocketConsumer):
     def update_divs(self, event):
         old_user = event['old_user']
         new_user = event['new_user']
-        self.send(json.dumps({'type': "update_divs", 'old_user': old_user, 'new_user': new_user}))
+        self.send(json.dumps({'type': "update_divs", 'old_user': old_user, 'new_user': new_user, 'pic': PlayersModel.objects.get(login=new_user).avatar.url}))
 
     def split_message(self, str):
         msg = ""
