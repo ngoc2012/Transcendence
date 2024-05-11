@@ -42,14 +42,20 @@ export class Pong
             window.history.pushState({page: '/pong/' + this.room.id}, '', '/pong/' + this.room.id);
 
         this.dom_game_name = document.getElementById("game_name");
-        this.dom_game_name.innerHTML = this.room.name;
+        if (this.dom_game_name && this.room && this.room.name)
+            this.dom_game_name.innerHTML = this.room.name;
+        else
+            return;
         this.dom_team0 = document.getElementById("team0");
         this.dom_team1 = document.getElementById("team1");
         this.dom_score0 = document.getElementById("score0");
         this.dom_score1 = document.getElementById("score1");
 
 		this.canvas = document.getElementById('pongCanvas');
-		this.ctx = this.canvas.getContext('2d');
+        if (this.canvas)
+		    this.ctx = this.canvas.getContext('2d');
+        else
+            return;
         this.ctx.canvas.width  = this.room.data.WIDTH;
         this.ctx.canvas.height = this.room.data.HEIGHT;
         this.reset_ratio();
@@ -294,7 +300,7 @@ export class Pong
         if (this.joined) {
             this.dom_toggle_AI.style.display = "none";
             this.dom_local_player.style.display = "none";
-            this.dom_power_play.style.display = "none";
+            // this.dom_power_play.style.display = "none";
             this.dom_new_local_player.style.display = "none";
             this.dom_login_local.style.display = "none";
             this.dom_password_local.style.display = "none";
@@ -456,10 +462,12 @@ export class Pong
     }
 
     startLocal() {
-        if (this.players[0].sk !== -1)
-            this.players[0].sk.send('start');
-        if (this.players[1].sk !== -1)
-            this.players[1].sk.send('start');
+        if (!this.pmBox) {
+            if (this.players[0].sk !== -1)
+                this.players[0].sk.send('start');
+            if (this.players[1]  && this.players[1].sk && this.players[1].sk !== -1)
+                this.players[1].sk.send('start');
+        }
     }
 
     close_room() {
@@ -467,8 +475,10 @@ export class Pong
             this.set_state(i, 'quit');
             if (p.sk !== -1)
             {
-                p.sk.close();
-                p.sk = -1;
+                if (p.sk.readyState === 1) {
+                    p.sk.close();
+                    p.sk = -1;
+                }
             }
         });
     }
@@ -568,23 +578,47 @@ export class Pong
     }
 
     set_state(i, e) {
-        if (this.players[i].sk !== -1)
+        if (this.players[i].sk !== -1 && this.players[i].sk.readyState === 1) {
             this.players[i].sk.send(e);
+        }
     }
 
     preMatchBox(player1, player2) {
-        this.pmBox = true;
+        // Remove existing backdrop and match box if they exist
+        let existingBackdrop = document.getElementById('backdrop');
+        if (existingBackdrop) {
+            document.body.removeChild(existingBackdrop);
+        }
+
+        let existingMatchBox = document.getElementById('matchBox');
+        if (existingMatchBox) {
+            document.body.removeChild(existingMatchBox);
+        }
+
+        // Reset blur effect on canvas
+        let canvas = document.getElementById('pongCanvas');
+        if (canvas) {
+            canvas.style.filter = '';
+        }
+
+        // Apply new blur effect
+        canvas.style.filter = 'blur(8px)';
+
+        // Create new backdrop
         let backdrop = document.createElement('div');
+        backdrop.setAttribute('id', 'backdrop');
         backdrop.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(51, 51, 51, 0.6); z-index: 99;';
         document.body.appendChild(backdrop);
-        document.getElementById('pongCanvas').style.filter = 'blur(8px)';
 
+        // Create new match box
         let matchBox = document.createElement('div');
         matchBox.setAttribute('id', 'matchBox');
         matchBox.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); padding: 20px; background-color: #ffffff7a; border: 2px solid #ffffff; text-align: center; z-index: 10000; border-radius: 10px;';
+        document.body.appendChild(matchBox);
 
+        // Add content to match box
         let matchText = document.createElement('p');
-        matchText.textContent = `Match can start whenever you are ready!`;
+        matchText.textContent = 'Match can start whenever you are ready!';
         matchText.style.cssText = 'font-family: "Poppins", sans-serif; font-weight: 400; font-style: normal; color: white;';
         matchBox.appendChild(matchText);
 
@@ -592,12 +626,14 @@ export class Pong
         instruct1.textContent = `${player1} controls: 'q' = up, 'a' = down`;
         instruct1.style.cssText = 'font-family: "Poppins", sans-serif; font-weight: 400; font-style: normal; color: white;';
         matchBox.appendChild(instruct1);
+
         let instruct2 = document.createElement('p');
         instruct2.textContent = `${player2} controls: 'o' = up, 'l' = down`;
         instruct2.style.cssText = 'font-family: "Poppins", sans-serif; font-weight: 400; font-style: normal; color: white;';
         matchBox.appendChild(instruct2);
+
         let instruct3 = document.createElement('p');
-        instruct3.textContent = `Press 'space' to launch the ball`;
+        instruct3.textContent = 'Press \'space\' to launch the ball';
         instruct3.style.cssText = 'font-family: "Poppins", sans-serif; font-weight: 400; font-style: normal; color: white;';
         matchBox.appendChild(instruct3);
 
@@ -605,14 +641,11 @@ export class Pong
         startButton.textContent = 'Start';
         startButton.classList.add('btn', 'btn-primary');
         startButton.onclick = () => {
-            if (document.getElementById('pongCanvas'))
-                document.getElementById('pongCanvas').style.filter = '';
+            canvas.style.filter = '';
             document.body.removeChild(backdrop);
             document.body.removeChild(matchBox);
-            this.pmBox = false;
         };
         matchBox.appendChild(startButton);
-        document.body.appendChild(matchBox);
     }
 
 

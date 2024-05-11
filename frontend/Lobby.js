@@ -127,6 +127,11 @@ export class Lobby
                     {
                         switch (info.game) {
                             case 'pong':
+                                if (this.main.lobby.game && this.main.lobby.game !== null)
+                                {
+                                    this.main.lobby.game.close_room();
+                                    this.main.lobby.game = null;
+                                }
                                 this.pong_game(info, false);
                                 break;
                         }
