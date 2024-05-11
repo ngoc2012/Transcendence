@@ -22,6 +22,8 @@ export class Pong
         this.pmBox = false;
         this.joined = false;
         this.playerLocal = false;
+        this.touchStartY = 0;
+        this.touchEndY = 0;
     }
 
     reset_ratio() {
@@ -121,8 +123,26 @@ export class Pong
             }
         });
 
-
         if (!this.localTour) {
+
+            document.addEventListener("touchstart", (event) => {
+                this.touchStartY = event.touches[0].clientY;
+            });
+
+            document.addEventListener("touchend", (event) => {
+                this.touchEndY = event.changedTouches[0].clientY;
+                let n = Math.floor(Math.abs(this.touchEndY - this.touchStartY) / (this.ctx.canvas.height / 10));
+                if (this.touchEndY - this.touchStartY < 0)
+                {
+                    for (let i = 0; i < n; i++)
+                        this.set_state(0, "up");
+                }
+                else
+                {
+                    for (let i = 0; i < n; i++)
+                        this.set_state(0, "down");
+                }
+            });
 
             document.addEventListener('keydown', (event) => {
                 if (["ArrowUp", "ArrowDown"].includes(event.key)) {
