@@ -151,7 +151,7 @@ def tournament_local_get(request):
         #     return JsonResponse({'error': 'not ready'})
 
         if tournament.localMatchIP:
-            # print('in')
+            print('in')
             return rematch(tournament)
 
         if tournament.callback:
@@ -678,9 +678,8 @@ def check_new_round(tournament):
 
 def rematch(tournament):
     try:
-        tournament = TournamentModel.objects.get(id=self.tour_id)
-
         match = TournamentMatchModel.objects.filter(tournament=tournament).order_by('-match_number').first()
+        print(match)
 
         new_room =  RoomsModel.objects.create(
             game=tournament.game,
@@ -697,6 +696,8 @@ def rematch(tournament):
 
         player1Name = match.player1Local if match.player1isLocal else (match.player1.tourn_alias if match.player1.tourn_alias else match.player1.login)
         player2Name = match.player2Local if match.player2isLocal else (match.player2.tourn_alias if match.player2.tourn_alias else match.player2.login)
+        print(player1Name)
+        print(player2Name)
 
         new_match = TournamentMatchModel.objects.create(**match_data)
         match.delete()

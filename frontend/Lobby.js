@@ -127,6 +127,11 @@ export class Lobby
                     {
                         switch (info.game) {
                             case 'pong':
+                                if (this.main.lobby.game && this.main.lobby.game !== null)
+                                {
+                                    this.main.lobby.game.close_room();
+                                    this.main.lobby.game = null;
+                                }
                                 this.pong_game(info, false);
                                 break;
                         }
@@ -343,7 +348,7 @@ export class Lobby
                 new_element.insertAdjacentHTML('afterend', "<br><m>" + data.message + "</m><br>");
                 let chatLog = document.getElementById("chat-log");
                 chatLog.scrollTop = chatLog.scrollHeight;
-                
+
                 return;
             }
             else if (data.type === 'whisper'){
