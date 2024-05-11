@@ -412,49 +412,49 @@ export class Lobby
 
     update_div(data){
         let divs = document.getElementsByClassName('user_chat');
-            for (let i = 0; divs[i] != undefined; i++){
-                if (divs[i].innerHTML === data.old_user){
-                    divs[i].innerHTML = data.new_user;
-                    let new_element = divs[i].cloneNode(true);
-                    new_element.addEventListener("click", () => this.main.find_profile(this.main.login, data.new_user));
-                    divs[i].parentNode.replaceChild(new_element, divs[i]);
-                }
+        for (let i = 0; divs[i] != undefined; i++){
+            if (divs[i].innerHTML === data.old_user){
+                divs[i].innerHTML = data.new_user;
+                let new_element = divs[i].cloneNode(true);
+                new_element.addEventListener("click", () => this.main.find_profile(this.main.login, data.new_user));
+                divs[i].parentNode.replaceChild(new_element, divs[i]);
             }
-            let whispers = document.getElementsByClassName('user_chat_whisper');
-            for (let i = 0; whispers[i] != undefined; i++){
-                if (whispers[i].innerHTML === data.old_user){
-                    whispers[i].innerHTML = data.new_user;
-                        let new_element = whispers[i].cloneNode(true);
-                        new_element.addEventListener("click", () => this.main.find_profile(this.main.login, data.new_user));
-                        whispers[i].parentNode.replaceChild(new_element, whispers[i]);
-                    }
-                }
-                let pic = document.getElementById(data.old_user + '_pic');
-                let user_profile = document.getElementById(data.old_user+ '_profile');
-                let new_user = user_profile.cloneNode(user_profile);
-                let add_button = document.getElementById(data.old_user + '_add-friend');
-                let new_add = add_button.cloneNode(add_button);
-                let invite_button = document.getElementById(data.old_user + '_invite');
-                let new_invite = invite_button.cloneNode(invite_button);
-                pic.src = data.pic.replace('/app/frontend/', 'static/');
-                new_user.id = data.new_user + '_profile';
-                new_user.innerHTML = data.new_user;
-                new_user.addEventListener('click', () => this.main.find_profile(this.main.login, data.new_user));
-                user_profile.parentElement.replaceChild(new_user, user_profile);
-                new_add.id = data.new_user +'_add-friend';
-                new_add.addEventListener('click', () => this.main.lobby.socket.send(JSON.stringify({
-                    'sender': this.main.login,
-                    'friend': data.new_user,
-                    'type': 'friend_request_send'
-                })));
-                add_button.parentNode.replaceChild(new_add, add_button);
-                new_invite.id = data.new_user + '_invite';
-                new_invite.addEventListener('click', () => this.main.lobby.socket(JSON.stringify({
-                    'sender': this.main.login,
-                    'friend': data.new_user,
-                    'type': 'game_invite'
-                })));
-                invite_button.parentElement.replaceChild(new_invite, invite_button);
+        }
+        let whispers = document.getElementsByClassName('user_chat_whisper');
+        for (let i = 0; whispers[i] != undefined; i++){
+            if (whispers[i].innerHTML === data.old_user){
+                whispers[i].innerHTML = data.new_user;
+                let new_element = whispers[i].cloneNode(true);
+                new_element.addEventListener("click", () => this.main.find_profile(this.main.login, data.new_user));
+                whispers[i].parentNode.replaceChild(new_element, whispers[i]);
+            }
+        }
+        let pic = document.getElementById(data.old_user + '_pic');
+        let user_profile = document.getElementById(data.old_user+ '_profile');
+        let new_user = user_profile.cloneNode(user_profile);
+        let add_button = document.getElementById(data.old_user + '_add-friend');
+        let new_add = add_button.cloneNode(add_button);
+        let invite_button = document.getElementById(data.old_user + '_invite');
+        let new_invite = invite_button.cloneNode(invite_button);
+        pic.src = data.pic.replace('/app/frontend/', 'static/');
+        new_user.id = data.new_user + '_profile';
+        new_user.innerHTML = data.new_user;
+        new_user.addEventListener('click', () => this.main.find_profile(this.main.login, data.new_user));
+        user_profile.parentElement.replaceChild(new_user, user_profile);
+        new_add.id = data.new_user +'_add-friend';
+        new_add.addEventListener('click', () => this.main.lobby.socket.send(JSON.stringify({
+            'sender': this.main.login,
+            'friend': data.new_user,
+            'type': 'friend_request_send'
+        })));
+        add_button.parentNode.replaceChild(new_add, add_button);
+        new_invite.id = data.new_user + '_invite';
+        new_invite.addEventListener('click', () => this.main.lobby.socket(JSON.stringify({
+            'sender': this.main.login,
+            'friend': data.new_user,
+            'type': 'game_invite'
+        })));
+        invite_button.parentElement.replaceChild(new_invite, invite_button);
     }
 
     displayUsers(data) {

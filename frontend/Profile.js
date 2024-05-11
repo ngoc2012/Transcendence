@@ -92,6 +92,9 @@ export class Profile{
         }
         fetch('/profile/' + this.main.login + '/change_avatar/', {
             method: 'POST',
+            headers:{
+				'X-CSRFToken': this.main.getCookie('csrftoken')
+			},
             body: form
         }).then(response => response.json())
           .then(response => {
