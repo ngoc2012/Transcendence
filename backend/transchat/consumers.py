@@ -32,7 +32,6 @@ class ChatConsumer(WebsocketConsumer):
         )
 
     def block_user(self, data, str):
-        # print("on enter")
         if str == data['username']:
             self.send(text_data=json.dumps({"message": "You can't block yourself.", 'user': data['user']}))
             return
