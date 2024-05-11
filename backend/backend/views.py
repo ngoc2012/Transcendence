@@ -483,8 +483,7 @@ def profile(request, username):
                     'elo': user.elo,
                     'friends': user.friends.all(),
                     'url': user.avatar.url,
-                    'form': UploadFileForm()
-                }
+                    }
                 return render(request, 'profile.html', context)
             else:
                 try:
@@ -509,8 +508,7 @@ def profile(request, username):
                         'elo': user.elo,
                         'friends': user.friends.all(),
                         'url': user.avatar.url,
-                        'form': UploadFileForm()
-                    }
+                            }
                     return render(request, 'profile.html', context)
                 context = {
                     'ownprofile': False,
@@ -525,8 +523,7 @@ def profile(request, username):
                     'elo': user.elo,
                     'friends': user.friends.all(),
                     'url': user.avatar.url,
-                    'form': UploadFileForm()
-                }
+                    }
                 return render(request, 'profile.html', context)
     elif 'requester' in request.GET and 'user' in request.GET:
         if request.GET['requester'] == request.GET['user']:
@@ -549,7 +546,6 @@ def profile(request, username):
                 'elo': user.elo,
                 'friends': user.friends.all(),
                 'url': user.avatar.url,
-                'form': UploadFileForm()
             }
             return render(request, 'profile.html', context)
         else:
@@ -575,8 +571,7 @@ def profile(request, username):
                     'elo': user.elo,
                     'friends': user.friends.all(),
                     'url': user.avatar.url,
-                    'form': UploadFileForm()
-                }
+                    }
                 return render(request, 'profile.html', context)
             context = {
                 'ownprofile': False,
@@ -591,7 +586,6 @@ def profile(request, username):
                 'elo': user.elo,
                 'friends': user.friends.all(),
                 'url': user.avatar.url,
-                'form': UploadFileForm()
             }
             return render(request, 'profile.html', context)
     else:
@@ -614,7 +608,6 @@ def profile(request, username):
             'elo': user.elo,
             'friends': user.friends.all(),
             'url': user.avatar.url,
-            'form': UploadFileForm()
         }
         return render(request, 'profile.html', context)
 
@@ -797,10 +790,17 @@ def friend(request, username):
 
 @csrf_protect
 def avatar(request, username):
+    form = UploadFileForm(request.FILES)
+    # print(form)
+    print(request.FILES)
+    if form.is_valid():
+        print('connard')
     user = PlayersModel.objects.get(login=username)
     user.avatar = request.FILES['id_file']
     user.save()
     return JsonResponse({"new_pp": True, "url": user.avatar.url})
+    print("uhoh")
+    return JsonResponse({'new_pp': False})
 
 def tournament_request(request):
     try:
