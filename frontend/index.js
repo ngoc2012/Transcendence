@@ -39,7 +39,7 @@ function    reload(path, isPopState = false) {
 }
 
 if (error_user)
-    main.set_status("Login already taken");
+    main.set_status("Login already taken", false);
 
 //recupere la data obtenue du callback de l'auth 42
 if (my42login !== null && my42login !== "" && my42email !== "" && my42ws != "")
