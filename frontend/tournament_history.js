@@ -14,7 +14,12 @@ export class tournament_history {
         }
         this.dom_proceed = document.querySelector("#proceed");
         this.dom_Select = document.querySelector("#Select");
-        this.dom_Select.addEventListener("click", () => this.selectTournament());
+        if (this.dom_Select) {
+            this.dom_Select.addEventListener("click", () => this.selectTournament());
+        } else {
+            console.error("Element with ID 'dom_Select' not found.");
+        }
+        
 
     }
 

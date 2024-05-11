@@ -11,6 +11,7 @@ function    reload(path, isPopState = false) {
         main.lobby.game.close_room();
         main.lobby.game = null;
     }
+
     if (path === '/login') {
         main.load('/pages/login', () => main.log_in.events(isPopState));
     } else if (path === '/signup') {
@@ -69,7 +70,8 @@ if (my42login !== null && my42login !== "" && my42email !== "" && my42ws != "")
 }
 
 window.addEventListener('popstate', (event) => {
-    reload(event.state.page, true);
+    if (event.state && event.state.page)
+        reload(event.state.page, true);
 });
 
 
