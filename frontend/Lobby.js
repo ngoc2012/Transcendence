@@ -98,6 +98,11 @@ export class Lobby
             this.main.set_status('Please login or sign up', false);
             return;
         }
+        if (this.main.lobby.game && this.main.lobby.game !== null)
+        {
+            this.main.lobby.game.close_room();
+            this.main.lobby.game = null;
+        }
 
         var csrftoken = this.main.getCookie('csrftoken');
 

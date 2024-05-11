@@ -1,5 +1,26 @@
 import {Draw} from './Draw.js'
 
+function waitForWebSocketClose(websocket) {
+    return new Promise((resolve) => {
+        if (websocket.readyState === WebSocket.CLOSED) {
+            resolve(); // WebSocket is already closed
+        } else {
+            websocket.addEventListener('close', function(event) {
+                resolve(); // WebSocket is closed
+            });
+        }
+    });
+}
+
+async function closeSocket(websocket) {
+    if (websocket instanceof WebSocket)
+    {
+        websocket.close();
+        await waitForWebSocketClose(websocket);
+    }
+        
+}
+
 export class Pong
 {
     constructor(m, l, r, t = null, localTournament = null, localTour = false, id = null) {
@@ -473,12 +494,11 @@ export class Pong
     close_room() {
         this.players.forEach((p, i) => {
             this.set_state(i, 'quit');
-            if (p.sk !== -1)
+            if (p.sk instanceof WebSocket)
             {
-                if (p.sk.readyState === 1) {
-                    p.sk.close();
+                closeSocket(p.sk).then(() => {
                     p.sk = -1;
-                }
+                });
             }
         });
     }
@@ -491,11 +511,17 @@ export class Pong
     stop() {
         this.players.forEach((p, i) => {
             this.set_state(i, 'stop');
-            if (p.sk !== -1)
+            if (p.sk instanceof WebSocket)
             {
-                p.sk.close();
-                p.sk = -1;
+                closeSocket(p.sk).then(() => {
+                    p.sk = -1;
+                });
             }
+            // if (p.sk !== -1)
+            // {
+            //     p.sk.close();
+            //     p.sk = -1;
+            // }
         });
     }
 
