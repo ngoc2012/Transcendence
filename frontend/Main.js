@@ -263,4 +263,27 @@ export class Main
         new_chatbox.appendChild(new_button);
         chat_area.appendChild(new_element);
     }
+
+    get_friend(login, friend){
+        let returnvalue = true;
+        $.ajax({
+            url: '/profile/' + login + '/add_friend/',
+            method: 'POST',
+            headers:{
+                'X-CSRFToken': this.getCookie('csrftoken')
+            },
+            data:{
+                'type': 'info',
+                'user': login,
+                'friend': friend
+            },
+            success: (info) =>{
+                returnvalue = true
+            },
+            error: (info) =>{
+                returnvalue = false
+            }
+        })
+        return returnvalue
+    }
 }

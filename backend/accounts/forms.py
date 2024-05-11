@@ -53,7 +53,4 @@ class ChatMessageForm(forms.Form):
         self.message = message
 
 class UploadFileForm(forms.Form):
-    id_file = forms.FileField(label="")
-
-    # def __init__(self, id_file):
-    #     self.id_file = id_file
+    file = forms.FileField(label="")

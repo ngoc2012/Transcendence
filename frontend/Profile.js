@@ -61,6 +61,7 @@ export class Profile{
         button.value = "Submit";
         input.type = 'file';
         input.name = 'id_file';
+        input.required = true;
         input.id = "id_file";
         new_form.enctype = "multipart/form-data"
         new_form.appendChild(input);
@@ -84,33 +85,25 @@ export class Profile{
         var i = $('#id_file');
         var form = new FormData();
         var input = i[0].files[0];
-        console.log(input)
         form.append('id_file', input);
         if (input.type.search('image') === -1){
             this.main.set_status("Invalid image format", false);
             return;
         }
-        try {
-            fetch('/profile/' + this.main.login + '/change_avatar/', {
+        fetch('/profile/' + this.main.login + '/change_avatar/', {
             method: 'POST',
             headers:{
-                // "Content-Type": "multipart/form-data",
 				'X-CSRFToken': this.main.getCookie('csrftoken')
 			},
             body: form
         }).then(response => response.json())
           .then(response => {
-                console.log(response)
-                const newUrl = response.url.replace('/app/frontend', '/static');
-                document.getElementById('picture').src = newUrl;
-                document.getElementById('profile_picture').src = newUrl;
-                this.main.set_status("Profile picture changed.", true);
+              const newUrl = response.url.replace('/app/frontend', '/static');
+              document.getElementById('picture').src = newUrl;
+              document.getElementById('profile_picture').src = newUrl;
+              this.main.set_status("Profile picture changed.", true);
           })
           .then(this.main.load('/profile/' + this.main.login, () => this.main.profile.events(true, this.main.login)));
-        }
-        catch (error){
-            console.log(error);
-        }
     }
 
     change_alias(){

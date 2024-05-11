@@ -202,7 +202,12 @@ class RoomsConsumer(AsyncWebsocketConsumer):
         await self.send_message_to_user(data.get('friend'), 'game_invite', data.get('sender'))
 
     async def send_friend_request(self, data):
-        await self.channel_layer.group_send(self.group_name,{'type': 'friend_request_receive', "sender": data.get('sender'), 'receiver': data.get('friend')})
+        user = await get_user_from_login(data.get('sender'))
+        try:
+            user_friend = user.friends.get(login=data.get('friend'))
+        except PlayersModel.DoesNotExist:
+            await self.channel_layer.group_send(self.group_name,{'type': 'friend_request_receive', "sender": data.get('sender'), 'receiver': data.get('friend')})
+        
 
     async def friend_request_receive(self, data):
         if self.login == data.get('receiver'):
