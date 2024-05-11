@@ -749,8 +749,17 @@ def name(request, username):
 def friend(request, username):
     user = PlayersModel.objects.get(login=username)
     if request.method == 'POST':
+        if request.POST['type'] == 'info':
+            try:
+                friend = user.friends.get(login=request.POST['friend'])
+            except PlayersModel.DoesNotExist:
+                response = HttpResponse("You're not friends")
+                response.status_code = 401
+                return response
+            response = HttpResponse("You are already friend")
+            response.status_code = 200
+            return response
         form = PlayerAddFriendForm(request.POST)
-        # print(form)
         if form.is_valid():
             if request.POST['type'] == 'send':
                 if form.cleaned_data['friend'] == username:
@@ -853,6 +862,7 @@ def new_tournament(request):
         return JsonResponse({'error': str(e)}, status=400)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+
 
 def auth_view(request):
     if request.method != 'POST':

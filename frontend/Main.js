@@ -229,38 +229,65 @@ export class Main
 
 
     make_chat(chat_area){
-        if (this.login === '')
-            chat_area.innerHTML = '';
-        if (document.getElementById('chat-log'))
-            return;
-        let new_element = document.createElement("div");
-        let new_chatbox = document.createElement("div");
-        let new_textarea = document.createElement('div');
-        let new_input = document.createElement('input');
-        let new_button = document.createElement('button');
-        new_button.id = 'chat-message-submit';
-        new_button.type = 'button';
-        new_button.className = "btn btn-primary mt-1";
-        new_button.innerHTML = 'Send';
+        if (this.login != ''){
+                chat_area.innerHTML = '';
+            if (document.getElementById('chat-log'))
+                return;
+            let new_element = document.createElement("div");
+            let new_chatbox = document.createElement("div");
+            let new_textarea = document.createElement('div');
+            let new_input = document.createElement('input');
+            let new_button = document.createElement('button');
+            new_button.id = 'chat-message-submit';
+            new_button.type = 'button';
+            new_button.className = "btn btn-primary mt-1";
+            new_button.innerHTML = 'Send';
 
-        new_button.style.margin = "0 auto";
-        new_input.id = "chat-message-input";
-        new_input.type = "text";
-        new_input.size = "13";
-        new_input.className = "form-chat  mt-1";
-        new_textarea.id ='chat-log';
-        new_textarea.style = 'text-align: left; padding: 5%';
-        new_chatbox.id = "chatbox";
-        new_chatbox.style = " margin-top: 0; padding-top: 0;"
-        new_element.id = "chat";
-        new_element.className = "container mt-3";
-        new_input.addEventListener('keydown', (event) => this.chat.press_enter(event, new_button));
-        new_button.addEventListener("click", () => this.chat.send_message(new_input.value, new_input));
-        new_chatbox.appendChild(new_textarea);
-        new_chatbox.appendChild(new_input);
+            new_button.style.margin = "0 auto";
+            new_input.id = "chat-message-input";
+            new_input.type = "text";
+            new_input.size = "13";
+            new_input.className = "form-chat  mt-1";
+            new_textarea.id ='chat-log';
+            new_textarea.style = 'text-align: left; padding: 5%';
+            new_chatbox.id = "chatbox";
+            new_chatbox.style = " margin-top: 0; padding-top: 0;"
+            new_element.id = "chat";
+            new_element.className = "container mt-3";
+            new_input.addEventListener('keydown', (event) => {
+                event.stopPropagation();
+                this.chat.press_enter(event, new_button)
+            });
+            new_button.addEventListener("click", () => this.chat.send_message(new_input.value, new_input));
+            new_chatbox.appendChild(new_textarea);
+            new_chatbox.appendChild(new_input);
 
-        new_element.appendChild(new_chatbox);
-        new_chatbox.appendChild(new_button);
-        chat_area.appendChild(new_element);
+            new_element.appendChild(new_chatbox);
+            new_chatbox.appendChild(new_button);
+            chat_area.appendChild(new_element);
+        }
+    }
+
+    get_friend(login, friend){
+        let returnvalue = true;
+        $.ajax({
+            url: '/profile/' + login + '/add_friend/',
+            method: 'POST',
+            headers:{
+                'X-CSRFToken': this.getCookie('csrftoken')
+            },
+            data:{
+                'type': 'info',
+                'user': login,
+                'friend': friend
+            },
+            success: (info) =>{
+                returnvalue = true
+            },
+            error: (info) =>{
+                returnvalue = false
+            }
+        })
+        return returnvalue
     }
 }
