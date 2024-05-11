@@ -22,18 +22,42 @@ function    reload(path, isPopState = false) {
         main.load('/lobby', () => main.lobby.events(isPopState));
     } else if (path.startsWith('/pong/')) {
         join_game(main, path.substring(6), true);
-    } else if (path === '/transchat/general_chat'){
-        main.load('transchat/general_chat', () => main.chat.events(isPopState));
     } else if (path.startsWith('/profile/')){
-        main.load_with_data('/profile/' + path.substring(9), () => main.profile.events(isPopState, path.substring(9)), {'user':path.substring(9), 'requester': main.login});
+        if (main.login !== '')
+            main.load_with_data('/profile/' + path.substring(9), () => main.profile.events(isPopState, path.substring(9)), {'user':path.substring(9), 'requester': main.login});
+        else {
+            main.load('/pages/login', () => main.log_in.events(false));
+            main.set_status("You need to Log in or Sign up to access this page", false);
+        }
     } else if (path === '/tournament') {
-        main.load('/tournament', () => main.lobby.tournament.events(isPopState));
+        if (main.login !== '')
+            main.load('/tournament', () => main.lobby.tournament.events(isPopState));
+        else {
+            main.load('/pages/login', () => main.log_in.events(false));
+            main.set_status("You need to Log in or Sign up to access this page", false);
+        }
     } else if (path === '/tournament/local') {
-        main.load('/tournament/local', () => main.lobby.tournament.eventsLocal(isPopState));
+        if (main.login !== '')
+            main.load('/tournament/local', () => main.lobby.tournament.eventsLocal(isPopState));
+        else {
+            main.load('/pages/login', () => main.log_in.events(false));
+            main.set_status("You need to Log in or Sign up to access this page", false);
+        }
     } else if (path === '/tournament/local/start') {
-        main.load('/tournament/local/start', () => main.lobby.tournament.localTournament.startEvents(isPopState));
+        if (main.login !== '')
+            main.load('/tournament/local/start', () => main.lobby.tournament.localTournament.startEvents(isPopState));
+        else {
+            main.load('/pages/login', () => main.log_in.events(false));
+            main.set_status("You need to Log in or Sign up to access this page", false);
+        }
     } else if (path === '/tournament_history') {
-        main.load('/tournament_history', () => main.tournament_history.events(isPopState));
+        if (main.login !== '')
+            main.load('/tournament_history', () => main.tournament_history.events(isPopState));
+        else {
+            main.load('/pages/login', () => main.log_in.events(false));
+            main.set_status("You need to Log in or Sign up to access this page", false);
+        }
+
     } else {
         main.load('/lobby', () => main.lobby.events(isPopState));
     }
@@ -41,7 +65,6 @@ function    reload(path, isPopState = false) {
 
 if (error_user)
     main.set_status("Login already taken", false);
-
 //recupere la data obtenue du callback de l'auth 42
 if (my42login !== null && my42login !== "" && my42email !== "" && my42ws != "")
 {
