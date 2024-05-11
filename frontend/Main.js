@@ -140,15 +140,6 @@ export class Main
         return cookieValue;
     }
 
-    // checkTourSockets() {
-    //     if (this.lobby.socketTour1) {
-    //         this.lobby.socketTour1.close();
-    //         this.lobby.socketTour2.close();
-    //         this.lobby.socketTour1 = -1;
-    //         this.lobby.socketTour2 = -1;
-    //     }
-    // }
-
     checkcsrf() {
         if (!this.csrftoken) {
             fetch('/get-csrf/')

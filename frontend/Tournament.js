@@ -243,8 +243,7 @@ export class Tournament {
             type: 'tournament-quit',
             tour_id: this.id,
         }));
-        this.id = -1;
-        this.game = null;
+        this.lobby.game.close_room()
         this.main.load('/lobby', () => this.main.lobby.events(false));
     }
 

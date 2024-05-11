@@ -195,6 +195,9 @@ class PongConsumer(AsyncWebsocketConsumer):
         while True:
             await asyncio.sleep(0.02)
             players = cache.get(self.k_all)
+            print(players)
+            print(self.room.player0)
+            print(self.room.player1)
             if players == None or len(players) == 0:
                 print('here')
                 await quit(self)

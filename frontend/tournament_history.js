@@ -7,6 +7,11 @@ export class tournament_history {
     events(isPopState) {
         if (!isPopState)
             window.history.pushState({ page: '/tournament_history' }, '', '/tournament_history');
+        if (this.main.lobby.game && this.main.lobby.game !== null)
+        {
+            this.main.lobby.game.close_room();
+            this.main.lobby.game = null;
+        }
         this.dom_proceed = document.querySelector("#proceed");
         this.dom_Select = document.querySelector("#Select");
         this.dom_Select.addEventListener("click", () => this.selectTournament());
@@ -45,7 +50,7 @@ export class tournament_history {
                         <h1><p style="font-weight: bold;">${tournamentName}</p></h1>
                         <h3>Contenders</h3>
                         ${contenders.map(contender => contender[0]).join(', ')}
-                        
+
                         <h3><br>Matches</h3>
                         ${matches.map(match => `Match number ${match[4]} : ${match[0][0]} vs ${match[1][0]} <br>Result : ${match[2]} - ${match[3]} | Winner : ${match[5]}<br><br>`).join('')}
                         <h3><br><p style="font-weight: bold;">Winner<br>${tournamentWinner} !</p></h3>
