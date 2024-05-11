@@ -584,7 +584,8 @@ export class Pong
     }
 
     preMatchBox(player1, player2) {
-        // Remove existing backdrop and match box if they exist
+        this.pmBox = true;
+
         let existingBackdrop = document.getElementById('backdrop');
         if (existingBackdrop) {
             document.body.removeChild(existingBackdrop);
@@ -595,28 +596,23 @@ export class Pong
             document.body.removeChild(existingMatchBox);
         }
 
-        // Reset blur effect on canvas
         let canvas = document.getElementById('pongCanvas');
         if (canvas) {
             canvas.style.filter = '';
         }
 
-        // Apply new blur effect
         canvas.style.filter = 'blur(8px)';
 
-        // Create new backdrop
         let backdrop = document.createElement('div');
         backdrop.setAttribute('id', 'backdrop');
         backdrop.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(51, 51, 51, 0.6); z-index: 99;';
         document.body.appendChild(backdrop);
 
-        // Create new match box
         let matchBox = document.createElement('div');
         matchBox.setAttribute('id', 'matchBox');
         matchBox.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); padding: 20px; background-color: #ffffff7a; border: 2px solid #ffffff; text-align: center; z-index: 10000; border-radius: 10px;';
         document.body.appendChild(matchBox);
 
-        // Add content to match box
         let matchText = document.createElement('p');
         matchText.textContent = 'Match can start whenever you are ready!';
         matchText.style.cssText = 'font-family: "Poppins", sans-serif; font-weight: 400; font-style: normal; color: white;';
