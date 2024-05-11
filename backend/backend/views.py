@@ -748,10 +748,8 @@ def name(request, username):
 @csrf_protect
 def friend(request, username):
     user = PlayersModel.objects.get(login=username)
-    print(user.friends.all())
     if request.method == 'POST':
         if request.POST['type'] == 'info':
-            print(request.POST)
             try:
                 friend = user.friends.get(login=request.POST['friend'])
             except PlayersModel.DoesNotExist:
