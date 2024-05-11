@@ -110,6 +110,7 @@ export class Profile{
               document.getElementById('picture').src = newUrl;
               document.getElementById('profile_picture').src = newUrl;
               this.main.set_status("Profile picture changed.", true);
+              this.main.chat_socket.send(json.stringify({'type': 'update'}));
           })
           .then(this.main.load('/profile/' + this.main.login, () => this.main.profile.events(true, this.main.login)));
     }
