@@ -254,7 +254,12 @@ export class Main
         new_chatbox.style = " margin-top: 0; padding-top: 0;"
         new_element.id = "chat";
         new_element.className = "container mt-3";
-        new_input.addEventListener('keydown', (event) => this.chat.press_enter(event, new_button));
+
+        new_input.addEventListener('keydown', (event) => {
+            event.stopPropagation();
+            this.chat.press_enter(event, new_button)
+        });
+
         new_button.addEventListener("click", () => this.chat.send_message(new_input.value, new_input));
         new_chatbox.appendChild(new_textarea);
         new_chatbox.appendChild(new_input);
