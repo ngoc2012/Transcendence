@@ -517,11 +517,6 @@ export class Pong
                     p.sk = -1;
                 });
             }
-            // if (p.sk !== -1)
-            // {
-            //     p.sk.close();
-            //     p.sk = -1;
-            // }
         });
     }
 
