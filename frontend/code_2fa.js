@@ -134,7 +134,7 @@ export class code_2fa
                         // window.history.pushState({}, '', '/tournament/local');
                         this.main.load('/tournament/local', () => this.main.lobby.tournament.eventsTwoFA(this.login));
                     } else {
-                        this.main.set_status('Wrong code, please try again', true);
+                        this.main.set_status('Wrong code, please try again', false);
                     }
                 },
                 error: (data) => this.main.set_status(data.error, false)
