@@ -42,5 +42,15 @@ class PlayerAddFriendForm(forms.Form):
     sender = forms.CharField(max_length=255)
     response = forms.CharField(required=False)
 
+class ChatMessageForm(forms.Form):
+    type = forms.CharField(max_length=255)
+    user = forms.CharField(max_length=255)
+    message = forms.CharField(max_length=255)
+    
+    def __init__(self, type, user, message):
+        self.type = type
+        self.user = user
+        self.message = message
+
 class UploadFileForm(forms.Form):
     file = forms.FileField(label="")

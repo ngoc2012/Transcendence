@@ -34,6 +34,9 @@ export class tournament_history {
         $.ajax({
             url: '/get_tournament_data/',
             method: 'GET',
+            headers:{
+				'X-CSRFToken': this.main.getCookie('csrftoken')
+			},
             data: {
                 "name": tournament_name,
             },

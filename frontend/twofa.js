@@ -8,7 +8,7 @@ export class twofa
         this.main = m;
     }
 
-    events(isPopState) {
+    events(email, login, name, isPopState) {
         this.main.checkcsrf();
         if (!isPopState)
             window.history.pushState({page: '/twofa'}, '', '/twofa');
@@ -17,9 +17,9 @@ export class twofa
         this.dom_cancel = document.querySelector("#cancel0");
         this.dom_log_in_email = document.querySelector("#log_in_with_email");
 
-        this.dom_log_in_qrcode.addEventListener("click", () => this.loginwithqrcode());
+        this.dom_log_in_qrcode.addEventListener("click", () => this.loginwithqrcode(login));
         this.dom_cancel.addEventListener("click", () => this.cancel());
-        this.dom_log_in_email.addEventListener("click", () => this.loginWithemail());
+        this.dom_log_in_email.addEventListener("click", () => this.loginWithemail(email, login, name));
     }
 
     eventsTour(id, login, name, email) {
@@ -31,15 +31,15 @@ export class twofa
         this.events()
     }
 
-    loginWithemail() {
+    loginWithemail(email, login, name) {
         var csrftoken = this.main.getCookie('csrftoken');
         let data;
 
         if (!this.tournament) {
             data = {
-                "login": this.main.login,
-                "name": this.main.name,
-                "email": this.main.email
+                "login": login,
+                "name": name,
+                "email": email
             }
         } else {
             data = {
@@ -70,9 +70,9 @@ export class twofa
     }
 
 
-    loginwithqrcode() {
+    loginwithqrcode(login) {
         if (!this.tournament) {
-            this.main.load('/qrcode_2fa', () => this.main.qrcode_2fa.events());
+            this.main.load('/qrcode_2fa', () => this.main.qrcode_2fa.events(login));
         } else {
             this.main.load('/qrcode_2fa', () => this.main.qrcode_2fa.eventsTour(this.tourLogin));
         }

@@ -38,12 +38,12 @@ class TournamentNameForm(forms.Form):
     name = forms.CharField(required=True)
 
 class verifyQrCodeForm(forms.Form):
-    code = forms.IntegerField(required=True)
+    input_code = forms.IntegerField(required=True)
 
 class verifyLoginForm(forms.Form):
     login = forms.CharField(max_length=150)
     password = forms.CharField(widget=forms.PasswordInput)
 
 class verifyCodeForm(forms.Form):
-    code = forms.IntegerField(required=True)
+    input_code = forms.IntegerField(required=True)
 

@@ -3,6 +3,7 @@ import json
 from asgiref.sync import async_to_sync
 from channels.generic.websocket import WebsocketConsumer
 from .models import User, Room
+from accounts.forms import ChatMessageForm
 from accounts.models import PlayersModel
 
 class ChatConsumer(WebsocketConsumer):
@@ -30,8 +31,7 @@ class ChatConsumer(WebsocketConsumer):
             self.room_group_name, self.channel_name
         )
 
-    def block_user(self, huh, data, str):
-        # print("on enter")
+    def block_user(self, data, str):
         if str == data['username']:
             self.send(text_data=json.dumps({"message": "You can't block yourself.", 'user': data['user']}))
             return
@@ -87,7 +87,7 @@ class ChatConsumer(WebsocketConsumer):
 
     # Receive message from WebSocket
     def receive(self, text_data):
-        # print(text_data)
+        print(text_data)
         if json.loads(text_data)["type"] == 'connection' or json.loads(text_data)['type'] == 'connection_update':
             if self.scope['state']['username'] == '':
                 if json.loads(text_data)['type'] == 'connection':
@@ -113,6 +113,7 @@ class ChatConsumer(WebsocketConsumer):
         elif json.loads(text_data)["type"] == 'update':
             async_to_sync(self.channel_layer.group_send)(self.room_group_name, {"type": "update"})
             return
+        
         data = {
             'text_data': json.loads(text_data),
             'message': json.loads(text_data)['message'],
@@ -124,7 +125,7 @@ class ChatConsumer(WebsocketConsumer):
             'whisper': False,
             'invite': False,
             'type': json.loads(text_data)['type']
-        }
+            }
         for i in data['msg_split']:
             if i and data['blockcmd'] == True:
                 self.block_user(data, i)
@@ -190,7 +191,7 @@ class ChatConsumer(WebsocketConsumer):
     def update_divs(self, event):
         old_user = event['old_user']
         new_user = event['new_user']
-        self.send(json.dumps({'type': "update_divs", 'old_user': old_user, 'new_user': new_user}))
+        self.send(json.dumps({'type': "update_divs", 'old_user': old_user, 'new_user': new_user, 'pic': PlayersModel.objects.get(login=new_user).avatar.url}))
 
     def split_message(self, str):
         msg = ""
