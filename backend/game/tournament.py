@@ -20,6 +20,21 @@ User = get_user_model()
 
 # PRIMARY METHODS
 
+def tournament_quit(request):
+    id = request.POST.get('id')
+
+    if id:
+        try:
+            tournament = TournamentModel.objects.get(id=id)
+            name = tournament.name
+            url = f"http://blockchain:9000/delete_tournament/{name}"
+            tournament.delete()
+        except TournamentModel.DoesNotExist:
+            return JsonResponse({'error': 'Tournament not found.'}, status=404)
+        return JsonResponse({'status': 'Tournament deleted.'})
+    else:
+        return JsonResponse({'error': 'No tournament ID provided.'}, status=400)
+
 def tournament_local_join_setup(request):
     game_id = request.POST.get('game_id')
     player2 = request.POST.get('player2')
@@ -109,6 +124,8 @@ def tournament_local_result(request):
         update_match(match, score1, score2)
         update_tournament(tournament, match, score1, score2)
         check_new_round(tournament)
+        tournament.localMatchIP = False
+        tournament.save()
         return JsonResponse({'status': 'ok'})
 
     except ValueError:
@@ -129,9 +146,13 @@ def tournament_local_get(request):
 
         if tournament.rematchIP:
             return tournament_matchIP(tournament)
+        # # if tournament.ready == False:
+        #     tournament.delete()
+        #     return JsonResponse({'error': 'not ready'})
 
-        if tournament.ready == False:
-            return JsonResponse({'error': 'not ready'})
+        if tournament.localMatchIP:
+            print('in')
+            return rematch(tournament)
 
         if tournament.callback:
             tournament.callback = False;
@@ -154,6 +175,8 @@ def tournament_local_get(request):
 
         player1Name, player2Name = check_alias(match, player1, player2)
 
+        tournament.localMatchIP = True
+        tournament.save()
         if player1 and player2:
             return JsonResponse({
                 'name': tournament.name,
@@ -652,3 +675,45 @@ def check_new_round(tournament):
         tournament.newRound = True
         refresh_participants(tournament)
     tournament.save()
+
+def rematch(tournament):
+    try:
+        match = TournamentMatchModel.objects.filter(tournament=tournament).order_by('-match_number').first()
+        print(match)
+
+        new_room =  RoomsModel.objects.create(
+            game=tournament.game,
+            name=f"{tournament.name} - Match {tournament.total_matches}",
+            owner=tournament.owner,
+            tournamentRoom=True
+        )
+        cache.set(str(new_room.id) + "_x", pong_data['PADDLE_WIDTH'] + pong_data['RADIUS'])
+        cache.set(str(new_room.id) + "_y", pong_data['HEIGHT'] / 2)
+
+        match_data = {field.name: getattr(match, field.name) for field in match._meta.fields if field.name != 'id' and field.name != 'room' and field.name != 'room_uuid'}
+        match_data['room'] = new_room
+        match_data['room_uuid'] = new_room.id
+
+        player1Name = match.player1Local if match.player1isLocal else (match.player1.tourn_alias if match.player1.tourn_alias else match.player1.login)
+        player2Name = match.player2Local if match.player2isLocal else (match.player2.tourn_alias if match.player2.tourn_alias else match.player2.login)
+        print(player1Name)
+        print(player2Name)
+
+        new_match = TournamentMatchModel.objects.create(**match_data)
+        match.delete()
+
+        return JsonResponse({
+                'name': tournament.name,
+                'round': tournament.round if tournament.final == False else 'final',
+                'match': tournament.total_matches,
+                'player1' : player1Name,
+                'player2': player2Name,
+                'room_id': str(new_room.id),
+        })
+
+    except TournamentMatchModel.DoesNotExist:
+        pass
+        # print("Match not found")
+    except Exception as e:
+        pass
+        # print(f"An error occurred: {e}")

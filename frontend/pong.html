@@ -23,7 +23,7 @@
         display: block;
         margin-top: 5%;
     }
-    
+
     html {
       margin-top: 5%;
     }
@@ -31,7 +31,6 @@
     #pongCanvas {
         border: 1px solid white;
     }
-
 
     .btn-custom {
       background-color: rgba(0, 0, 0, 0.7);
@@ -53,7 +52,6 @@
     input[type="range"] {
       accent-color: black;
       opacity: 90%;
-
     }
 
     input[type="range"]::-moz-range-thumb {
@@ -61,6 +59,24 @@
       opacity: 90%;
     }
 
+    @media screen and (max-width: 768px) {
+      body, html {
+        /* margin-top: 15%; */
+        display: flex !important;
+      }
+    }
+
+    @media only screen and (hover: none) and (pointer: coarse){
+      body, html {
+        overflow-y: hidden !important;
+        display: block;
+        /* margin-top: 15%; */
+      }
+
+      #new_local_player {
+        display: none;
+      }
+    }
 
   </style>
 

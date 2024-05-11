@@ -24,7 +24,7 @@ class JWTMiddleware(MiddlewareMixin):
 
         access_token = request.COOKIES.get('access_token')
         if not access_token:
-            return HttpResponseRedirect('/login')
+            return self.return_lobby(request)
 
         try:
             decoded = jwt.decode(access_token, settings.JWT_SECRET_KEY, algorithms=["HS256"])
@@ -133,7 +133,7 @@ class JWTMiddleware(MiddlewareMixin):
             return  HttpResponseRedirect('/login/')
 
     def return_lobby(self, request):
-        print('return lobby')
+        # print('return lobby')
         response = HttpResponseRedirect('/')
         response.delete_cookie('access_token')
         response.delete_cookie('refresh_token')

@@ -30,8 +30,12 @@ export class Tournament {
             this.dom_tournamentForm.addEventListener('submit', (e) => this.tournamentSubmit(e));
     }
 
-    // Followup Tournament in progress or next
     localBack() {
+        if (this.main.lobby.game && this.main.lobby.game !== null)
+        {
+            this.main.lobby.game.close_room();
+            this.main.lobby.game = null;
+        }
         this.localTournament = new localTournament(this.main, this.id, this);
         this.main.load('/tournament/local/start', () => this.localTournament.rematch(false));
     }
@@ -239,11 +243,25 @@ export class Tournament {
     }
 
     quitTournament() {
-        this.main.lobby.socket.send(JSON.stringify({
-            type: 'tournament-quit',
-            tour_id: this.id,
-        }));
-        this.lobby.game.close_room()
+        $.ajax({
+            url: '/game/tournament/local/delete',
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': this.main.getCookie('csrftoken')
+            },
+            data:{
+                'id':this.id,
+            },
+            success: (info) =>{
+                this.lobby.game.close_room()
+                this.main.set_status(info.status, true)
+            },
+            error: (info) =>{
+                this.lobby.game.close_room()
+                this.main.set_status(info.error, false)
+            }
+        });
+
         this.main.load('/lobby', () => this.main.lobby.events(false));
     }
 

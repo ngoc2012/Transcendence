@@ -111,7 +111,8 @@ export class localTournament {
                             this.lobby.game = new Pong(this.main, this.main.lobby, info, this.tournament, this, true, this.id);
                             this.dom_container = document.getElementById('match');
                             this.load('/pong/local', () => {
-                                this.lobby.game.init();
+                                if (this.lobby.game)
+                                    this.lobby.game.init();
                             });
                             break;
                     }

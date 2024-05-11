@@ -42,10 +42,18 @@ export class Profile{
             this.dom_add_friend.addEventListener("click", () => this.dom_add_friend.parentNode.removeChild(this.dom_add_friend));
         }
         if (this.main.getCookie('login42') && this.main.login === l) {
-            this.dom_password.style.display = 'none';
-            this.dom_email.style.display = 'none';
-            this.dom_login.style.display = 'none';
-            this.dom_name.style.display = 'none';
+            if (this.dom_password) {
+                this.dom_password.style.display = 'none';
+            }
+            if (this.dom_email) {
+                this.dom_email.style.display = 'none';
+            }
+            if (this.dom_login) {
+                this.dom_login.style.display = 'none';
+            }
+            if (this.dom_name) {
+                this.dom_name.style.display = 'none';
+            }            
         }
         this.create_submit_pp();
     }
@@ -57,7 +65,7 @@ export class Profile{
         let button = document.createElement('input');
         button.type = "submit";
         button.id = 'submit_button';
-        button.className = "btn btn-primary";
+        button.className = "btn btn-primary mb-3";
         button.value = "Submit";
         input.type = 'file';
         input.name = 'id_file';
