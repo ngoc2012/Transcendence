@@ -62,7 +62,7 @@ clean:
 CLI:
 	pip3 install --user keyboard --break-system-packages
 	pip3 install --user websockets --break-system-packages
-	clear && cd backend/CLI && sudo python3 CLI.py 10.24.107.3 8080
+	clear && cd backend/CLI && sudo python3 CLI.py 127.0.0.1 8080
 	#clear && cd backend/CLI && valgrind --leak-check=full python3 CLI.py
 	#cd backend/CLI && node CLI.js
 
