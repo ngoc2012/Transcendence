@@ -21,6 +21,7 @@ def action(request, room_id, player_id, action):
     k_y = room_id + "_y"
     k_player_x = room_id + "_" + player_id + "_x"
     k_player_y = room_id + "_" + player_id + "_y"
+    player_id = int(player_id)
     started = cache.get(room_id + "_started")
     team0 = cache.get(room_id + "_team0")
     if team0 == None:
@@ -44,10 +45,11 @@ def action(request, room_id, player_id, action):
             'team1': team1,
             'dx': cache.get(room_id + "_dx"),
             'started': started,
+            'server': player_id == server,
             'x': player_x,
             'y': player_y,
         })
-    player_id = int(player_id)
+    
     if action == 'up':
         if player_y > 0:
             cache.set(k_player_y, player_y - pong_data['STEP'])
@@ -100,6 +102,7 @@ def close_connection(request, room_id, player_id):
     return HttpResponse("done")
 
 def start(request, room_id):
+    # print("Starting game", room_id)
     async_to_sync(channel_layer.group_send)(
         room_id,
         {
