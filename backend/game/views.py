@@ -1,5 +1,4 @@
 from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
-from django.views.decorators.csrf import csrf_exempt
 from .models import RoomsModel, TournamentMatchModel, TournamentModel
 from accounts.models import PlayersModel
 from pong.data import pong_data
@@ -62,8 +61,8 @@ def add_player_to_room(game_id, login):
         cache.set(k_player_y, pong_data['HEIGHT'] / 2 - pong_data['PADDLE_HEIGHT'] / 2)
     return room, player
 
-@csrf_protect
-def new_game(request):
+@csrf_exempt
+def ng(request):
     if 'game' not in request.POST:
         return (HttpResponse("Error: No game!"))
     if 'login' not in request.POST:
@@ -95,6 +94,10 @@ def new_game(request):
         }))
 
 @csrf_protect
+def new_game(request):
+    return ng(request)
+
+@csrf_protect
 def update(request):
     data = {
         "rooms": [
@@ -107,8 +110,8 @@ def update(request):
     }
     return JsonResponse(data, safe=False)
 
-@csrf_protect
-def join(request):
+@csrf_exempt
+def jn(request):
     if 'game_id' not in request.POST:
         return (HttpResponse("Error: No game id!"))
     if 'login' not in request.POST:
@@ -147,10 +150,14 @@ def join(request):
             'data': get_data(room.game)
         }))
 
+@csrf_protect
+def join(request):
+    return jn(request)
+
 from backend.asgi import channel_layer
 from asgiref.sync import async_to_sync
 
-@csrf_protect
+@csrf_exempt
 def close_connection(request, login_id):
     async_to_sync(channel_layer.group_send)(
         "rooms",
@@ -161,7 +168,7 @@ def close_connection(request, login_id):
     )
     return HttpResponse("done")
 
-@csrf_protect
+@csrf_exempt
 def need_update(request):
     async_to_sync(channel_layer.group_send)(
         "rooms",

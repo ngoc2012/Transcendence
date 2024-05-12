@@ -89,7 +89,7 @@ async def pong_listener(room):
 
 def join(game_id, login):
     try:
-        with requests.post("https://" + host + "/game/join",
+        with requests.post("https://" + host + "/game/jn",
             data={"login": login, "game_id": game_id}, 
             verify=False) as response:
             if response.status_code != 200:
@@ -109,7 +109,7 @@ def join(game_id, login):
   
 def new_game(login):
     try:
-        with requests.post("https://" + host + "/game/new",
+        with requests.post("https://" + host + "/game/ng",
             data = {
                 'name': 'Stars war',
                 'game': 'pong',
@@ -148,7 +148,7 @@ def log_in():
     login = input("Login: ")
     password = getpass.getpass("Password: ")
     try:
-        with requests.post("https://" + host + "/log_in/",
+        with requests.post("https://" + host + "/lg/",
             data={"login": login, "password": password}, 
             verify=False) as response:
             if response.status_code != 200:
@@ -175,7 +175,7 @@ def sign_up():
     name = input("Full Name: ")
     email = input("Email: ")
     try:
-        with requests.post("https://" + host + "/new_player/",
+        with requests.post("https://" + host + "/np/",
             data={
                 "login": login,
                 "password": password,
@@ -372,7 +372,7 @@ if __name__ == "__main__":
                     pong_process = Process(target=run_pong_listener, args=(room,))
                     pong_process.start()
                     with requests.get("https://" + host + "/game/need_update",
-                        cert=(certfile, keyfile),
+
                         verify=False) as response:
                         next
                     playing = True
