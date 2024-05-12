@@ -226,18 +226,18 @@ def verify(request):
         return JsonResponse({'result': '1'})
     return JsonResponse({'result': '0'})
 
-# create a new player in the database and his 2fa key used for authenticator
-
 def generate_jwt_tokens(user_id):
     access_token = jwt.encode({
         'user_id': user_id,
-        'exp': datetime.now(pytz.utc) + timedelta(minutes=5)
-    }, JWT_SECRET_KEY, algorithm='HS256')
+        'exp': datetime.now(pytz.utc) + timedelta(minutes=60),
+        'jti': str(uuid.uuid4())
+    }, settings.JWT_SECRET_KEY, algorithm='HS256')
 
     refresh_token = jwt.encode({
         'user_id': user_id,
-        'exp': datetime.now(pytz.utc) + timedelta(days=7)
-    }, JWT_REFRESH_SECRET_KEY, algorithm='HS256')
+        'exp': datetime.now(pytz.utc) + timedelta(minutes=120),
+        'jti': str(uuid.uuid4())
+    }, settings.JWT_REFRESH_SECRET_KEY, algorithm='HS256')
 
     return access_token, refresh_token
 
@@ -269,6 +269,7 @@ def np(request):
 
         user.secret_2fa = hashed_secret
         user.save()
+        authenticate(username=user.username, password=user.password)
 
         response_data = {
             'login': user.username,
@@ -311,8 +312,6 @@ def lg(request):
 
     username = form.cleaned_data['login']
     password = form.cleaned_data['password']
-    userbibi = PlayersModel.objects.get(username=form.cleaned_data['login'])
-    print("dans login " + userbibi.password)
 
     user = authenticate(request, username=username, password=password)
     if user is not None:
@@ -795,9 +794,6 @@ def name(request, username):
 
 @csrf_protect
 def friend(request, username):
-    response = HttpResponse("Invalid data")
-    response.status_code = 200
-    return response 
     user = PlayersModel.objects.get(login=username)
     
     if request.method == 'POST':
@@ -868,6 +864,16 @@ def avatar(request, username):
 
 def tournament_request(request):
     try:
+        tournaments = TournamentModel.objects.filter(
+            owner=request.user,
+            terminated=False,
+            ready=False
+        )
+        if tournaments.exists():
+            for tournament in tournaments:
+                url = f"http://blockchain:9000/delete_tournament/{tournament.name}"
+                tournament.delete()
+
         tournament = TournamentModel.objects.filter(
             owner=request.user,
             terminated=False

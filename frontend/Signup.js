@@ -124,7 +124,7 @@ export class Signup
                         this.main.display_2fa.events();
                     }
                 },
-                error: function(jqXHR, textStatus, errorThrown) {
+                error: function(errorThrown) {
                     // console.error('Error setting up 2FA: ', errorThrown);
                     this.main.set_status('Error setting up 2FA: ' + errorThrown, false);
                 }

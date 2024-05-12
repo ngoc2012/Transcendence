@@ -88,17 +88,17 @@ export class code_2fa
                                     }
 
                                     if (!this.tournament) {
-                                        // this.main.history_stack.push('/');
-                                        // window.history.pushState({}, '', '/');
                                         this.main.load('/lobby', () => this.main.lobby.events());
                                     } else {
-                                        // this.main.history_stack.push('/tournament/local');
-                                        // window.history.pushState({}, '', '/tournament/local');
                                         this.main.load('/tournament/local', () => this.main.lobby.tournament.eventsTwoFA(this.login));
                                     }
                                 }
                             },
-                            error: (xhr, textStatus, errorThrown) => {
+                            error: (jqXHR, xhr) => {
+                                if (jqXHR.status === 401 && jqXHR.responseText === "Unauthorized - Token expired") {
+                                    this.main.load('/pages/login', () => this.main.log_in.events());
+                                    return;
+                                }
                                 if (xhr.responseJSON && xhr.responseJSON.error) {
                                     this.main.set_status(xhr.responseJSON.error, false);
                                 } else {
@@ -110,7 +110,13 @@ export class code_2fa
                         this.main.set_status('Wrong code, please try again', false);
                     }
                 },
-                error: (data) => this.main.set_status(data.error, false)
+                error: (data, jqXHR) => {
+                    if (jqXHR.status === 401) {
+                        this.main.load('/pages/login', () => this.main.log_in.events());
+                        return;
+                    }
+                    this.main.set_status(data.error, false)
+                }
             });
         }
     }
@@ -130,21 +136,23 @@ export class code_2fa
                     if (typeof info === 'string') {
                         this.main.set_status(info, true);
                     } else if (info.result === '1') {     
-                        // this.main.history_stack.push('/tournament/local');
-                        // window.history.pushState({}, '', '/tournament/local');
                         this.main.load('/tournament/local', () => this.main.lobby.tournament.eventsTwoFA(this.login));
                     } else {
                         this.main.set_status('Wrong code, please try again', false);
                     }
                 },
-                error: (data) => this.main.set_status(data.error, false)
+                error: (data, jqXHR) => {
+                    if (jqXHR.status === 401 && jqXHR.responseText === "Unauthorized - Token expired") {
+                        this.main.load('/pages/login', () => this.main.log_in.events());
+                        return;
+                    }
+                    this.main.set_status(data.error, false)
+                }
             });
         }
     }
 
     cancel() {
-        // this.main.history_stack.push('/');
-        // window.history.pushState({}, '', '/');
         this.main.load('/lobby', () => this.main.lobby.events());
     }
 }

@@ -40,7 +40,9 @@ export class Chat{
 				'message': message,
 				'user': this.main.login
 			},
-			success: (info) => {
+			success: (info, xhr) => {
+				if (xhr.status === 302)
+					return;
 				this.main.chat_socket.send(JSON.stringify({
 					'message': message,
 					'user': this.main.login,
@@ -48,7 +50,11 @@ export class Chat{
 					'type': 'chat_message'
 				}));
 			},
-			error: (info) =>{
+			error: (jqXHR) =>{
+				if (jqXHR.status === 401 && jqXHR.responseText === "Unauthorized - Token expired") {
+					this.main.load('/pages/login', () => this.main.log_in.events());
+					return;
+				}
 				console.error('Invalid data sent');
 			}
 		});

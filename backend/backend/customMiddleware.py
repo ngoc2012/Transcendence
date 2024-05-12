@@ -3,9 +3,9 @@ from django.utils.deprecation import MiddlewareMixin
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from datetime import datetime, timedelta
-import jwt, pytz
+import jwt, pytz, uuid
 from django.core.cache import cache
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.models import AnonymousUser
 
@@ -70,6 +70,7 @@ class JWTMiddleware(MiddlewareMixin):
     def handle_refresh_token(self, request):
         refresh_token = request.COOKIES.get('refresh_token')
         if not refresh_token:
+            print('no refresh token')
             return self.return_lobby()
         
         jti = None
@@ -100,21 +101,39 @@ class JWTMiddleware(MiddlewareMixin):
         except jwt.InvalidTokenError:
            return self.return_lobby()
 
+    # def generate_jwt_tokens(self, user_id):
+    #     access_token = jwt.encode({
+    #         'user_id': user_id,
+    #         'exp': datetime.now(pytz.utc) + timedelta(minutes=5),
+    #         'jti': str(uuid.uuid4())
+    #     }, settings.JWT_SECRET_KEY, algorithm='HS256')
+
+    #     refresh_token = jwt.encode({
+    #         'user_id': user_id,
+    #         'exp': datetime.now(pytz.utc) + timedelta(days=7),
+    #         'jti': str(uuid.uuid4())
+    #     }, settings.JWT_REFRESH_SECRET_KEY, algorithm='HS256')
+
+    #     return access_token, refresh_token
+
     def generate_jwt_tokens(self, user_id):
         access_token = jwt.encode({
             'user_id': user_id,
-            'exp': datetime.now(pytz.utc) + timedelta(minutes=5)
+            'exp': datetime.now(pytz.utc) + timedelta(minutes=60),
+            'jti': str(uuid.uuid4())
         }, settings.JWT_SECRET_KEY, algorithm='HS256')
 
         refresh_token = jwt.encode({
             'user_id': user_id,
-            'exp': datetime.now(pytz.utc) + timedelta(days=7)
+            'exp': datetime.now(pytz.utc) + timedelta(minutes=120),
+            'jti': str(uuid.uuid4())
         }, settings.JWT_REFRESH_SECRET_KEY, algorithm='HS256')
 
         return access_token, refresh_token
 
     def get_unauthenticated_paths(self):
         return [
+            'logout/',
             '/',
             '/favicon.ico',
             '/get-csrf/',
@@ -148,7 +167,9 @@ class JWTMiddleware(MiddlewareMixin):
             '/mail_2fa/',
             '/verify_qrcode/',
             '/verify/',
-            '/login42/'
+            '/login42/',
+            '/game/tournament/local/result/',
+            '/game/tournament/local/join/setup/',
         ]
 
     def process_callback(self, request):
@@ -156,11 +177,11 @@ class JWTMiddleware(MiddlewareMixin):
         if state and 'oauth_state_login'in request.session and state == request.session['oauth_state_login']:
             return None
         else:
-            return  HttpResponseRedirect('/login/')
+            return  self.return_lobby()
 
     def return_lobby(self):
-        print('return lobby')
-        response = HttpResponseRedirect('/')
+        print('return 401 middleware')
+        response = HttpResponse('Unauthorized - Token expired', status=401)
         response.delete_cookie('access_token')
         response.delete_cookie('refresh_token')
         response.delete_cookie('sessionid')

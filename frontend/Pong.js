@@ -318,7 +318,14 @@ export class Pong
                         this.preMatchBox(this.localTournament.player1, this.localTournament.player2);
                     }
                 },
-                error: () => this.main.set_status('Error: Can not join game', false)
+                error: (jqXHR) => {
+                    this.main.set_status('Error: Can not join game', false)
+                    if (jqXHR.status === 401 && jqXHR.responseText === "Unauthorized - Token expired") {
+                        this.main.clearClient();
+                        this.main.load('/pages/login', () => this.main.log_in.events());
+                        return;
+                    }
+                }
             });
         }
 
@@ -410,12 +417,17 @@ export class Pong
                 else
                     this.join_local_player(info);
             },
-            error: (xhr, textStatus, errorThrown) => {
+            error: (xhr, jqXHR) => {
                 if (xhr.responseJSON && xhr.responseJSON.error) {
                     this.main.set_status(xhr.responseJSON.error, false);
                 } else {
                     this.main.set_status('An error occurred during the request.', false);
                 }
+                if (jqXHR.status === 401 && jqXHR.responseText === "Unauthorized - Token expired") {
+                    this.main.clearClient();
+					this.main.load('/pages/login', () => this.main.log_in.events());
+					return;
+				}
             }
         });
     }
@@ -451,7 +463,14 @@ export class Pong
                     }
                 }
             },
-            error: () => this.main.set_status('Error: Can not join game', false)
+            error: (jqXHR) => {
+                if (jqXHR.status === 401 && jqXHR.responseText === "Unauthorized - Token expired") {
+                    this.main.clearClient();
+					this.main.load('/pages/login', () => this.main.log_in.events());
+					return;
+				}
+                this.main.set_status('Error: Can not join game', false)
+            }
         });
     }
 

@@ -36,97 +36,65 @@ export class Login
 
         var csrftoken = this.main.getCookie('csrftoken');
 
-        // $.ajax({
-        //     url: 'auth_view/',
-        //     method: 'POST',
-        //     headers: {
-        //         'X-CSRFToken': csrftoken,
-        //     },
-        //     data: {
-        //         "login": this.dom_login.value,
-        //         "password": this.dom_password.value,
-        //     },
-        //     success: (info) => {
+        $.ajax({
+            url: 'log_in/',
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken,
+            },
+            data: {
+                "login": this.dom_login.value,
+                "password": this.dom_password.value,
+            },
+            success: (info) => {
+                if (typeof info === 'string')
+                {
+                    this.main.set_status(info, true);
+                }
+                else
+                {
+                    this.main.email = info.email;
+                    this.main.login = info.login;
+                    this.main.name = info.name;
+                    this.main.dom_name.innerHTML = info.name;
+                    this.main.lobby.ws = info.ws;
+                    this.main.picture = info.avatar;
+                    var dom_log_in = document.getElementById('login');
+                    if (dom_log_in) {
+                        dom_log_in.style.display = "none";
+                    }
 
-        //         if (info.enable2fa == 'true')
-        //         {
-        //             // this.main.email = info.email;
-        //             // this.main.login = info.login;
-        //             // this.main.name = info.name;
-        //             this.main.load('/twofa', () => this.main.twofa.events(info.email, info.login, info.name ));
-        //         }
-        //         else
-        //         {
-                    $.ajax({
-                        url: 'log_in/',
-                        method: 'POST',
-                        headers: {
-                            'X-CSRFToken': csrftoken,
-                        },
-                        data: {
-                            "login": this.dom_login.value,
-                            "password": this.dom_password.value,
-                        },
-                        success: (info) => {
-                            if (typeof info === 'string')
-                            {
-                                this.main.set_status(info, true);
-                            }
-                            else
-                            {
-                                this.main.email = info.email;
-                                this.main.login = info.login;
-                                this.main.name = info.name;
-                                this.main.dom_name.innerHTML = info.name;
-                                this.main.lobby.ws = info.ws;
-                                this.main.picture = info.avatar;
-                                var dom_log_in = document.getElementById('login');
-                                if (dom_log_in) {
-                                    dom_log_in.style.display = "none";
-                                }
-
-                                var dom_signup = document.getElementById('signup');
-                                if (dom_signup) {
-                                    dom_signup.style.display = "none";
-                                    dom_signup.insertAdjacentHTML('afterend', '<button id="logoutButton" class="btn btn-danger">Log Out</button>');
-                                    var dom_logout = document.getElementById('logoutButton');
-                                    if (dom_logout) {
-                                        dom_logout.addEventListener('click', () => this.main.logout());
-                                    }
-                                }
-
-
-                                var dom_picture = document.getElementById('picture');
-                                if (dom_picture){
-                                    dom_picture.src = this.main.picture.replace('/app/frontend/', '/static/');
-                                }
-                                var dom_chatarea = document.getElementById('chat_area');
-                                if (dom_chatarea){
-                                    dom_chatarea.innerHTML = '';
-                                    this.main.make_chat(dom_chatarea);
-                                }
-                                this.main.load('/lobby', () => this.main.lobby.events(false));
-                            }
-                        },
-                        error: (xhr, textStatus, errorThrown) => {
-                            if (xhr.responseJSON && xhr.responseJSON.error) {
-                                this.main.set_status(xhr.responseJSON.error, false);
-                            } else {
-                                this.main.set_status('An error occurred during the request.', false);
-                            }
+                    var dom_signup = document.getElementById('signup');
+                    if (dom_signup) {
+                        dom_signup.style.display = "none";
+                        dom_signup.insertAdjacentHTML('afterend', '<button id="logoutButton" class="btn btn-danger">Log Out</button>');
+                        var dom_logout = document.getElementById('logoutButton');
+                        if (dom_logout) {
+                            dom_logout.addEventListener('click', () => this.main.logout());
                         }
-                    });
-                // }
-        //     },
-        //     error: (xhr, textStatus, errorThrown) => {
-        //         if (xhr.responseJSON && xhr.responseJSON.error) {
-        //             this.main.set_status(xhr.responseJSON.error, false);
-        //             // console.log( "erreur = ", xhr.responseJSON.error)
-        //         } else {
-        //             this.main.set_status('An error occurred during the request.', false);
-        //         }
-        //     }
-        // });
+                    }
+
+
+                    var dom_picture = document.getElementById('picture');
+                    if (dom_picture){
+                        dom_picture.src = this.main.picture.replace('/app/frontend/', '/static/');
+                    }
+                    var dom_chatarea = document.getElementById('chat_area');
+                    if (dom_chatarea){
+                        dom_chatarea.innerHTML = '';
+                        this.main.make_chat(dom_chatarea);
+                    }
+                    this.main.load('/lobby', () => this.main.lobby.events(false));
+                }
+            },
+            error: (xhr) => {
+                if (xhr.responseJSON && xhr.responseJSON.error) {
+                    this.main.set_status(xhr.responseJSON.error, false);
+                } else {
+                    this.main.set_status('An error occurred during the request.', false);
+                }
+            }
+        });
     }
 
     handle_key_press(event)
@@ -148,7 +116,7 @@ export class Login
                 success: (response) => {
                     window.location.href = response.url;
                 },
-                error: (xhr, textStatus, errorThrown) => {
+                error: () => {
                     this.main.set_status('Error', false);
                 }
             })

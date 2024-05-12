@@ -63,7 +63,12 @@ export class Tournament {
                     participants.forEach(participant => {this.userAdded.push(participant.login)})
                     this.main.load('/tournament/local', () => this.eventsLocal());
                 },
-                error: (xhr) => {
+                error: (xhr, jqXHR) => {
+                    if (jqXHR.status === 401 && jqXHR.responseText === "Unauthorized - Token expired") {
+                        this.main.clearClient();
+                        this.main.load('/pages/login', () => this.main.log_in.events());
+                        return;
+                    }
                     this.main.set_status(xhr.responseJSON.error, false);
                 }
             });
@@ -144,7 +149,12 @@ export class Tournament {
                         }
                     }
                 },
-                error: (xhr) => {
+                error: (xhr, jqXHR) => {
+                    if (jqXHR.status === 401 && jqXHR.responseText === "Unauthorized - Token expired") {
+                        this.main.clearClient();
+                        this.main.load('/pages/login', () => this.main.log_in.events());
+                        return;
+                    }
                     this.main.set_status(xhr.responseJSON.error, false);
                 }
             });
@@ -197,7 +207,12 @@ export class Tournament {
                     this.localTournament = new localTournament(this.main, response.id, this);
                     this.main.load('/tournament/local/start', () => this.localTournament.getMatch());
                 },
-                error: (xhr) => {
+                error: (xhr, jqXHR) => {
+                    if (jqXHR.status === 401 && jqXHR.responseText === "Unauthorized - Token expired") {
+                        this.main.clearClient();
+                        this.main.load('/pages/login', () => this.main.log_in.events());
+                        return;
+                    }
                     this.main.set_status(xhr.responseJSON.error, false);
                     this.quitTournament();
                 }
@@ -230,10 +245,15 @@ export class Tournament {
                     this.id = response.id;
                     this.main.load('/tournament/local', () => this.eventsLocal(false));
                 },
-                error: (xhr, textStatus, errorThrown) => {
+                error: (xhr, jqXHR) => {
+                    if (jqXHR.status === 401 && jqXHR.responseText === "Unauthorized - Token expired") {
+                        this.main.clearClient();
+                        this.main.load('/pages/login', () => this.main.log_in.events());
+                        return;
+                    }
                     if (xhr.status === 400) {
-                    var errorResponse = JSON.parse(xhr.responseText);
-                    this.main.set_status('Error: ' + errorResponse.error, false);
+                        var errorResponse = JSON.parse(xhr.responseText);
+                        this.main.set_status('Error: ' + errorResponse.error, false);
                     } else {
                         this.main.set_status('Error: Could not create tournament', false);
                     }
@@ -256,7 +276,12 @@ export class Tournament {
                 this.lobby.game.close_room()
                 this.main.set_status(info.status, true)
             },
-            error: (info) =>{
+            error: (info, jqXHR) =>{
+                if (jqXHR.status === 401 && jqXHR.responseText === "Unauthorized - Token expired") {
+                    this.main.clearClient();
+					this.main.load('/pages/login', () => this.main.log_in.events());
+					return;
+				}
                 this.lobby.game.close_room()
                 this.main.set_status(info.error, false)
             }

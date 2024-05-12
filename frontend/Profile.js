@@ -144,7 +144,12 @@ export class Profile{
                 this.main.set_status(info, true);
                 this.main.load('/profile/' + this.main.login, () => this.main.profile.events(false, this.main.login));
             },
-            error: (info) =>{
+            error: (info, jqXHR) =>{
+                if (jqXHR.status === 401 && jqXHR.responseText === "Unauthorized - Token expired") {
+                    this.main.clearClient();
+					this.main.load('/pages/login', () => this.main.log_in.events());
+					return;
+				}
                 this.main.set_status(info.responseText, false);
             }
         });
@@ -195,11 +200,16 @@ export class Profile{
                 this.main.set_status(info, true);
                 this.main.load('/profile/' + this.main.login, () => this.main.profile.events(false, this.main.login));
             },
-            error: (info) => {
+            error: (info, jqXHR) => {
                 this.main.set_status(info.responseText, false);
                 this.dom_newvalue.value = '';
                 this.dom_newvaluerepeat.value = '';
                 this.dom_oldvalue.value = '';
+                if (jqXHR.status === 401 && jqXHR.responseText === "Unauthorized - Token expired") {
+                    this.main.clearClient();
+					this.main.load('/pages/login', () => this.main.log_in.events());
+					return;
+				}
             }
         });
     }
@@ -251,8 +261,13 @@ export class Profile{
                 this.main.email = this.email;
                 this.main.load('/profile/' + this.main.login, () => this.main.profile.events(false, this.main.login));
             },
-            error: (info) =>{
+            error: (info, jqXHR) =>{
                 this.main.set_status(info.responseText, false);
+                if (jqXHR.status === 401 && jqXHR.responseText === "Unauthorized - Token expired") {
+                    this.main.clearClient();
+					this.main.load('/pages/login', () => this.main.log_in.events());
+					return;
+				}
             }
         })
     }
@@ -309,8 +324,13 @@ export class Profile{
                 this.main.login = this.dom_cllogin.value;
                 this.main.load('/profile/' + this.main.login, () => this.main.profile.events(false, this.main.login));
             },
-            error: (info) =>{
+            error: (info, jqXHR) =>{
                 this.main.set_status(info.responseText, false);
+                if (jqXHR.status === 401 && jqXHR.responseText === "Unauthorized - Token expired") {
+                    this.main.clearClient();
+					this.main.load('/pages/login', () => this.main.log_in.events());
+					return;
+				}
             }
         })
     }
@@ -365,8 +385,13 @@ export class Profile{
                 }
                 this.main.load('/profile/' + this.main.login, () => this.main.profile.events(false, this.main.login));
             },
-            error: (info)=>{
+            error: (info, jqXHR)=>{
                 this.main.set_status(info.responseText, false);
+                if (jqXHR.status === 401 && jqXHR.responseText === "Unauthorized - Token expired") {
+                    this.main.clearClient();
+					this.main.load('/pages/login', () => this.main.log_in.events());
+					return;
+				}
             }
         })
     }
@@ -421,8 +446,13 @@ export class Profile{
                 this.main.set_status(info, true);
                 this.main.load('/profile/' + this.main.login, () => this.friend_events(false));
             },
-            error: (info)=>{
+            error: (info, jqXHR)=>{
                 this.main.set_status(info.responseText, false);
+                if (jqXHR.status === 401 && jqXHR.responseText === "Unauthorized - Token expired") {
+                    this.main.clearClient();
+					this.main.load('/pages/login', () => this.main.log_in.events());
+					return;
+				}
             }
         });
     }
@@ -443,8 +473,13 @@ export class Profile{
                 this.main.set_status(info, true);
                 this.main.load('/profile/' + this.main.login, () => this.main.profile.events(false, this.main.login));
             },
-            error: (info) =>{
+            error: (info, jqXHR) =>{
                 this.main.set_status(info.responseText, false);
+                if (jqXHR.status === 401 && jqXHR.responseText === "Unauthorized - Token expired") {
+                    this.main.clearClient();
+					this.main.load('/pages/login', () => this.main.log_in.events());
+					return;
+				}
             }
         })
     }
@@ -496,8 +531,13 @@ export class Profile{
             success: (info)=>{
                 this.main.set_status(info, true);
             },
-            error: (info)=>{
+            error: (info, jqXHR)=>{
                 this.main.set_status(info.responseText, false);
+                if (jqXHR.status === 401 && jqXHR.responseText === "Unauthorized - Token expired") {
+                    this.main.clearClient();
+					this.main.load('/pages/login', () => this.main.log_in.events());
+					return;
+				}
             }
         })
     }
@@ -517,8 +557,13 @@ export class Profile{
             success: (info)=>{
                 this.main.set_status(info, true);
             },
-            error: (info) => {
+            error: (info, jqXHR) => {
                 this.main.set_status(info.responseText, false);
+                if (jqXHR.status === 401 && jqXHR.responseText === "Unauthorized - Token expired") {
+                    this.main.clearClient();
+					this.main.load('/pages/login', () => this.main.log_in.events());
+					return;
+				}
             }
         })
     }

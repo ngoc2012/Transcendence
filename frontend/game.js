@@ -31,8 +31,12 @@ export function join_game(main, game_id, isPopState, joined = false)
                 }
             }
         },
-        error: (info) => {
+        error: (jqXHR) => {
             main.set_status('Error: Can not join game', false);
+            if (jqXHR.status === 401 && jqXHR.responseText === "Unauthorized - Token expired") {
+                this.main.load('/pages/login', () => this.main.log_in.events());
+                return;
+            }
         }
     });
 }
