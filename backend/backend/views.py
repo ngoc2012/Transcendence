@@ -230,8 +230,8 @@ def generate_jwt_tokens(user_id):
 
     return access_token, refresh_token
 
-@csrf_protect
-def new_player(request):
+@csrf_exempt
+def np(request):
     if request.method != 'POST':
         return JsonResponse({'error': 'Only POST requests are allowed'}, status=405)
 
@@ -286,7 +286,11 @@ def new_player(request):
         return JsonResponse({'error': f'Unexpected error: {str(e)}'}, status=500)
 
 @csrf_protect
-def log_in(request):
+def new_player(request):
+   return  np(request)
+
+@csrf_exempt
+def lg(request):
     form = verifyLoginForm(request.POST)
 
     if not form.is_valid():
@@ -322,6 +326,10 @@ def log_in(request):
     else:
         return JsonResponse({'error': 'Invalid login credentials!'}, status=401)
 
+@csrf_protect
+def log_in(request):
+    return lg(request)
+    
 def login42(request):
     try:
         state = uuid.uuid4().hex

@@ -17,13 +17,14 @@ def check_collision(consumer):
     team1 = cache.get(consumer.k_team1)
     if team1 == None:
         team1 = []
+    hitbox = pong_data['PADDLE_WIDTH'] * 1.5
     if cache.get(consumer.k_dx) == -1:
         for p in team0:
             p_x = cache.get(consumer.room_id + "_" + str(p) + "_x")
             p_y = cache.get(consumer.room_id + "_" + str(p) + "_y")
             if p_x == None or p_y == None:
                 continue
-            if x - pong_data['RADIUS'] == p_x + pong_data['PADDLE_WIDTH'] and y >= p_y - pong_data['PADDLE_WIDTH'] and y <= p_y + pong_data['PADDLE_HEIGHT'] + pong_data['PADDLE_WIDTH']:
+            if x - pong_data['RADIUS'] == p_x + pong_data['PADDLE_WIDTH'] and y >= p_y - hitbox and y <= p_y + pong_data['PADDLE_HEIGHT'] + hitbox:
                 cache.set(consumer.k_dx, 1)
                 i = (y - p_y -pong_data['PADDLE_HEIGHT'] / 2) / ( pong_data['PADDLE_HEIGHT'] / len(consumer.choices))
                 cache.set(consumer.k_dy, math.copysign(1, i))
@@ -35,7 +36,7 @@ def check_collision(consumer):
             p_y = cache.get(consumer.room_id + "_" + str(p) + "_y")
             if p_x == None or p_y == None:
                 continue
-            if x + pong_data['RADIUS'] == p_x and y >= p_y - pong_data['PADDLE_WIDTH'] and y <= p_y + pong_data['PADDLE_HEIGHT'] + pong_data['PADDLE_WIDTH']:
+            if x + pong_data['RADIUS'] == p_x and y >= p_y - hitbox and y <= p_y + pong_data['PADDLE_HEIGHT'] + hitbox:
                 cache.set(consumer.k_dx, -1)
                 i = (y - p_y - pong_data['PADDLE_HEIGHT'] / 2) / ( pong_data['PADDLE_HEIGHT'] / len(consumer.choices))
                 cache.set(consumer.k_dy, math.copysign(1, i))
