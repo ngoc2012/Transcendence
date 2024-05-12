@@ -13,6 +13,8 @@ class NewPlayerForm(forms.Form):
     def clean_login(self):
         login = self.cleaned_data['login']
         User = get_user_model()
+        if ' ' in login:
+            raise forms.ValidationError("Login cannot contain spaces.")
         if User.objects.filter(username=login).exists():
             raise forms.ValidationError("This login is already taken.")
         return login
