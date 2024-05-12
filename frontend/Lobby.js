@@ -464,7 +464,7 @@ export class Lobby
             user_profile.parentElement.replaceChild(new_user, user_profile);
         if (new_add)
             new_add.id = data.new_user +'_add-friend';
-        if (!isfriend){
+        if (!isfriend && new_add){
             new_add.addEventListener('click', () => this.main.lobby.socket.send(JSON.stringify({
                 'sender': this.main.login,
                 'friend': data.new_user,
@@ -486,65 +486,6 @@ export class Lobby
         }
         if (invite_button)
             invite_button.parentElement.replaceChild(new_invite, invite_button);
-    }
-
-    displayUsers(data) {
-        if (data.type === "update" && this.socket.readyState === 1) {
-            var users = data.users;
-            var pictures = data.pictures;
-            var container = $(".user-box");
-            container.empty();
-
-            users.forEach(function(user, index) {
-                let isfriend = this.main.get_friend(this.main.login, user.login)
-                var userPic = pictures[index].avatar;
-                var userContent = $(
-                    '<div style="display: flex; align-items: center; margin-bottom: 10px;">' +
-                    '<img src="' + 'static/' + userPic + '" alt="Profile Picture" style="width: 40px; height: 40px; border-radius: 50%; margin-right: 10px;">' +
-                    '<span id ="' + user.login + '_profile" style="flex-grow: 1; cursor:pointer; text-decoration:underline;">' + user.login + '</span>' +
-                    '<button id="' + user.login + '_add-friend" class="btn btn-success btn-sm" type="button">Add Friend</button>' +
-                    '<button class="btn btn-info btn-sm" type="button">Invite</button>' +
-                    '</div>'
-                );
-                container.append(userContent);
-                var button = document.getElementById(user.login + '_add-friend');
-                if (this.main.login === user.login){
-                    button.addEventListener('click', () => this.main.set_status("You wanna be friend with... Yourself ? Come on...", false));
-                }
-                else if (isfriend){
-                    button.addEventListener('click', () => this.main.set_status('You are already friend with ' + user.login, false))
-                }
-                else{
-                    button.addEventListener('click', () =>
-                        $.ajax({
-                            url: '/profile/' + this.main.login + '/add_friend/',
-                            method: 'POST',
-                            headers: {
-                                'X-CSRFToken': this.main.getCookie('csrftoken')
-                            },
-                            data:{
-                                'sender': this.main.login,
-                                'friend': user.login,
-                                'type': 'send',
-                            },
-                            success: (info) =>{
-                                this.main.lobby.socket.send(JSON.stringify({
-                                    'sender': this.main.login,
-                                    'friend': user.login,
-                                    'type': 'friend_request_send'
-                                }));
-                                this.main.set_status(info, true);
-                            },
-                            error: (info) =>{
-                                this.main.set_status(info.responseText, false)
-                            }
-                        })
-                    );
-                }
-                var profile = document.getElementById(user.login + '_profile');
-                profile.addEventListener('click', () => this.main.find_profile(this.main.login, user.login));
-            }, this);
-        }
     }
 
     joinInvitePong(id) {
@@ -655,7 +596,6 @@ export class Lobby
                 if (user.login === this.main.login) {
                     return;
                 }
-                let isfriend = this.main.get_friend(this.main.login, user.login)
                 const userPic = pictures[index].avatar;
                 const userHtml = `
                     <div id="${user.login}_display" style="display: flex; align-items: center; margin-bottom: 10px;">
@@ -670,22 +610,9 @@ export class Lobby
                 container.innerHTML += userHtml;
 
 
-                const addButton = document.getElementById(user.login + '_add-friend');
                 const inviteButton = document.getElementById(user.login + '_invite');
                 const profileLink = document.getElementById(user.login + '_profile');
 
-                if (addButton && !isfriend) {
-                    addButton.addEventListener('click', () => {
-                        this.main.lobby.socket.send(JSON.stringify({
-                            'sender': this.main.login,
-                            'friend': user.login,
-                            'type': 'friend_request_send'
-                        }));
-                    });
-                }
-                else if (addButton && isfriend){
-                    addButton.addEventListener('click', () => this.main.set_status('You are already friend with ' + user.login, false));
-                }
                 if (inviteButton) {
                     inviteButton.addEventListener('click', () => {
                         this.main.lobby.socket.send(JSON.stringify({
@@ -695,6 +622,7 @@ export class Lobby
                         }));
                     });
                 }
+                
                 if (profileLink) {
                     profileLink.addEventListener('click', () => {
                         this.main.find_profile(this.main.login, user.login);
@@ -703,6 +631,24 @@ export class Lobby
                 counter++;
             });
 
+            users.forEach((user, index) =>{
+                if (this.main.login === user.login)
+                    return;
+                const button = document.getElementById(user.login + '_add-friend');
+                const isfriend = this.main.get_friend(this.main.login, user.login);
+                if (button && !isfriend) {
+                    button.addEventListener('click', () => {
+                        this.main.lobby.socket.send(JSON.stringify({
+                            'sender': this.main.login,
+                            'friend': user.login,
+                            'type': 'friend_request_send'
+                        }));
+                    });
+                }
+                else if (button && isfriend){
+                    button.addEventListener('click', () => this.main.set_status('You are already friend with ' + user.login, false));
+                }
+            })
 
             if (counter === 0) {
                 var userbox = document.querySelector(".user-box");

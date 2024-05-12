@@ -469,6 +469,7 @@ export class Profile{
                 this.accept_request(data);
                 inviteContainer.removeChild(inviteNotification);
                 inviteContainer.style.display = 'none';
+                this.main.chat_socket.send(JSON.stringify({'type': 'connection_update', 'old_user': this.main.login, 'new_user': this.main.login}))
             });
             document.getElementById('declineInviteBtn').addEventListener('click', () => {
                 this.decline_request(data);
