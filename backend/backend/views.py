@@ -872,6 +872,11 @@ def auth_view(request):
     if request.method != 'POST':
         return JsonResponse({'error': 'Only POST requests are allowed'}, status=405)
 
+    form = verifyLoginForm(request.POST)
+
+    if not form.is_valid():
+        return JsonResponse({'error': 'Invalid data', 'details': form.errors}, status=400)
+
     username = request.POST.get('login')
     password = request.POST.get('password')
 
@@ -893,4 +898,3 @@ def auth_view(request):
         return response
     else:
         return JsonResponse({'error': 'Invalid login credentials!'}, status=401)
-
