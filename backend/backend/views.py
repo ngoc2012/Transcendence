@@ -311,6 +311,8 @@ def lg(request):
 
     username = form.cleaned_data['login']
     password = form.cleaned_data['password']
+    userbibi = PlayersModel.objects.get(username=form.cleaned_data['login'])
+    print("dans login " + userbibi.password)
 
     user = authenticate(request, username=username, password=password)
     if user is not None:
@@ -801,8 +803,10 @@ def friend(request, username):
     if request.method == 'POST':
         if request.POST['type'] == 'info':
             try:
+                print(user.friends.all())
                 friend = user.friends.get(login=request.POST['friend'])
             except PlayersModel.DoesNotExist:
+                print("on rentre ici")
                 response = HttpResponse("You're not friends")
                 response.status_code = 401
                 return response

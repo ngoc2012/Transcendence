@@ -16,12 +16,12 @@ export class qrcode_2fa
         this.dom_cancel = document.querySelector("#cancel0");
         this.dom_confirm.addEventListener("click", () => this.confirm(login));
         this.dom_cancel.addEventListener("click", () => this.cancel());
-        this.dom_code.addEventListener("keypress", (e) => {
-            if (e.key === "Enter") {
-                e.preventDefault();
-                this.confirm();
-            }
-        });
+        // this.dom_code.addEventListener("keypress", (e) => {
+        //     // if (e.key === "Enter") {
+        //     //     e.preventDefault();
+        //     //     this.confirm();
+        //     // }
+        // });
     }
 
     eventsTour(login) {

@@ -110,6 +110,7 @@ export class Profile{
               document.getElementById('picture').src = newUrl;
               document.getElementById('profile_picture').src = newUrl;
               this.main.set_status("Profile picture changed.", true);
+              this.main.chat_socket.send(JSON.stringify({'type': 'connection_update', 'new_user': this.main.login, 'old_user': this.main.login}))
           })
           .then(this.main.load('/profile/' + this.main.login, () => this.main.profile.events(true, this.main.login)));
     }
@@ -468,6 +469,7 @@ export class Profile{
                 this.accept_request(data);
                 inviteContainer.removeChild(inviteNotification);
                 inviteContainer.style.display = 'none';
+                this.main.chat_socket.send(JSON.stringify({'type': 'connection_update', 'old_user': this.main.login, 'new_user': this.main.login}))
             });
             document.getElementById('declineInviteBtn').addEventListener('click', () => {
                 this.decline_request(data);

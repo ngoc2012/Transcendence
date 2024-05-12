@@ -170,8 +170,12 @@ export class Pong
                         this.set_state(0, "down");
                 }
             });
-
             document.addEventListener('keydown', (event) => {
+                if (["ArrowUp", "ArrowDown"].includes(event.key)) {
+                    event.preventDefault();
+                }
+            })
+            document.addEventListener('keyup', (event) => {
                 if (["ArrowUp", "ArrowDown"].includes(event.key)) {
                     event.preventDefault();
                 }
@@ -214,7 +218,7 @@ export class Pong
                 }
             });
         } else {
-            document.addEventListener('keydown', (event) => {
+            document.addEventListener('keyup', (event) => {
                 switch (event.key) {
                     case 'q':
                         this.set_state(0, "up");
@@ -364,6 +368,11 @@ export class Pong
     }
 
     local_player_login() {
+        if (this.players.length > 1)
+        {
+            this.main.set_status('Too many players', false);
+            return;
+        }
         if (this.dom_login_local.value === '' || this.dom_password_local.value === '')
         {
             this.main.set_status('Field must not be empty', false);
