@@ -643,6 +643,13 @@ export class Pong
         matchBox.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); padding: 20px; background-color: #ffffff7a; border: 2px solid #ffffff; text-align: center; z-index: 10000; border-radius: 10px;';
         document.body.appendChild(matchBox);
 
+        const leftbar = document.getElementById('left-sidebar');
+        leftbar.style.cssText = "z-index: 98;"
+        const mobilebar = document.getElementById('mobile-sidebar');
+        mobilebar.style.cssText = "z-index: 98;"
+        const togglebar = document.getElementById('toggle-sidebar');
+        togglebar.style.cssText = "z-index: 98;"
+
         let matchText = document.createElement('p');
         matchText.textContent = 'Match can start whenever you are ready!';
         matchText.style.cssText = 'font-family: "Poppins", sans-serif; font-weight: 400; font-style: normal; color: white;';
@@ -668,6 +675,12 @@ export class Pong
         startButton.classList.add('btn', 'btn-primary');
         startButton.onclick = () => {
             canvas.style.filter = '';
+            const leftbar = document.getElementById('left-sidebar');
+            leftbar.style.cssText = "z-index: 100;"
+            const mobilebar = document.getElementById('mobile-sidebar');
+            mobilebar.style.cssText = "z-index: 100;"
+            const togglebar = document.getElementById('toggle-sidebar');
+            togglebar.style.cssText = "z-index: 100;"
             document.body.removeChild(backdrop);
             document.body.removeChild(matchBox);
             this.pmBox = false;
@@ -693,6 +706,14 @@ export class Pong
             canvas.style.filter = 'blur(8px)';
         }
 
+
+        const leftbar = document.getElementById('left-sidebar');
+        leftbar.style.cssText = "z-index: 98;"
+        const mobilebar = document.getElementById('mobile-sidebar');
+        mobilebar.style.cssText = "z-index: 98;"
+        const togglebar = document.getElementById('toggle-sidebar');
+        togglebar.style.cssText = "z-index: 98;"
+
         let winBox = document.createElement('div');
         winBox.setAttribute('id', 'winBox');
         winBox.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); padding: 15px; background-color: #ffffff7a; border: 2px solid #ffffff; text-align: center; z-index: 100; border-radius: 10px; width: 25vw; height: 25vh;padding: 2%';
@@ -701,6 +722,7 @@ export class Pong
         const winnerText = document.createElement('p');
         winnerText.textContent = `${data.win === 'player0' ? this.player1 : this.player2} wins !`;
         winnerText.style.cssText = 'font-size: 30px; font-family: "Poppins", sans-serif; font-weight: bold; font-style: normal; color: white; text-align: center; padding: 3%';
+        
         winBox.appendChild(winnerText);
         const scoreContainer = document.createElement('div');
         const scoreText = document.createElement('p');
@@ -714,6 +736,12 @@ export class Pong
         backButton.classList.add('btn', 'btn-primary');
         backButton.onclick = () => {
             removeElements();
+            const leftbar = document.getElementById('left-sidebar');
+            leftbar.style.cssText = "z-index: 100;"
+            const mobilebar = document.getElementById('mobile-sidebar');
+            mobilebar.style.cssText = "z-index: 100;"
+            const togglebar = document.getElementById('toggle-sidebar');
+            togglebar.style.cssText = "z-index: 100;"
             this.quit();
         };
         winBox.appendChild(backButton);
