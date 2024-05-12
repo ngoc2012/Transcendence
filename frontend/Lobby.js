@@ -119,10 +119,12 @@ export class Lobby
                     'login': this.main.login
                 },
                 success: (info) => {
-                    if (this.socket !== -1)
+                    if (this.socket !== -1 && this.socket.readyState === WebSocket.OPEN)
                         this.socket.send(JSON.stringify({
                             type: 'update'
                         }));
+                    else
+                        return;
                     if (typeof info === 'string')
                     {
                         this.main.set_status(info, true);

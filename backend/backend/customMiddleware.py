@@ -7,6 +7,7 @@ import jwt, pytz
 from django.core.cache import cache
 from django.http import HttpResponseRedirect
 from django.core.exceptions import ObjectDoesNotExist
+from django.contrib.auth.models import AnonymousUser
 
 
 User = get_user_model()
@@ -16,29 +17,39 @@ class JWTMiddleware(MiddlewareMixin):
         if '/callback/' in request.path:
             return self.process_callback(request)
 
-        if request.headers.get('X-Internal-Request') == 'true' or request.path in self.get_unauthenticated_paths() or '/game/close/' in request.path or '/admin/' in request.path or '/pong/' in request.path:
-            return None
-
-        if '/media/' in request.path:
+        if request.headers.get('X-Internal-Request') == 'true' or request.path in self.get_unauthenticated_paths() or '/game/close/' in request.path or '/admin/' in request.path or '/pong/' in request.path or '/media/' in request.path:
+            self.user = None
             return None
 
         access_token = request.COOKIES.get('access_token')
         if not access_token:
-            return self.return_lobby(request)
+            print('no access token middlware')
+            return self.return_lobby()
+        
+        jti = None
 
         try:
-            print('in')
-            decoded = jwt.decode(access_token, settings.JWT_SECRET_KEY, algorithms=["HS256"])
-            user = self.get_user(decoded.get('user_id'))
-            if not user:
-                return self.return_lobby(request)
+            payload = jwt.decode(access_token, settings.JWT_SECRET_KEY, algorithms=["HS256"])
+            jti = payload.get("jti")
+            if not jti or cache.get(jti):
+                print('no jti or access token in cache middleware')
+                return self.return_lobby()
 
-            if decoded == jwt.decode(user.acc, settings.JWT_SECRET_KEY, algorithms=["HS256"]):
-                request.user = user
-                return None
+            user = self.get_user(payload.get('user_id'))
+            if not user:
+                print('no user found middleware 2')
+                return self.return_lobby()
+
+            request.user = user
+            return None
+        
         except jwt.ExpiredSignatureError:
+            if jti:
+                cache.set(jti, "revoked", timeout=None)
+            print('Expired Token')
             return self.handle_refresh_token(request)
         except jwt.InvalidTokenError:
+            print('Invalid Token')
             return self.return_lobby(request)
 
     def process_exception(self, request, exception):
@@ -46,38 +57,48 @@ class JWTMiddleware(MiddlewareMixin):
             return self.return_lobby(request)
 
     def get_user(self, user_id):
-        # user = cache.get(f'user_{user_id}')
-        # if not user:
         try:
             user = User.objects.get(id=user_id)
         except User.DoesNotExist:
+            print('no user found middleware 3')
+            return self.return_lobby()
+        if isinstance(user, AnonymousUser):
+            print('no user found middleware 4')
             return self.return_lobby()
         return user
 
     def handle_refresh_token(self, request):
         refresh_token = request.COOKIES.get('refresh_token')
         if not refresh_token:
-            return self.return_lobby(request)
+            return self.return_lobby()
+        
+        jti = None
 
         try:
-            decoded = jwt.decode(refresh_token, settings.JWT_REFRESH_SECRET_KEY, algorithms=["HS256"])
-            user = self.get_user(decoded.get('user_id'))
+            payload = jwt.decode(refresh_token, settings.JWT_REFRESH_SECRET_KEY, algorithms=["HS256"])
+            jti = payload.get("jti")
+            if not jti or cache.get(jti):
+                return self.return_lobby()
+            
+            user = self.get_user(payload.get('user_id'))
+
             if user:
-                user = User.objects.get(id=decoded.get('user_id'))
-                new_access_token, new_refresh_token = self.generate_jwt_tokens(decoded.get('user_id'))
-                user.acc = new_access_token
-                user.ref = new_refresh_token
-                user.save()
+                new_access_token, new_refresh_token = self.generate_jwt_tokens(payload.get('user_id'))
                 request.new_access_token = new_access_token
                 request.new_refresh_token = new_refresh_token
                 request.user = user
+                if jti:
+                    cache.set(jti, "revoked", timeout=None)
+                print('New tokens generated after expired access token')
                 return None
             else:
-                return self.return_lobby(request)
+                return self.return_lobby()
         except jwt.ExpiredSignatureError:
-            return self.return_lobby(request)
+            if jti:
+                cache.set(jti, "revoked", timeout=None)
+            return self.return_lobby()
         except jwt.InvalidTokenError:
-           return self.return_lobby(request)
+           return self.return_lobby()
 
     def generate_jwt_tokens(self, user_id):
         access_token = jwt.encode({
@@ -137,7 +158,7 @@ class JWTMiddleware(MiddlewareMixin):
         else:
             return  HttpResponseRedirect('/login/')
 
-    def return_lobby(self, request):
+    def return_lobby(self):
         print('return lobby')
         response = HttpResponseRedirect('/')
         response.delete_cookie('access_token')
