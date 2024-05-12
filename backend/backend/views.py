@@ -24,6 +24,7 @@ from django.contrib.auth import authenticate, login as auth_login, get_user_mode
 from django.core.cache import cache
 from cryptography.fernet import Fernet
 from .validation import NewPlayerForm, TournamentNameForm, verifyQrCodeForm, verifyLoginForm, verifyCodeForm
+from django.db import transaction
 
 API_PUBLIC = os.environ.get('API_PUBLIC')
 API_SECRET = os.environ.get('API_SECRET')
@@ -115,7 +116,7 @@ def validate_session(request):
                 ws_token = user.generate_ws_token()
                 enable2fa = request.POST.get('enable2fa', 'false') == 'true'
                 user.save()
-                cache.delete(f'user_{user.id}')
+                
 
                 response_data = {
                     "validSession": True,
@@ -229,8 +230,8 @@ def generate_jwt_tokens(user_id):
 
     return access_token, refresh_token
 
-@csrf_protect
-def new_player(request):
+@csrf_exempt
+def np(request):
     if request.method != 'POST':
         return JsonResponse({'error': 'Only POST requests are allowed'}, status=405)
 
@@ -285,7 +286,11 @@ def new_player(request):
         return JsonResponse({'error': f'Unexpected error: {str(e)}'}, status=500)
 
 @csrf_protect
-def log_in(request):
+def new_player(request):
+   return  np(request)
+
+@csrf_exempt
+def lg(request):
     form = verifyLoginForm(request.POST)
 
     if not form.is_valid():
@@ -318,10 +323,15 @@ def log_in(request):
         response.set_cookie('refresh_token', refresh_token, httponly=True, samesite='Lax', secure=True)
         response.set_cookie('access_token', access_token, httponly=True, samesite='Lax', secure=True)
         response.delete_cookie('login42')
+        
         return response
     else:
         return JsonResponse({'error': 'Invalid login credentials!'}, status=401)
 
+@csrf_protect
+def log_in(request):
+    return lg(request)
+    
 def login42(request):
     try:
         state = uuid.uuid4().hex
@@ -385,7 +395,7 @@ def callback(request):
             response.set_cookie('refresh_token', refresh_token, httponly=True, samesite='Lax', secure=True)
             response.set_cookie('access_token', access_token, httponly=True, samesite='Lax', secure=True)
             response.set_cookie('login42', secure=True)
-            cache.delete(f'user_{user.id}')
+            
             return response
 
         User = get_user_model()
@@ -413,7 +423,7 @@ def callback(request):
             'my42ws': ws_token,
             'avatar': user.avatar.url
         }
-        cache.delete(f'user_{user.id}')
+        
         response = render(request, 'index.html', response)
         response.set_cookie('refresh_token', refresh_token, httponly=True, samesite='Lax', secure=True)
         response.set_cookie('access_token', access_token, httponly=True, samesite='Lax', secure=True)
@@ -437,7 +447,7 @@ def logout(request):
     user.acc = ''
     user.ref = ''
     user.save()
-    cache.delete(f'user_{user.id}')
+    
 
     response = JsonResponse({'logout': 'success'})
     response.delete_cookie('access_token')
@@ -637,6 +647,7 @@ def alias(request, username):
                     return HttpResponse('Tournament alias succesfully changed')
                 response = HttpResponse('Alias already in use')
                 response.status_code = 401
+                
                 return response
             else:
                 if user.tourn_alias != '':
@@ -657,19 +668,22 @@ def alias(request, username):
 
 @csrf_protect
 def password(request, username):
-    user= PlayersModel.objects.get(login=username)
+    User = get_user_model()
+    user = User.objects.get(login=username)
     if request.method == 'POST':
         form = PlayerChangePasswordForm(request.POST)
         if form.is_valid():
             print(form.cleaned_data['newpwd'])
             print(form.cleaned_data['oldpwd'])
-            if check_password(form.cleaned_data['oldpwd'], user.password) == True:
-                user.set_password(form.cleaned_data['newpwd'])
-                print(user.password)
-                user.save()
-                print(user.password)
-                response = HttpResponse('Password changed succesfully')
+            if check_password(form.cleaned_data['oldpwd'], user.password):
+                with transaction.atomic():
+                    user.set_password(form.cleaned_data['newpwd'])
+                    print(form.cleaned_data['newpwd'])
+                    user.save()
+                    user.refresh_from_db()
+                response = HttpResponse('Password changed successfully')
                 response.status_code = 200
+                
                 return response
             else:
                 response = HttpResponse('Incorrect password')
@@ -687,16 +701,21 @@ def email(request, username):
     if request.method == 'POST':
         form = PlayerChangeEmailForm(request.POST)
         if form.is_valid():
-            if check_password(form.cleaned_data['password'], user.password) == False:
+            if not check_password(form.cleaned_data['password'], user.password):
                 response = HttpResponse('Invalid password')
                 response.status_code = 401
                 return response
-            else:
-                user.email = form.cleaned_data['email']
-                user.save()
-                response = HttpResponse('Email changed succesfully')
-                response.status_code = 200
+            new_email = form.cleaned_data['email']
+            if PlayersModel.objects.filter(email=new_email).exists():
+                response = HttpResponse('Email already in use')
+                response.status_code = 409
                 return response
+            user.email = new_email
+            user.save()
+            response = HttpResponse('Email changed successfully')
+            response.status_code = 200
+            
+            return response
         else:
             response = HttpResponse("Invalid data")
             response.status_code = 400
@@ -719,6 +738,7 @@ def change_login(request, username):
                 user.login = form.cleaned_data['new_login']
                 user.username = form.cleaned_data['new_login']
                 user.save()
+                
                 response = HttpResponse('Login changed succesfully')
                 response.status_code = 200
                 return response
@@ -745,6 +765,7 @@ def name(request, username):
             user.save()
             response = HttpResponse('Name changed succesfully')
             response.status_code = 200
+            
             return response
         else:
             response = HttpResponse("Invalid data")
@@ -755,6 +776,7 @@ def name(request, username):
 @csrf_protect
 def friend(request, username):
     user = PlayersModel.objects.get(login=username)
+    
     if request.method == 'POST':
         if request.POST['type'] == 'info':
             try:
@@ -814,6 +836,7 @@ def friend(request, username):
 @csrf_protect
 def avatar(request, username):
     user = PlayersModel.objects.get(login=username)
+    
     user.avatar = request.FILES['id_file']
     user.save()
     return JsonResponse({"new_pp": True, "url": user.avatar.url})
@@ -872,30 +895,66 @@ def new_tournament(request):
 
 
 def auth_view(request):
-    if request.method != 'POST':
-        return JsonResponse({'error': 'Only POST requests are allowed'}, status=405)
+    form = verifyLoginForm(request.POST)
 
-    username = request.POST.get('login')
-    password = request.POST.get('password')
-    userbibi = PlayersModel.objects.get(username=request.POST['login'])
-    print("dans auth_view " + userbibi.password)
+    if not form.is_valid():
+        return JsonResponse({'error': 'Invalid data', 'details': form.errors}, status=400)
 
-    if not username or not password:
-        return JsonResponse({'error': 'No login or password provided!'}, status=400)
+    username = form.cleaned_data['login']
+    password = form.cleaned_data['password']
 
-    user = authenticate(request, username=username, password=password)
-
+    user = authenticate(request, login=username, password=password)
     if user is not None:
         enable2fa = 'true' if getattr(user, 'secret_2fa', '') else 'false'
+        access_token, refresh_token = generate_jwt_tokens(user.id)
 
+        user.acc = access_token
+        user.ref = refresh_token
+        user.save()
+
+        ws_token = user.generate_ws_token()
         response_data = {
             'login': user.username,
             'name': user.name,
             'email': user.email,
             'enable2fa': enable2fa,
+            'ws': ws_token,
+            'avatar': user.avatar.url if hasattr(user, 'avatar') and user.avatar else None
         }
+        
         response = JsonResponse(response_data)
+        response.set_cookie('refresh_token', refresh_token, httponly=True, samesite='Lax', secure=True)
+        response.set_cookie('access_token', access_token, httponly=True, samesite='Lax', secure=True)
+        response.delete_cookie('login42')
         return response
     else:
         return JsonResponse({'error': 'Invalid login credentials!'}, status=401)
+# if request.method != 'POST':
+#     return JsonResponse({'error': 'Only POST requests are allowed'}, status=405)
 
+# form = verifyLoginForm(request.POST)
+
+# if not form.is_valid():
+#     return JsonResponse({'error': 'Invalid data', 'details': form.errors}, status=400)
+
+# username = request.POST.get('login')
+# password = request.POST.get('password')
+
+# if not username or not password:
+#     return JsonResponse({'error': 'No login or password provided!'}, status=400)
+
+# user = authenticate(request, username=username, password=password)
+
+# if user is not None:
+#     enable2fa = 'true' if getattr(user, 'secret_2fa', '') else 'false'
+
+#     response_data = {
+#         'login': user.username,
+#         'name': user.name,
+#         'email': user.email,
+#         'enable2fa': enable2fa,
+#     }
+#     response = JsonResponse(response_data)
+#     return response
+# else:
+#     return JsonResponse({'error': 'Invalid login credentials!'}, status=401)

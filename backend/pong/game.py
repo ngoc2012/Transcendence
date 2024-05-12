@@ -18,6 +18,24 @@ from .data import pong_data
 def set_power_play(consumer):
     if cache.get(consumer.k_pow):
         cache.set(consumer.k_pow, False)
+        team0 = cache.get(consumer.k_team0)
+        team1 = cache.get(consumer.k_team1)
+        if team0 == None:
+            team0 = []
+        if team1 == None:
+            team1 = []
+        started = cache.get(consumer.k_started)
+        server = cache.get(consumer.k_server)
+        for i in team0 + team1:
+            if i in team0:
+                cache.set(consumer.room_id + "_" + str(i) + "_x", 0)
+            else:
+                cache.set(consumer.room_id + "_" + str(i) + "_x", pong_data['WIDTH'] - pong_data['PADDLE_WIDTH'])
+            if not started and i == server:
+                if i in team0:
+                    cache.set(consumer.k_x, pong_data['PADDLE_WIDTH'] + pong_data['RADIUS'])
+                else:
+                    cache.set(consumer.k_x, pong_data['WIDTH'] - pong_data['PADDLE_WIDTH'] - pong_data['RADIUS'])
     else:
         cache.set(consumer.k_pow, True)
 

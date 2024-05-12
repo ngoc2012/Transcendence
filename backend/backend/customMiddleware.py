@@ -27,6 +27,7 @@ class JWTMiddleware(MiddlewareMixin):
             return self.return_lobby(request)
 
         try:
+            print('in')
             decoded = jwt.decode(access_token, settings.JWT_SECRET_KEY, algorithms=["HS256"])
             user = self.get_user(decoded.get('user_id'))
             if not user:
@@ -45,13 +46,12 @@ class JWTMiddleware(MiddlewareMixin):
             return self.return_lobby(request)
 
     def get_user(self, user_id):
-        user = cache.get(f'user_{user_id}')
-        if not user:
-            try:
-                user = User.objects.get(id=user_id)
-                cache.set(f'user_{user_id}', user, 300)
-            except User.DoesNotExist:
-                return None
+        # user = cache.get(f'user_{user_id}')
+        # if not user:
+        try:
+            user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            return self.return_lobby()
         return user
 
     def handle_refresh_token(self, request):
@@ -64,7 +64,6 @@ class JWTMiddleware(MiddlewareMixin):
             user = self.get_user(decoded.get('user_id'))
             if user:
                 user = User.objects.get(id=decoded.get('user_id'))
-                cache.set(f'user_{user.id}', user, 300)
                 new_access_token, new_refresh_token = self.generate_jwt_tokens(decoded.get('user_id'))
                 user.acc = new_access_token
                 user.ref = new_refresh_token
@@ -101,11 +100,13 @@ class JWTMiddleware(MiddlewareMixin):
             'pages/signup/',
             '/pages/signup/',
             '/new_player/',
+            '/np/',
             'pages/login/',
             '/pages/login/',
             '/login',
             '/login/',
             '/log_in/',
+            '/lg/',
             '/lobby/',
             '/lobby',
             '/admin/',
@@ -114,6 +115,10 @@ class JWTMiddleware(MiddlewareMixin):
             '/game/update',
             '/game/need_update',
             '/game/join',
+            '/game/ng',
+            '/game/upd',
+            '/game/need_update',
+            '/game/jn',
             '/validate-session/',
             '/auth_view/',
             '/twofa/',
@@ -133,7 +138,7 @@ class JWTMiddleware(MiddlewareMixin):
             return  HttpResponseRedirect('/login/')
 
     def return_lobby(self, request):
-        # print('return lobby')
+        print('return lobby')
         response = HttpResponseRedirect('/')
         response.delete_cookie('access_token')
         response.delete_cookie('refresh_token')
