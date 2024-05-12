@@ -269,10 +269,11 @@ export class Main
     }
 
     get_friend(login, friend){
-        var returnvalue = true;
+        var flag = true;
         $.ajax({
             url: '/profile/' + login + '/add_friend/',
             method: 'POST',
+            async: false,
             headers:{
                 'X-CSRFToken': this.getCookie('csrftoken')
             },
@@ -282,13 +283,12 @@ export class Main
                 'friend': friend
             },
             success: (info) =>{
-                return true
+                flag = true;
             },
             error: (info) =>{
-                return false
+                flag = false
             }
-        }).then(returnvalue = true).fail(returnvalue = false)
-        console.log(returnvalue)
-        return returnvalue
+        })
+        return flag
     }
 }

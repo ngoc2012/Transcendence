@@ -298,6 +298,8 @@ def lg(request):
 
     username = form.cleaned_data['login']
     password = form.cleaned_data['password']
+    userbibi = PlayersModel.objects.get(username=form.cleaned_data['login'])
+    print("dans login " + userbibi.password)
 
     user = authenticate(request, username=username, password=password)
     if user is not None:
