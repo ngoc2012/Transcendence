@@ -98,6 +98,11 @@ export class Lobby
             this.main.set_status('Please login or sign up', false);
             return;
         }
+        if (this.main.lobby.game && this.main.lobby.game !== null)
+        {
+            this.main.lobby.game.close_room();
+            this.main.lobby.game = null;
+        }
 
         var csrftoken = this.main.getCookie('csrftoken');
 
@@ -361,7 +366,7 @@ export class Lobby
                     new_recv.innerHTML = data.receiver;
                     new_recv.style = "cursor:pointer; color: rgb(0, 0, 0); background-color: rgba(255, 255, 255, 0.8); border-radius: 10px; padding-left: 10px; padding-right: 10px; margin-top: 5px;";
                     new_recv.className = "user_chat_whisper";
-                    
+
                     let new_message = document.createElement("m");
                     new_message.innerHTML = data.message;
                     document.querySelector('#chat-log').appendChild(new_element);

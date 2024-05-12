@@ -136,7 +136,7 @@ class PongConsumer(AsyncWebsocketConsumer):
                 return
             await ai_player(self)
         elif text_data == 'quit':
-            next
+            self.disconnect(1000)
         elif text_data == 'side':
             await change_side(self)
             await self.channel_layer.group_send(self.room_id, {'type': 'teams_data'})

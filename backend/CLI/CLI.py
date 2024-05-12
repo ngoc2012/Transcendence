@@ -10,13 +10,24 @@ import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 host = "127.0.0.1:8080"
-certfile = "minh-ngu.crt"
-keyfile = "minh-ngu.key"
 score = [0, 0]
 login = ""
 name = ""
 team0 = []
 team1 = []
+
+# print("Getting token")
+# with requests.get("https://" + host + "/game/close/" + login,
+#     verify=False) as response:
+#         if response.status_code != 200:
+#             print("Request failed with status code:", response.status_code)
+#             exit(1)
+
+csrf_token = ""
+
+headers = {
+    "X-CSRF-TOKEN": csrf_token
+}
 
 import multiprocessing
 main_queue = multiprocessing.Queue()

@@ -449,6 +449,8 @@ def verify_qrcode(request):
     if not form.is_valid():
         return JsonResponse({'error': 'Invalid data', 'details': form.errors}, status=400)
 
+    print(request.POST)
+    print(form.cleaned_data)
     input_code = form.cleaned_data['input_code']
     if not PlayersModel.objects.filter(login=request.POST['login']).exists():
         return (HttpResponse("Error: Login '" + request.POST['login'] + "' does not exist!"))
@@ -653,21 +655,23 @@ def alias(request, username):
 
 @csrf_protect
 def password(request, username):
-    user= PlayersModel.objects.filter(login=username).get(login=username)
+    user= PlayersModel.objects.get(login=username)
     if request.method == 'POST':
         form = PlayerChangePasswordForm(request.POST)
         if form.is_valid():
-                if check_password(form.cleaned_data['oldpwd'], user.password) == True:
-                    new = make_password(form.cleaned_data['newpwd'])
-                    user.password = new
-                    user.save()
-                    response = HttpResponse('Password changed succesfully')
-                    response.status_code = 200
-                    return response
-                else:
-                    response = HttpResponse('Incorrect password')
-                    response.status_code = 401
-                    return response
+            print(form.cleaned_data['newpwd'])
+            print(form.cleaned_data['oldpwd'])
+            if check_password(request.POST['oldpwd'], user.password) == True:
+                new = make_password(request.POST['newpwd'])
+                user.password = new
+                user.save()
+                response = HttpResponse('Password changed succesfully')
+                response.status_code = 200
+                return response
+            else:
+                response = HttpResponse('Incorrect password')
+                response.status_code = 401
+                return response
         else:
             response = HttpResponse("Invalid data")
             response.status_code = 400
@@ -748,10 +752,8 @@ def name(request, username):
 @csrf_protect
 def friend(request, username):
     user = PlayersModel.objects.get(login=username)
-    print(user.friends.all())
     if request.method == 'POST':
         if request.POST['type'] == 'info':
-            print(request.POST)
             try:
                 friend = user.friends.get(login=request.POST['friend'])
             except PlayersModel.DoesNotExist:
