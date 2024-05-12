@@ -301,7 +301,31 @@ def new_player(request):
 
 @csrf_protect
 def auth_view(request):
-    return lg(request)
+    form = verifyLoginForm(request.POST)
+
+    if not form.is_valid():
+        return JsonResponse({'error': 'Invalid data', 'details': form.errors}, status=400)
+
+    username = form.cleaned_data['login']
+    password = form.cleaned_data['password']
+
+    user = authenticate(request, login=username, password=password)
+    if user is not None:
+        enable2fa = 'true' if getattr(user, 'secret_2fa', '') else 'false'
+ 
+        response_data = {
+            'login': user.username,
+            'name': user.name,
+            'email': user.email,
+            'enable2fa': enable2fa,
+        }
+        
+        response = JsonResponse(response_data)
+
+        return response
+    else:
+        return JsonResponse({'error': 'Invalid login credentials!'}, status=401)
+
 
 @csrf_exempt
 def lg(request):
@@ -480,8 +504,6 @@ def verify_qrcode(request):
     if not form.is_valid():
         return JsonResponse({'error': 'Invalid data', 'details': form.errors}, status=400)
 
-    print(request.POST)
-    print(form.cleaned_data)
     input_code = form.cleaned_data['input_code']
     if not PlayersModel.objects.filter(login=request.POST['login']).exists():
         return (HttpResponse("Error: Login '" + request.POST['login'] + "' does not exist!"))
@@ -692,12 +714,12 @@ def password(request, username):
     if request.method == 'POST':
         form = PlayerChangePasswordForm(request.POST)
         if form.is_valid():
-            print(form.cleaned_data['newpwd'])
-            print(form.cleaned_data['oldpwd'])
+            # print(form.cleaned_data['newpwd'])
+            # print(form.cleaned_data['oldpwd'])
             if check_password(form.cleaned_data['oldpwd'], user.password):
                 with transaction.atomic():
                     user.set_password(form.cleaned_data['newpwd'])
-                    print(form.cleaned_data['newpwd'])
+                    # print(form.cleaned_data['newpwd'])
                     user.save()
                     user.refresh_from_db()
                 response = HttpResponse('Password changed successfully')
@@ -799,10 +821,10 @@ def friend(request, username):
     if request.method == 'POST':
         if request.POST['type'] == 'info':
             try:
-                print(user.friends.all())
+                # print(user.friends.all())
                 friend = user.friends.get(login=request.POST['friend'])
             except PlayersModel.DoesNotExist:
-                print("on rentre ici")
+                # print("on rentre ici")
                 response = HttpResponse("You're not friends")
                 response.status_code = 401
                 return response
