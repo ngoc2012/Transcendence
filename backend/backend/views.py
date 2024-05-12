@@ -293,6 +293,8 @@ def log_in(request):
 
     username = form.cleaned_data['login']
     password = form.cleaned_data['password']
+    userbibi = PlayersModel.objects.get(username=form.cleaned_data['login'])
+    print("dans login " + userbibi.password)
 
     user = authenticate(request, username=username, password=password)
     if user is not None:
@@ -661,10 +663,11 @@ def password(request, username):
         if form.is_valid():
             print(form.cleaned_data['newpwd'])
             print(form.cleaned_data['oldpwd'])
-            if check_password(request.POST['oldpwd'], user.password) == True:
-                new = make_password(request.POST['newpwd'])
-                user.password = new
+            if check_password(form.cleaned_data['oldpwd'], user.password) == True:
+                user.set_password(form.cleaned_data['newpwd'])
+                print(user.password)
                 user.save()
+                print(user.password)
                 response = HttpResponse('Password changed succesfully')
                 response.status_code = 200
                 return response
@@ -874,6 +877,8 @@ def auth_view(request):
 
     username = request.POST.get('login')
     password = request.POST.get('password')
+    userbibi = PlayersModel.objects.get(username=request.POST['login'])
+    print("dans auth_view " + userbibi.password)
 
     if not username or not password:
         return JsonResponse({'error': 'No login or password provided!'}, status=400)

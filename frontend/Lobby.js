@@ -443,18 +443,27 @@ export class Lobby
         }
         let pic = document.getElementById(data.old_user + '_pic');
         let user_profile = document.getElementById(data.old_user+ '_profile');
-        let new_user = user_profile.cloneNode(user_profile);
+        if (user_profile)
+            var new_user = user_profile.cloneNode(user_profile);
         let add_button = document.getElementById(data.old_user + '_add-friend');
-        let new_add = add_button.cloneNode(add_button);
+        if (add_button)
+            var new_add = add_button.cloneNode(add_button);
         let invite_button = document.getElementById(data.old_user + '_invite');
-        let new_invite = invite_button.cloneNode(invite_button);
-        pic.id = data.new_user + '_pic';
-        pic.src = data.pic.replace('/app/frontend/', 'static/');
-        new_user.id = data.new_user + '_profile';
-        new_user.innerHTML = data.new_user;
-        new_user.addEventListener('click', () => this.main.find_profile(this.main.login, data.new_user));
-        user_profile.parentElement.replaceChild(new_user, user_profile);
-        new_add.id = data.new_user +'_add-friend';
+        if (invite_button)
+            var new_invite = invite_button.cloneNode(invite_button);
+        if (pic){
+            pic.id = data.new_user + '_pic';
+            pic.src = data.pic.replace('/app/frontend/', 'static/');
+        }
+        if (new_user){
+            new_user.id = data.new_user + '_profile';
+            new_user.innerHTML = data.new_user;
+            new_user.addEventListener('click', () => this.main.find_profile(this.main.login, data.new_user));
+        }
+        if (user_profile)
+            user_profile.parentElement.replaceChild(new_user, user_profile);
+        if (new_add)
+            new_add.id = data.new_user +'_add-friend';
         if (!isfriend){
             new_add.addEventListener('click', () => this.main.lobby.socket.send(JSON.stringify({
                 'sender': this.main.login,
@@ -462,17 +471,21 @@ export class Lobby
                 'type': 'friend_request_send'
             })));
         }
-        else{
+        else if (new_add){
             new_add.addEventListener('click', () => this.main.set_status("You are already friend with " + data.new_user, false));
         }
-        add_button.parentNode.replaceChild(new_add, add_button);
-        new_invite.id = data.new_user + '_invite';
-        new_invite.addEventListener('click', () => this.main.lobby.socket(JSON.stringify({
-            'sender': this.main.login,
-            'friend': data.new_user,
-            'type': 'game_invite'
-        })));
-        invite_button.parentElement.replaceChild(new_invite, invite_button);
+        if (add_button)
+            add_button.parentNode.replaceChild(new_add, add_button);
+        if (new_invite){
+            new_invite.id = data.new_user + '_invite';
+            new_invite.addEventListener('click', () => this.main.lobby.socket(JSON.stringify({
+                'sender': this.main.login,
+                'friend': data.new_user,
+                'type': 'game_invite'
+            })));
+        }
+        if (invite_button)
+            invite_button.parentElement.replaceChild(new_invite, invite_button);
     }
 
     displayUsers(data) {
