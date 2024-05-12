@@ -17,10 +17,10 @@ export class qrcode_2fa
         this.dom_confirm.addEventListener("click", () => this.confirm(login));
         this.dom_cancel.addEventListener("click", () => this.cancel());
         this.dom_code.addEventListener("keypress", (e) => {
-            if (e.key === "Enter") {
-                e.preventDefault();
-                this.confirm();
-            }
+            // if (e.key === "Enter") {
+            //     e.preventDefault();
+            //     this.confirm();
+            // }
         });
     }
 
