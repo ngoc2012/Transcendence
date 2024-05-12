@@ -269,7 +269,7 @@ export class Main
     }
 
     get_friend(login, friend){
-        let returnvalue = true;
+        var returnvalue = true;
         $.ajax({
             url: '/profile/' + login + '/add_friend/',
             method: 'POST',
@@ -282,12 +282,13 @@ export class Main
                 'friend': friend
             },
             success: (info) =>{
-                returnvalue = true
+                return true
             },
             error: (info) =>{
-                returnvalue = false
+                return false
             }
-        })
+        }).then(returnvalue = true).fail(returnvalue = false)
+        console.log(returnvalue)
         return returnvalue
     }
 }

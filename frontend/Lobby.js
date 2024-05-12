@@ -475,65 +475,6 @@ export class Lobby
         invite_button.parentElement.replaceChild(new_invite, invite_button);
     }
 
-    displayUsers(data) {
-        if (data.type === "update" && this.socket.readyState === 1) {
-            var users = data.users;
-            var pictures = data.pictures;
-            var container = $(".user-box");
-            container.empty();
-
-            users.forEach(function(user, index) {
-                let isfriend = this.main.get_friend(this.main.login, user.login)
-                var userPic = pictures[index].avatar;
-                var userContent = $(
-                    '<div style="display: flex; align-items: center; margin-bottom: 10px;">' +
-                    '<img src="' + 'static/' + userPic + '" alt="Profile Picture" style="width: 40px; height: 40px; border-radius: 50%; margin-right: 10px;">' +
-                    '<span id ="' + user.login + '_profile" style="flex-grow: 1; cursor:pointer; text-decoration:underline;">' + user.login + '</span>' +
-                    '<button id="' + user.login + '_add-friend" class="btn btn-success btn-sm" type="button">Add Friend</button>' +
-                    '<button class="btn btn-info btn-sm" type="button">Invite</button>' +
-                    '</div>'
-                );
-                container.append(userContent);
-                var button = document.getElementById(user.login + '_add-friend');
-                if (this.main.login === user.login){
-                    button.addEventListener('click', () => this.main.set_status("You wanna be friend with... Yourself ? Come on...", false));
-                }
-                else if (isfriend){
-                    button.addEventListener('click', () => this.main.set_status('You are already friend with ' + user.login, false))
-                }
-                else{
-                    button.addEventListener('click', () =>
-                        $.ajax({
-                            url: '/profile/' + this.main.login + '/add_friend/',
-                            method: 'POST',
-                            headers: {
-                                'X-CSRFToken': this.main.getCookie('csrftoken')
-                            },
-                            data:{
-                                'sender': this.main.login,
-                                'friend': user.login,
-                                'type': 'send',
-                            },
-                            success: (info) =>{
-                                this.main.lobby.socket.send(JSON.stringify({
-                                    'sender': this.main.login,
-                                    'friend': user.login,
-                                    'type': 'friend_request_send'
-                                }));
-                                this.main.set_status(info, true);
-                            },
-                            error: (info) =>{
-                                this.main.set_status(info.responseText, false)
-                            }
-                        })
-                    );
-                }
-                var profile = document.getElementById(user.login + '_profile');
-                profile.addEventListener('click', () => this.main.find_profile(this.main.login, user.login));
-            }, this);
-        }
-    }
-
     joinInvitePong(id) {
         join_game(this.main, id, false, true);
     }
