@@ -170,8 +170,12 @@ export class Pong
                         this.set_state(0, "down");
                 }
             });
-
             document.addEventListener('keydown', (event) => {
+                if (["ArrowUp", "ArrowDown"].includes(event.key)) {
+                    event.preventDefault();
+                }
+            })
+            document.addEventListener('keyup', (event) => {
                 if (["ArrowUp", "ArrowDown"].includes(event.key)) {
                     event.preventDefault();
                 }
@@ -214,7 +218,7 @@ export class Pong
                 }
             });
         } else {
-            document.addEventListener('keydown', (event) => {
+            document.addEventListener('keyup', (event) => {
                 switch (event.key) {
                     case 'q':
                         this.set_state(0, "up");

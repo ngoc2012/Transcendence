@@ -10,8 +10,8 @@ export class twofa
 
     events(email, login, name, isPopState) {
         this.main.checkcsrf();
-        if (!isPopState)
-            window.history.pushState({page: '/twofa'}, '', '/twofa');
+        // if (!isPopState)
+        //     window.history.pushState({page: '/twofa'}, '', '/twofa');
 
         this.dom_log_in_qrcode = document.querySelector("#log_in_with_qrcode");
         this.dom_cancel = document.querySelector("#cancel0");
