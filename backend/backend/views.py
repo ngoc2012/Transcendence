@@ -198,7 +198,7 @@ def mail_2fa(request):
     message = Mail(
         from_email=sender_email,
         to_emails=recipient_email,
-        subject='2FA CODE TRANSCENDENCE',
+        subject='TRANSCENDENCE 2FA VERIFICATION CODE',
         html_content=code)
     try:
         sg = SendGridAPIClient(SENDGRID_API_KEY)
@@ -223,8 +223,8 @@ def verify(request):
     input_code = form.cleaned_data['input_code']
 
     if (input_code == int(settings.CODE)):
-        return JsonResponse({'result': '1'})
-    return JsonResponse({'result': '0'})
+        return JsonResponse({'result': '1'}, status=200)
+    return JsonResponse({'result': '0'}, status=400)
 
 def generate_jwt_tokens(user_id):
     access_token = jwt.encode({
@@ -508,11 +508,12 @@ def verify_qrcode(request):
     if not PlayersModel.objects.filter(login=request.POST['login']).exists():
         return (HttpResponse("Error: Login '" + request.POST['login'] + "' does not exist!"))
     player = PlayersModel.objects.get(login=request.POST['login'])
-
+    # print("input code = ", input_code)
     totp = pyotp.TOTP(decrypt(player.secret_2fa))
     if totp.verify(input_code):
-        return JsonResponse({'result': '1'})
-    return JsonResponse({'result': '0'})
+        return JsonResponse({'result': '1'}, status=200)
+    # print("didn't work out = ", input_code)
+    return JsonResponse({'result': '0', 'error': 'Invalid OTP code'}, status=400)
 
 @csrf_protect
 def profile(request, username):

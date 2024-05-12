@@ -16,6 +16,12 @@ export class code_2fa
         // document.getElementById("email_address").innerText = this.main.email;
         this.dom_confirm.addEventListener("click", () => this.confirm());
         this.dom_cancel.addEventListener("click", () => this.cancel());
+        this.dom_code.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                // this.confirm();
+            }
+        });
     }
 
     eventsTour(login) {
