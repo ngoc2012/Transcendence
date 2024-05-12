@@ -116,7 +116,7 @@ def validate_session(request):
                 ws_token = user.generate_ws_token()
                 enable2fa = request.POST.get('enable2fa', 'false') == 'true'
                 user.save()
-                cache.delete(f'user_{user.id}')
+                
 
                 response_data = {
                     "validSession": True,
@@ -321,7 +321,7 @@ def lg(request):
         response.set_cookie('refresh_token', refresh_token, httponly=True, samesite='Lax', secure=True)
         response.set_cookie('access_token', access_token, httponly=True, samesite='Lax', secure=True)
         response.delete_cookie('login42')
-        cache.delete(f'user_{user.id}')
+        
         return response
     else:
         return JsonResponse({'error': 'Invalid login credentials!'}, status=401)
@@ -393,7 +393,7 @@ def callback(request):
             response.set_cookie('refresh_token', refresh_token, httponly=True, samesite='Lax', secure=True)
             response.set_cookie('access_token', access_token, httponly=True, samesite='Lax', secure=True)
             response.set_cookie('login42', secure=True)
-            cache.delete(f'user_{user.id}')
+            
             return response
 
         User = get_user_model()
@@ -421,7 +421,7 @@ def callback(request):
             'my42ws': ws_token,
             'avatar': user.avatar.url
         }
-        cache.delete(f'user_{user.id}')
+        
         response = render(request, 'index.html', response)
         response.set_cookie('refresh_token', refresh_token, httponly=True, samesite='Lax', secure=True)
         response.set_cookie('access_token', access_token, httponly=True, samesite='Lax', secure=True)
@@ -445,7 +445,7 @@ def logout(request):
     user.acc = ''
     user.ref = ''
     user.save()
-    cache.delete(f'user_{user.id}')
+    
 
     response = JsonResponse({'logout': 'success'})
     response.delete_cookie('access_token')
@@ -645,7 +645,7 @@ def alias(request, username):
                     return HttpResponse('Tournament alias succesfully changed')
                 response = HttpResponse('Alias already in use')
                 response.status_code = 401
-                cache.delete(f'user_{user.id}')
+                
                 return response
             else:
                 if user.tourn_alias != '':
@@ -674,14 +674,14 @@ def password(request, username):
             print(form.cleaned_data['newpwd'])
             print(form.cleaned_data['oldpwd'])
             if check_password(form.cleaned_data['oldpwd'], user.password):
-                with transaction.atomic():  # Ensures changes are committed immediately
+                with transaction.atomic():
                     user.set_password(form.cleaned_data['newpwd'])
                     print(form.cleaned_data['newpwd'])
                     user.save()
-                    user.refresh_from_db()  # Refresh to ensure database is in sync with the model
+                    user.refresh_from_db()
                 response = HttpResponse('Password changed successfully')
                 response.status_code = 200
-                cache.delete(f'user_{user.id}')
+                
                 return response
             else:
                 response = HttpResponse('Incorrect password')
@@ -712,7 +712,7 @@ def email(request, username):
             user.save()
             response = HttpResponse('Email changed successfully')
             response.status_code = 200
-            cache.delete(f'user_{user.id}')
+            
             return response
         else:
             response = HttpResponse("Invalid data")
@@ -736,7 +736,7 @@ def change_login(request, username):
                 user.login = form.cleaned_data['new_login']
                 user.username = form.cleaned_data['new_login']
                 user.save()
-                cache.delete(f'user_{user.id}')
+                
                 response = HttpResponse('Login changed succesfully')
                 response.status_code = 200
                 return response
@@ -763,7 +763,7 @@ def name(request, username):
             user.save()
             response = HttpResponse('Name changed succesfully')
             response.status_code = 200
-            cache.delete(f'user_{user.id}')
+            
             return response
         else:
             response = HttpResponse("Invalid data")
@@ -774,7 +774,7 @@ def name(request, username):
 @csrf_protect
 def friend(request, username):
     user = PlayersModel.objects.get(login=username)
-    cache.delete(f'user_{user.id}')
+    
     if request.method == 'POST':
         if request.POST['type'] == 'info':
             try:
@@ -836,7 +836,7 @@ def friend(request, username):
 @csrf_protect
 def avatar(request, username):
     user = PlayersModel.objects.get(login=username)
-    cache.delete(f'user_{user.id}')
+    
     user.avatar = request.FILES['id_file']
     user.save()
     return JsonResponse({"new_pp": True, "url": user.avatar.url})
@@ -921,7 +921,7 @@ def auth_view(request):
             'ws': ws_token,
             'avatar': user.avatar.url if hasattr(user, 'avatar') and user.avatar else None
         }
-        cache.delete(f'user_{user.id}')
+        
         response = JsonResponse(response_data)
         response.set_cookie('refresh_token', refresh_token, httponly=True, samesite='Lax', secure=True)
         response.set_cookie('access_token', access_token, httponly=True, samesite='Lax', secure=True)
