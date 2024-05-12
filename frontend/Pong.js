@@ -364,6 +364,11 @@ export class Pong
     }
 
     local_player_login() {
+        if (this.players.length > 1)
+        {
+            this.main.set_status('Too many players', false);
+            return;
+        }
         if (this.dom_login_local.value === '' || this.dom_password_local.value === '')
         {
             this.main.set_status('Field must not be empty', false);
