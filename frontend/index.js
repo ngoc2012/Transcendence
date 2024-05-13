@@ -11,7 +11,6 @@ function    reload(path, isPopState = false) {
         main.lobby.game.close_room();
         main.lobby.game = null;
     }
-
     if (path === '/login') {
         main.load('/pages/login', () => main.log_in.events(isPopState));
     } else if (path === '/signup') {
@@ -25,42 +24,42 @@ function    reload(path, isPopState = false) {
             join_game(main, path.substring(6), true);
         else {
             main.load('/pages/login', () => main.log_in.events(false));
-            main.set_status("You need to Log in or Sign up to access this page", false);
+            // main.set_status("You need to Log in or Sign up to access this page", false);
         }
     } else if (path.startsWith('/profile/')){
         if (main.login !== '')
-            main.load_with_data('/profile/' + path.substring(9), () => main.profile.events(isPopState, path.substring(9)), {'user':path.substring(9), 'requester': main.login});
+            main.load_with_data('/profile/' + path.substring(9) +'/', () => main.profile.events(isPopState, path.substring(9)), {'user':path.substring(9), 'requester': main.login});
         else {
             main.load('/pages/login', () => main.log_in.events(false));
-            main.set_status("You need to Log in or Sign up to access this page", false);
+            // main.set_status("You need to Log in or Sign up to access this page", false);
         }
     } else if (path === '/tournament') {
         if (main.login !== '')
             main.load('/tournament', () => main.lobby.tournament.events(isPopState));
         else {
             main.load('/pages/login', () => main.log_in.events(false));
-            main.set_status("You need to Log in or Sign up to access this page", false);
+            // main.set_status("You need to Log in or Sign up to access this page", false);
         }
     } else if (path === '/tournament/local') {
         if (main.login !== '')
             main.load('/tournament/local', () => main.lobby.tournament.eventsLocal(isPopState));
         else {
             main.load('/pages/login', () => main.log_in.events(false));
-            main.set_status("You need to Log in or Sign up to access this page", false);
+            // main.set_status("You need to Log in or Sign up to access this page", false);
         }
     } else if (path === '/tournament/local/start') {
         if (main.login !== '')
             main.load('/tournament/local/start', () => main.lobby.tournament.localTournament.startEvents(isPopState));
         else {
             main.load('/pages/login', () => main.log_in.events(false));
-            main.set_status("You need to Log in or Sign up to access this page", false);
+            // main.set_status("You need to Log in or Sign up to access this page", false);
         }
     } else if (path === '/tournament_history') {
         if (main.login !== '')
             main.load('/tournament_history', () => main.tournament_history.events(isPopState));
         else {
             main.load('/pages/login', () => main.log_in.events(false));
-            main.set_status("You need to Log in or Sign up to access this page", false);
+            // main.set_status("You need to Log in or Sign up to access this page", false);
         }
 
     } else {

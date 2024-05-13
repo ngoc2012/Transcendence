@@ -685,6 +685,14 @@ def profile(request, username):
 def alias(request, username):
     user = PlayersModel.objects.filter(login=username).get(login=username)
     if request.method == 'POST':
+        if 'type' in request.POST:
+            print("????")
+            user.tourn_alias = ''
+            user.save()
+            response = HttpResponse("Tournament alias deleted")
+            response.status_code = 200
+            return response
+
         form = PlayerChangeAliasForm(request.POST)
         if form.is_valid():
             if request.POST['alias'] != '' :
@@ -696,19 +704,10 @@ def alias(request, username):
                     return HttpResponse('Tournament alias succesfully changed')
                 response = HttpResponse('Alias already in use')
                 response.status_code = 401
-
-                return response
             else:
-                if user.tourn_alias != '':
-                    user.tourn_alias = ''
-                    user.save()
-                    response = HttpResponse("Tournament alias deleted")
-                    response.status_code = 200
-                    return response
-                else:
-                    response = HttpResponse("You must enter a value")
-                    response.status_code = 403
-                    return response
+                response = HttpResponse("You must enter a value")
+                response.status_code = 403
+                return response
         else:
             response = HttpResponse("Invalid data")
             response.status_code = 400
@@ -825,18 +824,15 @@ def name(request, username):
 @csrf_protect
 def friend(request, username):
     user = PlayersModel.objects.get(login=username)
-
     if request.method == 'POST':
         if request.POST['type'] == 'info':
             try:
-                # print(user.friends.all())
                 friend = user.friends.get(login=request.POST['friend'])
             except PlayersModel.DoesNotExist:
-                # print("on rentre ici")
-                response = HttpResponse("You're not friends")
-                response.status_code = 401
+                response = HttpResponse("false")
+                response.status_code = 200
                 return response
-            response = HttpResponse("You are already friend")
+            response = HttpResponse("True")
             response.status_code = 200
             return response
         form = PlayerAddFriendForm(request.POST)

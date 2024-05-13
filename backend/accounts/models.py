@@ -20,7 +20,7 @@ class PlayersModel(AbstractUser):
     ws_token = models.CharField(max_length=255, blank=True, null=True)
     ws_token_expires = models.DateTimeField(blank=True, null=True)
     blocked_users = models.ManyToManyField('self', blank=True, symmetrical=False, related_name='blocked_user')
-    avatar = models.ImageField(upload_to='media', default='/media/chat.jpg')
+    avatar = models.ImageField(upload_to='media', default='media/chat.jpg')
 
     USERNAME_FIELD = 'login'
     REQUIRED_FIELDS = ['username']

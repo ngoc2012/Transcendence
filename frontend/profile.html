@@ -59,7 +59,7 @@
   <p>Your Email: {{ email }} <i class="fa fa-pencil" aria-hidden="true" id="email"></i></p>
   {% if context != '' %}
     {% if alias %}
-      <p>Tournament Alias: {{ alias }} <i class="fa fa-pencil" aria-hidden="true" id="alias"></i></p>
+      <p>Tournament Alias: {{ alias }} <i class="fa fa-pencil" aria-hidden="true" id="alias"></i>   <i class="fa fa-trash-o" aria-hidden="true" id="alias-delete"></i></p>
     {% else %}
       <p>Tournament Alias: None <i class="fa fa-pencil" aria-hidden="true" id="alias"></i></p>
     {% endif %}
@@ -76,7 +76,7 @@
     {% else %}
         <p>You don't have friends (sadge)</p>
     {% endif %}
-  <button id="add_friend" class="btn btn-primary">Add Friends</button>
+  <button id="add_friend" class="btn btn-primary mt-2">Add Friends</button>
 </div>
   <hr>
   <div>

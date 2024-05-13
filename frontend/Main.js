@@ -246,6 +246,7 @@ export class Main
 
             new_button.style.margin = "0 auto";
             new_input.id = "chat-message-input";
+            new_input.autocomplete = "off";
             new_input.type = "text";
             new_input.size = "13";
             new_input.className = "form-chat  mt-1";
@@ -269,12 +270,10 @@ export class Main
         }
     }
 
-    get_friend(login, friend){
-        var flag = true;
+    get_friend(login, friend, button){
         $.ajax({
             url: '/profile/' + login + '/add_friend/',
             method: 'POST',
-            async: false,
             headers:{
                 'X-CSRFToken': this.getCookie('csrftoken')
             },
@@ -284,13 +283,20 @@ export class Main
                 'friend': friend
             },
             success: (info) =>{
-                flag = true;
-            },
-            error: (info) =>{
-                flag = false
+                if (info == 'True'){
+                    button.addEventListener('click', () => this.set_status('You are already friend with ' + friend, false));
+                }
+                else{
+                    button.addEventListener('click', () => {
+                        this.lobby.socket.send(JSON.stringify({
+                            'sender': login,
+                            'friend': friend,
+                            'type': 'friend_request_send'
+                        }));
+                    });
+                }
             }
         })
-        return flag
     }
 
     clearClient() {
