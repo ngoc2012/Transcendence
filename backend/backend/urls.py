@@ -8,8 +8,10 @@ from .views import callback, csrf
 
 urlpatterns = [
     path('', views.index, name='index'),
-    path('get-csrf/', csrf, name='get-csrf'),
     path("game/", include("game.urls")),
+    path('pong/', include("pong.urls", namespace='pong')),
+    path('transchat/', include("transchat.urls")),
+    path('get-csrf/', csrf, name='get-csrf'),
     path('admin/', admin.site.urls),
     path('lobby/', views.lobby, name='lobby'),
     path('pages/signup/', views.signup, name='signup'),
@@ -20,9 +22,7 @@ urlpatterns = [
     path('logout/', views.logout, name='logout'),
     path('new_player/', views.new_player, name='new_player'),
     path('np/', views.np, name='np'),
-    path('pong/', include("pong.urls", namespace='pong')),
     path('callback/', callback, name='callback'),
-    path('transchat/', include("transchat.urls")),
     path('twofa/', views.twofa, name='twofa'),
     path('display_2fa/', views.display_2fa, name='display_2fa'),
     path('qrcode_2fa/', views.qrcode_2fa, name='qrcode_2fa'),

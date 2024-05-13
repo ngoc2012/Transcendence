@@ -1,0 +1,146 @@
+/* General layout/settings */
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: scroll !important;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  font-family: "Poppins", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+  color: white;
+}
+
+html::-webkit-scrollbar{
+  display: none;
+}
+
+body::-webkit-scrollbar{
+  display: none;
+}
+
+.container {
+  text-align: center;
+}
+
+canvas {
+  /* border: 1px solid #000; */
+  display: block;
+  margin: 20px auto;
+}
+
+p, h1, h2, h3, h4, h5, h6, span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: "Poppins", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+  color: white;
+}
+
+label {
+  font-family: "Poppins", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+  color: white;
+}
+
+.btn {
+  opacity: 90%;
+}
+
+/* Form control */
+
+.form-label-left {
+  text-align: left;
+  margin-bottom: 0;
+}
+
+.form-control {
+  border-radius: 10px;
+  border: 2px solid rgba(255, 255, 255, 0.75);
+  /* padding: 12px; */
+  color: #ffffff;
+  background-color: rgba(66, 66, 66, 0.5);
+}
+
+
+.form-label-left {
+  text-align: left;
+  margin-bottom: 0;
+}
+
+/* INPUT elements */
+
+input {
+  height: 50px !important;
+}
+
+input.form-control:focus {
+  background-color: rgba(85, 85, 85, 0.8) !important; 
+  outline: none !important;
+  color: white;
+}
+
+/* SELECT elements */
+
+select {
+  height: 50px !important;
+}.form-check-label {
+  margin-left: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  user-select: none;
+  margin-top: 3px;
+}
+
+.form-check-input {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px !important;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.398);
+  border: none;
+  cursor: pointer;
+  vertical-align: middle;
+  transition: background-color 0.3s ease;
+}
+
+.form-check-input:checked {
+  background-color: #ffffff;
+  border: none;
+}
+
+/* CHECKBOXES */
+
+.form-check-label {
+  margin-left: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  user-select: none;
+  margin-top: 3px;
+}
+
+.form-check-input {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px !important;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.398);
+  border: none;
+  cursor: pointer;
+  vertical-align: middle;
+  transition: background-color 0.3s ease;
+}
+
+.form-check-input:checked {
+  background-color: #ffffff;
+  border: none;
+}

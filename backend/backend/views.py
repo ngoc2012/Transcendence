@@ -398,11 +398,13 @@ def callback(request):
         })
 
         token_data = token_response.json()
+        print(token_data)
         access_token = token_data['access_token']
 
         user_response = requests.get('https://api.intra.42.fr/v2/me', headers={
             'Authorization': f'Bearer {access_token}',
         })
+
         print(user_response)
 
         user_data = user_response.json()
@@ -461,11 +463,12 @@ def callback(request):
         response = render(request, 'index.html', response)
         response.set_cookie('refresh_token', refresh_token, httponly=True, samesite='Lax', secure=True)
         response.set_cookie('access_token', access_token, httponly=True, samesite='Lax', secure=True)
-        response.set_cookie('login42', httponly=True, secure=True)
+        response.set_cookie('login42', secure=True)
 
         return response
     except Exception as e:
         if 'duplicate key value violates unique constraint "accounts_playersmodel_username_key"' in str(e):
+                print(str(e))
                 response = {
                     'error_user': "Login already taken",
                 }

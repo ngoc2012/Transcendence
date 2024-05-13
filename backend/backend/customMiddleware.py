@@ -142,6 +142,7 @@ class JWTMiddleware(MiddlewareMixin):
     def get_unauthenticated_paths(self):
         return [
             'logout/',
+            'logout/',
             '/',
             '/favicon.ico',
             '/get-csrf/',

@@ -1,0 +1,25 @@
+<head>
+    <style>
+        #status_message {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="row justify-content-center">
+        <div class="col-xs-12 col-md-8 col-lg-6 text-center">
+            <h2>Enter your 2FA code here</h2>
+        </div>
+    </div>
+    <div class="row justify-content-center">
+        <form id="2faForm">
+            <div class="form-group">
+                <label for="code">Code:</label>
+                <input type="text" class="form-control" id="code" name="code" required>
+            </div>
+            <button id="confirm" class="btn btn-primary" type="button">Confirm</button>
+            <button id="cancel0" class="btn btn-secondary" type="button">Cancel</button>
+            <div id="status_message"></div>
+        </form>
+    </div>
+</body>
