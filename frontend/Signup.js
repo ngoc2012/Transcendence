@@ -75,14 +75,12 @@ export class Signup
                         var dom_logout = document.getElementById('logoutButton');
                         if (dom_logout) {
                             dom_logout.style.display = 'inline-block'
-                            dom_logout.addEventListener('click', () => this.main.logout());
                         }
                     }
                     if (checkbox)
                         this.display2FASetup(info.secret);
                     else
                         this.main.load('/lobby', () => this.main.lobby.events());
-                    console.log("ma queue");
                 }
             },
             error: (jqXHR, textStatus, errorThrown) => {

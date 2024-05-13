@@ -24,6 +24,9 @@ class ChatConsumer(WebsocketConsumer):
         # Leave room group
         user = PlayersModel.objects.get(login=self.scope['state']['username'])
         room = Room.objects.get(room_name=self.scope['state']['room'])
+        user.previous_status = user.online_status
+        user.online_status = 'Offline'
+        user.save()
         room.users.remove(user)
         room.save()
         async_to_sync(self.channel_layer.group_send)(self.room_group_name, {"type": "update"})
@@ -103,6 +106,10 @@ class ChatConsumer(WebsocketConsumer):
                     except PlayersModel.DoesNotExist:
                         room.users.add(PlayersModel.objects.get(login=self.scope['state']['username']))
                         room.save()
+                    user = PlayersModel.objects.get(login=self.scope['state']['username'])
+                    user.previous_status = user.online_status
+                    user.online_status = 'Online'
+                    user.save()
                     async_to_sync(self.channel_layer.group_send)(self.room_group_name, {"type": "update"})
                     return
             else:
@@ -196,32 +203,6 @@ class ChatConsumer(WebsocketConsumer):
         old_user = event['old_user']
         new_user = event['new_user']
         self.send(json.dumps({'type': "update_divs", 'old_user': old_user, 'new_user': new_user, 'pic': PlayersModel.objects.get(login=new_user).avatar.url}))
-
-    def split_message(self, str):
-        msg = ""
-        msg_split = str.split(' ')
-        count = 0
-        for i in msg_split:
-            if count + len(i) < 20:
-                msg += i + ' '
-                count += len(i) + 1
-            elif len(i) < 20:
-                msg += '<br>'
-                msg += i + ' '
-                count = len(i) + 1
-            else:
-                # print(i)
-                subcount = count
-                for n in i:
-                    if subcount < 19:
-                        msg += n
-                        subcount += 1
-                    else:
-                        msg += '<br>'
-                        subcount = 0
-                    # print(subcount)
-                count = 0
-        return msg
 
     def game_invite(self, event):
         if self.scope['state']['username'] == event['friend']:

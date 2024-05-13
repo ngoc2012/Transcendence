@@ -17,7 +17,6 @@ export class Lobby
     }
 
     events(isPopState) {
-        console.log("lolo");
         if (this.main.lobby.game && this.main.lobby.game !== null)
         {
             this.main.lobby.game.close_room();

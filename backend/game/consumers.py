@@ -130,8 +130,6 @@ class RoomsConsumer(AsyncWebsocketConsumer):
         user = await get_player_by_id(user_id)
         if user is None:
             return
-        user.online_status = 'Offline'
-        user.save()
 
     async def receive(self, text_data):
         if not text_data:
@@ -217,6 +215,7 @@ class RoomsConsumer(AsyncWebsocketConsumer):
         user = await get_user_from_login(data.get('login'))
         if user:
             self.user = user
+            self.user.previous_status = self.user.online_status
             self.user.online_status = 'Online'
             self.user.save()
 
@@ -226,8 +225,6 @@ class RoomsConsumer(AsyncWebsocketConsumer):
             self.user = user
             self.user_id = user.id
             self.login = user.login
-            self.user.online_status = 'Online'
-            self.user.save()
             unique_group_name = f"user_{self.login}"
             await self.channel_layer.group_add(unique_group_name, self.channel_name)
             RoomsConsumer.connected_users.add(self.user_id)
