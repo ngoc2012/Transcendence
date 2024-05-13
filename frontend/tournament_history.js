@@ -75,8 +75,12 @@ export class tournament_history {
                     `;
                 }
             },
-            error: (xhr, status, error) => {
-                // console.error('Error:', error);
+            error: (jqXHR) => {
+                if (jqXHR.status === 401 && jqXHR.responseText === "Unauthorized - Token expired") {
+                    this.main.clearClient();
+					this.main.load('/pages/login', () => this.main.log_in.events());
+					return;
+				}
             }
         });
     }

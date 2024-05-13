@@ -31,10 +31,6 @@ remove_images:
 	@docker image prune --all --force
 
 re:
-	gio trash -f backend/game/migrations/[!__init__.py]*
-	gio trash -f backend/accounts/migrations/[!__init__.py]*
-	gio trash -f backend/pong/migrations/[!__init__.py]*
-	gio trash -f backend/transchat/migrations/[!__init__.py]*
 	@make down
 	@make up
 

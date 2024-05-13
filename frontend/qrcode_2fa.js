@@ -16,12 +16,12 @@ export class qrcode_2fa
         this.dom_cancel = document.querySelector("#cancel0");
         this.dom_confirm.addEventListener("click", () => this.confirm(login));
         this.dom_cancel.addEventListener("click", () => this.cancel());
-        // this.dom_code.addEventListener("keypress", (e) => {
-        //     // if (e.key === "Enter") {
-        //     //     e.preventDefault();
-        //     //     this.confirm();
-        //     // }
-        // });
+        this.dom_code.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                // this.confirm();
+            }
+        });
     }
 
     eventsTour(login) {
@@ -53,6 +53,7 @@ export class qrcode_2fa
                         this.main.set_status(info, true);
                         this.main.login.state = 2;
                     } else if (info.result === '1') {
+                        // console.log("good code")
                         if (this.tournament) {
                             this.main.load('/tournament/local', () => this.main.lobby.tournament.eventsTwoFA(this.login));
                             return;
@@ -95,11 +96,16 @@ export class qrcode_2fa
                                         this.main.load('/lobby', () => this.main.lobby.events());
                                     }
                                 },
-                                error: (xhr, textStatus, errorThrown) => {
+                                error: (xhr, jqXHR) => {
                                     if (xhr.responseJSON && xhr.responseJSON.error) {
                                         this.main.set_status(xhr.responseJSON.error, false);
                                     } else {
                                         this.main.set_status('An error occurred during the request.', false);
+                                    }
+                                    if (jqXHR.status === 401 && jqXHR.responseText === "Unauthorized - Token expired") {
+                                        this.main.clearClient();
+                                        this.main.load('/pages/login', () => this.main.log_in.events());
+                                        return;
                                     }
                                 }
                             });
@@ -108,8 +114,13 @@ export class qrcode_2fa
                         this.main.set_status('Wrong code, please try again', false);
                     }
                 },
-                error: (xhr) => {
+                error: (xhr, jqXHR) => {
                     this.main.set_status(xhr.responseJSON && xhr.responseJSON.error ? xhr.responseJSON.error : 'An error occurred during the request.', false);
+                    if (jqXHR.status === 401 && jqXHR.responseText === "Unauthorized - Token expired") {
+                        this.main.clearClient();
+                        this.main.load('/pages/login', () => this.main.log_in.events());
+                        return;
+                    }
                 }
             });
         }

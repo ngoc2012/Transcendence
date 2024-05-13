@@ -63,8 +63,12 @@ export class twofa
                     this.main.load('/code_2fa', () => this.main.code_2fa.eventsTour(this.tourLogin));
                 }
             },
-            error: (xhr, status, error) => {
-                // console.error('Error:', error);
+            error: (jqXHR) => {
+                if (jqXHR.status === 401 && jqXHR.responseText === "Unauthorized - Token expired") {
+                    this.main.clearClient();
+					this.main.load('/pages/login', () => this.main.log_in.events());
+					return;
+				}
             }
         });
     }

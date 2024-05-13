@@ -71,7 +71,10 @@ export class Main
                 }
             },
             error: (jqXHR, textStatus, errorThrown) => {
+                console.log('load error')
+                console.log('jqXHR.status')
                 if (jqXHR.status === 401) {
+                    // this.clearClient();
                     this.login_click();
                 }
                 else
@@ -89,14 +92,13 @@ export class Main
             data : data,
             success: (html) => {
                 this.dom_container.innerHTML = html;
-                //pas oublier de changer ca
                 if (callback && typeof callback === 'function') {
                     callback();
                 }
-                // callback();  // fait erreur "callback is not a function"
             },
-            error: (jqXHR, textStatus, errorThrown) => {
+            error: (jqXHR) => {
                 if (jqXHR.status === 401) {
+                    this.clearClient();
                     this.login_click();
                 }
             }
@@ -171,8 +173,6 @@ export class Main
                     // this.twofat = '';
                     this.secret_2fa = '';
 
-                    // this.history_stack.push('/');
-                    // window.history.pushState({}, '', '/');
                     this.load('/lobby', () => this.lobby.events());
 
                     var dom_log_in = document.getElementById('login');
@@ -197,7 +197,7 @@ export class Main
                     }
                 }
             },
-            error: (xhr, textStatus, errorThrown) => {
+            error: (xhr) => {
                 if (xhr.responseJSON && xhr.responseJSON.error) {
                     this.set_status(xhr.responseJSON.error, false);
                 } else {
@@ -291,5 +291,15 @@ export class Main
             }
         })
         return flag
+    }
+
+    clearClient() {
+        this.email = '';
+        this.login = '';
+        this.name = '';
+        this.dom_name.innerHTML = 'Anonyme';
+        this.lobby.ws = '';
+        // this.twofat = '';
+        this.secret_2fa = '';
     }
 }

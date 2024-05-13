@@ -110,6 +110,8 @@ class PongConsumer(AsyncWebsocketConsumer):
 
     async def receive(self, text_data):
         if text_data == 'start':
+            # print('start ', self.room_id)
+            # self.start(None)
             players = cache.get(self.k_all)
             if players == None or len(players) < 2:
                 return
@@ -160,9 +162,17 @@ class PongConsumer(AsyncWebsocketConsumer):
         }))
 
     async def start(self, data):
-        await self.send(text_data=json.dumps({
-            "type": 'start'
-        }))
+        # await self.send(text_data=json.dumps({
+        #     "type": 'start'
+        # }))
+        players = cache.get(self.k_all)
+        if players == None or len(players) < 2:
+            return
+        if self.player_id != cache.get(self.k_server) and not cache.get(self.k_ai):
+            return
+        info = await get_info(self)
+        if info and not cache.get(self.k_started):
+            asyncio.create_task(self.game_loop())
 
     async def group_data(self, event):
         room_data = await get_room_data(self)

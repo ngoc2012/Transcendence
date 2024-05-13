@@ -21,7 +21,12 @@ function    reload(path, isPopState = false) {
     } else if (path === '/') {
         main.load('/lobby', () => main.lobby.events(isPopState));
     } else if (path.startsWith('/pong/')) {
-        join_game(main, path.substring(6), true);
+        if (main.login !== '')
+            join_game(main, path.substring(6), true);
+        else {
+            main.load('/pages/login', () => main.log_in.events(false));
+            main.set_status("You need to Log in or Sign up to access this page", false);
+        }
     } else if (path.startsWith('/profile/')){
         if (main.login !== '')
             main.load_with_data('/profile/' + path.substring(9), () => main.profile.events(isPopState, path.substring(9)), {'user':path.substring(9), 'requester': main.login});

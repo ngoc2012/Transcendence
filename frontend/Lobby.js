@@ -12,6 +12,8 @@ export class Lobby
         this.game = null;
         this.tournament = null;
         this.ws = null;
+        this.delay = 1000;
+        this.new_game_available = true;
     }
 
     events(isPopState) {
@@ -92,7 +94,9 @@ export class Lobby
     }
 
     new_game(game) {
-        // console.log('new game');
+        if (!this.new_game_available)
+            return;
+        this.new_game_available = false;
         if (this.main.login === '')
         {
             this.main.set_status('Please login or sign up', false);
@@ -100,6 +104,7 @@ export class Lobby
         }
         if (this.main.lobby.game && this.main.lobby.game !== null)
         {
+            console.log('closing room', this.main.lobby.game);
             this.main.lobby.game.close_room();
             this.main.lobby.game = null;
         }
@@ -119,7 +124,7 @@ export class Lobby
                     'login': this.main.login
                 },
                 success: (info) => {
-                    if (this.socket !== -1)
+                    if (this.socket !== -1 && this.socket.readyState === WebSocket.OPEN)
                         this.socket.send(JSON.stringify({
                             type: 'update'
                         }));
@@ -132,20 +137,23 @@ export class Lobby
                     {
                         switch (info.game) {
                             case 'pong':
-                                if (this.main.lobby.game && this.main.lobby.game !== null)
-                                {
-                                    this.main.lobby.game.close_room();
-                                    this.main.lobby.game = null;
-                                }
                                 this.pong_game(info, false);
                                 break;
                         }
                     }
                 },
-                error: () => this.main.set_status('Error: Can not create game', false)
+                error: (jqXHR) => {
+                    this.main.set_status('Error: Can not create game', false)
+                    if (jqXHR.status === 401 && jqXHR.responseText === "Unauthorized - Token expired") {
+                        this.main.clearClient();
+                        this.main.load('/pages/login', () => this.main.log_in.events());
+                        return;
+                    }
+                }
             });
         } else
             this.main.load('/pages/login', () => this.main.log_in.events(false));
+        setTimeout(() => {this.new_game_available = true;}, this.delay);
     }
 
     tournament_history_click() {
@@ -203,12 +211,17 @@ export class Lobby
                         }));
                     }
                 },
-                error: (xhr, textStatus, errorThrown) => {
+                error: (xhr, jqXHR) => {
                     let errorMessage = "Error: Can not delete game";
+                    this.main.set_status(errorMessage, false);
+                    if (jqXHR.status === 401 && jqXHR.responseText === "Unauthorized - Token expired") {
+                        this.main.clearClient();
+                        this.main.load('/pages/login', () => this.main.log_in.events());
+                        return;
+                    }
                     if (xhr.responseJSON && xhr.responseJSON.error) {
                         errorMessage = xhr.responseJSON.error;
                     }
-                    this.main.set_status(errorMessage, false);
                 }
             });
         } else
@@ -508,11 +521,6 @@ export class Lobby
                     'login': this.main.login
                 },
                 success: (info) => {
-                    // exclude this room !!!!
-                    // if (this.socket !== -1)
-                    //     this.socket.send(JSON.stringify({
-                    //         type: 'update'
-                    //     }));
                     if (typeof info === 'string')
                     {
                         this.main.set_status(info, true);
@@ -534,7 +542,14 @@ export class Lobby
                         }
                     }
                 },
-                error: () => this.main.set_status('Error: Can not create game', false)
+                error: (jqXHR) => {
+                    this.main.set_status('Error: Can not create game', false)
+                    if (jqXHR.status === 401 && jqXHR.responseText === "Unauthorized - Token expired") {
+                        this.main.clearClient();
+                        this.main.load('/pages/login', () => this.main.log_in.events());
+                        return;
+                    }
+                }
             });
         }
     }
@@ -683,7 +698,12 @@ export class Lobby
                         this.tournament.localBack();
                     }
                 },
-                error: () => {
+                error: (jqXHR) => {
+                    if (jqXHR.status === 401 && jqXHR.responseText === "Unauthorized - Token expired") {
+                        this.main.clearClient();
+                        this.main.load('/pages/login', () => this.main.log_in.events());
+                        return;
+                    }
                 }
             });
         }

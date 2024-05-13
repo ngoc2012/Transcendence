@@ -43,8 +43,11 @@ export class Pong
         this.pmBox = false;
         this.joined = false;
         this.playerLocal = false;
-        this.touchStartY = 0;
-        this.touchEndY = 0;
+        this.touchStart = [0, 0];
+        this.touchEnd = [0, 0];
+        this.set_state_available = true;
+        this.delay = 40;
+
     }
 
     reset_ratio() {
@@ -58,7 +61,6 @@ export class Pong
     }
 
 	init(isPopState) {
-
         if (!isPopState)
             window.history.pushState({page: '/pong/' + this.room.id}, '', '/pong/' + this.room.id);
 
@@ -151,22 +153,35 @@ export class Pong
         });
 
         if (!this.localTour) {
-
             document.addEventListener("touchstart", (event) => {
-                this.touchStartY = event.touches[0].clientY;
+                var touch = event.touches[0];
+                this.touchStart[0] = touch.clientX;
+                this.touchStart[1] = touch.clientY;
             });
-
             document.addEventListener("touchend", (event) => {
-                this.touchEndY = event.changedTouches[0].clientY;
-                let n = Math.floor(Math.abs(this.touchEndY - this.touchStartY) / (this.ctx.canvas.height / 10));
-                if (this.touchEndY - this.touchStartY < 0)
+                var touch = event.touches[0];
+                this.touchEnd[0] = touch.clientX;
+                this.touchEnd[1] = touch.clientY;
+                let nx = Math.floor(Math.abs(this.touchEnd[0] - this.touchStart[0]) / (this.ctx.canvas.width / 20));
+                let ny = Math.floor(Math.abs(this.touchEnd[1] - this.touchStart[1]) / (this.ctx.canvas.height / 10));
+                if (this.touchEnd[0] - this.touchStart[0] < 0)
                 {
-                    for (let i = 0; i < n; i++)
+                    for (let i = 0; i < nx; i++)
+                        this.set_state(0, "left");
+                }
+                else
+                {
+                    for (let i = 0; i < nx; i++)
+                        this.set_state(0, "right");
+                }
+                if (this.touchEnd[1] - this.touchStart[1] < 0)
+                {
+                    for (let i = 0; i < ny; i++)
                         this.set_state(0, "up");
                 }
                 else
                 {
-                    for (let i = 0; i < n; i++)
+                    for (let i = 0; i < ny; i++)
                         this.set_state(0, "down");
                 }
             });
@@ -175,7 +190,7 @@ export class Pong
                     event.preventDefault();
                 }
             })
-            document.addEventListener('keyup', (event) => {
+            document.addEventListener('keydown', (event) => {
                 if (["ArrowUp", "ArrowDown"].includes(event.key)) {
                     event.preventDefault();
                 }
@@ -218,7 +233,7 @@ export class Pong
                 }
             });
         } else {
-            document.addEventListener('keyup', (event) => {
+            document.addEventListener('keydown', (event) => {
                 switch (event.key) {
                     case 'q':
                         this.set_state(0, "up");
@@ -318,7 +333,14 @@ export class Pong
                         this.preMatchBox(this.localTournament.player1, this.localTournament.player2);
                     }
                 },
-                error: () => this.main.set_status('Error: Can not join game', false)
+                error: (jqXHR) => {
+                    this.main.set_status('Error: Can not join game', false)
+                    if (jqXHR.status === 401 && jqXHR.responseText === "Unauthorized - Token expired") {
+                        this.main.clearClient();
+                        this.main.load('/pages/login', () => this.main.log_in.events());
+                        return;
+                    }
+                }
             });
         }
 
@@ -410,12 +432,17 @@ export class Pong
                 else
                     this.join_local_player(info);
             },
-            error: (xhr, textStatus, errorThrown) => {
+            error: (xhr, jqXHR) => {
                 if (xhr.responseJSON && xhr.responseJSON.error) {
                     this.main.set_status(xhr.responseJSON.error, false);
                 } else {
                     this.main.set_status('An error occurred during the request.', false);
                 }
+                if (jqXHR.status === 401 && jqXHR.responseText === "Unauthorized - Token expired") {
+                    this.main.clearClient();
+					this.main.load('/pages/login', () => this.main.log_in.events());
+					return;
+				}
             }
         });
     }
@@ -451,7 +478,14 @@ export class Pong
                     }
                 }
             },
-            error: () => this.main.set_status('Error: Can not join game', false)
+            error: (jqXHR) => {
+                if (jqXHR.status === 401 && jqXHR.responseText === "Unauthorized - Token expired") {
+                    this.main.clearClient();
+					this.main.load('/pages/login', () => this.main.log_in.events());
+					return;
+				}
+                this.main.set_status('Error: Can not join game', false)
+            }
         });
     }
 
@@ -608,9 +642,13 @@ export class Pong
     }
 
     set_state(i, e) {
+        if (!this.set_state_available)
+            return;
+        this.set_state_available = false;
         if (this.players[i].sk !== -1 && this.players[i].sk.readyState === 1) {
             this.players[i].sk.send(e);
         }
+        setTimeout(() => {this.set_state_available = true;}, this.delay);
     }
 
     preMatchBox(player1, player2) {
@@ -643,6 +681,13 @@ export class Pong
         matchBox.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); padding: 20px; background-color: #ffffff7a; border: 2px solid #ffffff; text-align: center; z-index: 10000; border-radius: 10px;';
         document.body.appendChild(matchBox);
 
+        const leftbar = document.getElementById('left-sidebar');
+        leftbar.style.cssText = "z-index: 98;"
+        const mobilebar = document.getElementById('mobile-sidebar');
+        mobilebar.style.cssText = "z-index: 98;"
+        const togglebar = document.getElementById('toggle-sidebar');
+        togglebar.style.cssText = "z-index: 98;"
+
         let matchText = document.createElement('p');
         matchText.textContent = 'Match can start whenever you are ready!';
         matchText.style.cssText = 'font-family: "Poppins", sans-serif; font-weight: 400; font-style: normal; color: white;';
@@ -668,6 +713,12 @@ export class Pong
         startButton.classList.add('btn', 'btn-primary');
         startButton.onclick = () => {
             canvas.style.filter = '';
+            const leftbar = document.getElementById('left-sidebar');
+            leftbar.style.cssText = "z-index: 100;"
+            const mobilebar = document.getElementById('mobile-sidebar');
+            mobilebar.style.cssText = "z-index: 100;"
+            const togglebar = document.getElementById('toggle-sidebar');
+            togglebar.style.cssText = "z-index: 100;"
             document.body.removeChild(backdrop);
             document.body.removeChild(matchBox);
             this.pmBox = false;
@@ -693,6 +744,14 @@ export class Pong
             canvas.style.filter = 'blur(8px)';
         }
 
+
+        const leftbar = document.getElementById('left-sidebar');
+        leftbar.style.cssText = "z-index: 98;"
+        const mobilebar = document.getElementById('mobile-sidebar');
+        mobilebar.style.cssText = "z-index: 98;"
+        const togglebar = document.getElementById('toggle-sidebar');
+        togglebar.style.cssText = "z-index: 98;"
+
         let winBox = document.createElement('div');
         winBox.setAttribute('id', 'winBox');
         winBox.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); padding: 15px; background-color: #ffffff7a; border: 2px solid #ffffff; text-align: center; z-index: 100; border-radius: 10px; width: 25vw; height: 25vh;padding: 2%';
@@ -701,6 +760,7 @@ export class Pong
         const winnerText = document.createElement('p');
         winnerText.textContent = `${data.win === 'player0' ? this.player1 : this.player2} wins !`;
         winnerText.style.cssText = 'font-size: 30px; font-family: "Poppins", sans-serif; font-weight: bold; font-style: normal; color: white; text-align: center; padding: 3%';
+        
         winBox.appendChild(winnerText);
         const scoreContainer = document.createElement('div');
         const scoreText = document.createElement('p');
@@ -714,6 +774,12 @@ export class Pong
         backButton.classList.add('btn', 'btn-primary');
         backButton.onclick = () => {
             removeElements();
+            const leftbar = document.getElementById('left-sidebar');
+            leftbar.style.cssText = "z-index: 100;"
+            const mobilebar = document.getElementById('mobile-sidebar');
+            mobilebar.style.cssText = "z-index: 100;"
+            const togglebar = document.getElementById('toggle-sidebar');
+            togglebar.style.cssText = "z-index: 100;"
             this.quit();
         };
         winBox.appendChild(backButton);

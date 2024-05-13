@@ -51,7 +51,14 @@ export class localTournament {
                         this.startEvents();
                         this.joinMatch(info.room_id);
                 },
-                error: () => this.main.set_status('Error: Can not join game', false)
+                error: (jqXHR) => {
+                    if (jqXHR.status === 401 && jqXHR.responseText === "Unauthorized - Token expired") {
+                        this.main.clearClient();
+                        this.main.load('/pages/login', () => this.main.log_in.events());
+                        return;
+                    }
+                    this.main.set_status('Error: Can not join game', false)
+                }
             });
         }
     }
@@ -110,14 +117,21 @@ export class localTournament {
                         case 'pong':
                             this.lobby.game = new Pong(this.main, this.main.lobby, info, this.tournament, this, true, this.id);
                             this.dom_container = document.getElementById('match');
-                            this.load('/pong/local', () => {
+                            this.main.load('/pong/local', () => {
                                 if (this.lobby.game)
                                     this.lobby.game.init();
                             });
                             break;
                     }
                 },
-                error: () => this.main.set_status('Error: Can not join game', false)
+                error: () => {
+                    if (jqXHR.status === 401 && jqXHR.responseText === "Unauthorized - Token expired") {
+                        this.main.clearClient();
+                        this.main.load('/pages/login', () => this.main.log_in.events());
+                        return;
+                    }
+                    this.main.set_status('Error: Can not join game', false)
+                }
             });
         }
     }
@@ -132,11 +146,14 @@ export class localTournament {
                     callback();
                 }
             },
-            error: (jqXHR, textStatus, errorThrown) => {
-                if (jqXHR.status === 401) {
-                    this.login_click();
+            error: (jqXHR) => {
+                let message = 'Error - Please try again';
+                if (jqXHR.status === 401 && jqXHR.responseText === "Unauthorized - Token expired") {
+                    this.main.clearClient();
+                    message = 'Please Log In - Token is expired';
                 }
-            },
+                this.dom_container.innerHTML = message;
+            },    
         });
     }
 
@@ -154,10 +171,10 @@ export class localTournament {
                 'score2': score2
             },
             success: (info) => {
-                // this.tournament.localBack();
             },
-            error: (jqXHR, textStatus, errorThrown) => {
+            error: (jqXHR) => {
                 if (jqXHR.status === 401) {
+                    this.main.clearClient();
                     this.login_click();
                 }
             }
