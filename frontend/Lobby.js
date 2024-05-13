@@ -435,7 +435,6 @@ export class Lobby
     }
 
     update_div(data){
-        let isfriend = this.main.get_friend(this.main.login, data.new_user);
         let divs = document.getElementsByClassName('user_chat');
         for (let i = 0; divs[i] != undefined; i++){
             if (divs[i].innerHTML === data.old_user){
@@ -475,17 +474,9 @@ export class Lobby
         }
         if (user_profile)
             user_profile.parentElement.replaceChild(new_user, user_profile);
-        if (new_add)
+        if (new_add){
             new_add.id = data.new_user +'_add-friend';
-        if (!isfriend && new_add){
-            new_add.addEventListener('click', () => this.main.lobby.socket.send(JSON.stringify({
-                'sender': this.main.login,
-                'friend': data.new_user,
-                'type': 'friend_request_send'
-            })));
-        }
-        else if (new_add){
-            new_add.addEventListener('click', () => this.main.set_status("You are already friend with " + data.new_user, false));
+            this.main.get_friend(this.main.login, data.new_user, new_add);
         }
         if (add_button)
             add_button.parentNode.replaceChild(new_add, add_button);
@@ -650,19 +641,8 @@ export class Lobby
                 if (this.main.login === user.login)
                     return;
                 const button = document.getElementById(user.login + '_add-friend');
-                const isfriend = this.main.get_friend(this.main.login, user.login);
-                if (button && !isfriend) {
-                    button.addEventListener('click', () => {
-                        this.main.lobby.socket.send(JSON.stringify({
-                            'sender': this.main.login,
-                            'friend': user.login,
-                            'type': 'friend_request_send'
-                        }));
-                    });
-                }
-                else if (button && isfriend){
-                    button.addEventListener('click', () => this.main.set_status('You are already friend with ' + user.login, false));
-                }
+                if (button)
+                    this.main.get_friend(this.main.login, user.login, button);
             })
 
             if (counter === 0) {

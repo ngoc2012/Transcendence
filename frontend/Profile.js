@@ -15,6 +15,7 @@ export class Profile{
             window.history.pushState({page: '/profile/' + l}, '', '/profile/' + l);
 
         this.dom_alias = document.getElementById("alias");
+        this.dom_del_alias = document.getElementById('alias-delete');
         this.dom_friend = document.getElementById("add_friend");
         this.dom_add_friend = document.getElementById('add_user_as_friend');
         this.dom_password = document.getElementById("password");
@@ -23,6 +24,8 @@ export class Profile{
         this.dom_name = document.getElementById("new_name");
         this.dom_cancel = document.getElementById("back");
         this.dom_pp = document.getElementById("new_pp");
+        if (this.dom_del_alias)
+            this.dom_del_alias.addEventListener('click', () => this.delete_alias());
         if (this.dom_alias)
             this.dom_alias.addEventListener("click", () => this.change_alias());
         if (this.dom_friend)
@@ -56,6 +59,26 @@ export class Profile{
             }            
         }
         this.create_submit_pp();
+    }
+
+    delete_alias(){
+        $.ajax({
+            url: '/profile/' + this.main.login + '/alias/',
+            method: 'POST',
+            headers:{
+                'X-CSRFTOKEN': this.main.getCookie('csrftoken')
+            },
+            data:{
+                'type': 'delete'
+            },
+            success: (info) => {
+                this.main.set_status(info, true);
+                this.main.load('/profile/' + this.main.login, () => this.main.profile.events(true, this.main.login))
+            },
+            error: (info) =>{
+                this.main.set_status('An error occured', false);
+            }
+        })
     }
 
     create_submit_pp() {
@@ -556,7 +579,8 @@ export class Profile{
             data:{
                 'type': 'receive',
                 'sender': data.sender,
-                'response': 'decline'
+                'response': 'decline',
+                'friend': data.receiver
             },
             success: (info)=>{
                 this.main.set_status(info, true);
