@@ -117,7 +117,7 @@ export class localTournament {
                         case 'pong':
                             this.lobby.game = new Pong(this.main, this.main.lobby, info, this.tournament, this, true, this.id);
                             this.dom_container = document.getElementById('match');
-                            this.main.load('/pong/local', () => {
+                            this.load('/pong/local', () => {
                                 if (this.lobby.game)
                                     this.lobby.game.init();
                             });
