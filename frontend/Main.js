@@ -151,7 +151,6 @@ export class Main
 
     logout() {
         const csrftoken = this.getCookie('csrftoken');
-        console.log(csrftoken)
 
         $.ajax({
             url: 'logout/',

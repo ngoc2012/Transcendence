@@ -372,7 +372,7 @@ def login42(request):
         state = uuid.uuid4().hex
         request.session['oauth_state_login'] = state
 
-        client_id = 'u-s4t2ud-bda043967d92d434d1d6c24cf1d236ce0c6cc9c718a9198973efd9c5236038ed'
+        client_id = API_PUBLIC
         redirect_uri = quote('https://127.0.0.1:8080/callback/')
         authorize_url = f'https://api.intra.42.fr/oauth/authorize?client_id={client_id}&redirect_uri={redirect_uri}&response_type=code&state={state}'
 
@@ -428,6 +428,7 @@ def callback(request):
             response.set_cookie('refresh_token', refresh_token, httponly=True, samesite='Lax', secure=True)
             response.set_cookie('access_token', access_token, httponly=True, samesite='Lax', secure=True)
             response.set_cookie('login42', secure=True)
+            response.delete_cookie('sessionid')
 
             return response
 
@@ -459,6 +460,7 @@ def callback(request):
         response.set_cookie('refresh_token', refresh_token, httponly=True, samesite='Lax', secure=True)
         response.set_cookie('access_token', access_token, httponly=True, samesite='Lax', secure=True)
         response.set_cookie('login42', secure=True)
+        response.delete_cookie('sessionid')
 
         return response
     except Exception as e:

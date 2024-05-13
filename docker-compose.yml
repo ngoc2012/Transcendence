@@ -35,13 +35,13 @@ services:
     depends_on:
       - db
       - redis
-  
+
   db:
-    image: postgres:latest 
+    image: postgres:latest
     environment:
       POSTGRES_DB: transdb
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: admin
+      POSTGRES_USER: ${DB_LOG}
+      POSTGRES_PASSWORD: ${DB_PWD}
     ports:
       - "5432:5432"
     volumes:
@@ -78,7 +78,7 @@ services:
       - network
     # profiles:
     # - donotstart
-    
+
   ai:
     container_name: ai
     build:
@@ -115,7 +115,7 @@ volumes:
       type: none
       device: ./
       o: bind
-  
+
   postgres_data:
   cli_data:
     driver: local

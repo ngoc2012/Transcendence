@@ -74,7 +74,15 @@ export class Signup
                         dom_signup.style.display = "none";
                         var dom_logout = document.getElementById('logoutButton');
                         if (dom_logout) {
+                            // dom_logout.classList.remove("hidden");
                             dom_logout.style.display = 'inline-block'
+                            // dom_logout.addEventListener('click', () => this.main.logout());
+                        }
+                        else
+                        {
+                            dom_signup.insertAdjacentHTML('afterend', '<button id="logoutButton" class="btn btn-danger">Log Out</button>');
+                            var dom_logout = document.getElementById('logoutButton');
+                            dom_logout.addEventListener('click', () => this.main.logout());
                         }
                     }
                     if (checkbox)
