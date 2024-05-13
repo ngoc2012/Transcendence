@@ -18,7 +18,7 @@ class JWTMiddleware(MiddlewareMixin):
         try:
             resolve(request.path_info)
         except Resolver404:
-            print('404 Not Found')
+            print('404 Not Found: ' + request.path_info)
             return HttpResponseRedirect('/')
 
         if '/callback/' in request.path:
@@ -141,8 +141,7 @@ class JWTMiddleware(MiddlewareMixin):
 
     def get_unauthenticated_paths(self):
         return [
-            'logout/',
-            'logout/',
+            '/logout/',
             '/',
             '/favicon.ico',
             '/get-csrf/',

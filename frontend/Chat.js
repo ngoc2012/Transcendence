@@ -41,7 +41,7 @@ export class Chat{
 			success: (info, xhr) => {
 				if (xhr.status === 302)
 					return;
-				if (this.main.chat_socket.readyState !== -1){
+				if (this.main.chat_socket.readyState === WebSocket.OPEN){
 					this.main.chat_socket.send(JSON.stringify({
 						'message': message,
 						'user': this.main.login,

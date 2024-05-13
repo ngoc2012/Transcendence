@@ -90,7 +90,7 @@ def tournament_local_start(request):
     return (render(request, 'tournament_local_start.html'))
 
 def csrf(request):
-    return JsonResponse({'csrfToken': get_token(request)})
+    return JsonResponse({'csrftoken': get_token(request)})
 
 @csrf_protect
 def display_2fa(request):
@@ -386,7 +386,6 @@ def login42(request):
 # callback function used to get the info from the 42 API
 @csrf_protect
 def callback(request):
-    print('in callback')
     code = request.GET.get('code')
     try:
         token_response = requests.post('https://api.intra.42.fr/oauth/token', data={
@@ -398,14 +397,11 @@ def callback(request):
         })
 
         token_data = token_response.json()
-        print(token_data)
         access_token = token_data['access_token']
 
         user_response = requests.get('https://api.intra.42.fr/v2/me', headers={
             'Authorization': f'Bearer {access_token}',
         })
-
-        print(user_response)
 
         user_data = user_response.json()
 
@@ -436,7 +432,6 @@ def callback(request):
             return response
 
         User = get_user_model()
-        print(user_data)
         user = User.objects.create_user(
             username=user_data['login'],
             email=user_data['email'],

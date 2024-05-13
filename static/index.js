@@ -108,7 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
         fetch('/get-csrf/')
         .then(response => response.json())
         .then(data => {
-            main.csrftoken = data.csrfToken;
+            main.csrftoken = data.csrftoken;
         });
     }
 
