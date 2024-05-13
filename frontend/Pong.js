@@ -417,7 +417,7 @@ export class Pong
         }
         let csrftoken = this.main.getCookie('csrftoken');
         $.ajax({
-            url: '/log_in/',
+            url: '/auth_view/',
             method: 'POST',
             headers: {
                 'X-CSRFToken': csrftoken,
@@ -760,7 +760,7 @@ export class Pong
         const winnerText = document.createElement('p');
         winnerText.textContent = `${data.win === 'player0' ? this.player1 : this.player2} wins !`;
         winnerText.style.cssText = 'font-size: 30px; font-family: "Poppins", sans-serif; font-weight: bold; font-style: normal; color: white; text-align: center; padding: 3%';
-        
+
         winBox.appendChild(winnerText);
         const scoreContainer = document.createElement('div');
         const scoreText = document.createElement('p');

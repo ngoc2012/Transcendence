@@ -114,6 +114,10 @@ class ChatConsumer(WebsocketConsumer):
             async_to_sync(self.channel_layer.group_send)(self.room_group_name, {"type": "update"})
             return
 
+        try:
+            user = PlayersModel.objects.get(login=json.loads(text_data)['user']),
+        except PlayersModel.DoesNotExist:
+            return
         data = {
             'text_data': json.loads(text_data),
             'message': json.loads(text_data)['message'],
