@@ -143,19 +143,21 @@ export class Main
             fetch('/get-csrf/')
             .then(response => response.json())
             .then(data => {
-                this.csrftoken = data.csrfToken;
-                return decodeURIComponent(data.csrfToken);
+                return this.getCookie('csrftoken');
             });
         }
         return cookieValue;
     }
 
     logout() {
+        const csrftoken = this.getCookie('csrftoken');
+        console.log(csrftoken)
+
         $.ajax({
             url: 'logout/',
             method: 'POST',
             headers: {
-                'X-CSRFToken': this.getCookie('csrftoken'),
+                'X-CSRFToken': csrftoken,
             },
             success: (info) => {
                 if (typeof info === 'string')

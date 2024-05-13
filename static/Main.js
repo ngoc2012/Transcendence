@@ -143,8 +143,8 @@ export class Main
             fetch('/get-csrf/')
             .then(response => response.json())
             .then(data => {
-                this.csrftoken = data.csrfToken;
-                return decodeURIComponent(data.csrfToken);
+                this.csrftoken = data.csrftoken;
+                return decodeURIComponent(data.csrftoken);
             });
         }
         return cookieValue;
