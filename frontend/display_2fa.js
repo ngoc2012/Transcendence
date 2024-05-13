@@ -8,8 +8,6 @@ export class display_2fa {
     }
 
     events() {
-        this.main.checkcsrf();
-        
         this.dom_proceed = document.querySelector("#proceed");
         this.dom_proceed.addEventListener("click", () => this.proceed());
         this.generateQRCode();
@@ -47,6 +45,6 @@ export class display_2fa {
         qrCodeWrapper.classList.add("text-center", "my-3"); // Added classes for centering and margin
         qrCodeElement.appendChild(qrCodeWrapper);
         new QRCode(qrCodeWrapper, secret);
-    }               
+    }
 }
 

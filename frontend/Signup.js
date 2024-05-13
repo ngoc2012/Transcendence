@@ -5,7 +5,6 @@ export class Signup
     }
 
     events(isPopState) {
-        this.main.checkcsrf();
         if (!isPopState)
             window.history.pushState({page: '/signup'}, '', '/signup');
 

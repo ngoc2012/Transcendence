@@ -24,7 +24,6 @@ export class Tournament {
             this.main.lobby.game = null;
         }
 
-        this.main.checkcsrf();
         this.dom_tournamentForm = document.getElementById('tournamentForm');
         if (this.dom_tournamentForm)
             this.dom_tournamentForm.addEventListener('submit', (e) => this.tournamentSubmit(e));

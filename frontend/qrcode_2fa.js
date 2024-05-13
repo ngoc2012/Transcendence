@@ -9,8 +9,6 @@ export class qrcode_2fa
     }
 
     events(login) {
-        this.main.checkcsrf();
-
         this.dom_code = document.querySelector("#code");
         this.dom_confirm = document.querySelector("#confirm");
         this.dom_cancel = document.querySelector("#cancel0");

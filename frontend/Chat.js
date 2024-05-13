@@ -6,8 +6,6 @@ export class Chat{
 	}
 
 	init(){
-		this.main.checkcsrf();
-
 		this.chat_socket = this.main.chat_socket;
 	}
 

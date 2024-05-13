@@ -9,7 +9,6 @@ export class twofa
     }
 
     events(email, login, name, isPopState) {
-        this.main.checkcsrf();
         // if (!isPopState)
         //     window.history.pushState({page: '/twofa'}, '', '/twofa');
 

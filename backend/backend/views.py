@@ -116,15 +116,15 @@ def validate_session(request):
     access_token = request.COOKIES.get('access_token')
     if not access_token:
         return JsonResponse({"validSession": False, "message": "No Authorization token provided."}, status=200)
-    
+
     jti = None
-    
+
     try:
         payload = jwt.decode(access_token, settings.JWT_SECRET_KEY, algorithms=["HS256"])
         jti = payload.get("jti")
         if not jti or cache.get(jti):
             return invalid_session()
-        
+
         user = User.objects.filter(id=payload.get('user_id')).first()
         if not user:
             return invalid_session()
@@ -132,7 +132,7 @@ def validate_session(request):
         ws_token = user.generate_ws_token()
         enable2fa = request.POST.get('enable2fa', 'false') == 'true'
         user.save()
-        
+
         response_data = {
             "validSession": True,
             'login': user.username,
@@ -146,7 +146,7 @@ def validate_session(request):
         # response.set_cookie('refresh_token', refresh_token, httponly=True, samesite='Lax', secure=True)
         # response.set_cookie('access_token', access_token, httponly=True, samesite='Lax', secure=True)
         return response
-    
+
     except jwt.ExpiredSignatureError:
         return invalid_session()
     except jwt.InvalidTokenError:
@@ -312,14 +312,14 @@ def auth_view(request):
     user = authenticate(request, login=username, password=password)
     if user is not None:
         enable2fa = 'true' if getattr(user, 'secret_2fa', '') else 'false'
- 
+
         response_data = {
             'login': user.username,
             'name': user.name,
             'email': user.email,
             'enable2fa': enable2fa,
         }
-        
+
         response = JsonResponse(response_data)
 
         return response
@@ -357,7 +357,7 @@ def lg(request):
         response.set_cookie('refresh_token', refresh_token, httponly=True, samesite='Lax', secure=True)
         response.set_cookie('access_token', access_token, httponly=True, samesite='Lax', secure=True)
         response.delete_cookie('login42')
-        
+
         return response
     else:
         return JsonResponse({'error': 'Invalid login credentials!'}, status=401)
@@ -365,7 +365,8 @@ def lg(request):
 @csrf_protect
 def log_in(request):
     return lg(request)
-    
+
+@csrf_protect
 def login42(request):
     try:
         state = uuid.uuid4().hex
@@ -385,6 +386,7 @@ def login42(request):
 # callback function used to get the info from the 42 API
 @csrf_protect
 def callback(request):
+    print('in callback')
     code = request.GET.get('code')
     try:
         token_response = requests.post('https://api.intra.42.fr/oauth/token', data={
@@ -401,6 +403,7 @@ def callback(request):
         user_response = requests.get('https://api.intra.42.fr/v2/me', headers={
             'Authorization': f'Bearer {access_token}',
         })
+        print(user_response)
 
         user_data = user_response.json()
 
@@ -427,10 +430,11 @@ def callback(request):
             response.set_cookie('refresh_token', refresh_token, httponly=True, samesite='Lax', secure=True)
             response.set_cookie('access_token', access_token, httponly=True, samesite='Lax', secure=True)
             response.set_cookie('login42', secure=True)
-            
+
             return response
 
         User = get_user_model()
+        print(user_data)
         user = User.objects.create_user(
             username=user_data['login'],
             email=user_data['email'],
@@ -453,11 +457,11 @@ def callback(request):
             'my42ws': ws_token,
             'avatar': user.avatar.url
         }
-        
+
         response = render(request, 'index.html', response)
         response.set_cookie('refresh_token', refresh_token, httponly=True, samesite='Lax', secure=True)
         response.set_cookie('access_token', access_token, httponly=True, samesite='Lax', secure=True)
-        response.set_cookie('login42', secure=True)
+        response.set_cookie('login42', httponly=True, secure=True)
 
         return response
     except Exception as e:
@@ -724,7 +728,7 @@ def password(request, username):
                     user.refresh_from_db()
                 response = HttpResponse('Password changed successfully')
                 response.status_code = 200
-                
+
                 return response
             else:
                 response = HttpResponse('Incorrect password')
@@ -755,7 +759,7 @@ def email(request, username):
             user.save()
             response = HttpResponse('Email changed successfully')
             response.status_code = 200
-            
+
             return response
         else:
             response = HttpResponse("Invalid data")
@@ -779,7 +783,7 @@ def change_login(request, username):
                 user.login = form.cleaned_data['new_login']
                 user.username = form.cleaned_data['new_login']
                 user.save()
-                
+
                 response = HttpResponse('Login changed succesfully')
                 response.status_code = 200
                 return response
@@ -806,7 +810,7 @@ def name(request, username):
             user.save()
             response = HttpResponse('Name changed succesfully')
             response.status_code = 200
-            
+
             return response
         else:
             response = HttpResponse("Invalid data")
@@ -876,7 +880,7 @@ def friend(request, username):
 @csrf_protect
 def avatar(request, username):
     user = PlayersModel.objects.get(login=username)
-    
+
     user.avatar = request.FILES['id_file']
     user.save()
     return JsonResponse({"new_pp": True, "url": user.avatar.url})
