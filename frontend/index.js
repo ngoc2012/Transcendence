@@ -11,7 +11,6 @@ function    reload(path, isPopState = false) {
         main.lobby.game.close_room();
         main.lobby.game = null;
     }
-
     if (path === '/login') {
         main.load('/pages/login', () => main.log_in.events(isPopState));
     } else if (path === '/signup') {
@@ -29,7 +28,7 @@ function    reload(path, isPopState = false) {
         }
     } else if (path.startsWith('/profile/')){
         if (main.login !== '')
-            main.load_with_data('/profile/' + path.substring(9), () => main.profile.events(isPopState, path.substring(9)), {'user':path.substring(9), 'requester': main.login});
+            main.load_with_data('/profile/' + path.substring(9) +'/', () => main.profile.events(isPopState, path.substring(9)), {'user':path.substring(9), 'requester': main.login});
         else {
             main.load('/pages/login', () => main.log_in.events(false));
             main.set_status("You need to Log in or Sign up to access this page", false);
