@@ -54,14 +54,15 @@ services:
     build:
       context: ./ganache
       dockerfile: Dockerfile
+    env_file:
+     - .env
     ports:
       - "8545:8545"
     volumes:
       - ganache_db:/ganache_db
     networks:
       - network
-    # profiles:
-    #   - donotstart
+
 
   blockchain:
     container_name: blockchain
