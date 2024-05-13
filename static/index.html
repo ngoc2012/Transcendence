@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    {% load static %}
+    {% load replace_url %}
+
+    <link rel="stylesheet" href="{% static 'bootstrap-4.0.0-dist/css/bootstrap.css' %}">
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link href="https://fonts.googleapis.com/css2?family=Jersey+15&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+    <script src="{% static 'jquery-3.7.1.js' %}"></script>
+    <script src="{% static 'bootstrap-4.0.0-dist/js/bootstrap.bundle.js' %}"></script>
+    <script src="{% static 'index.js' %}" type="module"></script>
+    <script src="{% static 'qrcode.min.js' %}"></script>
+    <script src="{% static 'three.min.js' %}"></script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>Transcendence</title>
+
+    <style>
+        h {
+          margin-right:10px;
+        }
+
+      #dynamic-bg {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(120deg, #a6c0fe, #f68084);
+          filter: blur(8px);
+          z-index: -1;
+          transition: background 2s;
+      }
+
+      #status {
+        position: fixed;
+        top: calc(70%);
+        left: 50%;
+        transform: translateX(-50%);
+        display: none;
+        background-color: #dc3545;
+        color: white;
+        padding: 10px;
+        border-radius: 10px;
+        width: 25%;
+        text-align: center;
+        z-index: 1000;
+    }
+
+      #toggle-sidebar {
+          position: fixed;
+          top: 50%;
+          right: 0;
+          transform: translateY(-50%);
+          width: 40px;
+          height: 80px;
+          padding: 0;
+          border: none;
+          background: #ffffff7a;
+          color: white;
+          cursor: pointer;
+          z-index: 1050;
+          border-top-left-radius: 10px;
+          border-bottom-left-radius: 10px;
+          transition: right 0.3s ease-in-out;
+          outline: none;
+      }
+
+      #inviteContainer{
+        border: 1px solid #ffffff;
+        border-radius: 5px;
+        padding: 5px;
+        background-color: rgba(0, 0, 0, 0.562);
+        display: none;
+        width: 50%;
+      }
+      #inviteContainer .invite-notification{
+        display: block;
+      }
+
+      #inviteContainer .invite-notification p{
+        color: #ffffff;
+        word-break: keep-all;
+      }
+
+      .form-chat{
+        display: block;
+        width: 107%;
+        padding: 0.375rem 0.75rem;
+        font-size: 1rem;
+        line-height: 1.5;
+        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        border-radius: 10px;
+        border : 2px solid #000000;
+        color: #000000;
+        background-color: #ffffff;
+      }
+
+      #user-sidebar {
+          position: fixed;
+          top: 12%;
+          bottom: 10%;
+          right: -250px;
+          height: 85vh;
+          width: 250px;
+          background-color: #ffffff7a;
+          transition: right 0.3s ease-in-out;
+          border-top-left-radius: 10px;
+          border-bottom-left-radius: 5px;
+        }
+
+        #chat-log{
+            width: 200px;
+            height: 600px;
+            border-radius: 10px;
+            border: 2px solid rgba(255, 255, 255, 0.75);
+            color: #ffffff;
+            background-color: rgba(66, 66, 66, 0.5);
+            resize:none;
+            overflow-x: hidden;
+            overflow-y: scroll;
+        }
+
+        #chat-log::-webkit-scrollbar{
+          display: none;
+        }
+
+        #left-sidebar {
+          position: fixed;
+          top: 35%;
+          left: 0;
+          width: 70px;
+          background-color: #ffffff7a;
+          color: white;
+          transition: width 0.3s ease-in-out;
+          z-index: 1040;
+          overflow: hidden;
+          border-top-right-radius: 10px;
+          border-bottom-right-radius: 10px;
+      }
+
+      #left-sidebar .btn {
+          display: flex;
+          align-items: center;
+          justify-content: flex-start;
+          width: 100%;
+          padding: 0;
+          height: 40px;
+          color: #ffffff;
+          opacity: 100%;
+        }
+
+        #left-sidebar myicon {
+            flex: 0 0 auto;
+            display: flex;
+            justify-content: center;
+            width: 40px;
+            margin: 0;
+            padding: 0;
+            color: #ffffff;
+        }
+
+        #left-sidebar .text {
+          flex-grow: 1;
+          display: none;
+          justify-content: flex-end;
+          text-align: right;
+          padding-right: 5px;
+        }
+
+        #left-sidebar:hover .btn {
+            justify-content: center;
+        }
+
+        #left-sidebar:hover {
+          width: 210px;
+      }
+
+      #left-sidebar:hover .btn .text {
+          display: inline;
+      }
+
+      .btn myicon {
+         order: 1;
+        }
+
+        .btn .text {
+      order: 2;
+        }
+
+      .btn:hover myicon i {
+          animation: bounce 0.6s ease-in-out infinite;
+      }
+
+        @keyframes bounce {
+            0% {
+                transform: translateY(0);
+            }
+            25% {
+                transform: translateY(-1px);
+            }
+            50% {
+                transform: translateY(0);
+            }
+            75% {
+                transform: translateY(+1px);
+            }
+        }
+
+      /* MOBILE */
+      .mobile-sidebar {
+          position: fixed;
+          top: 85%;
+          transform: translateX(-50%);
+          width: 65%;
+          background-color: #ffffff7a;
+          color: white;
+          transition: width 0.3s ease-in-out;
+          z-index: 1040;
+          overflow: hidden;
+          border-radius: 10px;
+          /* display: flex; */
+          justify-content: center;
+          align-items: center;
+          margin-left: auto;
+          margin-right: auto;
+          display: none;
+      }
+
+      .mobile-sidebar myicon {
+            /* flex: 0 0 auto; */
+            /* display: flex; */
+            justify-content: center;
+            margin: 0;
+            padding: 0;
+            color: #ffffff;
+            text-align: center;
+        }
+
+        #mobile-sidebar .nav-item {
+          text-align: center;
+          justify-content: center;
+          width: 20%;
+          margin-left: 4%;
+          border-radius: 0;
+        }
+
+
+        @media screen and (max-width: 768px) {
+            #toggle-sidebar {
+                top: 90%;
+                width: 40px;
+                height: 40px;
+                border-top-left-radius: 0;
+                border-bottom-left-radius: 0;
+            }
+
+
+            .mobile-sidebar {
+              display: block;
+            }
+            #left-sidebar {
+              display: none;
+            }
+        }
+
+
+        #chat-log m{
+          word-break: break-word;
+        }
+
+        @media (max-width: 768px) {
+            #left-sidebar:hover {
+                width: 100%;
+            }
+
+            #left-sidebar .btn .text {
+                display: none;
+            }
+
+            #left-sidebar .btn {
+                justify-content: center;
+            }
+        }
+
+        .background-wrapper {
+          position: fixed;
+          top: 20px;
+          right: 20px;
+          background-color: #ffffff7a;
+          border-radius: 25px;
+          padding: 10px;
+          display: inline-block;
+      }
+
+
+      #chat-message-input {
+
+        border-radius: 10px;
+        border: 2px solid rgba(255, 255, 255, 0.75);
+        color: #ffffff;
+        background-color: rgba(66, 66, 66, 0.5);
+        }
+
+        #chat-message-input:hover {
+        border-radius: 10px;
+        border: 2px solid rgba(255, 255, 255, 0.90);
+        color: #ffffff;
+        background-color: rgba(66, 66, 66, 0.7);
+        }
+
+    </style>
+    <base href="/">
+  </head>
+
+  <body>
+    <div id="dynamic-bg"></div>
+
+    <div class="background-wrapper">
+        <div class="top-right-container">
+          <div class="d-flex align-items-center">
+            <img src="{% static 'media/chat.jpg' %}" id="picture" alt="User Icon" class="rounded-circle mx-2" style="width: 40px; height: 40px;">
+            <h><span id="name"></span></h>
+            <h><button id="profile" class="btn btn-info ml-2" type="button">Profile</button></h>
+            <h><button id="login" class="btn btn-primary ml-2">Log In</button></h>
+            <button id="signup" class="btn btn-success ml-2">Sign Up</button>
+          </div>
+        </div>
+    </div>
+
+    <div class="container">
+      <div class="row justify-content-center">
+          <div class="col-md-6"></div>
+      </div>
+      <div id="main_container" class="mt-3"></div>
+      <div id="status" class="mt-3"></div>
+    </div>
+
+  <div id="left-sidebar" class="left-sidebar">
+    <div class="p-3">
+        <ul class="nav flex-column">
+          <li class="nav-item">
+            <button id="homebar" class="btn btn-secondary btn-block mb-2" type="button">
+                <myicon><i class="fas fa-house-user" style="margin-right: 5px;"></i></myicon>
+                <span class="text">Home</span>
+            </button>
+          </li>
+          <li class="nav-item">
+              <button id="pong" class="btn btn-success btn-block mb-2" type="button">
+                  <myicon><i class="fas fa-table-tennis" style="margin-right: 5px;"></i></myicon>
+                  <span class="text">Pong</span>
+              </button>
+          </li>
+          <li class="nav-item">
+              <button id="tournament" class="btn btn-warning btn-block mb-2" type="button">
+                  <myicon><i class="fas fa-trophy" style="margin-right: 5px;"></i></myicon>
+                  <span class="text">Tournament</span>
+              </button>
+          </li>
+          <li class="nav-item">
+              <button id="tournament_history" class="btn btn-info btn-block mb-2" type="button">
+                  <myicon><i class="fab fa-ethereum" style="margin-right: 5px;"></i></myicon>
+                  <span class="text">Blockchain</span>
+              </button>
+          </li>
+        </ul>
+    </div>
+  </div>
+
+
+
+
+  <div id="mobile-sidebar" class="mobile-sidebar"  style="transform: scale(0.8);">
+    <div class="p-3">
+        <ul class="nav flex-row">
+          <li class="nav-item">
+            <button id="homebar2" class="btn btn-secondary btn-block mb-2" type="button">
+                <myicon><i class="fas fa-house-user" ></i></myicon>
+            </button>
+          </li>
+          <li class="nav-item">
+              <button id="pong2" class="btn btn-success btn-block mb-2" type="button">
+                  <myicon><i class="fas fa-table-tennis" ></i></myicon>
+              </button>
+          </li>
+          <li class="nav-item">
+              <button id="tournament2" class="btn btn-warning btn-block mb-2" type="button">
+                  <myicon><i class="fas fa-trophy" ></i></myicon>
+              </button>
+          </li>
+          <li class="nav-item">
+              <button id="tournament_history2" class="btn btn-info btn-block mb-2" type="button">
+                  <myicon><i class="fab fa-ethereum" ></i></myicon>
+              </button>
+          </li>
+        </ul>
+    </div>
+  </div>
+
+  <div id="user-sidebar">
+    <div class="p-3">
+        <h5 class="text-center mb-0">Chat</h5>
+        <ul id="chat_area" class="list-unstyled mt-0">
+        </ul>
+    </div>
+  </div>
+
+  <button id="toggle-sidebar">
+    <i class="fas fa-comment"></i>
+  </button>
+
+  <script>
+    var fromAddUser = {{ from_add_user|default:"false" }};
+    var error_user = "{{ error_user }}";
+    var tourid = "{{ id|default:'-1' }}";
+    var my42login = '{{ my42login }}';
+    var my42name = '{{ my42name }}';
+    var my42email = '{{ my42email }}';
+    var my42ws = '{{ my42ws }}';
+    var my42enable2fa = '{{ my42enable2fa }}';
+
+    function handleStatusChange(mutationsList, observer) {
+      for(let mutation of mutationsList) {
+        if (mutation.type === 'childList' && mutation.target.id === 'status') {
+          // console.log('Status changed:', mutation.target.innerText);
+          $('#status').stop(true, true);
+          $('#status').fadeIn().delay(200).fadeOut(2000);
+
+        }
+      }
+    }
+
+    const statusObserver = new MutationObserver(handleStatusChange);
+
+    const observerConfig = { childList: true, subtree: true };
+
+    statusObserver.observe(document.getElementById('status'), observerConfig);
+  </script>
+</body>
+
+</html>

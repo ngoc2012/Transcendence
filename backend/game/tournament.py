@@ -275,6 +275,13 @@ def tournament_local_verify(request):
             return JsonResponse({'error': 'Missing id'}, status=400)
 
         tournament = TournamentModel.objects.get(id=id)
+
+        num_participants_database = tournament.participants.all().count()
+        num_participants_local = len(tournament.participantsLocal)
+        total_participants = num_participants_database + num_participants_local
+        if total_participants <= 1:
+            return JsonResponse({'error': 'Not enought participants'}, status=401)
+
         tournament.ready = True
         tournament.save()
 

@@ -71,8 +71,8 @@ export class Main
             },
             error: (jqXHR, textStatus) => {
                 if (jqXHR.status === 401 && jqXHR.responseText === "Unauthorized - Token expired") {
-                    this.main.clearClient();
-					this.main.load('/pages/login', () => this.main.log_in.events());
+                    this.clearClient();
+					this.load('/pages/login', () => this.log_in.events());
 					return;
 				}
                 else
@@ -96,8 +96,8 @@ export class Main
             },
             error: (jqXHR) => {
                 if (jqXHR.status === 401 && jqXHR.responseText === "Unauthorized - Token expired") {
-                    this.main.clearClient();
-					this.main.load('/pages/login', () => this.main.log_in.events());
+                    this.clearClient();
+					this.load('/pages/login', () => this.log_in.events());
 					return;
 				}
                 // if (jqXHR.status === 401) {
@@ -155,7 +155,7 @@ export class Main
             url: 'logout/',
             method: 'POST',
             headers: {
-                'X-CSRFToken': this.csrftoken,
+                'X-CSRFToken': this.getCookie('csrftoken'),
             },
             success: (info) => {
                 if (typeof info === 'string')
@@ -307,5 +307,27 @@ export class Main
         this.lobby.ws = '';
         // this.twofat = '';
         this.secret_2fa = '';
+
+        var dom_log_in = document.getElementById('login');
+        if (dom_log_in) {
+            dom_log_in.style.display = "block";
+            dom_log_in.addEventListener("click", () => this.login_click());
+        }
+
+        var dom_signup = document.getElementById('signup');
+        if (dom_signup) {
+            dom_signup.style.display = "block";
+            dom_signup.addEventListener("click", () => this.signup_click());
+        }
+
+        var dom_logout = document.getElementById('logoutButton');
+        if (dom_logout) {
+            dom_logout.style.display = "none";
+        }
+        var dom_picture = document.getElementById('picture');
+        if (dom_picture){
+            dom_picture.src="static/media/chat.jpg"
+        }
+
     }
 }

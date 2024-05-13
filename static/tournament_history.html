@@ -1,0 +1,63 @@
+
+<head>
+<style>
+
+html, body {
+        overflow-y: auto !important;
+        display: block;
+        margin-top: 5%;
+}
+
+#selectedTournamentName {
+            background-color: rgba(255, 255, 255, 0.252);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px auto;
+            width: 100%;
+            text-align: center;
+        }
+
+    @media screen and (max-width: 768px) {
+      body, html {
+        /* margin-top: 15%; */
+        display: flex !important;
+      }
+    }
+</style>
+</head>
+<div class="row justify-content-center">
+    <div class="col-sm-12 col-md-8 col-lg-6 text-center">
+        <h2>Tournament History</h2>
+    </div>
+</div>
+<form>
+    <div class="form-group row justify-content-center">
+        <div class="col-sm-12 col-md-8 col-lg-6 text-left">
+            <label for="tournamentSelect" class="col-form-label">Select a Tournament</label>
+            <select class="form-control" id="tournamentSelect" name="tournaments">
+                {% for name in names %}
+                <option value="{{ name }}">{{ name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+    
+    <div class="form-group row justify-content-center">
+        <div class="col-sm-12 col-md-8 col-lg-6">
+            <div class="btn-group d-flex justify-content-center">
+                <button id="Select" class="btn btn-primary mr-2" type="button">Select</button>
+            </div>
+        </div>
+    </div>
+    <div class="form-group row justify-content-center">
+        <div class="col-sm-12 col-md-8 col-lg-6 text-center">
+            <div id="selectedTournamentName"></div>
+        </div>
+    </div>
+</form>
+
+
+</div>
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
