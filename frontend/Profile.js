@@ -131,6 +131,10 @@ export class Profile{
     }
 
     alias_confirm(){
+        if (this.dom_textfield.value === ''){
+            this.main.set_status("All fields are required", false);
+            return;
+        }
         $.ajax({
             url: '/profile/' + this.main.login + '/alias/',
             method: 'POST',

@@ -245,6 +245,7 @@ export class Main
 
             new_button.style.margin = "0 auto";
             new_input.id = "chat-message-input";
+            new_input.autocomplete = "off";
             new_input.type = "text";
             new_input.size = "13";
             new_input.className = "form-chat  mt-1";
