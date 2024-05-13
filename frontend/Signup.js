@@ -72,9 +72,9 @@ export class Signup
                     var dom_signup = document.getElementById('signup');
                     if (dom_signup) {
                         dom_signup.style.display = "none";
-                        dom_signup.insertAdjacentHTML('afterend', '<button id="logoutButton" class="btn btn-danger">Log Out</button>');
                         var dom_logout = document.getElementById('logoutButton');
                         if (dom_logout) {
+                            dom_logout.style.display = 'inline-block'
                             dom_logout.addEventListener('click', () => this.main.logout());
                         }
                     }
@@ -82,6 +82,7 @@ export class Signup
                         this.display2FASetup(info.secret);
                     else
                         this.main.load('/lobby', () => this.main.lobby.events());
+                    console.log("ma queue");
                 }
             },
             error: (jqXHR, textStatus, errorThrown) => {
