@@ -609,13 +609,12 @@ export class Lobby
                         <button id="${user.login}_invite" class="btn btn-info btn-sm ml-2" type="button">Invite</button>
                     </div>
                 `;
+                container.innerHTML += userHtml;                
+                counter++;
+            });
 
-
-                container.innerHTML += userHtml;
-
-
+            users.forEach((user, index) =>{
                 const inviteButton = document.getElementById(user.login + '_invite');
-                const profileLink = document.getElementById(user.login + '_profile');
 
                 if (inviteButton) {
                     inviteButton.addEventListener('click', () => {
@@ -626,19 +625,23 @@ export class Lobby
                         }));
                     });
                 }
+            });
+
+            users.forEach((user, index) =>{
+                const profileLink = document.getElementById(user.login + '_profile');
 
                 if (profileLink) {
                     profileLink.addEventListener('click', () => {
                         this.main.find_profile(this.main.login, user.login);
                     });
                 }
-                counter++;
             });
 
             users.forEach((user, index) =>{
-                if (this.main.login === user.login)
-                    return;
                 const button = document.getElementById(user.login + '_add-friend');
+                if (this.main.login === user.login){
+                    return;
+                }
                 if (button)
                     this.main.get_friend(this.main.login, user.login, button);
             })

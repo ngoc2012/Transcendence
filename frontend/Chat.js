@@ -41,12 +41,14 @@ export class Chat{
 			success: (info, xhr) => {
 				if (xhr.status === 302)
 					return;
-				this.main.chat_socket.send(JSON.stringify({
-					'message': message,
-					'user': this.main.login,
-					'room' : room,
-					'type': 'chat_message'
-				}));
+				if (this.main.chat_socket.readyState !== -1){
+					this.main.chat_socket.send(JSON.stringify({
+						'message': message,
+						'user': this.main.login,
+						'room' : room,
+						'type': 'chat_message'
+					}));
+				}
 			},
 			error: (jqXHR) =>{
 				if (jqXHR.status === 401 && jqXHR.responseText === "Unauthorized - Token expired") {
