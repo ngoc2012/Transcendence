@@ -172,6 +172,8 @@ GOOGLELOG = 'templog'
 GOOGLENAME = 'tempname'
 CODE = ''
 
+APPEND_SLASH = False
+
 # AUTH USER CONFIG
 AUTH_USER_MODEL = "accounts.PlayersModel"
 
