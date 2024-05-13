@@ -9,7 +9,6 @@ export class Login
     }
 
     events(isPopState) {
-        this.main.checkcsrf();
         if (!isPopState)
             window.history.pushState({page: '/login'}, '', '/login');
 

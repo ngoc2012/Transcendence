@@ -23,8 +23,6 @@ export class Lobby
             this.main.lobby.game = null;
         }
 
-        this.main.checkcsrf();
-
         if (this.main.login != '') {
             this.rooms_update();
         }
@@ -637,7 +635,7 @@ export class Lobby
                         }));
                     });
                 }
-                
+
                 if (profileLink) {
                     profileLink.addEventListener('click', () => {
                         this.main.find_profile(this.main.login, user.login);

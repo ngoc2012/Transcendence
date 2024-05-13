@@ -4,7 +4,6 @@ export class Profile{
     }
 
     events(isPopState, l){
-        this.main.checkcsrf();
         if (this.main.lobby.game && this.main.lobby.game !== null)
         {
             this.main.lobby.game.close_room();
@@ -53,7 +52,7 @@ export class Profile{
             }
             if (this.dom_name) {
                 this.dom_name.style.display = 'none';
-            }            
+            }
         }
         this.create_submit_pp();
     }

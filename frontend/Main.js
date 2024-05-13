@@ -22,7 +22,6 @@ export class Main
     status = '';
     secret_2fa = '';
     history_stack = [];
-    csrftoken = '';
     picture = '';
     chat = '';
     chat_socket = -1;
@@ -70,13 +69,12 @@ export class Main
                     callback();
                 }
             },
-            error: (jqXHR, textStatus, errorThrown) => {
-                console.log('load error')
-                console.log('jqXHR.status')
-                if (jqXHR.status === 401) {
-                    // this.clearClient();
-                    this.login_click();
-                }
+            error: (jqXHR, textStatus) => {
+                if (jqXHR.status === 401 && jqXHR.responseText === "Unauthorized - Token expired") {
+                    this.main.clearClient();
+					this.main.load('/pages/login', () => this.main.log_in.events());
+					return;
+				}
                 else
                 {
                     this.dom_container.innerHTML = textStatus;
@@ -97,10 +95,15 @@ export class Main
                 }
             },
             error: (jqXHR) => {
-                if (jqXHR.status === 401) {
-                    this.clearClient();
-                    this.login_click();
-                }
+                if (jqXHR.status === 401 && jqXHR.responseText === "Unauthorized - Token expired") {
+                    this.main.clearClient();
+					this.main.load('/pages/login', () => this.main.log_in.events());
+					return;
+				}
+                // if (jqXHR.status === 401) {
+                //     this.clearClient();
+                //     this.login_click();
+                // }
             }
         });
     }
@@ -136,17 +139,15 @@ export class Main
                 }
             }
         }
-        return cookieValue;
-    }
-
-    checkcsrf() {
-        if (!this.csrftoken) {
+        if (cookieValue === null) {
             fetch('/get-csrf/')
             .then(response => response.json())
             .then(data => {
                 this.csrftoken = data.csrfToken;
+                return decodeURIComponent(data.csrfToken);
             });
         }
+        return cookieValue;
     }
 
     logout() {

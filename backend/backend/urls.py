@@ -47,7 +47,7 @@ urlpatterns = [
     path('tournament/local/start/', views.tournament_local_start, name='tournament_local_start'),
     path('validate-session/', views.validate_session, name='validate_session'),
     path('login42/', views.login42, name='login42'),
-    re_path(r'^.*$', views.redirect, name='redirect'),
+    # re_path(r'^.*$', views.redirect, name='redirect'),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
