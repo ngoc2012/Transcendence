@@ -43,8 +43,11 @@ export class Pong
         this.pmBox = false;
         this.joined = false;
         this.playerLocal = false;
-        this.touchStartY = 0;
-        this.touchEndY = 0;
+        this.touchStart = [0, 0];
+        this.touchEnd = [0, 0];
+        this.set_state_available = true;
+        this.delay = 40;
+
     }
 
     reset_ratio() {
@@ -58,7 +61,6 @@ export class Pong
     }
 
 	init(isPopState) {
-
         if (!isPopState)
             window.history.pushState({page: '/pong/' + this.room.id}, '', '/pong/' + this.room.id);
 
@@ -151,22 +153,35 @@ export class Pong
         });
 
         if (!this.localTour) {
-
             document.addEventListener("touchstart", (event) => {
-                this.touchStartY = event.touches[0].clientY;
+                var touch = event.touches[0];
+                this.touchStart[0] = touch.clientX;
+                this.touchStart[1] = touch.clientY;
             });
-
             document.addEventListener("touchend", (event) => {
-                this.touchEndY = event.changedTouches[0].clientY;
-                let n = Math.floor(Math.abs(this.touchEndY - this.touchStartY) / (this.ctx.canvas.height / 10));
-                if (this.touchEndY - this.touchStartY < 0)
+                var touch = event.touches[0];
+                this.touchEnd[0] = touch.clientX;
+                this.touchEnd[1] = touch.clientY;
+                let nx = Math.floor(Math.abs(this.touchEnd[0] - this.touchStart[0]) / (this.ctx.canvas.width / 20));
+                let ny = Math.floor(Math.abs(this.touchEnd[1] - this.touchStart[1]) / (this.ctx.canvas.height / 10));
+                if (this.touchEnd[0] - this.touchStart[0] < 0)
                 {
-                    for (let i = 0; i < n; i++)
+                    for (let i = 0; i < nx; i++)
+                        this.set_state(0, "left");
+                }
+                else
+                {
+                    for (let i = 0; i < nx; i++)
+                        this.set_state(0, "right");
+                }
+                if (this.touchEnd[1] - this.touchStart[1] < 0)
+                {
+                    for (let i = 0; i < ny; i++)
                         this.set_state(0, "up");
                 }
                 else
                 {
-                    for (let i = 0; i < n; i++)
+                    for (let i = 0; i < ny; i++)
                         this.set_state(0, "down");
                 }
             });
@@ -175,7 +190,7 @@ export class Pong
                     event.preventDefault();
                 }
             })
-            document.addEventListener('keyup', (event) => {
+            document.addEventListener('keydown', (event) => {
                 if (["ArrowUp", "ArrowDown"].includes(event.key)) {
                     event.preventDefault();
                 }
@@ -218,7 +233,7 @@ export class Pong
                 }
             });
         } else {
-            document.addEventListener('keyup', (event) => {
+            document.addEventListener('keydown', (event) => {
                 switch (event.key) {
                     case 'q':
                         this.set_state(0, "up");
@@ -627,9 +642,13 @@ export class Pong
     }
 
     set_state(i, e) {
+        if (!this.set_state_available)
+            return;
+        this.set_state_available = false;
         if (this.players[i].sk !== -1 && this.players[i].sk.readyState === 1) {
             this.players[i].sk.send(e);
         }
+        setTimeout(() => {this.set_state_available = true;}, this.delay);
     }
 
     preMatchBox(player1, player2) {

@@ -12,6 +12,8 @@ export class Lobby
         this.game = null;
         this.tournament = null;
         this.ws = null;
+        this.delay = 1000;
+        this.new_game_available = true;
     }
 
     events(isPopState) {
@@ -92,7 +94,9 @@ export class Lobby
     }
 
     new_game(game) {
-        // console.log('new game');
+        if (!this.new_game_available)
+            return;
+        this.new_game_available = false;
         if (this.main.login === '')
         {
             this.main.set_status('Please login or sign up', false);
@@ -100,6 +104,7 @@ export class Lobby
         }
         if (this.main.lobby.game && this.main.lobby.game !== null)
         {
+            console.log('closing room', this.main.lobby.game);
             this.main.lobby.game.close_room();
             this.main.lobby.game = null;
         }
@@ -123,8 +128,6 @@ export class Lobby
                         this.socket.send(JSON.stringify({
                             type: 'update'
                         }));
-                    else
-                        return;
                     if (typeof info === 'string')
                     {
                         this.main.set_status(info, true);
@@ -134,11 +137,6 @@ export class Lobby
                     {
                         switch (info.game) {
                             case 'pong':
-                                if (this.main.lobby.game && this.main.lobby.game !== null)
-                                {
-                                    this.main.lobby.game.close_room();
-                                    this.main.lobby.game = null;
-                                }
                                 this.pong_game(info, false);
                                 break;
                         }
@@ -155,6 +153,7 @@ export class Lobby
             });
         } else
             this.main.load('/pages/login', () => this.main.log_in.events(false));
+        setTimeout(() => {this.new_game_available = true;}, this.delay);
     }
 
     tournament_history_click() {
