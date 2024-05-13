@@ -235,10 +235,10 @@ export class Pong
         } else {
             document.addEventListener('keydown', (event) => {
                 switch (event.key) {
-                    case 'q':
+                    case 'ArrowUp':
                         this.set_state(0, "up");
                         break;
-                    case 'a':
+                    case 'ArrowDown':
                         this.set_state(0, "down");
                         break;
                 }
@@ -328,7 +328,7 @@ export class Pong
                         this.connect(i);
                         if (this.players[i].sk !== -1)
                         {
-                            this.keyboard_layout += 'olpk';
+                            this.keyboard_layout += 'wsqa';
                         }
                         this.preMatchBox(this.localTournament.player1, this.localTournament.player2);
                     }
@@ -694,12 +694,12 @@ export class Pong
         matchBox.appendChild(matchText);
 
         let instruct1 = document.createElement('p');
-        instruct1.textContent = `${player1} controls: 'q' = up, 'a' = down`;
+        instruct1.textContent = `${player1} controls: 'Arrow Up' = up, 'Arrow Down' = down`;
         instruct1.style.cssText = 'font-family: "Poppins", sans-serif; font-weight: 400; font-style: normal; color: white;';
         matchBox.appendChild(instruct1);
 
         let instruct2 = document.createElement('p');
-        instruct2.textContent = `${player2} controls: 'o' = up, 'l' = down`;
+        instruct2.textContent = `${player2} controls: 'w' = up, 's' = down`;
         instruct2.style.cssText = 'font-family: "Poppins", sans-serif; font-weight: 400; font-style: normal; color: white;';
         matchBox.appendChild(instruct2);
 
