@@ -131,9 +131,6 @@ def tournament_local_result(request):
     except ValueError:
         return JsonResponse({'error': 'Invalid input for scores. Please provide numeric values.'}, status=400)
     except ObjectDoesNotExist:
-        print('object not found')
-        print(tournament)
-        print(match)
         return JsonResponse({'error': 'Room or match not found.'}, status=404)
     except Exception as e:
         return JsonResponse({'error': 'An unexpected error occurred: {}'.format(str(e))}, status=400)

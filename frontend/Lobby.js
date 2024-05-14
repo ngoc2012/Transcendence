@@ -342,12 +342,10 @@ export class Lobby
             var list_user = document.getElementById('user_list');
             var chat_log = document.querySelector('#chat-log');
             chat_log.scrollTop
-            console.log(data)
             if (data.type === 'update_divs'){
                 this.update_div(data);
             }
             else if (!data.type){
-                console.log("on entre")
                 let new_element = document.createElement("a");
                 new_element.className = 'user_chat';
                 new_element.innerHTML = '<strong>' + data.message + '</strong><br>';
@@ -617,7 +615,7 @@ export class Lobby
                         <button id="${user.login}_invite" class="btn btn-info btn-sm ml-2" type="button">Invite</button>
                     </div>
                 `;
-                container.innerHTML += userHtml;                
+                container.innerHTML += userHtml;
                 counter++;
             });
 
