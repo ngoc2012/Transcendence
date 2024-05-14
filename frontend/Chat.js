@@ -55,7 +55,6 @@ export class Chat{
 					this.main.load('/pages/login', () => this.main.log_in.events());
 					return;
 				}
-				console.error('Invalid data sent');
 			}
 		});
         div.value = '';

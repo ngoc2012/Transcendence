@@ -131,12 +131,10 @@ export class Signup
                     }
                 },
                 error: function(errorThrown) {
-                    // console.error('Error setting up 2FA: ', errorThrown);
                     this.main.set_status('Error setting up 2FA: ' + errorThrown, false);
                 }
             });
         } else {
-            // console.log('Login required');
             this.main.load('/pages/login', () => this.main.log_in.events());
         }
     }

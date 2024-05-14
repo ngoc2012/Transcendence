@@ -221,7 +221,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         var dom_logout = document.getElementById('logoutButton');
                         if (dom_logout) {
                             // dom_logout.classList.remove("hidden");
-                            console.log("coucou index 218")
                             dom_logout.style.display = 'inline-block'
                             // dom_logout.addEventListener('click', () => this.main.logout());
                         }
@@ -265,11 +264,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     return null;
                 }
             } else {
-                // console.error('Session validation request failed:', response.statusText);
                 return null;
             }
         } catch (error) {
-            // console.error('Error during session validation:', error);
             return null;
         }
     }

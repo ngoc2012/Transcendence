@@ -51,7 +51,6 @@ def room_list(rooms):
 
 @sync_to_async
 def close_connection(data):
-    # print(data['login_id'])
     return json.dumps({
         "type": 'close',
         "login_id": data['login_id']
@@ -143,7 +142,6 @@ class RoomsConsumer(AsyncWebsocketConsumer):
             try:
                 data = json.loads(text_data)
             except ValueError as e:
-                # print(f"Invalid JSON: {e}")
                 await self.channel_layer.group_send(
                     self.group_name,
                     {

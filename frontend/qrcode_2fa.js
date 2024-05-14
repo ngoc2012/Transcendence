@@ -34,7 +34,6 @@ export class qrcode_2fa
             return;
         }
         const csrftoken = this.main.getCookie('csrftoken');
-        // console.log(csrftoken)
         if (csrftoken) {
             $.ajax({
                 url: '/verify_qrcode/',
@@ -51,7 +50,6 @@ export class qrcode_2fa
                         this.main.set_status(info, true);
                         this.main.login.state = 2;
                     } else if (info.result === '1') {
-                        // console.log("good code")
                         if (this.tournament) {
                             this.main.load('/tournament/local', () => this.main.lobby.tournament.eventsTwoFA(this.login));
                             return;

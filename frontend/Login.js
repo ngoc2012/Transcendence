@@ -123,7 +123,6 @@ export class Login
             error: (xhr, textStatus, errorThrown) => {
                 if (xhr.responseJSON && xhr.responseJSON.error) {
                     this.main.set_status(xhr.responseJSON.error, false);
-                    // console.log( "erreur = ", xhr.responseJSON.error)
                 } else {
                     this.main.set_status('An error occurred during the request.', false);
                 }
