@@ -691,11 +691,11 @@ export class Pong
         document.body.appendChild(matchBox);
 
         const leftbar = document.getElementById('left-sidebar');
-        leftbar.style.cssText = "z-index: 98;"
+        leftbar.style.cssText += "z-index: 98;"
         const mobilebar = document.getElementById('mobile-sidebar');
-        mobilebar.style.cssText = "z-index: 98;"
+        mobilebar.style.cssText += "z-index: 98;"
         const togglebar = document.getElementById('toggle-sidebar');
-        togglebar.style.cssText = "z-index: 98;"
+        togglebar.style.cssText += "z-index: 98;"
 
         let matchText = document.createElement('p');
         matchText.textContent = 'Match can start whenever you are ready!';
@@ -725,11 +725,11 @@ export class Pong
         startButton.onclick = () => {
             canvas.style.filter = '';
             const leftbar = document.getElementById('left-sidebar');
-            leftbar.style.cssText = "z-index: 100;"
+            leftbar.style.cssText += "z-index: 100;"
             const mobilebar = document.getElementById('mobile-sidebar');
-            mobilebar.style.cssText = "z-index: 100;"
+            mobilebar.style.cssText += "z-index: 100;"
             const togglebar = document.getElementById('toggle-sidebar');
-            togglebar.style.cssText = "z-index: 100;"
+            togglebar.style.cssText += "z-index: 100;"
             document.body.removeChild(backdrop);
             document.body.removeChild(matchBox);
             this.pmBox = false;
@@ -757,11 +757,11 @@ export class Pong
 
 
         const leftbar = document.getElementById('left-sidebar');
-        leftbar.style.cssText = "z-index: 98;"
+        leftbar.style.cssText += "z-index: 98;"
         const mobilebar = document.getElementById('mobile-sidebar');
-        mobilebar.style.cssText = "z-index: 98;"
+        mobilebar.style.cssText += "z-index: 98;"
         const togglebar = document.getElementById('toggle-sidebar');
-        togglebar.style.cssText = "z-index: 98;"
+        togglebar.style.cssText += "z-index: 98;"
 
         let winBox = document.createElement('div');
         winBox.setAttribute('id', 'winBox');
@@ -786,11 +786,11 @@ export class Pong
         backButton.onclick = () => {
             removeElements();
             const leftbar = document.getElementById('left-sidebar');
-            leftbar.style.cssText = "z-index: 100;"
+            leftbar.style.cssText += "z-index: 100;"
             const mobilebar = document.getElementById('mobile-sidebar');
-            mobilebar.style.cssText = "z-index: 100;"
+            mobilebar.style.cssText += "z-index: 100;"
             const togglebar = document.getElementById('toggle-sidebar');
-            togglebar.style.cssText = "z-index: 100;"
+            togglebar.style.cssText += "z-index: 100;"
             this.quit();
         };
         winBox.appendChild(backButton);
