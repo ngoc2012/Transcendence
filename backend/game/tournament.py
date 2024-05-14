@@ -269,36 +269,36 @@ def tournament_local_verify(request):
     try:
         data = json.loads(request.body)
         id = data.get('id')
-        print(data)
+        # print(data)
 
         if not id:
             return JsonResponse({'error': 'Missing id'}, status=400)
 
         tournament = TournamentModel.objects.get(id=id)
-        print(tournament)
+        # print(tournament)
 
         num_participants_database = tournament.participants.all().count()
         num_participants_local = len(tournament.participantsLocal)
         total_participants = num_participants_database + num_participants_local
         if total_participants <= 1:
             return JsonResponse({'error': 'Not enought participants'}, status=401)
-        print(total_participants)
+        # print(total_participants)
 
         tournament.ready = True
         tournament.save()
 
         if not tournament.owner == request.user:
-            print('error owner')
+            # print('error owner')
             return JsonResponse({'error': 'Owner not found'}, status=404)
 
         name = tournament.name
-        print(name)
+        # print(name)
         url = f"http://blockchain:9000/add_tournament/{name}"
-        print(url)
+        # print(url)
         response = requests.post(url)
-        print(response)
-        print(response.raise_for_status())
-        print('ok raise')
+        # print(response)
+        response.raise_for_status()
+        # print('ok raise')
 
         for participant in tournament.participants.all():
             add_player_to_blockchain(tournament.name, check_alias_from_login(participant.login))
