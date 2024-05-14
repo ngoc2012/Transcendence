@@ -199,13 +199,7 @@ export class Pong
                         this.set_state(0, "down");
                 }
             });
-            // document.addEventListener('keydown', (event) => {
-            //     if (["w", "s"].includes(event.key)) {
-            //         event.preventDefault();
-            //     }
-            // })
             document.addEventListener('keyup', (event) => {
-                // console.log('keyup', event.key);
                 if (["w", "s"].includes(event.key)) {
                     event.stopPropagation();
                 }
@@ -240,8 +234,6 @@ export class Pong
                         index = index % 4;
                         if (index < 2 || (index >= 2 && this.power_play))
                             this.players[i_player][commands[index]] = false;
-                            // keydown(this, i_player, commands[index]);
-                            // this.set_state(i_player, commands[index]);
                     }
 
                 }
@@ -336,7 +328,6 @@ export class Pong
                         index = index % 4;
                         if (index < 2 || (index >= 2 && this.power_play))
                             keydown(this, i_player, commands[index]);
-                            // this.set_state(i_player, commands[index]);
                     }
 
                 }
@@ -726,25 +717,9 @@ export class Pong
     }
 
     set_state(i, e) {
-        // let directions = ['up', 'down', 'left', 'right'];
-        // if (directions.includes(e))
-        // {
-        //     if (this.players[i].sk !== -1 && this.players[i].sk.readyState === 1) {
-        //         this.players[i].sk.send(e);
-        //     }
-        //     // console.log('set_state', i, e);
-        //     return;
-        // }
-        // if (!this.set_state_available)
-        //     return;
-        // this.set_state_available = false;
         if (this.players[i].sk !== -1 && this.players[i].sk.readyState === 1) {
             this.players[i].sk.send(e);
         }
-        // console.log('set_state', i, e);
-        // let directions = ['up', 'down', 'left', 'right'];
-        // if (!directions.includes(e))
-        // setTimeout(() => {this.set_state_available = true;}, this.delay);
     }
 
     preMatchBox(player1, player2) {
