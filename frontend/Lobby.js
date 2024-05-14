@@ -342,8 +342,18 @@ export class Lobby
             var list_user = document.getElementById('user_list');
             var chat_log = document.querySelector('#chat-log');
             chat_log.scrollTop
+            console.log(data)
             if (data.type === 'update_divs'){
                 this.update_div(data);
+            }
+            else if (!data.type){
+                console.log("on entre")
+                let new_element = document.createElement("a");
+                new_element.className = 'user_chat';
+                new_element.innerHTML = '<strong>' + data.message + '</strong><br>';
+		        document.querySelector('#chat-log').appendChild(new_element);
+                let chatLog = document.getElementById("chat-log");
+                chatLog.scrollTop = chatLog.scrollHeight;
             }
             else if (data.type === 'chat_message'){
                 let new_element = document.createElement("a");
