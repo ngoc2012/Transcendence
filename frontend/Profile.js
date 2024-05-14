@@ -555,6 +555,11 @@ export class Profile{
             },
             success: (info)=>{
                 this.main.set_status(info, true);
+                this.main.chat_socket.send(JSON.stringify({
+                    'type': 'connection_update',
+                    'new_user': data.sender,
+                    'old_user': data.sender
+                }))
             },
             error: (info, jqXHR)=>{
                 this.main.set_status(info.responseText, false);
