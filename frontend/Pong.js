@@ -21,6 +21,8 @@ async function closeSocket(websocket) {
 
 }
 
+function keydown(player, )
+
 export class Pong
 {
     constructor(m, l, r, t = null, localTournament = null, localTour = false, id = null) {
@@ -33,7 +35,11 @@ export class Pong
         this.keyboard_layout = "";
         this.players = [{
             'id': this.room.player_id,
-            'sk': -1
+            'sk': -1,
+            'up': false,
+            'down': false,
+            'left': false,
+            'right': false
         }];
         this.tournament = t;
         this.localTournament = localTournament;
@@ -191,7 +197,8 @@ export class Pong
                 }
                 switch (event.key) {
                     case 'w':
-                        this.set_state(0, "up");
+                        // this.set_state(0, "up");
+
                         break;
                     case 's':
                         this.set_state(0, "down");
