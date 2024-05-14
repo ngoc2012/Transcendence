@@ -79,9 +79,15 @@ if (my42login !== null && my42login !== "" && my42email !== "" && my42ws != "")
     main.name = my42name;
     main.dom_name.innerHTML = main.name;
     main.login42 = true;
+    main.picture = my42avatar;
     var dom_log_in = document.getElementById('login');
     if (dom_log_in) {
         dom_log_in.style.display = "none";
+    }
+
+    var dom_picture = document.getElementById('picture');
+    if (dom_picture){
+        dom_picture.src = main.picture.replace('/app/frontend/', '/static/');
     }
 
     var dom_signup = document.getElementById('signup');
