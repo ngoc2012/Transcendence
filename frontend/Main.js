@@ -231,10 +231,8 @@ export class Main
 
 
     make_chat(chat_area){
-        if (this.login != ''){
-                chat_area.innerHTML = '';
-            if (document.getElementById('chat-log'))
-                return;
+        if (this.login != '' && !document.getElementById('chat-log')){
+            chat_area.innerHTML = '';
             let new_element = document.createElement("div");
             let new_chatbox = document.createElement("div");
             let new_textarea = document.createElement('div');
