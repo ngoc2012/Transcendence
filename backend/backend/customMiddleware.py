@@ -18,11 +18,9 @@ class JWTMiddleware(MiddlewareMixin):
         try:
             resolve(request.path_info)
         except Resolver404:
-            # print('404 Not Found: ' + request.path_info)
             return HttpResponseRedirect('/')
 
         if '/callback/' in request.path:
-            print('callback')
             return self.process_callback(request)
 
         if request.headers.get('X-Internal-Request') == 'true' or request.path in self.get_unauthenticated_paths() or '/game/close/' in request.path or '/admin/' in request.path or '/pong/' in request.path or '/media/' in request.path:
@@ -31,8 +29,7 @@ class JWTMiddleware(MiddlewareMixin):
 
         access_token = request.COOKIES.get('access_token')
         if not access_token:
-            print('no access token middlware')
-            return self.return_lobby()
+            return self.return_lobby(request)
 
         jti = None
 
@@ -40,13 +37,11 @@ class JWTMiddleware(MiddlewareMixin):
             payload = jwt.decode(access_token, settings.JWT_SECRET_KEY, algorithms=["HS256"])
             jti = payload.get("jti")
             if not jti or cache.get(jti):
-                print('no jti or access token in cache middleware')
-                return self.return_lobby()
+                return self.return_lobby(request)
 
             user = self.get_user(payload.get('user_id'))
             if not user:
-                print('no user found middleware 2')
-                return self.return_lobby()
+                return self.return_lobby(request)
 
             request.user = user
             return None
@@ -54,11 +49,9 @@ class JWTMiddleware(MiddlewareMixin):
         except jwt.ExpiredSignatureError:
             if jti:
                 cache.set(jti, "revoked", timeout=None)
-            print('Expired Token')
             return self.handle_refresh_token(request)
         except jwt.InvalidTokenError:
-            print('Invalid Token')
-            return self.return_lobby()
+            return self.return_lobby(request)
 
     def process_exception(self, request, exception):
         if isinstance(exception, ObjectDoesNotExist):
@@ -68,18 +61,15 @@ class JWTMiddleware(MiddlewareMixin):
         try:
             user = User.objects.get(id=user_id)
         except User.DoesNotExist:
-            print('no user found middleware 3')
-            return self.return_lobby()
+            return self.return_lobby(request)
         if isinstance(user, AnonymousUser):
-            print('no user found middleware 4')
-            return self.return_lobby()
+            return self.return_lobby(request)
         return user
 
     def handle_refresh_token(self, request):
         refresh_token = request.COOKIES.get('refresh_token')
         if not refresh_token:
-            print('no refresh token')
-            return self.return_lobby()
+            return self.return_lobby(request)
 
         jti = None
 
@@ -98,7 +88,6 @@ class JWTMiddleware(MiddlewareMixin):
                 request.user = user
                 if jti:
                     cache.set(jti, "revoked", timeout=None)
-                print('New tokens generated after expired access token')
                 return None
             else:
                 return self.return_lobby()
@@ -187,8 +176,7 @@ class JWTMiddleware(MiddlewareMixin):
         else:
             return  self.return_lobby()
 
-    def return_lobby(self):
-        # print('return 401 middleware')
+    def return_lobby(self, request):
         response = HttpResponse('Unauthorized - Token expired', status=401)
         response.delete_cookie('access_token')
         response.delete_cookie('refresh_token')

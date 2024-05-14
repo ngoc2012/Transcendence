@@ -12,6 +12,7 @@ class PlayersModel(AbstractUser):
     session_id = models.CharField(max_length=40, null=True, blank=True)
     elo = models.IntegerField(default=1500)
     history = models.ManyToManyField(MatchModel, symmetrical=False, blank=True)
+    previous_status = models.CharField(max_length=8, default='Offline')
     online_status = models.CharField(max_length=8, default='Offline')
     tourn_alias = models.CharField(max_length=255, default='')
     friends = models.ManyToManyField("self", blank=True)

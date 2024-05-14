@@ -55,20 +55,15 @@ def get_info(consumer):
     try:
         consumer.room = RoomsModel.objects.get(id=consumer.room_id)
     except ObjectDoesNotExist:
-        # print(f"Room with ID {consumer.room_id} does not exist.")
         return False
     except MultipleObjectsReturned:
-        # print(f"Many rooms with ID {consumer.room_id} exist.")  
         return False
     try:
         consumer.player = PlayersModel.objects.get(id=consumer.player_id)
     except ObjectDoesNotExist:
-        # print(f"Player with ID {consumer.player_id} does not exist.")   
         return False
     except MultipleObjectsReturned:
-        # print(f"Many players with ID {consumer.player_id} exist.")  
         return False
-    # print(f"Player {consumer.player_id} connected to room {consumer.room_id}.")
     return True
 
 @sync_to_async
@@ -122,7 +117,6 @@ def get_win_data(consumer):
 
 @sync_to_async
 def end_game(consumer):
-    # print(f"Ending game in room {consumer.room_id}.")
     if cache.get(consumer.k_x) <= 0:
         cache.set(consumer.k_score1, cache.get(consumer.k_score1) + 1)
     else:
@@ -161,7 +155,6 @@ def quit(consumer):
         consumer.room.delete()
         return
     if len(players) == 2 and cache.get(consumer.k_ai):
-        # print("Delete all")
         for i in ['x', 'y', 'dx', 'dy', 'ddy', 'ai', 'pow', 'score0', 'score1', 'started', 'server', 'team0', 'team1', 'all']:
             cache.delete(getattr(consumer, "k_" + i))
         for i in ['x', 'y']:
@@ -222,7 +215,6 @@ def random_choice(a, exclude):
     return random.choice(filtered)
 
 def change_server(consumer):
-    # print(f"Changing server in room {consumer.room_id}.")
     players = cache.get(consumer.k_all)
     if players == None or len(players) == 0:
         return

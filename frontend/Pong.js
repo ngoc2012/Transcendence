@@ -88,11 +88,6 @@ export class Pong
             this.draw.execute(this.draw.data);
             this.draw.update_3D(this.draw.data);
             // Your code to be executed on window resize
-            // console.log('Window resized to: ' + window.innerWidth + 'x' + window.innerHeight);
-        });
-
-        window.addEventListener("beforeunload", () => {
-            // console.log("Are you sure you want to leave this page?");
         });
 
         this.pongThreeJS = document.getElementById('pongThreeJS');

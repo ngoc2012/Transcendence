@@ -541,7 +541,6 @@ export class Profile{
     }
 
     accept_request(data){
-        // console.log('on accepte pour ' + this.main.login);
         $.ajax({
             url: '/profile/' + data.sender + '/add_friend/',
             method: 'POST',

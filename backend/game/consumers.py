@@ -51,7 +51,6 @@ def room_list(rooms):
 
 @sync_to_async
 def close_connection(data):
-    # print(data['login_id'])
     return json.dumps({
         "type": 'close',
         "login_id": data['login_id']
@@ -130,8 +129,6 @@ class RoomsConsumer(AsyncWebsocketConsumer):
         user = await get_player_by_id(user_id)
         if user is None:
             return
-        user.online_status = 'Offline'
-        user.save()
 
     async def receive(self, text_data):
         if not text_data:
@@ -145,7 +142,6 @@ class RoomsConsumer(AsyncWebsocketConsumer):
             try:
                 data = json.loads(text_data)
             except ValueError as e:
-                # print(f"Invalid JSON: {e}")
                 await self.channel_layer.group_send(
                     self.group_name,
                     {
@@ -217,6 +213,7 @@ class RoomsConsumer(AsyncWebsocketConsumer):
         user = await get_user_from_login(data.get('login'))
         if user:
             self.user = user
+            self.user.previous_status = self.user.online_status
             self.user.online_status = 'Online'
             self.user.save()
 
@@ -226,8 +223,6 @@ class RoomsConsumer(AsyncWebsocketConsumer):
             self.user = user
             self.user_id = user.id
             self.login = user.login
-            self.user.online_status = 'Online'
-            self.user.save()
             unique_group_name = f"user_{self.login}"
             await self.channel_layer.group_add(unique_group_name, self.channel_name)
             RoomsConsumer.connected_users.add(self.user_id)

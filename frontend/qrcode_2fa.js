@@ -34,7 +34,6 @@ export class qrcode_2fa
             return;
         }
         const csrftoken = this.main.getCookie('csrftoken');
-        // console.log(csrftoken)
         if (csrftoken) {
             $.ajax({
                 url: '/verify_qrcode/',
@@ -51,7 +50,6 @@ export class qrcode_2fa
                         this.main.set_status(info, true);
                         this.main.login.state = 2;
                     } else if (info.result === '1') {
-                        // console.log("good code")
                         if (this.tournament) {
                             this.main.load('/tournament/local', () => this.main.lobby.tournament.eventsTwoFA(this.login));
                             return;
@@ -84,9 +82,16 @@ export class qrcode_2fa
                                         var dom_signup = document.getElementById('signup');
                                         if (dom_signup) {
                                             dom_signup.style.display = "none";
-                                            dom_signup.insertAdjacentHTML('afterend', '<button id="logoutButton" class="btn btn-danger">Log Out</button>');
                                             var dom_logout = document.getElementById('logoutButton');
                                             if (dom_logout) {
+                                                // dom_logout.classList.remove("hidden");
+                                                dom_logout.style.display = 'inline-block'
+                                                // dom_logout.addEventListener('click', () => this.main.logout());
+                                            }
+                                            else
+                                            {
+                                                dom_signup.insertAdjacentHTML('afterend', '<button id="logoutButton" class="btn btn-danger">Log Out</button>');
+                                                var dom_logout = document.getElementById('logoutButton');
                                                 dom_logout.addEventListener('click', () => this.main.logout());
                                             }
                                         }

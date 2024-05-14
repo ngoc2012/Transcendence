@@ -79,21 +79,36 @@ if (my42login !== null && my42login !== "" && my42email !== "" && my42ws != "")
     main.name = my42name;
     main.dom_name.innerHTML = main.name;
     main.login42 = true;
+    main.picture = my42avatar;
     var dom_log_in = document.getElementById('login');
     if (dom_log_in) {
         dom_log_in.style.display = "none";
-        dom_log_in.insertAdjacentHTML('afterend', '<button id="logoutButton" class="btn btn-danger">Log Out</button>');
+    }
+
+    var dom_picture = document.getElementById('picture');
+    if (dom_picture){
+        dom_picture.src = main.picture.replace('/app/frontend/', '/static/');
     }
 
     var dom_signup = document.getElementById('signup');
     if (dom_signup) {
         dom_signup.style.display = "none";
+        var dom_logout = document.getElementById('logoutButton');
+        if (dom_logout) {
+            // dom_logout.classList.remove("hidden");
+            
+            dom_logout.style.display = 'inline-block'
+            // dom_logout.addEventListener('click', () => main.logout());
+            // dom_logout.addEventListener('click', () => this.main.logout());
+        }
+        else
+        {
+            dom_signup.insertAdjacentHTML('afterend', '<button id="logoutButton" class="btn btn-danger">Log Out</button>');
+            var dom_logout = document.getElementById('logoutButton');
+            dom_logout.addEventListener('click', () => main.logout());
+        }
     }
 
-    var dom_logout = document.getElementById('logoutButton');
-    if (dom_logout) {
-        dom_logout.addEventListener('click', () => main.logout());
-    }
 }
 
 window.addEventListener('popstate', (event) => {
@@ -203,13 +218,24 @@ document.addEventListener('DOMContentLoaded', () => {
                     var dom_signup = document.getElementById('signup');
                     if (dom_signup) {
                         dom_signup.style.display = "none";
-                        dom_signup.insertAdjacentHTML('afterend', '<button id="logoutButton" class="btn btn-danger">Log Out</button>');
+                        var dom_logout = document.getElementById('logoutButton');
+                        if (dom_logout) {
+                            // dom_logout.classList.remove("hidden");
+                            dom_logout.style.display = 'inline-block'
+                            // dom_logout.addEventListener('click', () => this.main.logout());
+                        }
+                        else
+                        {
+                            dom_signup.insertAdjacentHTML('afterend', '<button id="logoutButton" class="btn btn-danger">Log Out</button>');
+                            var dom_logout = document.getElementById('logoutButton');
+                            dom_logout.addEventListener('click', () => main.logout());
+                        }
                     }
 
-                    var dom_logout = document.getElementById('logoutButton');
-                    if (dom_logout) {
-                        dom_logout.addEventListener('click', () => main.logout());
-                    }
+                    // var dom_logout = document.getElementById('logoutButton');
+                    // if (dom_logout) {
+                    //     dom_logout.addEventListener('click', () => main.logout());
+                    // }
                     var dom_picture = document.getElementById('picture')
                     if (dom_picture){
                         dom_picture.src=data.avatar.replace('/app/frontend/', 'static/');
@@ -238,11 +264,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     return null;
                 }
             } else {
-                // console.error('Session validation request failed:', response.statusText);
                 return null;
             }
         } catch (error) {
-            // console.error('Error during session validation:', error);
             return null;
         }
     }

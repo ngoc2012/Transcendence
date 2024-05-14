@@ -17,7 +17,6 @@ export class Lobby
     }
 
     events(isPopState) {
-        console.log("lolo");
         if (this.main.lobby.game && this.main.lobby.game !== null)
         {
             this.main.lobby.game.close_room();
@@ -103,7 +102,6 @@ export class Lobby
         }
         if (this.main.lobby.game && this.main.lobby.game !== null)
         {
-            console.log('closing room', this.main.lobby.game);
             this.main.lobby.game.close_room();
             this.main.lobby.game = null;
         }
@@ -416,7 +414,6 @@ export class Lobby
                 chatLog.scrollTop = chatLog.scrollHeight;
             }
             else if (data.type === "update") {
-                // console.log('update received')
                 this.displayUsers(data);
             }
             else if (data.type === 'game_invite_receive'){

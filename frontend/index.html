@@ -418,6 +418,7 @@
     var error_user = "{{ error_user }}";
     var tourid = "{{ id|default:'-1' }}";
     var my42login = '{{ my42login }}';
+    var my42avatar = '{{ my42avatar }}';
     var my42name = '{{ my42name }}';
     var my42email = '{{ my42email }}';
     var my42ws = '{{ my42ws }}';
@@ -426,7 +427,6 @@
     function handleStatusChange(mutationsList, observer) {
       for(let mutation of mutationsList) {
         if (mutation.type === 'childList' && mutation.target.id === 'status') {
-          // console.log('Status changed:', mutation.target.innerText);
           $('#status').stop(true, true);
           $('#status').fadeIn().delay(200).fadeOut(2000);
 

@@ -21,10 +21,8 @@ def ai_player(consumer):
         player = PlayersModel.objects.get(login='ai')
     except PlayersModel.DoesNotExist:
         pass
-        # print("Error: AI player not found.")
     if cache.get(consumer.k_ai) == True:
         cache.set(consumer.k_ai, False)
-        # print("AI player deleted.")
         with requests.post("http://ai:5000/ai/del",
             data = {
                 'room_id': consumer.room_id,
@@ -33,9 +31,7 @@ def ai_player(consumer):
             headers={'X-Internal-Request': 'true'}) as response:
             if response.status_code != 200:
                 pass
-                # print("Request failed with status code:", response.status_code)
         remove_player(consumer, player.id)
-        # print("Delete ai_player", player.id, cache.get(consumer.k_server), type(player.id), player.id == cache.get(consumer.k_server))
         if player.id == cache.get(consumer.k_server):
             change_server(consumer)
         return
@@ -56,7 +52,6 @@ def ai_player(consumer):
         )
     add_player_to_room(consumer.room_id, 'ai')
 
-    # print("AI player created. Send request to AI server.")
     with requests.post("http://ai:5000/ai/new",
         data = {
             'room_id': consumer.room.id,
@@ -65,4 +60,3 @@ def ai_player(consumer):
         headers={'X-Internal-Request': 'true'}) as response:
         if response.status_code != 200:
             pass
-            # print("Request failed with status code:", response.status_code)

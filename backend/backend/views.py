@@ -47,7 +47,6 @@ def encrypt(message):
     encrypted_text = fernet.encrypt(message.encode()).decode()
     return encrypted_text
   except Exception as e:
-    # print("Error during encryption:", e)
     return None
 
 def decrypt(encrypted_text):
@@ -56,7 +55,6 @@ def decrypt(encrypted_text):
     decrypted_text = fernet.decrypt(encrypted_text.encode()).decode()
     return decrypted_text
   except Exception as e:
-    # print("Error during decryption:", e)
     return None
 
 def redirect(request):
@@ -104,7 +102,6 @@ def qrcode_2fa(request):
 	return (render(request, 'qrcode_2fa.html'))
 
 def invalid_session():
-    print('invalid session')
     response = JsonResponse({"validSession": False, "message": "Token expired."}, status=200)
     response.delete_cookie('access_token')
     response.delete_cookie('refresh_token')
@@ -163,7 +160,6 @@ def tournament_history(request):
         return render(request, 'tournament_history.html', {'names' : tournament_names})
 
     except requests.exceptions.RequestException as e:
-        # print(f"Error retrieving tournament history: {e}")
         context = {'error_message': 'Failed to retrieve tournament history.'}
         return render(request, 'tournament_history.html', context)
 
@@ -189,7 +185,6 @@ def get_tournament_data(request):
 def mail_2fa(request):
     sender_email = EMAIL_SENDER
     recipient_email = request.GET.get('email')
-    # print(recipient_email)
     code = ""
     for _ in range(6):
         digit = random.randint(0, 9)
@@ -203,13 +198,8 @@ def mail_2fa(request):
     try:
         sg = SendGridAPIClient(SENDGRID_API_KEY)
         response = sg.send(message)
-        # print('Email sent successfully')
-        # print(response.status_code)
-        # print(response.body)
-        # print(response.headers)
     except Exception as e:
         pass
-        # print('Error sending email:', str(e))
     return JsonResponse({'code': code})
 
 # verify the email code
@@ -421,7 +411,7 @@ def callback(request):
                 'my42email': user.email,
                 'my42enable2fa': enable2fa,
                 'my42ws': ws_token,
-                'avatar': user.avatar.url
+                'my42avatar': user.avatar.url,
             }
 
             response = render(request, 'index.html', response)
@@ -453,7 +443,7 @@ def callback(request):
             'my42email': user.email,
             'my42enable2fa': enable2fa,
             'my42ws': ws_token,
-            'avatar': user.avatar.url
+            'my42avatar': user.avatar.url
         }
 
         response = render(request, 'index.html', response)
@@ -465,7 +455,6 @@ def callback(request):
         return response
     except Exception as e:
         if 'duplicate key value violates unique constraint "accounts_playersmodel_username_key"' in str(e):
-                print(str(e))
                 response = {
                     'error_user': "Login already taken",
                 }
@@ -512,11 +501,9 @@ def verify_qrcode(request):
     if not PlayersModel.objects.filter(login=request.POST['login']).exists():
         return (HttpResponse("Error: Login '" + request.POST['login'] + "' does not exist!"))
     player = PlayersModel.objects.get(login=request.POST['login'])
-    # print("input code = ", input_code)
     totp = pyotp.TOTP(decrypt(player.secret_2fa))
     if totp.verify(input_code):
         return JsonResponse({'result': '1'}, status=200)
-    # print("didn't work out = ", input_code)
     return JsonResponse({'result': '0', 'error': 'Invalid OTP code'}, status=400)
 
 @csrf_protect
@@ -683,7 +670,6 @@ def alias(request, username):
     user = PlayersModel.objects.filter(login=username).get(login=username)
     if request.method == 'POST':
         if 'type' in request.POST:
-            print("????")
             user.tourn_alias = ''
             user.save()
             response = HttpResponse("Tournament alias deleted")
@@ -718,12 +704,9 @@ def password(request, username):
     if request.method == 'POST':
         form = PlayerChangePasswordForm(request.POST)
         if form.is_valid():
-            # print(form.cleaned_data['newpwd'])
-            # print(form.cleaned_data['oldpwd'])
             if check_password(form.cleaned_data['oldpwd'], user.password):
                 with transaction.atomic():
                     user.set_password(form.cleaned_data['newpwd'])
-                    # print(form.cleaned_data['newpwd'])
                     user.save()
                     user.refresh_from_db()
                 response = HttpResponse('Password changed successfully')
