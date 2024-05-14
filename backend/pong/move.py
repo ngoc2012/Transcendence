@@ -9,8 +9,6 @@ from django.core.cache import cache
 
 @sync_to_async
 def check_collision(consumer):
-    x = cache.get(consumer.k_x)
-    y = cache.get(consumer.k_y)
     team0 = cache.get(consumer.k_team0)
     if team0 == None:
         team0 = []
@@ -18,6 +16,8 @@ def check_collision(consumer):
     if team1 == None:
         team1 = []
     hitbox = pong_data['PADDLE_WIDTH'] * 2.0
+    x = cache.get(consumer.k_x)
+    y = cache.get(consumer.k_y)
     if cache.get(consumer.k_dx) == -1:
         for p in team0:
             p_x = cache.get(consumer.room_id + "_" + str(p) + "_x")
