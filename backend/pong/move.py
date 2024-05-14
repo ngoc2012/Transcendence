@@ -17,7 +17,7 @@ def check_collision(consumer):
     team1 = cache.get(consumer.k_team1)
     if team1 == None:
         team1 = []
-    hitbox = pong_data['PADDLE_WIDTH'] * 1.5
+    hitbox = pong_data['PADDLE_WIDTH'] * 2.0
     if cache.get(consumer.k_dx) == -1:
         for p in team0:
             p_x = cache.get(consumer.room_id + "_" + str(p) + "_x")
