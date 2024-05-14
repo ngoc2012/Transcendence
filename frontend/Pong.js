@@ -87,7 +87,16 @@ export class Pong
             this.reset_ratio();
             this.draw.execute(this.draw.data);
             this.draw.update_3D(this.draw.data);
-            // Your code to be executed on window resize
+        });
+
+        document.getElementById('login_local').addEventListener('keydown', function(event) {
+            event.stopPropagation();
+        });
+        document.getElementById('password_local').addEventListener('keydown', function(event) {
+            event.stopPropagation();
+        });
+        document.getElementById('keyboard_layout').addEventListener('keydown', function(event) {
+            event.stopPropagation();
         });
 
         this.pongThreeJS = document.getElementById('pongThreeJS');
@@ -186,6 +195,11 @@ export class Pong
             //     }
             // })
             document.addEventListener('keydown', (event) => {
+                // document.addEventListener('keydown', (event) => {
+                //     if (["w", "s"].includes(event.key)) {
+                //         event.preventDefault();
+                //     }
+                // })
                 if (["w", "s"].includes(event.key)) {
                     event.stopPropagation();
                 }
