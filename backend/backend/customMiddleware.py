@@ -18,7 +18,7 @@ class JWTMiddleware(MiddlewareMixin):
         try:
             resolve(request.path_info)
         except Resolver404:
-            print('404 Not Found: ' + request.path_info)
+            # print('404 Not Found: ' + request.path_info)
             return HttpResponseRedirect('/')
 
         if '/callback/' in request.path:
@@ -32,7 +32,7 @@ class JWTMiddleware(MiddlewareMixin):
         access_token = request.COOKIES.get('access_token')
         if not access_token:
             print('no access token middlware')
-            return self.return_lobby(request)
+            return self.return_lobby()
 
         jti = None
 
@@ -41,12 +41,12 @@ class JWTMiddleware(MiddlewareMixin):
             jti = payload.get("jti")
             if not jti or cache.get(jti):
                 print('no jti or access token in cache middleware')
-                return self.return_lobby(request)
+                return self.return_lobby()
 
             user = self.get_user(payload.get('user_id'))
             if not user:
                 print('no user found middleware 2')
-                return self.return_lobby(request)
+                return self.return_lobby()
 
             request.user = user
             return None
@@ -58,28 +58,28 @@ class JWTMiddleware(MiddlewareMixin):
             return self.handle_refresh_token(request)
         except jwt.InvalidTokenError:
             print('Invalid Token')
-            return self.return_lobby(request)
+            return self.return_lobby()
 
     def process_exception(self, request, exception):
         if isinstance(exception, ObjectDoesNotExist):
-            return self.return_lobby(request)
+            return self.return_lobby()
 
     def get_user(self, user_id):
         try:
             user = User.objects.get(id=user_id)
         except User.DoesNotExist:
             print('no user found middleware 3')
-            return self.return_lobby(request)
+            return self.return_lobby()
         if isinstance(user, AnonymousUser):
             print('no user found middleware 4')
-            return self.return_lobby(request)
+            return self.return_lobby()
         return user
 
     def handle_refresh_token(self, request):
         refresh_token = request.COOKIES.get('refresh_token')
         if not refresh_token:
             print('no refresh token')
-            return self.return_lobby(request)
+            return self.return_lobby()
 
         jti = None
 
@@ -87,7 +87,7 @@ class JWTMiddleware(MiddlewareMixin):
             payload = jwt.decode(refresh_token, settings.JWT_REFRESH_SECRET_KEY, algorithms=["HS256"])
             jti = payload.get("jti")
             if not jti or cache.get(jti):
-                return self.return_lobby(request)
+                return self.return_lobby()
 
             user = self.get_user(payload.get('user_id'))
 
@@ -101,13 +101,13 @@ class JWTMiddleware(MiddlewareMixin):
                 print('New tokens generated after expired access token')
                 return None
             else:
-                return self.return_lobby(request)
+                return self.return_lobby()
         except jwt.ExpiredSignatureError:
             if jti:
                 cache.set(jti, "revoked", timeout=None)
-            return self.return_lobby(request)
+            return self.return_lobby()
         except jwt.InvalidTokenError:
-           return self.return_lobby(request)
+           return self.return_lobby()
 
     # def generate_jwt_tokens(self, user_id):
     #     access_token = jwt.encode({
@@ -185,10 +185,10 @@ class JWTMiddleware(MiddlewareMixin):
         if state and 'oauth_state_login'in request.session and state == request.session['oauth_state_login']:
             return None
         else:
-            return  self.return_lobby(request)
+            return  self.return_lobby()
 
-    def return_lobby(self, request):
-        print('return 401 middleware')
+    def return_lobby(self):
+        # print('return 401 middleware')
         response = HttpResponse('Unauthorized - Token expired', status=401)
         response.delete_cookie('access_token')
         response.delete_cookie('refresh_token')

@@ -186,26 +186,26 @@ export class Pong
                 }
             });
             document.addEventListener('keydown', (event) => {
-                if (["ArrowUp", "ArrowDown"].includes(event.key)) {
+                if (["w", "s"].includes(event.key)) {
                     event.preventDefault();
                 }
             })
             document.addEventListener('keydown', (event) => {
-                if (["ArrowUp", "ArrowDown"].includes(event.key)) {
+                if (["w", "s"].includes(event.key)) {
                     event.preventDefault();
                 }
                 switch (event.key) {
-                    case 'ArrowUp':
+                    case 'w':
                         this.set_state(0, "up");
                         break;
-                    case 'ArrowDown':
+                    case 's':
                         this.set_state(0, "down");
                         break;
-                    case 'ArrowLeft':
+                    case 'a':
                         if (this.power_play)
                             this.set_state(0, "left");
                         break;
-                    case 'ArrowRight':
+                    case 'd':
                         if (this.power_play)
                             this.set_state(0, "right");
                         break;
@@ -232,13 +232,14 @@ export class Pong
 
                 }
             });
+            this.preMatchBox(this.player1)
         } else {
             document.addEventListener('keydown', (event) => {
                 switch (event.key) {
-                    case 'ArrowUp':
+                    case 'w':
                         this.set_state(0, "up");
                         break;
-                    case 'ArrowDown':
+                    case 's':
                         this.set_state(0, "down");
                         break;
                 }
@@ -328,7 +329,7 @@ export class Pong
                         this.connect(i);
                         if (this.players[i].sk !== -1)
                         {
-                            this.keyboard_layout += 'wsqa';
+                            this.keyboard_layout += 'ikjl';
                         }
                         this.preMatchBox(this.localTournament.player1, this.localTournament.player2);
                     }
@@ -694,14 +695,16 @@ export class Pong
         matchBox.appendChild(matchText);
 
         let instruct1 = document.createElement('p');
-        instruct1.textContent = `${player1} controls: 'Arrow Up' = up, 'Arrow Down' = down`;
+        instruct1.textContent = `${player1} controls: 'w' = up, 's' = down`;
         instruct1.style.cssText = 'font-family: "Poppins", sans-serif; font-weight: 400; font-style: normal; color: white;';
         matchBox.appendChild(instruct1);
 
-        let instruct2 = document.createElement('p');
-        instruct2.textContent = `${player2} controls: 'w' = up, 's' = down`;
-        instruct2.style.cssText = 'font-family: "Poppins", sans-serif; font-weight: 400; font-style: normal; color: white;';
-        matchBox.appendChild(instruct2);
+        if (player2) {
+            let instruct2 = document.createElement('p');
+            instruct2.textContent = `${player2} controls: 'i' = up, 'k' = down`;
+            instruct2.style.cssText = 'font-family: "Poppins", sans-serif; font-weight: 400; font-style: normal; color: white;';
+            matchBox.appendChild(instruct2);
+        }
 
         let instruct3 = document.createElement('p');
         instruct3.textContent = 'Press \'space\' to launch the ball';
