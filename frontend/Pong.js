@@ -180,14 +180,14 @@ export class Pong
                         this.set_state(0, "down");
                 }
             });
+            // document.addEventListener('keydown', (event) => {
+            //     if (["w", "s"].includes(event.key)) {
+            //         event.preventDefault();
+            //     }
+            // })
             document.addEventListener('keydown', (event) => {
                 if (["w", "s"].includes(event.key)) {
-                    event.preventDefault();
-                }
-            })
-            document.addEventListener('keydown', (event) => {
-                if (["w", "s"].includes(event.key)) {
-                    event.preventDefault();
+                    event.stopPropagation();
                 }
                 switch (event.key) {
                     case 'w':

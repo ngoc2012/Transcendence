@@ -133,7 +133,7 @@ def tournament_local_result(request):
     except ObjectDoesNotExist:
         return JsonResponse({'error': 'Room or match not found.'}, status=404)
     except Exception as e:
-        return JsonResponse({'error': 'An unexpected error occurred: {}'.format(str(e))}, status=500)
+        return JsonResponse({'error': 'An unexpected error occurred: {}'.format(str(e))}, status=400)
 
 @require_POST
 def tournament_local_get(request):
@@ -197,7 +197,7 @@ def tournament_local_get(request):
         if tournament:
             url = f"http://blockchain:9000/delete_tournament/{tournament.name}"
             tournament.delete()
-        return JsonResponse({'error': f'An error occurred: {str(e)}'}, status=500)
+        return JsonResponse({'error': f'An error occurred: {str(e)}'}, status=400)
 
 @require_POST
 def tournament_add_user(request):
@@ -269,51 +269,73 @@ def tournament_local_verify(request):
     try:
         data = json.loads(request.body)
         id = data.get('id')
+        print(data)
 
         if not id:
             return JsonResponse({'error': 'Missing id'}, status=400)
 
         tournament = TournamentModel.objects.get(id=id)
+        print(tournament)
 
         num_participants_database = tournament.participants.all().count()
         num_participants_local = len(tournament.participantsLocal)
         total_participants = num_participants_database + num_participants_local
         if total_participants <= 1:
             return JsonResponse({'error': 'Not enought participants'}, status=401)
+        print(total_participants)
 
         tournament.ready = True
         tournament.save()
 
         if not tournament.owner == request.user:
+            print('error owner')
             return JsonResponse({'error': 'Owner not found'}, status=404)
 
         name = tournament.name
+        print(name)
         url = f"http://blockchain:9000/add_tournament/{name}"
+        print(url)
         response = requests.post(url)
-        response.raise_for_status()
+        print(response)
+        print(response.raise_for_status())
+        print('ok raise')
 
         for participant in tournament.participants.all():
             add_player_to_blockchain(tournament.name, check_alias_from_login(participant.login))
+            ('player added 1')
 
         for participant in tournament.participantsLocal:
             add_player_to_blockchain(tournament.name, participant)
+            ('player added 2')
 
     except json.JSONDecodeError as e:
+        clean_tournament(tournament)
         return JsonResponse({'error': f'Error decoding JSON: {str(e)}'}, status=400)
     except TournamentModel.DoesNotExist:
         return JsonResponse({'error': 'Tournament not found'}, status=400)
     except requests.exceptions.RequestException as e:
-        return JsonResponse({'error': 'Failed to interact with blockchain'}, status=500)
+        clean_tournament(tournament)
+        return JsonResponse({'error': 'Failed to interact with blockchain'}, status=400)
     except ObjectDoesNotExist:
         return JsonResponse({'error': 'Owner not found'}, status=404)
     except IntegrityError as e:
+        clean_tournament(tournament)
         return JsonResponse({'error': 'Tournament could not be created'}, status=409)
     except ValidationError as e:
+        clean_tournament(tournament)
         return JsonResponse({'error': str(e)}, status=400)
     except Exception as e:
-        return JsonResponse({'error': 'An unexpected error occurred'}, status=500)
+        clean_tournament(tournament)
+        return JsonResponse({'error': 'An unexpected error occurred'}, status=400)
 
     return JsonResponse({'message': 'Done', 'id': tournament.id})
+
+def clean_tournament(tournament):
+    try:
+        if tournament:
+            tournament.delete()
+    except:
+        pass
 
 # SECONDARY METHODS
 

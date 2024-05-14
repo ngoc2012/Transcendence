@@ -178,7 +178,7 @@ def get_tournament_data(request):
 
         return JsonResponse(data)
     except Exception as e:
-        return JsonResponse({"error": str(e)}, status=500)
+        return JsonResponse({"error": str(e)}, status=400)
 
 # use sendgrid API to send an email to the user containing the code used for the 2fa
 @csrf_protect
@@ -277,13 +277,13 @@ def np(request):
     except IntegrityError:
         return JsonResponse({'error': 'Error: Login or email not available.'}, status=409)
     except Exception as e:
-        return JsonResponse({'error': f'Unexpected error: {str(e)}'}, status=500)
+        return JsonResponse({'error': f'Unexpected error: {str(e)}'}, status=400)
 
 
     except IntegrityError:
         return JsonResponse({'error': 'Error: Login or email not available.'}, status=409)
     except Exception as e:
-        return JsonResponse({'error': f'Unexpected error: {str(e)}'}, status=500)
+        return JsonResponse({'error': f'Unexpected error: {str(e)}'}, status=400)
 
 @csrf_protect
 def new_player(request):
@@ -371,7 +371,7 @@ def login42(request):
     except KeyError as e:
         return JsonResponse({'error': f'Missing key in request: {str(e)}'}, status=400)
     except Exception as e:
-        return JsonResponse({'error': f'An error occurred: {str(e)}'}, status=500)
+        return JsonResponse({'error': f'An error occurred: {str(e)}'}, status=400)
 
 # callback function used to get the info from the 42 API
 @csrf_protect
@@ -901,7 +901,7 @@ def tournament_request(request):
         }, status=200)
 
     except Exception as e:
-        return JsonResponse({'status': 'error', 'message': 'Internal server error'}, status=500)
+        return JsonResponse({'status': 'error', 'message': 'Internal server error'}, status=400)
 
 
 @require_POST
@@ -928,4 +928,4 @@ def new_tournament(request):
     except ValidationError as e:
         return JsonResponse({'error': str(e)}, status=400)
     except Exception as e:
-        return JsonResponse({'error': str(e)}, status=500)
+        return JsonResponse({'error': str(e)}, status=400)
