@@ -24,7 +24,7 @@ function keydown_loop(pong, i, direction)
 {
     pong.set_state(i, direction);
     if (pong.players[i][direction]) {
-        setTimeout(() => {keydown_loop(pong, i, direction);}, pong.delay + 0.01);
+        setTimeout(() => {keydown_loop(pong, i, direction);}, pong.delay);
     }
 }
 
@@ -65,7 +65,7 @@ export class Pong
         this.touchStart = [0, 0];
         this.touchEnd = [0, 0];
         this.set_state_available = true;
-        this.delay = 40;
+        this.delay = 30;
 
     }
 
