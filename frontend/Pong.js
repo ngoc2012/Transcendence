@@ -227,7 +227,7 @@ export class Pong
 
                 }
             });
-            this.preMatchBox(this.player1)
+            this.preMatchBox(this.main.login)
         } else {
             document.addEventListener('keydown', (event) => {
                 switch (event.key) {
