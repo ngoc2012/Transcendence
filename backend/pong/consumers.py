@@ -213,8 +213,7 @@ class PongConsumer(AsyncWebsocketConsumer):
                 await self.channel_layer.group_send(self.room_id, {'type': 'group_data'})
                 score0 = cache.get(self.k_score0)
                 score1 = cache.get(self.k_score1)
-                if (score0 >= 2 or score1 >= 2) :
-                # if abs(score0 - score1) > 1 and (score0 >= 11 or score1 >= 11) :
+                if abs(score0 - score1) > 1 and (score0 >= 11 or score1 >= 11) :
                     if not self.disconnected:
                         await self.channel_layer.group_send(self.room_id, {'type': 'win_data'})
                     if self.room.tournamentRoom == False:
