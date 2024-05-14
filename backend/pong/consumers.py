@@ -17,7 +17,6 @@ from django.core.cache import cache
 @database_sync_to_async
 def rematch(self):
     try:
-        # print('entering rematch')
         tournament = TournamentModel.objects.get(id=self.tour_id)
         if tournament.rematchIP:
             return
@@ -45,10 +44,8 @@ def rematch(self):
 
     except TournamentMatchModel.DoesNotExist:
         pass
-        # print("Match not found")
     except Exception as e:
         pass
-        # print(f"An error occurred: {e}")
 
 
 class PongConsumer(AsyncWebsocketConsumer):
@@ -93,7 +90,6 @@ class PongConsumer(AsyncWebsocketConsumer):
         # 1008: Policy violation.
         # 1011: Internal error.
         self.disconnected = True
-        # print(f"Player {self.player_id} disconnected with code {close_code}.")
         score0 = cache.get(self.k_score0)
         score1 = cache.get(self.k_score1)
         if self.player.previous_status == 'Offline':
@@ -115,8 +111,6 @@ class PongConsumer(AsyncWebsocketConsumer):
 
     async def receive(self, text_data):
         if text_data == 'start':
-            # print('start ', self.room_id)
-            # self.start(None)
             players = cache.get(self.k_all)
             if players == None or len(players) < 2:
                 return
@@ -137,7 +131,6 @@ class PongConsumer(AsyncWebsocketConsumer):
             await set_power_play(self)
         elif text_data == 'ai_player':
             players = cache.get(self.k_all)
-            # print(cache.get(self.k_ai), len(players))
             ai = cache.get(self.k_ai)
             if (ai == None or ai == False) and len(players) > 1:
                 return
@@ -205,7 +198,6 @@ class PongConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=win)
 
     async def game_loop(self):
-        # print("Game in room {self.room_id} started.")
         cache.set(self.k_started, True)
         while True:
             await asyncio.sleep(0.02)

@@ -64,7 +64,6 @@ class ChatConsumer(WebsocketConsumer):
 
     def send_whisper(self, data, value):
         msg = ' '.join(data['msg_split'][2::])
-        # print(self.scope['state']['username'])
         if value == data['username']:
             self.send(text_data=json.dumps({"message": self.split_message("You can't whisper yourself."), 'user': data['username']}))
             return
@@ -90,7 +89,6 @@ class ChatConsumer(WebsocketConsumer):
 
     # Receive message from WebSocket
     def receive(self, text_data):
-        # print(text_data)
         if json.loads(text_data)["type"] == 'connection' or json.loads(text_data)['type'] == 'connection_update':
             if self.scope['state']['username'] == '':
                 if json.loads(text_data)['type'] == 'connection':

@@ -102,7 +102,6 @@ def close_connection(request, room_id, player_id):
     return HttpResponse("done")
 
 def start(request, room_id):
-    # print("Starting game", room_id)
     async_to_sync(channel_layer.group_send)(
         room_id,
         {

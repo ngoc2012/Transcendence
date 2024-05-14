@@ -16,13 +16,6 @@ name = ""
 team0 = []
 team1 = []
 
-# print("Getting token")
-# with requests.get("https://" + host + "/game/close/" + login,
-#     verify=False) as response:
-#         if response.status_code != 200:
-#             print("Request failed with status code:", response.status_code)
-#             exit(1)
-
 csrf_token = ""
 
 headers = {
@@ -39,7 +32,6 @@ ssl_context.verify_mode = ssl.CERT_NONE
 async def rooms_listener():
     global main_queue
     uri = "wss://" + host + "/ws/game/rooms/"
-    #print(f"Connecting to {uri}...")
 
     try:
         async with websockets.connect(uri, ssl=ssl_context) as rooms_socket:
@@ -65,7 +57,6 @@ async def pong_listener(room):
     global main_queue
     
     uri = "wss://" + host + "/ws/pong/" + room['id'] + '/' + str(room['player_id']) + '/'
-    # print(f"Connecting to {uri}...")
 
     try:
         async with websockets.connect(uri, ssl=ssl_context) as pong_socket:
@@ -359,7 +350,6 @@ if __name__ == "__main__":
                     next
             elif data == 'n':
                 room = new_game(login)
-                # print(room)
                 if room != None:
                     if rooms_process != None:
                         with requests.get("https://" + host + "/game/close/" + login,
