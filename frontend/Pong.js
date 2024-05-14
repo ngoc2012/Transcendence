@@ -136,7 +136,7 @@ export class Pong
 
         document.addEventListener('keydown', (event) => {
             if (event.key === ' ') {
-                event.preventDefault();
+                event.stopPropagation();
                 if (this.pmBox)
                     return;
                 if (this.localTournament) {

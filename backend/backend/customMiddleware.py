@@ -29,7 +29,7 @@ class JWTMiddleware(MiddlewareMixin):
 
         access_token = request.COOKIES.get('access_token')
         if not access_token:
-            return self.return_lobby(request)
+            return self.return_lobby()
 
         jti = None
 
@@ -37,11 +37,11 @@ class JWTMiddleware(MiddlewareMixin):
             payload = jwt.decode(access_token, settings.JWT_SECRET_KEY, algorithms=["HS256"])
             jti = payload.get("jti")
             if not jti or cache.get(jti):
-                return self.return_lobby(request)
+                return self.return_lobby()
 
             user = self.get_user(payload.get('user_id'))
             if not user:
-                return self.return_lobby(request)
+                return self.return_lobby()
 
             request.user = user
             return None
@@ -51,7 +51,7 @@ class JWTMiddleware(MiddlewareMixin):
                 cache.set(jti, "revoked", timeout=None)
             return self.handle_refresh_token(request)
         except jwt.InvalidTokenError:
-            return self.return_lobby(request)
+            return self.return_lobby()
 
     def process_exception(self, request, exception):
         if isinstance(exception, ObjectDoesNotExist):
@@ -61,15 +61,15 @@ class JWTMiddleware(MiddlewareMixin):
         try:
             user = User.objects.get(id=user_id)
         except User.DoesNotExist:
-            return self.return_lobby(request)
+            return self.return_lobby()
         if isinstance(user, AnonymousUser):
-            return self.return_lobby(request)
+            return self.return_lobby()
         return user
 
     def handle_refresh_token(self, request):
         refresh_token = request.COOKIES.get('refresh_token')
         if not refresh_token:
-            return self.return_lobby(request)
+            return self.return_lobby()
 
         jti = None
 
@@ -98,25 +98,10 @@ class JWTMiddleware(MiddlewareMixin):
         except jwt.InvalidTokenError:
            return self.return_lobby()
 
-    # def generate_jwt_tokens(self, user_id):
-    #     access_token = jwt.encode({
-    #         'user_id': user_id,
-    #         'exp': datetime.now(pytz.utc) + timedelta(minutes=5),
-    #         'jti': str(uuid.uuid4())
-    #     }, settings.JWT_SECRET_KEY, algorithm='HS256')
-
-    #     refresh_token = jwt.encode({
-    #         'user_id': user_id,
-    #         'exp': datetime.now(pytz.utc) + timedelta(days=7),
-    #         'jti': str(uuid.uuid4())
-    #     }, settings.JWT_REFRESH_SECRET_KEY, algorithm='HS256')
-
-    #     return access_token, refresh_token
-
     def generate_jwt_tokens(self, user_id):
         access_token = jwt.encode({
             'user_id': user_id,
-            'exp': datetime.now(pytz.utc) + timedelta(minutes=60),
+            'exp': datetime.now(pytz.utc) + timedelta(minutes=65),
             'jti': str(uuid.uuid4())
         }, settings.JWT_SECRET_KEY, algorithm='HS256')
 
@@ -176,7 +161,7 @@ class JWTMiddleware(MiddlewareMixin):
         else:
             return  self.return_lobby()
 
-    def return_lobby(self, request):
+    def return_lobby(self):
         response = HttpResponse('Unauthorized - Token expired', status=401)
         response.delete_cookie('access_token')
         response.delete_cookie('refresh_token')

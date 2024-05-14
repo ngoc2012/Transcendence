@@ -140,8 +140,6 @@ def validate_session(request):
             'avatar': user.avatar.url
         }
         response = JsonResponse(response_data)
-        # response.set_cookie('refresh_token', refresh_token, httponly=True, samesite='Lax', secure=True)
-        # response.set_cookie('access_token', access_token, httponly=True, samesite='Lax', secure=True)
         return response
 
     except jwt.ExpiredSignatureError:
@@ -219,7 +217,7 @@ def verify(request):
 def generate_jwt_tokens(user_id):
     access_token = jwt.encode({
         'user_id': user_id,
-        'exp': datetime.now(pytz.utc) + timedelta(minutes=60),
+        'exp': datetime.now(pytz.utc) + timedelta(minutes=65),
         'jti': str(uuid.uuid4())
     }, settings.JWT_SECRET_KEY, algorithm='HS256')
 
