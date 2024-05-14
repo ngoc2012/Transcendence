@@ -176,7 +176,7 @@ class JWTMiddleware(MiddlewareMixin):
         else:
             return  self.return_lobby()
 
-    def return_lobby(self, request):
+    def return_lobby(self):
         response = HttpResponse('Unauthorized - Token expired', status=401)
         response.delete_cookie('access_token')
         response.delete_cookie('refresh_token')
