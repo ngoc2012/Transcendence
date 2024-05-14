@@ -162,8 +162,10 @@ export class Pong
         }
 
         document.addEventListener('keydown', (event) => {
-            if (event.key === ' ') {
-                event.stopPropagation();
+            const target = event.target;
+            const isTextInput = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable;
+            if (event.key === ' ' && !isTextInput) {
+                event.preventDefault();
                 if (this.pmBox)
                     return;
                 if (this.localTournament) {
@@ -248,8 +250,8 @@ export class Pong
             });
             document.addEventListener('keydown', (event) => {
                 // document.addEventListener('keydown', (event) => {
-                //     if (["w", "s"].includes(event.key)) {
-                //         event.preventDefault();
+                //     if ([" "].includes(event.key)) {
+                //         event.stopPropagation();
                 //     }
                 // })
                 if (["w", "s"].includes(event.key)) {
@@ -783,7 +785,7 @@ export class Pong
         matchBox.appendChild(instruct1);
 
         if (player2) {
-            let instruct2 = document.createElement('p');
+            let instruct2 = document.createElement('p');z
             instruct2.textContent = `${player2} controls: 'i' = up, 'k' = down`;
             instruct2.style.cssText = 'font-family: "Poppins", sans-serif; font-weight: 400; font-style: normal; color: white;';
             matchBox.appendChild(instruct2);
