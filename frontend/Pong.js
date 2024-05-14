@@ -18,12 +18,10 @@ async function closeSocket(websocket) {
         websocket.close();
         await waitForWebSocketClose(websocket);
     }
-
 }
 
 function keydown_loop(pong, i, direction)
 {
-    // console.log('keydown loop');
     pong.set_state(i, direction);
     if (pong.players[i][direction]) {
         setTimeout(() => {keydown_loop(pong, i, direction);}, pong.delay + 0.01);
@@ -32,12 +30,10 @@ function keydown_loop(pong, i, direction)
 
 function keydown(pong, i, direction)
 {
-    // console.log('start', i, direction, pong.players[i][direction]);
     if (pong.players[i][direction])
         return;
     pong.players[i][direction] = true;
     keydown_loop(pong, i, direction);
-    // console.log('end', i, direction, pong.players[i][direction]);
 }
 
 export class Pong
@@ -251,7 +247,6 @@ export class Pong
                 }
             });
             document.addEventListener('keydown', (event) => {
-                // console.log('keydown', event.key);
                 if (["w", "s"].includes(event.key)) {
                     event.stopPropagation();
                 }
@@ -289,7 +284,6 @@ export class Pong
                         index = index % 4;
                         if (index < 2 || (index >= 2 && this.power_play))
                             keydown(this, i_player, commands[index]);
-                            // this.set_state(i_player, commands[index]);
                     }
 
                 }
@@ -297,7 +291,6 @@ export class Pong
             this.preMatchBox(this.main.login)
         } else {
             document.addEventListener('keyup', (event) => {
-                // console.log('keyup', event.key);
                 if (["w", "s"].includes(event.key)) {
                     event.stopPropagation();
                 }
@@ -308,19 +301,6 @@ export class Pong
                     case 's':
                         this.players[0].down = false;
                         break;
-                    // case 'a':
-                    //     this.players[0].left = false;
-                    //     break;
-                    // case 'd':
-                    //     this.players[0].right = false;
-                    //     break;
-                    // case 'Tab':
-                    //     if (this.power_play)
-                    //         this.set_state(0, "side");
-                    //     break;
-                    // case 'Control':
-                    //     this.set_state(0, "server");
-                    //     break;
                 }
                 let commands = ['up', 'down', 'left', 'right'];
                 if (event.key && event.key.length === 1)
@@ -332,8 +312,6 @@ export class Pong
                         index = index % 4;
                         if (index < 2 || (index >= 2 && this.power_play))
                             this.players[i_player][commands[index]] = false;
-                            // keydown(this, i_player, commands[index]);
-                            // this.set_state(i_player, commands[index]);
                     }
 
                 }
@@ -346,27 +324,8 @@ export class Pong
                     case 's':
                         keydown(this, 0, 'down');
                         break;
-                    // case 'w':
-                    //     this.set_state(0, "up");
-                    //     break;
-                    // case 's':
-                    //     this.set_state(0, "down");
-                    //     break;
                 }
 
-                // let commands = ['up', 'down', 'left', 'right'];
-                // if (event.key && event.key.length === 1)
-                // {
-                //     let index = this.keyboard_layout.indexOf(event.key);
-                //     if (index >= 0)
-                //     {
-                //         let i_player = Math.floor(index / 4) + 1;
-                //         index = index % 4;
-                //         if (index < 2)
-                //             this.set_state(i_player, commands[index]);
-                //     }
-
-                // }
                 let commands = ['up', 'down', 'left', 'right'];
                 if (event.key && event.key.length === 1)
                 {
