@@ -55,7 +55,7 @@ class JWTMiddleware(MiddlewareMixin):
 
     def process_exception(self, request, exception):
         if isinstance(exception, ObjectDoesNotExist):
-            return self.return_lobby(request)
+            return self.return_lobby()
 
     def get_user(self, user_id):
         try:
@@ -77,7 +77,7 @@ class JWTMiddleware(MiddlewareMixin):
             payload = jwt.decode(refresh_token, settings.JWT_REFRESH_SECRET_KEY, algorithms=["HS256"])
             jti = payload.get("jti")
             if not jti or cache.get(jti):
-                return self.return_lobby(request)
+                return self.return_lobby()
 
             user = self.get_user(payload.get('user_id'))
 
@@ -90,13 +90,13 @@ class JWTMiddleware(MiddlewareMixin):
                     cache.set(jti, "revoked", timeout=None)
                 return None
             else:
-                return self.return_lobby(request)
+                return self.return_lobby()
         except jwt.ExpiredSignatureError:
             if jti:
                 cache.set(jti, "revoked", timeout=None)
-            return self.return_lobby(request)
+            return self.return_lobby()
         except jwt.InvalidTokenError:
-           return self.return_lobby(request)
+           return self.return_lobby()
 
     # def generate_jwt_tokens(self, user_id):
     #     access_token = jwt.encode({
@@ -174,7 +174,7 @@ class JWTMiddleware(MiddlewareMixin):
         if state and 'oauth_state_login'in request.session and state == request.session['oauth_state_login']:
             return None
         else:
-            return  self.return_lobby(request)
+            return  self.return_lobby()
 
     def return_lobby(self, request):
         response = HttpResponse('Unauthorized - Token expired', status=401)
