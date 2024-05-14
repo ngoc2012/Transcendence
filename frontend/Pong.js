@@ -89,16 +89,6 @@ export class Pong
             this.draw.update_3D(this.draw.data);
         });
 
-        document.getElementById('login_local').addEventListener('keydown', function(event) {
-            event.stopPropagation();
-        });
-        document.getElementById('password_local').addEventListener('keydown', function(event) {
-            event.stopPropagation();
-        });
-        document.getElementById('keyboard_layout').addEventListener('keydown', function(event) {
-            event.stopPropagation();
-        });
-
         this.pongThreeJS = document.getElementById('pongThreeJS');
 
         if (!this.localTour) {
@@ -137,6 +127,15 @@ export class Pong
             this.dom_join_local = document.getElementById('join_local');
             this.dom_close_local = document.getElementById('close_local');
             this.dom_keyboard_layout = document.getElementById('keyboard_layout');
+            document.getElementById('login_local').addEventListener('keydown', function(event) {
+                event.stopPropagation();
+            });
+            document.getElementById('password_local').addEventListener('keydown', function(event) {
+                event.stopPropagation();
+            });
+            document.getElementById('keyboard_layout').addEventListener('keydown', function(event) {
+                event.stopPropagation();
+            });
         }
         else {
             this.dom_quit_tournament = document.getElementById('quit-tournament');
