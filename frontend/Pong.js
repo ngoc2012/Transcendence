@@ -18,7 +18,22 @@ async function closeSocket(websocket) {
         websocket.close();
         await waitForWebSocketClose(websocket);
     }
+}
 
+function keydown_loop(pong, i, direction)
+{
+    pong.set_state(i, direction);
+    if (pong.players[i][direction]) {
+        setTimeout(() => {keydown_loop(pong, i, direction);}, pong.delay + 0.01);
+    }
+}
+
+function keydown(pong, i, direction)
+{
+    if (pong.players[i][direction])
+        return;
+    pong.players[i][direction] = true;
+    keydown_loop(pong, i, direction);
 }
 
 export class Pong
@@ -33,7 +48,11 @@ export class Pong
         this.keyboard_layout = "";
         this.players = [{
             'id': this.room.player_id,
-            'sk': -1
+            'sk': -1,
+            'up': false,
+            'down': false,
+            'left': false,
+            'right': false
         }];
         this.tournament = t;
         this.localTournament = localTournament;
@@ -188,11 +207,45 @@ export class Pong
                         this.set_state(0, "down");
                 }
             });
-            // document.addEventListener('keydown', (event) => {
-            //     if (["w", "s"].includes(event.key)) {
-            //         event.preventDefault();
-            //     }
-            // })
+            document.addEventListener('keyup', (event) => {
+                if (["w", "s"].includes(event.key)) {
+                    event.stopPropagation();
+                }
+                switch (event.key) {
+                    case 'w':
+                        this.players[0].up = false;
+                        break;
+                    case 's':
+                        this.players[0].down = false;
+                        break;
+                    case 'a':
+                        this.players[0].left = false;
+                        break;
+                    case 'd':
+                        this.players[0].right = false;
+                        break;
+                    case 'Tab':
+                        if (this.power_play)
+                            this.set_state(0, "side");
+                        break;
+                    case 'Control':
+                        this.set_state(0, "server");
+                        break;
+                }
+                let commands = ['up', 'down', 'left', 'right'];
+                if (event.key && event.key.length === 1)
+                {
+                    let index = this.keyboard_layout.indexOf(event.key);
+                    if (index >= 0)
+                    {
+                        let i_player = Math.floor(index / 4) + 1;
+                        index = index % 4;
+                        if (index < 2 || (index >= 2 && this.power_play))
+                            this.players[i_player][commands[index]] = false;
+                    }
+
+                }
+            });
             document.addEventListener('keydown', (event) => {
                 // document.addEventListener('keydown', (event) => {
                 //     if (["w", "s"].includes(event.key)) {
@@ -204,18 +257,18 @@ export class Pong
                 }
                 switch (event.key) {
                     case 'w':
-                        this.set_state(0, "up");
+                        keydown(this, 0, 'up');
                         break;
                     case 's':
-                        this.set_state(0, "down");
+                        keydown(this, 0, 'down');
                         break;
                     case 'a':
                         if (this.power_play)
-                            this.set_state(0, "left");
+                            keydown(this, 0, 'left');
                         break;
                     case 'd':
                         if (this.power_play)
-                            this.set_state(0, "right");
+                            keydown(this, 0, 'right');
                         break;
                     case 'Tab':
                         if (this.power_play)
@@ -235,20 +288,46 @@ export class Pong
                         let i_player = Math.floor(index / 4) + 1;
                         index = index % 4;
                         if (index < 2 || (index >= 2 && this.power_play))
-                            this.set_state(i_player, commands[index]);
+                            keydown(this, i_player, commands[index]);
                     }
 
                 }
             });
             this.preMatchBox(this.main.login)
         } else {
+            document.addEventListener('keyup', (event) => {
+                if (["w", "s"].includes(event.key)) {
+                    event.stopPropagation();
+                }
+                switch (event.key) {
+                    case 'w':
+                        this.players[0].up = false;
+                        break;
+                    case 's':
+                        this.players[0].down = false;
+                        break;
+                }
+                let commands = ['up', 'down', 'left', 'right'];
+                if (event.key && event.key.length === 1)
+                {
+                    let index = this.keyboard_layout.indexOf(event.key);
+                    if (index >= 0)
+                    {
+                        let i_player = Math.floor(index / 4) + 1;
+                        index = index % 4;
+                        if (index < 2 || (index >= 2 && this.power_play))
+                            this.players[i_player][commands[index]] = false;
+                    }
+
+                }
+            });
             document.addEventListener('keydown', (event) => {
                 switch (event.key) {
                     case 'w':
-                        this.set_state(0, "up");
+                        keydown(this, 0, 'up');
                         break;
                     case 's':
-                        this.set_state(0, "down");
+                        keydown(this, 0, 'down');
                         break;
                 }
 
@@ -260,8 +339,8 @@ export class Pong
                     {
                         let i_player = Math.floor(index / 4) + 1;
                         index = index % 4;
-                        if (index < 2)
-                            this.set_state(i_player, commands[index]);
+                        if (index < 2 || (index >= 2 && this.power_play))
+                            keydown(this, i_player, commands[index]);
                     }
 
                 }
@@ -651,13 +730,9 @@ export class Pong
     }
 
     set_state(i, e) {
-        if (!this.set_state_available)
-            return;
-        this.set_state_available = false;
         if (this.players[i].sk !== -1 && this.players[i].sk.readyState === 1) {
             this.players[i].sk.send(e);
         }
-        setTimeout(() => {this.set_state_available = true;}, this.delay);
     }
 
     preMatchBox(player1, player2) {
