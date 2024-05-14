@@ -798,8 +798,8 @@ export class Pong
         if (this.tournament) {
             const nextMatchButton = document.createElement('button');
             nextMatchButton.textContent = 'Continue';
-            nextMatchButton.classList.add('btn', 'btn-primary');
-            nextMatchButton.style.marginLeft = '10px';
+            nextMatchButton.classList.add('btn', 'btn-primary', 'ml-2');
+            // nextMatchButton.style.marginLeft = '10px';
             nextMatchButton.onclick = () => {
                 removeElements();
                 this.tournament.nextMatch();
