@@ -137,16 +137,16 @@ export class Tournament {
                     'X-CSRFToken': csrftoken,
                 },
                 success: (response) => {
-                    if (response.success == 'twofa') {
-                        this.main.load('/twofa', () => this.main.twofa.eventsTour(this.id, response.login, response.name, response.email));
-                    } else {
+                    // if (response.success == 'twofa') {
+                    //     this.main.load('/twofa', () => this.main.twofa.eventsTour(this.id, response.login, response.name, response.email));
+                    // } else {
                         if (response.error) {
                             this.main.set_status(response.error, false)
                         } else {
                             this.userAdded.push(response.login);
                             this.main.load('/tournament/local', () => this.eventsLocal(false));
                         }
-                    }
+                    // }
                 },
                 error: (xhr, jqXHR) => {
                     if (jqXHR.status === 401 && jqXHR.responseText === "Unauthorized - Token expired") {

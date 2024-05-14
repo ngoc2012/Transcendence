@@ -131,6 +131,9 @@ def tournament_local_result(request):
     except ValueError:
         return JsonResponse({'error': 'Invalid input for scores. Please provide numeric values.'}, status=400)
     except ObjectDoesNotExist:
+        print('object not found')
+        print(tournament)
+        print(match)
         return JsonResponse({'error': 'Room or match not found.'}, status=404)
     except Exception as e:
         return JsonResponse({'error': 'An unexpected error occurred: {}'.format(str(e))}, status=400)
@@ -589,16 +592,16 @@ def add_user_player(request, tournament, login, password):
         if user in tournament.participants.all():
             return JsonResponse({'error': f'Player {login} already added to the tournament'}, status=400)
 
-        if user.secret_2fa:
-            request.session['tourID'] = str(tournament.id)
-            request.session['login2FA'] = user.login
-            tournament.callback = True
-            tournament.save()
-            return JsonResponse({'success': 'twofa', 'login': login, 'name': user.name, 'email': user.email})
+        # if user.secret_2fa:
+        #     request.session['tourID'] = str(tournament.id)
+        #     request.session['login2FA'] = user.login
+        #     tournament.callback = True
+        #     tournament.save()
+        #     return JsonResponse({'success': 'twofa', 'login': login, 'name': user.name, 'email': user.email})
 
-        else:
-            tournament.participants.add(user)
-            tournament.save()
+        # else:
+        tournament.participants.add(user)
+        tournament.save()
 
         return JsonResponse({'success': True, 'login': login, 'local': False})
 
