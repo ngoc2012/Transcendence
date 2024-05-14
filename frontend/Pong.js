@@ -22,6 +22,9 @@ async function closeSocket(websocket) {
 }
 
 function keydown(player, )
+{
+
+}
 
 export class Pong
 {
