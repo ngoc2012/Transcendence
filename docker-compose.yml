@@ -76,8 +76,8 @@ services:
       - blockchain_data:/app
     networks:
       - network
-    # profiles:
-    # - donotstart
+    profiles:
+    - donotstart
 
   ai:
     container_name: ai
